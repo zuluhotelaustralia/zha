@@ -6,7 +6,7 @@ include "include/client";
 
 program disharmony( caster )
 
-	if(!TryToCast( caster, 8 ))
+	if(!TryToCastBard( caster, 8 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif

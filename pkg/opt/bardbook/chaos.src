@@ -10,7 +10,7 @@ include "include/random";
 
 program chaos( caster )
 	
-	if(!TryToCast( caster, 16 ))
+	if(!TryToCastBard( caster, 16 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif

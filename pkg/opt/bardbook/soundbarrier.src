@@ -19,7 +19,7 @@ program songofendurance( caster )
 	var com5 := GetObjProperty( caster, "bparty5" );
 	var com6 := GetObjProperty( caster, "bparty6" );
 	
-	if(!TryToCast(caster, 14 ))
+	if(!TryToCastBard(caster, 14 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif

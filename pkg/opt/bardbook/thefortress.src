@@ -9,7 +9,7 @@ include "include/random";
 
 program thefortress( caster )
 
-	if(!TryToCast( caster, 10 ))
+	if(!TryToCastBard( caster, 10 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif

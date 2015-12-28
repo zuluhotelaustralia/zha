@@ -11,7 +11,7 @@ var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
 
 program minstrelsjourney( caster )
 
-	if(!TryToCast( caster, 9 ))
+	if(!TryToCastBard( caster, 9 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif

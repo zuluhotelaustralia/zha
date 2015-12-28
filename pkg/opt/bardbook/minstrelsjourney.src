@@ -9,7 +9,7 @@ var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
 
 program minstrelsjourney( caster, parms )
 	
-	if(!TryToCast( caster, 1 ))
+	if(!TryToCastBard( caster, 1 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
@@ -31,7 +31,7 @@ program minstrelsjourney( caster, parms )
 		endif
 
 	else
-		where := CanTargetArea(caster);
+		where := CanTargetAreaBard(caster);
 		if (!where)
 			EraseObjProperty( caster, "#Casting" );
 			return;

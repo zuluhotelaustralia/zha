@@ -161,6 +161,7 @@ const G_GRAY_CIRCLE_0		:= 0x00d0;
 const G_GRAY_CIRCLE_1		:= 0x00d1;
 const G_GREEN_ARROW_RIGHT_0	:= 0x15a4;
 const G_GREEN_ARROW_RIGHT_1	:= 0x15a6;
+const G_GREEN_SMALL_CIRCLE_1	:= 0x939;
 const G_MARBLE_ARROW_DOWN_0	:= 0x0a58;
 const G_MARBLE_ARROW_DOWN_1	:= 0x0a59;
 const G_MARBLE_ARROW_UP_0	:= 0x0a5a;
@@ -195,6 +196,7 @@ const G_RED_ARROW_LEFT_0	:= 0x15a1;
 const G_RED_ARROW_LEFT_1	:= 0x15a3;
 const G_RED_DIAMOND_0		:= 0x09a8;
 const G_RED_DIAMOND_1		:= 0x09a9;
+const G_RED_SMALL_CIRCLE_1 := 0x938;
 const G_STONE_CHECK_0		:= 0x13ba;
 const G_STONE_CHECK_1		:= 0x13bb;
 const G_STONE_X_0		:= 0x13bc;
@@ -347,6 +349,8 @@ const G_STONE_ARROW_RIGHT		:= 0x1468;
 // GFGumpPic( x, y, gumpid )
 // GFResizePic( x, y, gumpid, w, h )
 // GFTilePic( x, y, tileid )
+// GFCheckerTrans(x, y, w, h)
+// GFGumpPicTiled( x, y, w, h, gumpid )
 // GFTextLine( x, y, colour, text );
 // GFTextMid(x, y, w, colour, text );
 // GFTextRight( rx, y, colour, text );
@@ -518,6 +522,19 @@ function GFUser2( l_line, d_pos, d_line )
 	return XGFRetVal( gflayout.size(), d_pos );
 endfunction
 
+// Added By Dev GIB
+function GFCheckerTrans(x, y, w, h)
+	var line := "checkertrans "+Cstr(gfref.x + Cint(x)) + " " +CStr(gfref.y + CInt(y));
+	line := line + " " + CStr(CInt(w)) + " " + CStr(CInt(h));
+	gflayout.append( line );
+	return XGFRetVal( gflayout.size() );
+endfunction
+function GFGumpPicTiled( x, y, w, h, gumpid )
+	var line := "gumppictiled " + CStr(gfref.x + CInt(x)) + " " + CStr(gfref.y + CInt(y));
+	line := line+ " " + CStr(CInt(w)) + " " + CStr(CInt(h)) + " " + CStr(CInt(gumpid));
+	gflayout.append( line );
+	return XGFRetVal( gflayout.size() );
+endfunction
 // Single "art gump"
 // (Uses "Gump" art from InsideUO)
 //
@@ -588,6 +605,20 @@ function GFTextMid(x, y, w, colour, text )
 	return XGFRetVal( gflayout.size(), gfdtidx - 1 );
 endfunction
 
+// Display a left-aligned line of text on the gump
+//
+// Returns: A structure...
+//	.lytidx = Layout-array index changed
+//	.dtidx  = Data-array index changed (0-based index)
+//
+function GFTextLeft( x, y, colour, text )
+	var line := "text " + CStr(gfref.x + x) + " " + CStr(gfref.y + CInt(y));
+	line := line + " " + CStr(CInt(colour)) + " " + CStr(gfdtidx);
+	gflayout.append( line );
+	gfdtidx := gfdtidx + 1;		// Update index into GFdata[]
+	gfdata[gfdtidx] := text;	// arrays start at #1... id#0 goes into [1]!!
+	return XGFRetVal( gflayout.size(), gfdtidx - 1 );
+endfunction
 // Display a right-aligned line of text on the gump
 //
 // Returns: A structure...

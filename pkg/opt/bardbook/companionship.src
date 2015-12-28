@@ -16,7 +16,7 @@ program cast_companion( caster )
 		size := bard;
 	endif
 
-	if(!TryToCast( caster, 2 ));
+	if(!TryToCastBard( caster, 2 ));
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
@@ -39,7 +39,7 @@ program cast_companion( caster )
 	var i := 0;
 	while(i < size)
 		i := i + 1;
-		cast_on := CanTargetSpell( caster );
+		cast_on := CanTargetSpellBard( caster );
 		if( !cast_on )
 			EraseObjProperty( caster, "#Casting" );
 			return;

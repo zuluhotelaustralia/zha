@@ -1,9 +1,9 @@
 // include "include/starteqp";
 
 set_critical(0);
-var me := self();
+var me := Self();
 
-var npccfg := readconfigfile("npcdesc");
+var npccfg := ReadConfigFile("npcdesc");
 var speechelem := npccfg[me.npctemplate];
 var flee_point := speechelem.flee_point;
 if (!flee_point)
@@ -14,9 +14,9 @@ if (!me.backpack)
 	var newbackpack := CreateItemAtLocation(5288,1176,0, 0xe75,1);
 	EquipItem(me, newbackpack);
 	if (npccfg[me.npctemplate].colorrange)
-		var parms := splitwords(npccfg[me.npctemplate].colorrange);
-		me.color := Random(cint(parms[2]) - cint(parms[1]))+cint(parms[1]);
-		setobjproperty(me,"color",me.color);
+		var parms := SplitWords(npccfg[me.npctemplate].colorrange);
+		me.color := Random(CInt(parms[2]) - CInt(parms[1]))+CInt(parms[1]);
+		SetObjProperty(me,"color",me.color);
 	endif
 	if (npccfg[me.npctemplate].dress)
 		var parms := {};
@@ -26,9 +26,9 @@ if (!me.backpack)
 	elseif (npccfg[me.npctemplate].equip)
     		EquipFromTemplate(me, npccfg[me.npctemplate].equip);
 	endif
-
+	
 	if( me.name["<random>"] )
-		if ((me.graphic = 400) or (me.graphic = 401))
+		if ((me.graphic == 400 || me.graphic == 401))
 			me.gender := Random(2);
 			me.graphic := 400 + me.gender;
 		endif
@@ -36,7 +36,7 @@ if (!me.backpack)
 			var title := Random(20);
 			var ttitle := "";
 
-			case (title) 
+			case (title)
         	  	0: ttitle := "";
           		1: ttitle := " the townsperson";
 	          	2: ttitle := " the farmer";
@@ -50,17 +50,21 @@ if (!me.backpack)
         		default: ttitle := "";
 			endcase
 			var tname := randomname(me);
-			setname(me, tname + ttitle);
+			SetName(me, tname + ttitle);
 		else
-			SetName ( me , RandomName( me ) );
+			SetName( me, randomname( me ) );
 		endif
 	endif
 
 	if ( npccfg[me.npctemplate].mount )
-		var mymount := CreateItemAtLocation(5288,1176,0,0xF021,1);
-		var mountparms := splitwords(npccfg[me.npctemplate].mount);
-		mymount.graphic := cint(mountparms[1]);
-		mymount.color := cint(mountparms[2]);
+		var mymount := CreateItemAtLocation(5288,1176,0,0xf021,1);
+		var mountparms := SplitWords(npccfg[me.npctemplate].mount);
+		mymount.graphic := CInt(mountparms[1]);
+		mymount.color := CInt(mountparms[2]);
+		var mynpctemplate := npccfg[me.npctemplate].mounttemplate;
+		if (mynpctemplate)
+			SetObjProperty(mymount,"npctemplate",mynpctemplate);
+		endif
 		EquipItem(me, mymount);
 	endif
 

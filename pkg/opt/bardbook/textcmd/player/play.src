@@ -83,7 +83,7 @@ program play (who, text)
 		songid := hassong;
 	endif
 	
-var song := GetScript( songid );
+var song := GetScriptBard( songid );
 
 	if( GetObjProperty( book, "CastingOpts" ) )
 		SetObjProperty( who, "CastingOpts", GetObjProperty( book, "CastingOpts" ) );
