@@ -3,6 +3,7 @@ use uo;
 include "include/spelldata";
 include "include/client";
 include "include/speedhackRecallCheck";
+include "include/statichouses";
 
 var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
 
@@ -71,6 +72,17 @@ program cast_teleport( parms )
 		endif
 	endforeach
 
+	var casterinstatic := IsInStaticHouse( where.x, where.y, where.z );
+	if( casterinstatic )
+		if( !IsStaticOwner( caster, casterinstatic )  )
+			if( !IsStaticCoowner( caster, casterinstatic ) )
+				if( !IsStaticFriend( caster, casterinstatic ) )
+						SendSysMessage( caster, "You cannot teleport in this house." );
+				return;
+				endif
+			endif
+		endif
+	endif
 	var sx := caster.x, sy := caster.y, sz := caster.z;
 	MoveCharacterToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z) );
 	SetSpeedCheckNote(caster);

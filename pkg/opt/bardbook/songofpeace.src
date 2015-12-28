@@ -1,0 +1,166 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_ID		:= FX_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_EARTH_BLESSING;
+
+program songofendurance( caster )
+
+	var com1 := GetObjProperty( caster, "bparty1" );
+	var com2 := GetObjProperty( caster, "bparty2" );
+	var com3 := GetObjProperty( caster, "bparty3" );
+	var com4 := GetObjProperty( caster, "bparty4" );
+	var com5 := GetObjProperty( caster, "bparty5" );
+	var com6 := GetObjProperty( caster, "bparty6" );
+	
+	if(!TryToCast(caster, 7 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var skill := GetEffectiveSkill( caster, 9 );
+	var bard := GetObjProperty( caster, "IsBard" );
+	var healed := skill/10;
+	var duration := (bard)+2;
+	var sleeptime := 4;
+	var i:= 0;
+	var chr;
+	var newmana1;
+	var newmana2;
+	var newmana3;
+	var newmana4;
+	var newmana5;
+	var newmana6;
+
+	if(bard)
+		healed := healed*(1+bard/10);
+	endif
+
+	SendSysMessage( caster, "You begin to relieve your companions..." );
+	
+	while ( duration > 0 )
+		if(com1)
+			if(!com1.dead)
+			if((GetHP(com1)>1))
+				if((Distance (caster, com1)<15))
+					if( GetMana(com1) < GetMaxMana(com1) )
+						SendSysMessage( com1, "You recover mana" );
+						PlayObjectCenteredEffect(com1,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com1, 0x28F );
+						newmana1 := (GetMana(com1) + healed);
+						SetMana( com1, newmana1 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com2)
+			if(!com2.dead)
+			if((GetHP(com2)>1))
+				if((Distance (caster, com2)<15))
+					if( GetMana(com2) < GetMaxMana(com2) )
+						SendSysMessage( com2, "You recover mana" );
+						PlayObjectCenteredEffect(com2,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com2, 0x28F );
+						newmana2 := (GetMana(com2) + healed);
+						SetMana( com2, newmana2 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com3)
+			if(!com3.dead)
+			if((GetHP(com3)>1))
+				if((Distance (caster, com3)<15))
+					if( GetMana(com3) < GetMaxMana(com3) )
+						SendSysMessage( com3, "You recover mana" );
+						PlayObjectCenteredEffect(com3,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com3, 0x28F );
+						newmana3 := (GetMana(com3) + healed);
+						SetMana( com3, newmana3 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com4)
+			if(!com4.dead)
+			if((GetHP(com4)>1))
+				if((Distance (caster, com4)<15))
+					if( GetMana(com4) < GetMaxMana(com4) )
+						SendSysMessage( com4, "You recover mana" );
+						PlayObjectCenteredEffect(com4,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com4, 0x28F );
+						newmana4 := (GetMana(com4) + healed);
+						SetMana( com4, newmana4 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com5)
+			if(!com5.dead)
+			if((GetHP(com5)>1))
+				if((Distance (caster, com5)<15))
+					if( GetMana(com5) < GetMaxMana(com5) )
+						SendSysMessage( com5, "You recover mana" );
+						PlayObjectCenteredEffect(com5,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com5, 0x28F );
+						newmana5 := (GetMana(com5) + healed);
+						SetMana( com5, newmana5 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com6)
+			if(!com6.dead)
+			if((GetHP(com6)>1))
+				if((Distance (caster, com6)<15))
+					if( GetMana(com6) < GetMaxMana(com6) )
+						SendSysMessage( com6, "You recover mana" );
+						PlayObjectCenteredEffect(com6,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com6, 0x28F );
+						newmana6 := (GetMana(com6) + healed);
+						SetMana( com6, newmana6 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		duration := duration - 1;
+		sleep( sleeptime );
+	endwhile
+
+	SendSysMessage( caster, "You finish your song of peace." );
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram
+
+                                               
+

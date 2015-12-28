@@ -15,6 +15,9 @@ program freeze( gm )
 		else
 			res.mobile.frozen := 1;
 			SetObjProperty( res.mobile, "frozen", 1 );
+			
+var gmdata := {	"freeze", res.name, res.serial , res.acctname,"concealed: "+gm.concealed,"na","na"};
+logcommand(gm, gmdata);
 			PrintTextAbovePrivate( res.mobile, res.mobile.name + " is now frozen", gm );
 		endif
 	endif

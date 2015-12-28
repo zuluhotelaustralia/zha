@@ -63,6 +63,9 @@ program processpersistedmods( parms )
 		"seehidden":
 			GrantPrivilege(who, "seehidden");
 			who.enable("seehidden");
+		"spiritspeaksee":
+			GrantPrivilege( who, "seeghosts" );
+			who.enable( "seeghosts" );
 		"hair":
 			DestroyItem( GetEquipmentByLayer( who, LAYER_HAIR ) );
 			if( new_val )

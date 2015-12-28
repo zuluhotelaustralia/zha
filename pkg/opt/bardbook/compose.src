@@ -1,0 +1,110 @@
+use uo;
+use basic;
+use cfgfile;
+use os;
+
+include "include/yesno";
+include "include/attributes";
+include "include/bitwise";
+include "include/client";
+include "include/objtype";
+include "include/skillpoints";
+include "include/itemutil";
+include "include/classes";
+include "include/string";
+include "include/random";
+
+const SOUND_EFFECT_INSCRIPTION 	:= 0x50;
+const SOUND_EFFECT_SPARKLE 	:= 0x1e8;
+const EFFECT_SPARKLE 		:= 0x373a;
+const POINT_MULTIPLIER		:= 15;
+
+var config_file;
+
+program DoCompose( character )
+
+	var item;
+ 
+	SendSysMessage( character, "What would you like to compose?" );
+ 
+	item := Target( character, TGTOPT_CHECK_LOS );
+  
+	if( !item )
+		return;
+	endif
+
+	if( !Accessible( character, item ) || Distance(character, item)>2 )
+		SendSysMessage( character, "You can't reach that!" );
+		return;
+	endif
+
+	if( !ReserveItem( item ) )
+		return;
+	endif
+ 
+	config_file := ReadConfigFile( "compose" );
+
+	if( (item.objtype >= 0xc101) && (item.objtype <= 0xc110) )
+		ComposeSong( character, item );
+	else
+		SendSysMessage(character, "You can't compose that!");
+	endif
+
+endprogram
+
+
+function ComposeSong(character, item)
+
+	SendSysMessage( character, "Select your Bard Book in which to inscribe." );
+
+	var book := Target( character, TGTOPT_CHECK_LOS );
+	if (!book)
+		return;
+	endif
+
+	if ( !Accessible(character, book) )
+		SendSysMessage(character, "You can't reach that!");
+		return;
+	endif
+
+	if( book.objtype != 0xC100 )
+		SendSysMessage(character, "You must select a Bard Book!");
+		return;
+	endif
+
+	var elem	:= FindConfigElem( config_file, item.objtype );
+	var skill	:= CInt( elem.ToBookDiff );
+	var points	:= skill * (POINT_MULTIPLIER + 5);
+	var flagregister := elem.flagset;
+	var flag	:= elem.flag;
+	var circle	:= "";
+
+	if( flagregister == 1 )
+		circle := "Lesser";
+	else
+		circle := "Greater";
+	endif
+
+	flagregister := GetObjProperty( book, circle );
+	flagregister := CInt(flagregister);
+
+	if( FlagCheck( flagregister, flag ) == 1 )
+		SendSysMessage(character, "That spell is already inscribed.");
+		return;
+	endif
+
+	if( !CheckSkill( character, SKILLID_MUSICIANSHIP, skill, points ) )
+		SendSysMessage( character, "You fail, and destroy the song" );
+		SubtractAmount( item, 1 );
+		return;	 
+	endif
+
+	PlaySoundEffect( character, SOUND_EFFECT_INSCRIPTION );
+	PlayObjectCenteredEffect( book, EFFECT_SPARKLE, 10,10 );
+	SubtractAmount( item, 1 );
+	SendSysMessage(character, "You inscribe the spell into your Bard Book.");
+	flagregister := FlagSet( flagregister, flag );
+	flagregister := CStr( flagregister );
+	SetObjProperty( book, circle, flagregister );
+
+endfunction

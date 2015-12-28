@@ -347,6 +347,7 @@ function TryToRes( character, patient, bandages, X, Y, Z )
 
 	var delay := DELAY_TO_RES;
 
+	
 	sleep( delay );
 
 	if( Distance( character, patient ) > 1 )
@@ -375,6 +376,7 @@ function TryToRes( character, patient, bandages, X, Y, Z )
 	endif
 
 	SubtractAmount( bandages, BANDAGES_TO_RES );
+	ReleaseItem( bandages );
 	CreateItemInBackpack( character, BLOODY_BANDAGE, BANDAGES_TO_RES );
 
 endfunction

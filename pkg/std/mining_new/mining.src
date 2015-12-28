@@ -56,6 +56,11 @@ program use_picktool( chr, tool )
         PrintTextAbovePrivate(chr,"That is too far away.",chr);
         return;
     endif
+    broadcast("obj: "+use_on.objtype);
+    if( (use_on.objtype == 0xF3C ) && ( tool.objtype == 0x0f39 ) )
+    	Move_Shit( chr, use_on );
+      return;
+    endif
 
     var info := GetMapInfo( use_on.x, use_on.y );
 
@@ -375,3 +380,20 @@ function GetOre(location)
   return wait_for_event(10);
 
 endfunction
+function Move_Shit( who, shit )
+	SendSysMessage( who, "Where would you like to move that to?");
+	var move_to := TargetCoordinates( who );
+	if( !move_to )
+		sendsysmessage( who, "Canceled.");
+		return;
+	endif
+	var distt := coordist( shit.x, shit.y, move_to.x, move_to.y );
+  if( distt > 3 )
+      PrintTextAbovePrivate(who,"How long do you think the handle of your shovel is?", who);
+      return;
+  endif
+	MoveItemToLocation( shit, move_to.x, move_to.y, move_to.z );
+  PrintTextAbovePrivate(shit,"Moved.", who);
+  return;
+endfunction
+	

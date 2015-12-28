@@ -5,6 +5,7 @@ use os;
 include "include/gumps";
 include "include/string";
 include "include/yesno";
+include "include/packets";
 
 function ShowPartyStatus(who)
 	if (GetObjProperty(who,"partygump"))
@@ -84,6 +85,10 @@ function ShowPartyStatus(who)
 		endif
 	endif
 	EraseObjProperty(who,"partygump");
+	
+	//Broadcast("ShowPartyStatus sending");
+	SendPartyListPacket(who);
+	
 endfunction
 
 function GetPartyLeader(who)
@@ -257,6 +262,7 @@ function RemovePartyMember(who, partyleader)
 	if (YesNo(partyleader, "Remove member?"))
 		DeleteFromParty(who, partyleader);
 	endif	
+	
 endfunction
 
 //player addition and deletion functions
@@ -273,8 +279,55 @@ function AddToParty(who, newplayer, partyleader:=0)
 	SetObjProperty (partyleader, "PartyMembers", pms);
 	SetObjProperty (newplayer, "PartyLeader", CInt(partyleader.serial));
 	TellAllPartyMembers(partyleader, ""+newplayer.name + " has joined the party");
+	
+	//Broadcast("AddToParty sending");
+	SendPartyListPacket(who);
+	
 endfunction
 
+function SendPartyListPacket(who)
+
+	if(TypeOf( who ) == "Integer")
+		who := SystemFindObjectBySerial(who);
+	endif
+	
+	var partyleader := IsInParty(who);
+	
+	if (!partyleader)
+		partyleader := who;
+	else
+		partyleader := SystemFindObjectBySerial(partyleader);
+	endif
+	
+	var partylist := GetPartyPlayers(partyleader);
+	
+	var count := len( partylist );
+
+	//Broadcast("PartyLeader: " + partyleader.serial + " " + count + " party members!");
+	
+	var packet;
+	packet := fixPacketLength(BytePacket(0xBF), 1);
+	packet := packet + fixPacketLength(BytePacket(7 + count * 4), 2);
+	packet := packet + fixPacketLength(BytePacket(0x0006), 2);
+	packet := packet + fixPacketLength(BytePacket(0x01), 1);
+	packet := packet + fixPacketLength(BytePacket(count), 1);
+	
+	if(count == 1) //Empty party, send invalid serial instead
+		packet := packet + fixPacketLength( (Hex( 0 )-"0x"), 4);
+	else	
+		foreach obj in partylist
+			packet := packet + fixPacketLength( (Hex(obj.serial)-"0x"), 4);
+		endforeach
+	endif
+	
+	
+	foreach obj in partylist
+		//SendSysMessage(obj, "Partylist:");
+		//SendSysMessage(obj, packet);
+		SendPacket(obj, packet);
+	endforeach
+	
+endfunction
 
 function DeleteFromParty(delplayer, partyleader:=0)
 	
@@ -308,6 +361,13 @@ function DeleteFromParty(delplayer, partyleader:=0)
 		SetObjProperty (partyleader, "PartyMembers", tempPMs);
 	endif
 	EraseObjProperty (delplayer, "PartyLeader");
+	foreach
+	
+	//Broadcast("DeleteFromParty sending");
+	SendPartyListPacket(partyleader);
+	SendPartyListPacket(delplayer);
+	
+	
 endfunction
 
 function DisbandParty (partyleader)
@@ -319,8 +379,15 @@ function DisbandParty (partyleader)
 		if (playermember)
 			EraseObjProperty (playermember, "PartyLeader");	
 		endif
+		
+		SendPartyListPacket(pmser);
+		
 	endforeach
 	EraseObjProperty (partyleader, "PartyMembers");
+	
+	//Broadcast("DisbandParty sending");
+	SendPartyListPacket(partyleader);
+	
 endfunction
 
 function InheritParty (partyleader)
@@ -353,6 +420,11 @@ function InheritParty (partyleader)
 	endif
 	TellAllPartyMembers(partyleader, ""+partyleader.name + " has left the party");
 	TellAllPartyMembers(newcommander, ""+newcommander.name + " is the new party leader");
+	
+	//Broadcast("InheritParty sending");
+	SendPartyListPacket(partyleader);
+	SendPartyListPacket(newcommander);
+	
 endfunction
 
 function TellAllPartyMembers(who, message, colour := 89)

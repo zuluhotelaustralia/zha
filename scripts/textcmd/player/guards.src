@@ -4,6 +4,7 @@ use os;
 
 include "include/random";
 include "include/areas";
+include "include/statichouses";
 
 use cfgfile;
 
@@ -27,7 +28,18 @@ program textcmd_guards( who, text )
 	else
 
 		var numcalls := who.acct.getprop("numcalls");
+		var callerinstatic := IsInStaticHouse( who.x, who.y, who.z );
 
+	if( callerinstatic )
+		if( !IsStaticOwner( who, callerinstatic )  )
+			if( !IsStaticCoowner( who, callerinstatic ) )
+				if( !IsStaticFriend( who, callerinstatic ) )
+						SendSysMessage( who, "You cannot call guards in a house." );
+				return;
+				endif
+			endif
+		endif
+	endif
 		// if account has no numcalls prop, set it to 0
 		if(!numcalls && numcalls != 0)
 			who.acct.setprop("numcalls", 0);

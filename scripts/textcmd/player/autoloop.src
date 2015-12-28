@@ -5,7 +5,7 @@
 
 use uo;
 
-const max := 100;
+const max := 1000;
 
 program textcmd_autoloop( who, amount )
 

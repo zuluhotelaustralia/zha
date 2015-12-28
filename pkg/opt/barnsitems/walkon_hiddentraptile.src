@@ -6,9 +6,10 @@ include "include/objtype";
 include "include/dotempmods";
 include "include/random";
 include "pickdoor";
+include "include/cmdlevel_check";
 
 program walkon_hiddentraptile( who, tile )
-	if (who.dead || !who.acct)
+	if (who.dead || !who.acct || who.cmdlevel > CMDLEVEL_PLAYER )
 		return;
 	endif
 	FireTrapIfPresent(who,tile);

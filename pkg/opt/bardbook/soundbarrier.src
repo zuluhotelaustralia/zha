@@ -1,0 +1,101 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_ID		:= FX_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_EARTH_BLESSING;
+
+program songofendurance( caster )
+
+	var com1 := GetObjProperty( caster, "bparty1" );
+	var com2 := GetObjProperty( caster, "bparty2" );
+	var com3 := GetObjProperty( caster, "bparty3" );
+	var com4 := GetObjProperty( caster, "bparty4" );
+	var com5 := GetObjProperty( caster, "bparty5" );
+	var com6 := GetObjProperty( caster, "bparty6" );
+	
+	if(!TryToCast(caster, 14 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var amt := GetEffectiveSkill( caster, SKILLID_PEACEMAKING );
+	amt := CInt(amt / 3);
+	var bard := GetObjProperty( caster, "IsBard" );
+	amt := amt + (bard*25);
+
+	if((GetHP(com1))>1)
+		if((Distance (caster, com1)<10))
+			SendSysMessage( com1, "You are being protected by " + caster.name + "'s Sound Barrier" );
+			PlayObjectCenteredEffect(com1,
+                  SPELL_EFFECT_ID,
+	            SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com1, 0x457 );
+			SetObjProperty( com1, "SBarrier", amt );
+		endif
+	endif
+	if((GetHP(com2))>1)
+		if((Distance (caster, com2)<10))
+			SendSysMessage( com2, "You are being protected by " + caster.name + "'s Sound Barrier" );
+			PlayObjectCenteredEffect(com2,
+                  SPELL_EFFECT_ID,
+                  SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com2, 0x457 );
+			SetObjProperty( com2, "SBarrier", amt );
+		endif
+	endif
+	if((GetHP(com3))>1)
+		if((Distance (caster, com3)<10))
+			SendSysMessage( com3, "You are being protected by " + caster.name + "'s Sound Barrier" );
+			PlayObjectCenteredEffect(com3,
+                  SPELL_EFFECT_ID,
+                  SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com3, 0x457 );
+			SetObjProperty( com3, "SBarrier", amt );
+		endif
+	endif
+	if((GetHP(com4))>1)
+		if((Distance (caster, com4)<10))
+			SendSysMessage( com4, "You are being protected by " + caster.name + "'s Sound Barrier" );
+			PlayObjectCenteredEffect(com4,
+                 	SPELL_EFFECT_ID,
+                 	SPELL_EFFECT_SPEED,
+                 	SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com4, 0x457 );
+			SetObjProperty( com4, "SBarrier", amt );
+		endif
+	endif
+	if((GetHP(com5))>1)
+		if((Distance (caster, com5)<10))
+			SendSysMessage( com5, "You are being protected by " + caster.name + "'s Sound Barrier" );
+			PlayObjectCenteredEffect(com5,
+                 	SPELL_EFFECT_ID,
+                	SPELL_EFFECT_SPEED,
+                 	SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com5, 0x457 );
+			SetObjProperty( com5, "SBarrier", amt );
+		endif
+	endif
+	if((GetHP(com6))>1)
+		if((Distance (caster, com6)<10))
+			SendSysMessage( com6, "You are being protected by " + caster.name + "'s Sound Barrier" );
+			PlayObjectCenteredEffect(com6,
+                 	SPELL_EFFECT_ID,
+                 	SPELL_EFFECT_SPEED,
+                 	SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com6, 0x457 );
+			SetObjProperty( com6, "SBarrier", amt );
+		endif
+	endif
+
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram

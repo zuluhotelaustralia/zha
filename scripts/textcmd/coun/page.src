@@ -71,6 +71,7 @@ var data := array(
 );
 
 program textcmd_pagegm( who )
+	var gmdata;
 	if (!checkStaff(who, "page", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
@@ -159,6 +160,8 @@ program textcmd_pagegm( who )
 	var char := SystemFindObjectBySerial(chserial);
 	if (cmdgump == 1)
 		MoveCharacterToLocation( who, CInt(char.x), CInt(char.y), CInt(char.z) );
+		gmdata := {	"page: goto", char.name, char.serial , char.acctname,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 		showflame(who);
 		SendSysMessage(who, "Going to " + char.name);
 	elseif(cmdgump == 2)
@@ -176,6 +179,8 @@ program textcmd_pagegm( who )
 		foreach chr in EnumerateOnlineCharacters()
 			if ( (chr.cmdlevel == 5) && (GetObjProperty(chr, "HearMsgs") ) )
 				SendSysMessage( chr, "Msg from " + who.name + " to " + char.name + ": " + themessage);
+		gmdata := {	"page: message", chr.name, chr.serial , chr.acctname,"concealed: "+who.concealed,themessage,"time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 			endif
 		endforeach
 	endif

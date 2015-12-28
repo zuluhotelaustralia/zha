@@ -4,9 +4,7 @@ include "include/cmdlevel_check";
 
 
 program textcmd_tele( who )
-	if (!checkStaff(who, "tele", CMDLEVEL_COUNSELOR))
-		return 0;
-	endif
+		var gmdata, mob, mobstring;
 	
     SendSysMessage( who, "Where do you want to teleport?" );
 
@@ -18,6 +16,14 @@ program textcmd_tele( who )
             result := MoveCharacterToLocation( who, where.x, where.y,where.z, MOVECHAR_FORCELOCATION);
         endif
 
+if( where.mobile )
+            	mob := where.mobile;
+            	mobstring := " mob: "+cstr(mob.name)+"-"+mob.serial;
+            else
+            	mobstring := " mob: NA";
+            endif
+		gmdata := {	"tele", where.x, where.y , where.z,"concealed: "+who.concealed,mobstring,"time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 	//showflame(who);
         if (!result)
             SendSysMessage( who, result.errortext );

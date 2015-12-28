@@ -7,4 +7,6 @@ program textcmd_bcast( who, text )
 		return 0;
 	endif
     Broadcast( who.name + " : " + text );
+    var		gmdata := {	"bcast", who.serial+ " / "+who.name+" / "+who.acctname, "text: "+text, "NA","NA","concealed: "+who.concealed , "na"};
+		logcommand(who, gmdata);
 endprogram

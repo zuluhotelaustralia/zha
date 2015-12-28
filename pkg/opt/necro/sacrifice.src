@@ -53,7 +53,11 @@ program sacrifice( parms )
 	var z		:= cast_on.z;
 
 	PlayLightningBoltEffect( cast_on );
-	SetObjProperty( cast_on, "guardkill", 1 );
+	if(cast_on.npctemplate == "sheep")
+		SetObjProperty( cast_on, "Sacrificed", 1 );
+	else
+		SetObjProperty( cast_on, "guardkill", 1 );
+	endif
 	ApplyTheDamage( cast_on, caster, GetHp(cast_on) + 3, plane );
 	EraseObjProperty( caster, "#Casting" );
 

@@ -25,6 +25,13 @@ program spiritspeak(who)
 	PlaySoundEffect(who, SFX_SKILL_SPIRITSPEAK );
 
 	DoPersistedMod(who, "spiritspeak", 1, who.enabled( "hearghosts" ), 120);
+	
+	if( GetBaseSkillBaseValue(who, 32) >= 1300 )
+		DoPersistedMod(who, "spiritspeaksee", 1, who.enabled( "seeghosts" ), 60);
+		PrintTextAbove( who, who.name+"s eyes glaze over.", 3, 53 );
+		MoveCharacterToLocation( who, who.x, who.y, who.z, MOVECHAR_FORCELOCATION );
+	endif
+	
 
 	//now see if they are near a necro gravestone:
 	var stonelevel := FindNecroGravestone(who);

@@ -15,7 +15,7 @@ program cast_raise_dead( parms )
 	var cast_on;
 	var fromhit;
 
-	if (parms[1] = "#MOB")
+	if (parms[1] == "#MOB")
 		caster := parms[2];
 		cast_on := parms[3];
 		if (parms[4])

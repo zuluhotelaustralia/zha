@@ -1,0 +1,94 @@
+use uo;
+use cfgfile;
+
+include "bardbook";
+include "include/client";
+include "include/speedhackRecallCheck";
+
+var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
+
+program minstrelsjourney( caster, parms )
+	
+	if(!TryToCast( caster, 1 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var circle := 1;
+	var where;
+	var BX;
+	var BY;
+	var BZ;
+	var fromhit;
+
+	if (parms[1] == "#MOB")
+		where := parms[3];
+		if (parms[4])
+			circle := parms[4];
+		endif
+		if (parms[5])
+			fromhit := parms[5];
+		endif
+
+	else
+		where := CanTargetArea(caster);
+		if (!where)
+			EraseObjProperty( caster, "#Casting" );
+			return;
+		endif
+	endif
+	bx:=caster.x;
+	by:=caster.y;
+	bz:=caster.z;
+	
+	if (caster.z > where.z+10 || caster.z < where.z-10)
+		SendSysMessage( caster, "You can't see that." );
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	if (! CheckLosAt( caster, where.x, where.y, where.z ))
+		SendSysMessage( caster, "You can't see that." );
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	//make a place marker at location and check that it can see the player :)
+	var firefield := CreateItemAtLocation(where.x, where.y, where.z, "firefield" ); //chose firefield cos if shard fails as script run it wont be made at reboot
+	if (!firefield)
+		SendSysMessage( caster, "You can't see that." );
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	firefield.invisible:=1;
+	
+	if (! CheckLineOfSight(firefield, caster) ||  ! CheckLineOfSight(caster, firefield) || Distance(caster,firefield)>22)
+		SendSysMessage( caster, "You can't see that." );
+		DestroyItem(firefield);
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	DestroyItem(firefield);
+
+	foreach item in ListItemsNearLocation( CInt(where.x), CInt(where.y), CInt(where.z), 4 );
+		if( (item.objtype == 61457 || item.objtype == 61458) &&
+		  (GetMapInfo(where.x,where.y).landtile in water) )
+			SendSysMessage( caster, "You cannot teleport there." );
+			EraseObjProperty( caster, "#Casting" );
+			return;
+		endif
+	endforeach
+
+	var sx := caster.x, sy := caster.y, sz := caster.z;
+	MoveCharacterToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z) );
+	SetSpeedCheckNote(caster);
+	PlayStationaryEffect( sx, sy, sz, FX_SPELL_TELEPORT, SPEED_SPELL_TELEPORT, LOOP_SPELL_TELEPORT );
+	PlayStationaryEffect( CInt(caster.x), CInt(caster.y), CInt(caster.z), FX_SPELL_TELEPORT, SPEED_SPELL_TELEPORT, LOOP_SPELL_TELEPORT );
+	PlaySoundEffect( caster, 0x1FF );
+	if (caster.multi)
+		MoveCharacterToLocation( caster, bx, by, bz );
+	endif
+
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram

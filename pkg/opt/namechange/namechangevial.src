@@ -31,6 +31,7 @@ function changename(who)
 		SendSysMessage(who, "Cancelled.",3,70);
 		return 0;
 	endif
+
 	
 	if (vname == who.name)
 		SendSysMessage(who, "You already have that name.",3,41);
@@ -47,6 +48,11 @@ function changename(who)
 		SendSysMessage(who, "You have chosen an invalid or inappropriate name.",3,41);
 		return 0;
 	endif
+		
+	if( getobjproperty(who, "abv"))
+		vname := vname + " ["+getobjproperty (who, "abv")+"]";
+	endif
+	
 	if (!len(getNameChanges(who)))
 		addNameChange(who, "name change vial");
 	endif

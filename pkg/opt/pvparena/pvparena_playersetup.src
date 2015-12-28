@@ -360,20 +360,9 @@ function giveGeneralEquipment(who)
 	ArenaCreateItemInBackpack(who, 0xDC03, 1, 0); // Greater Heal
 	ArenaCreateItemInBackpack(who, 0xDC16, 1, 0); // Greater Cure
 	ArenaCreateItemInBackpack(who, 0xDC0F, 1, 0); // Full Refresh
-	
-	var hasarrows := 0, hasbolts := 0, hasreags := 0;
-	foreach item in EnumerateItemsInContainer(who.backpack)
-		if ((item.objtype == 0x13B2) && !hasarrows)
-			ArenaCreateItemInBackpack(who, 0x0F3F, 100, 0); //100 arrows.
-			hasarrows := 1;
-		endif
-		
-		if ((item.objtype==0xF4F || item.objtype==0x13FD) && !hasbolts)
-			ArenaCreateItemInBackpack(who, 0x1bfb, 100, 0); //100 bolts.
-			hasbolts := 1;
-		endif
-		
-		if ((item.objtype == 0x0EFA) && !hasreags)
+	ArenaCreateItemInBackpack(who, 0x0F3F, 100, 0); //100 arrows.
+	ArenaCreateItemInBackpack(who, 0x1bfb, 100, 0); //100 bolts.
+			
 			var reagsBag := ArenaCreateItemInBackpack(who, 0xe76); //Bag
 			
 			// Normal Reagents
@@ -388,9 +377,6 @@ function giveGeneralEquipment(who)
 			// End of Reagents
 			
 			equipment.append(reagsBag);
-			hasreags := 1;
-		endif
-	endforeach
 
 	ArenaCreateItemInBackpack(who, 0xE21, 100, 0);
 

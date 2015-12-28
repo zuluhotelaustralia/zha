@@ -1,0 +1,1595 @@
+use uo;
+use os;
+
+include "include/time";
+include "util/key";
+include "util/bank";
+include "include/itemutil";
+include "include/yesno";
+include "include/objtype";
+include "setup";
+include "housemanagement";
+include "utility";
+include "include/statichouses";
+include "include/gumps"; //Jono's custom gump edition! remember to update
+//include "include/client"
+
+const UOBJECT_DOORS_START	:= 0x0675;
+const UOBJECT_DOORS_END		:= 0x06f4;
+const UOBJECT_SECURE_CHECK	:= 0x2002;
+const KEYSTART			:= 0x100e;
+const KEYEND			:= 0x1013;
+const KEYRING			:= 0x1011;
+const TEXT_COLOR_GREEN := 63;
+const TEXT_COLOR_YELLOW := 53;
+const TEXT_COLOR_RED := 37;
+const TEXT_COLOR_BLUE := 1160;
+
+
+program textcmd_sign( who, sign )
+	OpenSign( who, sign, "home");
+endprogram
+
+Function OpenSign( who, sign, page )
+var homepage, socialpage, friendspage,banspage,coownpage,optionspage,managementpage;
+	case(page)
+		"home":
+		homepage := 1;		socialpage := 2;		friendspage := 3;		banspage := 4;		coownpage := 5;		optionspage := 6;		managementpage := 7;
+		"social":
+		homepage := 2;		socialpage := 1;		friendspage := 3;		banspage := 4;		coownpage := 5;		optionspage := 6;		managementpage := 7;
+		"friends":
+		homepage := 2;		socialpage := 3;		friendspage := 1;		banspage := 4;		coownpage := 5;		optionspage := 6;		managementpage := 7;		
+		"bans":
+		homepage :=2;		socialpage := 3;		friendspage := 4;		banspage := 1;		coownpage := 5;		optionspage := 6;		managementpage := 7;		
+		"coown":
+		homepage := 2;		socialpage := 3;		friendspage := 4;		banspage := 5;		coownpage := 1;		optionspage := 6;		managementpage := 7;		
+		"options":
+		homepage := 2;		socialpage := 3;		friendspage := 4;		banspage := 5;		coownpage := 6;		optionspage := 1;		managementpage := 7;		
+		"management":
+		homepage := 2;		socialpage := 3;		friendspage := 4;		banspage := 5;		coownpage := 6;		optionspage := 7; 	managementpage := 1;
+	endcase
+		
+	if( !ReserveItem(sign) )
+		SendSysMessage( who, "This is already in use." );
+		return 0;
+	endif
+
+	set_script_option( SCRIPTOPT_NO_RUNAWAY, 1 );
+
+	var house_serial := GetObjProperty( sign, "house_serial" );
+	if( !house_serial )
+		return 0;
+	endif
+
+	var house := SystemFindObjectBySerial( CInt(house_serial) );
+	if( !house )
+		DestroyItem(sign);
+		return 0;
+	endif
+
+	var owner_serial := CInt(GetObjProperty( house, "ownerserial" ));
+
+	var addonitem;
+	var founditem;
+
+	if(GetObjProperty( sign, "OnSale")==1)
+		RunSaleGump(who, sign);
+		return;
+	endif
+	
+	
+	var owner := "";
+	if( who.serial == owner_serial )
+		owner := who.name;
+		SetObjProperty( sign, "lastownername", who.name );
+		var numberDaysDecayed := CInt(GetObjProperty(sign, "NumberDecayDays"));
+		/*if (numberDaysDecayed > 1||numberDaysDecayed==error)
+			ResetDecayStatus(sign);
+		endif*/
+	else
+		owner := GetObjProperty( sign, "lastownername" );
+	endif
+ 
+	var PlaqueName := SetPlaqueName( sign );
+			
+			GFInitGump( 10, 60 );
+			GFPage(0);
+      GFNoDispose();
+      
+			GFResizePic( 0, 0, 5054, 412, 300 );
+  		GFGumpPicTiled( 6, 6, 400, 69, 2624 );
+  		GFGumpPicTiled( 6, 77, 400, 188, 2624 );
+  		GFGumpPicTiled( 6, 267, 400, 27, 2624 );
+  		GFCheckerTrans( 6, 6, 400, 288 );
+  		GFTilePic( 10, 35, 8900 );
+  		GFGumpPic( -7, -7, 10460 );
+  		GFGumpPic( 392, -7, 10460 );
+  		GFGumpPic( -7, 280, 10460 );
+  		GFGumpPic( 392, 280, 10460 );
+			GFGumpPic( 140, -60, 100 );
+			GFTextLine( 165, -15, 0, PlaqueName);
+			GFResizePic( 45, 45, 5100, 360, 25 );
+			GFTextLine( 60, 47, 0, "INFO" );
+			GFButtonPage( 98, 49, 5209, 5003, homepage );
+			GFTextLine( 165, 47, 0, "FRIENDS" );
+			GFButtonPage( 240, 49, 5209, 5003, socialpage );
+			GFTextLine( 295, 47, 0, "OPTIONS" );
+			GFButtonPage( 370, 49, 5209, 5003, optionspage );
+			GFTextLine( 50, 270, TEXT_COLOR_YELLOW, "Upkeep is" );
+			if(GetUpkeepAmount( sign ) <=1 )
+				GFTextLine( 110, 270, TEXT_COLOR_RED, "Due." );
+			else
+				GFTextLine( 110, 270, TEXT_COLOR_BLUE, "Paid.");
+			endif
+			var GPAYUPKEEP := GFButtonID( 150, 270, G_BUTTON_OKAY_0, G_BUTTON_OKAY_0, 1);
+			var CLOSEGUMP := GFButtonID( 280, 270, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+
+			GFPage(homepage);
+			GFTextLine( 40, 140, TEXT_COLOR_GREEN, "Owned by:"); // owner
+			GFTextLine( 120, 140, TEXT_COLOR_BLUE, owner );
+			GFTextLine( 35, 180, TEXT_COLOR_GREEN, "Number of locked down items:" );
+			GFTextLine( 250, 180, TEXT_COLOR_YELLOW, GetObjProperty( house, "numlockdowns" ) ); //Lockdowns
+			GFTextLine( 35, 200, TEXT_COLOR_GREEN, "Number of  containers:" );
+			GFTextLine( 250, 200, TEXT_COLOR_YELLOW, GetObjProperty( house, "numsecure" ) ); //Secures
+			GFTextLine( 235, 240, TEXT_COLOR_GREEN, "Change the house name:" );
+			var NAMEHOUSE := GFButtonID( 380, 240, 2714, 2715, 1);
+
+			GFPage(socialpage);
+			GFTextLine( 45, 80, TEXT_COLOR_GREEN, "List of co-owners" );
+			GFButtonPage( 15, 80, 2714, 2715, coownpage );
+			//GFTextLine( 45, 102, TEXT_COLOR_GREEN, "Add a co-owner" );
+			//var GADDCOOWN := GFButtonID( 15, 102, 2714, 2715, 1 );
+			//GFTextLine( 45, 124, TEXT_COLOR_GREEN, "Remove a co-owner" );
+			//var GREMOVECOOWN := GFButtonID( 15, 124, 2714, 2715, 1 );
+			GFTextLine( 240, 80, TEXT_COLOR_GREEN, "List of friends" );
+			GFButtonPage( 210, 80, 2714, 2715, friendspage );
+			GFTextLine( 240, 102, TEXT_COLOR_GREEN, "Add a friend" );
+			var GADDFRIEND := GFButtonID( 210, 102, 2714, 2715, 1 );
+			//GFTextLine( 240, 124, TEXT_COLOR_GREEN, "Remove a friend" );
+			//var GREMOVEFRIEND := GFButtonID( 210, 124, 2714, 2715, 1 );
+			GFTextLine( 240, 146, TEXT_COLOR_GREEN, "Clear friend list" );
+			var GCLEARFRIEND := GFButtonID( 210, 146, 2714, 2715, 1 );
+			//GFTextLine( 135, 168, TEXT_COLOR_GREEN, "Ban someone from the house" ); //40
+			//var GBANPLAYER := GFButtonID( 105, 168, 2714, 2715, 1 );
+			GFTextLine( 135, 190, TEXT_COLOR_GREEN, "Eject someone from the house" );
+			var GEJECTPLAYER := GFButtonID( 105, 190, 2714, 2715, 1 );
+			GFTextLine( 135, 212, TEXT_COLOR_GREEN, "List of banned people" );
+			GFButtonPage( 105, 212, 2714, 2715, banspage );
+			//GFTextLine( 135, 234, TEXT_COLOR_GREEN, "Remove a ban" );
+			//var GREMOVEBAN := GFButtonID( 105, 234, 2714, 2715, 1 );
+
+			GFPage(optionspage);
+			GFTextLine( 90, 130, TEXT_COLOR_GREEN, "Make house" );
+			If ( CInt(GetObjProperty(sign, "Public")) == 1)
+				GFTextLine( 165, 130, TEXT_COLOR_GREEN, "Private." );
+			Else
+				GFTextLine( 165, 130, TEXT_COLOR_GREEN, "Public." );
+			Endif
+			var GPUBLIC := GFbuttonID( 60, 130, 2714, 2715, 1 );
+			GFTextLine( 90, 160, TEXT_COLOR_GREEN, "Put house up for auction." );
+			var GAUCTION := GFButtonID( 60, 160, 2714, 2715, 1 );
+			GFTextLine( 90, 190, TEXT_COLOR_GREEN, "Change the master key" );
+			var GCHANGEKEY := GFButtonID( 60, 190, 2714, 2715, 1 );
+      GFTextLine( 90, 220, TEXT_COLOR_GREEN, "House management" );             //House Management
+			GFButtonPage( 60, 220, 2714, 2715, managementpage );
+			
+			GFPage(managementpage); //House Management
+			
+				var LOCK;  //Lock
+    		var UNLOCK;  //Unloc
+    		var DELSEC;  //Delete
+    		var SECEASTOWN;
+    		var SECSOUTHOWN;
+    		var SECEASTCOOWN;
+    		var SECSOUTHCOOWN;
+    		var SECEASTFRIEND;
+    		var SECSOUTHFRIEND;
+    		var SECEASTPUBLIC;
+    		var SECSOUTHPUBLIC;
+			if( IsOwner(who, house) == 1 )
+				LOCK := GFButtonID( 35, 102, 2714, 2715, 1 );  //Lock
+    		UNLOCK := GFButtonID( 35, 124, 2714, 2715, 1 );  //Unloc
+    		DELSEC := GFButtonID( 35, 189, 2714, 2715, 1 );  //Delete
+
+    		GFTextLine( 60,  77,   TEXT_COLOR_YELLOW, "House Management" );    //title
+    		GFTextLine( 70,  105, TEXT_COLOR_GREEN, "Lock down an item" );    //Lock
+    		GFTextLine( 70,  127, TEXT_COLOR_GREEN, "Unlock an item" );    //Unlock
+    		
+    		GFTextLine( 310,  90, TEXT_COLOR_YELLOW, "Add a secure" );    //Secure East
+    		GFTextLine( 300,  105, TEXT_COLOR_GREEN, "East" );    //Secure East
+    		GFTextLine( 370, 105, TEXT_COLOR_GREEN, "South" );    //Secure South
+    		GFTextLine( 335,  127, TEXT_COLOR_GREEN, "Owner" );    //Owner
+    		SECEASTOWN := GFButtonID( 300, 130, 2714, 2715, 1 );  //Secure East
+    		SECSOUTHOWN := GFButtonID( 385, 130, 2714, 2715, 1 );  //Secure North
+    		GFTextLine( 325,  149, TEXT_COLOR_GREEN, "Co-owners" );    //Coowner
+    		SECEASTCOOWN:= GFButtonID( 300, 152, 2714, 2715, 1 );  //Secure East
+    		SECSOUTHCOOWN := GFButtonID( 385, 152, 2714, 2715, 1 );  //Secure North
+    		GFTextLine( 330,  171, TEXT_COLOR_GREEN, "Friends" );    //Friends
+    		SECEASTFRIEND := GFButtonID( 300, 173, 2714, 2715, 1 );  //Secure East
+    		SECSOUTHFRIEND := GFButtonID( 385, 173, 2714, 2715, 1 );  //Secure North
+    		GFTextLine( 335,  193, TEXT_COLOR_GREEN, "Public" );    //Public
+    		SECEASTPUBLIC := GFButtonID( 300, 196, 2714, 2715, 1 );  //Secure East
+    		SECSOUTHPUBLIC := GFButtonID( 385, 196, 2714, 2715, 1 );  //Secure North
+    		
+    		GFTextLine( 70, 192, TEXT_COLOR_GREEN, "Delete a secure" );     //Delete
+			else
+				GFTextLine( 60,  77, TEXT_COLOR_YELLOW, "House Management" );    //fail text
+    		GFTextLine( 70,  99, TEXT_COLOR_GREEN, "You need to be the owner of the house to access this." );  
+    	endif
+    	
+    	GFPage(friendspage); //Friends List
+    	
+    		var i;
+	    	var addfriendbuttons := array;
+  	  	var removefriendbuttons := array;
+				var serial;
+				var friend;
+				var friends := GetObjProperty( house, "friends" );
+				var linecount := 0;
+    	if(IsACoowner( sign, who ))
+
+				for( i := 1; i <= 10; i := i + 1 )
+					serial := CInt(friends[i]);
+				
+					if( serial )
+						friend := SystemFindObjectBySerial(serial);
+						if( !friend )
+							friend := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+ 		 				GFTextCrop( 33,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + friend.name );
+						removefriendbuttons[i] := GFButtonID( 20, 84+(linecount * 18), 2360, 2360, 1 );
+						addfriendbuttons[i] := GFButtonID( 7, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					
+					else
+  					GFTextLine( 33,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removefriendbuttons[i] := GFButtonID( 20, 84+(linecount * 18), 2360, 2360, 1 );
+						addfriendbuttons[i] := GFButtonID( 7, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+				serial := 0;
+				friend := 0;
+				linecount := 0;	
+
+				for( i := 11; i <= 20; i := i + 1 )
+					serial := CInt(friends[i]);
+					
+					if( serial )
+						friend := SystemFindObjectBySerial(serial);
+						if( !friend )
+							friend := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+ 		 				GFTextCrop( 160,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + friend.name );
+						removefriendbuttons[i] := GFButtonID( 147, 84+(linecount * 18), 2360, 2360, 1 );
+						addfriendbuttons[i] := GFButtonID( 135, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+				
+					else
+  					GFTextLine( 160,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removefriendbuttons[i] := GFButtonID( 147, 84+(linecount * 18), 2360, 2360, 1 );
+						addfriendbuttons[i] := GFButtonID( 135, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+				serial := 0;
+				friend := 0;
+				linecount := 0;	
+
+				for( i := 21; i <= 30; i := i + 1 )
+					serial := CInt(friends[i]);
+				
+					if( serial )
+						friend := SystemFindObjectBySerial(serial);
+						if( !friend )
+							friend := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+  					GFTextCrop( 313,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + friend.name );
+						removefriendbuttons[i] := GFButtonID( 300, 85+(linecount * 18), 2360, 2360, 1 );
+						addfriendbuttons[i] := GFButtonID( 287, 85+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+				
+					else
+  					GFTextLine( 313,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removefriendbuttons[i] := GFButtonID( 300, 85+(linecount * 18), 2360, 2360, 1 );
+						addfriendbuttons[i] := GFButtonID( 287, 85+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+			else
+				GFTextLine( 33,  80, TEXT_COLOR_GREEN, "You must be co-owner of this house to view the friends list.");
+			endif
+			
+    	GFPage(coownpage); //Co-Owner List
+    	
+    		i := 0;
+	    	var addcoownerbuttons := array;
+  	  	var removecoownerbuttons := array;
+				serial := 0;
+				var coowner;
+				var coowners := GetObjProperty( house, "coowners" );
+				linecount := 0;
+    	if(GetObjProperty(house, "ownerserial") == who.serial)
+
+				for( i := 1; i <= 10; i := i + 1 )
+					serial := CInt(coowners[i]);
+				
+					if( serial )
+						coowner := SystemFindObjectBySerial(serial);
+						if( !coowner )
+							coowner := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+ 		 				GFTextCrop( 33,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + coowner.name );
+						removecoownerbuttons[i] := GFButtonID( 20, 84+(linecount * 18), 2360, 2360, 1 );
+						addcoownerbuttons[i] := GFButtonID( 7, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					
+					else
+  					GFTextLine( 33,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removecoownerbuttons[i] := GFButtonID( 20, 84+(linecount * 18), 2360, 2360, 1 );
+						addcoownerbuttons[i] := GFButtonID( 7, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+				serial := 0;
+				coowner := 0;
+				linecount := 0;	
+
+				for( i := 11; i <= 20; i := i + 1 )
+					serial := CInt(coowners[i]);
+					
+					if( serial )
+						coowner := SystemFindObjectBySerial(serial);
+						if( !coowner )
+							coowner := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+ 		 				GFTextCrop( 160,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + coowner.name );
+						removecoownerbuttons[i] := GFButtonID( 147, 84+(linecount * 18), 2360, 2360, 1 );
+						addcoownerbuttons[i] := GFButtonID( 135, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+				
+					else
+  					GFTextLine( 160,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removecoownerbuttons[i] := GFButtonID( 147, 84+(linecount * 18), 2360, 2360, 1 );
+						addcoownerbuttons[i] := GFButtonID( 135, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+				serial := 0;
+				coowner := 0;
+				linecount := 0;	
+
+				for( i := 21; i <= 30; i := i + 1 )
+					serial := CInt(coowners[i]);
+				
+					if( serial )
+						coowner := SystemFindObjectBySerial(serial);
+						if( !coowner )
+							coowner := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+  					GFTextCrop( 313,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + coowner.name );
+						removecoownerbuttons[i] := GFButtonID( 300, 85+(linecount * 18), 2360, 2360, 1 );
+						addcoownerbuttons[i] := GFButtonID( 287, 85+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+				
+					else
+  					GFTextLine( 313,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removecoownerbuttons[i] := GFButtonID( 300, 85+(linecount * 18), 2360, 2360, 1 );
+						addcoownerbuttons[i] := GFButtonID( 287, 85+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+			else
+				GFTextLine( 33,  80, TEXT_COLOR_GREEN, "You are not the owner of this house.");
+			endif
+
+    	GFPage(banspage); //Banned List
+    	
+    		i := 0;
+	    	var addbannedbuttons := array;
+  	  	var removebannedbuttons := array;
+				serial := 0;
+				var banned;
+				var bannedlist := GetObjProperty( house, "bannedlist" );
+				linecount := 0;
+    	if(GetObjProperty(house, "ownerserial") == who.serial)
+
+				for( i := 1; i <= 10; i := i + 1 )
+					serial := CInt(bannedlist[i]);
+				
+					if( serial )
+						banned := SystemFindObjectBySerial(serial);
+						if( !banned )
+							banned := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+ 		 				GFTextCrop( 33,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + banned.name );
+						removebannedbuttons[i] := GFButtonID( 20, 84+(linecount * 18), 2360, 2360, 1 );
+						addbannedbuttons[i] := GFButtonID( 7, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					
+					else
+  					GFTextLine( 33,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removebannedbuttons[i] := GFButtonID( 20, 84+(linecount * 18), 2360, 2360, 1 );
+						addbannedbuttons[i] := GFButtonID( 7, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+				serial := 0;
+				banned := 0;
+				linecount := 0;	
+
+				for( i := 11; i <= 20; i := i + 1 )
+					serial := CInt(bannedlist[i]);
+					
+					if( serial )
+						banned := SystemFindObjectBySerial(serial);
+						if( !banned )
+							banned := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+ 		 				GFTextCrop( 160,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + banned.name );
+						removebannedbuttons[i] := GFButtonID( 147, 84+(linecount * 18), 2360, 2360, 1 );
+						addbannedbuttons[i] := GFButtonID( 135, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+				
+					else
+  					GFTextLine( 160,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removebannedbuttons[i] := GFButtonID( 147, 84+(linecount * 18), 2360, 2360, 1 );
+						addbannedbuttons[i] := GFButtonID( 135, 84+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+				serial := 0;
+				banned := 0;
+				linecount := 0;	
+
+				for( i := 21; i <= 30; i := i + 1 )
+					serial := CInt(bannedlist[i]);
+				
+					if( serial )
+						banned := SystemFindObjectBySerial(serial);
+						if( !banned )
+							banned := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+						endif
+  					GFTextCrop( 313,  80+(linecount * 18), 100, 25, TEXT_COLOR_GREEN, (i) + ". " + banned.name );
+						removebannedbuttons[i] := GFButtonID( 300, 85+(linecount * 18), 2360, 2360, 1 );
+						addbannedbuttons[i] := GFButtonID( 287, 85+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+				
+					else
+  					GFTextLine( 313,  80+(linecount * 18), TEXT_COLOR_GREEN, (i) + ". - None." );
+						removebannedbuttons[i] := GFButtonID( 300, 85+(linecount * 18), 2360, 2360, 1 );
+						addbannedbuttons[i] := GFButtonID( 287, 85+(linecount * 18), 2361, 2361, 1 );
+						linecount := linecount + 1;
+					endif
+				endfor
+				
+			else
+				GFTextLine( 33,  80, TEXT_COLOR_GREEN, "You are not the owner of this house.");
+			endif
+			
+	/*if(IsACoowner( sign, who ))
+		ResetDecayStatus(sign);
+	endif*/
+	
+	//if( (GetObjProperty( house, "owner_serial ) == error && GetObjProperty( house, "onsale") == 1))
+	//	var owner_serial := CStr(GetObjProperty( house, "price" ));
+	//	var nameprice := ""This static house is on sale for" + price+ "!""
+	//	SetName( sign, nameprice);
+	//endif
+		
+		
+
+	if( (GetObjProperty( house, "numlockdowns" ) == error) || (GetObjProperty( house, "numsecure" ) == error) )
+		AssignDefaultContainers( house );
+	endif
+
+	/*var i;
+
+	if (house.objtype==0x6070 || house.objtype==0x6072)
+		for(i := 38; i <= 45; i := i + 1)
+			layout[i] :="";
+		endfor
+	endif
+*/
+
+	var result := GFSendGump( who );
+
+	var cown := IsCoOwner(who, house);
+	if(( owner_serial == who.serial ) || (cown))
+		RefreshHouseItems( house );
+		//SetObjProperty(sign, "decay", GetDate()); //FIXME
+var v;
+var array1;
+var array2;
+		for( v := 1; v <= 30; v := v + 1 )
+			array1 := addfriendbuttons[v];
+			array2 := array1[2];
+			if( result[ array2 ] )
+				AddFriend( house, who, v );
+				OpenSign( who, sign, "friends" );
+			endif
+		endfor
+
+		for( v := 1; v <= 30; v := v + 1 )
+			array1 := removefriendbuttons[v];
+			array2 := array1[2];
+			if( result[ array2 ] )
+				DeleteFriend( house, who, v );
+				OpenSign( who, sign, "friends"  );
+			endif
+		endfor
+		
+		for( v := 1; v <= 30; v := v + 1 )
+			array1 := addcoownerbuttons[v];
+			array2 := array1[2];
+			if( result[ array2 ] )
+				AddCoowner( house, who, v );
+				OpenSign( who, sign, "coown" );
+			endif
+		endfor
+
+		for( v := 1; v <= 30; v := v + 1 )
+			array1 := removecoownerbuttons[v];
+			array2 := array1[2];
+			if( result[ array2 ] )
+				DeleteCoowner( house, who, v );
+				OpenSign( who, sign, "coown"  );
+			endif
+		endfor
+		
+		for( v := 1; v <= 30; v := v + 1 )
+			array1 := addbannedbuttons[v];
+			array2 := array1[2];
+			if( result[ array2 ] )
+				AddBan( house, who, v );
+				OpenSign( who, sign, "bans" );
+			endif
+		endfor
+
+		for( v := 1; v <= 30; v := v + 1 )
+			array1 := removebannedbuttons[v];
+			array2 := array1[2];
+			if( result[ array2 ] )
+				DeleteBan( house, who, v );
+				OpenSign( who, sign, "bans" );
+			endif
+		endfor
+		
+		if( result[ CLOSEGUMP.keyid ] )
+			return;
+		elseif( result[ NAMEHOUSE.keyid ] )
+				var newname := RequestInput( who, sign, "Enter a name for this house. (esc to exit)" );
+				if (!newname || !NameValidation(newname))
+					SendSysMessage( who, "Canceled!" );
+				elseif( (len(newname) > 20) )
+					SendSysMessage( who, "House sign names may not be longer than 20 characters." );
+				elseif( len(SplitWords( newname )) > 5)
+					SendSysMessage( who, "House sign names are limited to 5 words or less." );
+				else
+                                        SetName( sign, newname );
+                                        SetObjProperty(sign, "HouseName", newname);
+																				OpenSign( who, sign, "home" );
+				endif
+			//elseif(result[GLISTCOOWN.keyid])
+			//	ListCoowner( house, who );
+			//elseif(result[GADDCOOWN.keyid])
+			//	AddCoowner( house, who );
+			//elseif(result[GREMOVECOOWN.keyid])
+			//	DeleteCoowner( house, who );
+			//elseif(result[GADDFRIEND.keyid])
+			//	AddFriend( house, who , 0 );
+			//elseif(result[GREMOVEFRIEND.keyid])
+			//	DeleteFriend( house, who );
+			elseif(result[GCLEARFRIEND.keyid])
+				ClearFriend( house, who );
+				OpenSign( who, sign, "social" );
+			//elseif(result[GBANPLAYER.keyid])
+			//	AddBan( house, who,sign );
+			elseif(result[GEJECTPLAYER.keyid])
+				Eject( house,who,sign );
+				OpenSign( who, sign, "social");
+			//elseif(result[GLISTBANNED.keyid])
+			//	ListBan( house, who );
+			//elseif(result[GREMOVEBAN.keyid])
+			//	DeleteBan( house, who );
+			/*elseif(result[GTRANSFER.keyid])
+				if( owner_serial == who.serial )
+					var targetow := Target( who );
+					SendSysMessage( who, "Transfer the house to who?" );
+					if (ChangeHouseOwner(targetow,house)==1)
+						SendSysMessage( who, "House transfer was successful." );
+					else
+						SendSysMessage( who, "House transfer was NOT successful." );
+					endif
+				endif
+			elseif(result[GDEMOLISH.keyid])
+				if (YesNo(who, "Really redeed the house?"))
+					Demolish(who, house, sign);
+				endif
+				return;*/
+			elseif(result[GCHANGEKEY.keyid])
+				if( owner_serial == who.serial )
+					ChangeLocks( who, house );
+				OpenSign( who, sign, "options" );
+				endif
+			elseif(result[GPAYUPKEEP.keyid])
+				PayUpkeep(who, sign);
+				OpenSign( who, sign, "home" );
+				return;
+			elseif(result[LOCK.keyid])HouseFunctionLock(who, house, 1);
+				OpenSign( who, sign, "management"  );
+			elseif(result[UNLOCK.keyid])HouseFunctionLock(who, house, 2);
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECEASTOWN.keyid])HouseFunctionSecure(who, house, 1, "owner");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECSOUTHOWN.keyid])HouseFunctionSecure(who, house, 2, "owner");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECEASTCOOWN.keyid])HouseFunctionSecure(who, house, 1, "coowner");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECSOUTHCOOWN.keyid])HouseFunctionSecure(who, house, 2, "coowner");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECEASTFRIEND.keyid])HouseFunctionSecure(who, house, 1, "friend");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECSOUTHFRIEND.keyid])HouseFunctionSecure(who, house, 2, "friend");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECEASTPUBLIC.keyid])HouseFunctionSecure(who, house, 1, "public");
+				OpenSign( who, sign, "management"  );
+			elseif(result[SECSOUTHPUBLIC.keyid])HouseFunctionSecure(who, house, 2, "public");
+				OpenSign( who, sign, "management"  );
+			elseif(result[DELSEC.keyid])HouseFunctionSecure(who, house, 3 , 0);
+				OpenSign( who, sign, "management"  );
+			else
+				return;
+			endif
+			endif
+
+endfunction
+
+function SetPlaqueName( sign )
+	var named := getobjproperty(sign, "HouseName");
+	if(!named)
+		named := "Untitled";
+	endif
+	sign.name := named;
+	setobjproperty(sign, "HouseName", named);
+	return named;
+
+endfunction
+
+function ChangeLocks( who, house )
+
+	SendSysMessage( who, "Target the new master key." );
+
+	var addonitem, newkey := Target( who );
+
+	if( (newkey.objtype >= KEYSTART) && (newkey.objtype <= KEYEND) && (newkey.objtype != KEYRING) )
+		var lockid := AllocLockId();
+
+		SetObjProperty( newkey, "lockid", lockid );
+
+		foreach item in GetObjectsInStaticHouse( house )
+			if( ((item.objtype >= UOBJECT_DOORS_START) && (item.objtype <= UOBJECT_DOORS_END)) )
+				item.locked := 1;
+				SetObjProperty( item, "lockid", lockid );
+			endif
+		endforeach
+
+		addonitem := CInt(GetObjProperty( house, "component2" ));
+		if (addonitem)
+			addonitem.locked := 1;
+			SetObjProperty( addonitem, "lockid", lockid );
+		endif
+
+		SendSysMessage( who, "Locks have been changed." );
+	else
+			SendSysMessage( who, "That is not a key!" );
+	endif
+
+endfunction
+
+
+function RefreshHouseItems( house )
+
+	var addonitem;
+
+	//foreach item in (house.components)
+	//	foreach item in (house.items)
+	//		if (item.corpsetype=error or !item.corpsetype or item.corpsetype="")
+	//			item.decayat := ReadGameClock() + 5184000;  //60 RL days in the future
+	//	endif
+	//endforeach
+
+	addonitem := CInt(GetObjProperty( house, "component1" ));
+	if (addonitem)
+		addonitem.decayAt := ReadGameClock() + 5184000;
+	endif
+	addonitem := CInt(GetObjProperty( house, "component2" ));
+	if (addonitem)
+		addonitem.decayAt := ReadGameClock() + 5184000;
+	endif
+	addonitem := CInt(GetObjProperty( house, "component3" ));
+	if (addonitem)
+		addonitem.decayAt := ReadGameClock() + 5184000;
+	endif
+
+endfunction
+
+function AssignDefaultContainers( house )
+
+	case (house.objtype)
+		0x6064: SetObjProperty( house, "numlockdowns", 25 );
+		        SetObjProperty( house, "numsecure", 1 );
+		0x6066: SetObjProperty( house, "numlockdowns", 25 );
+		        SetObjProperty( house, "numsecure", 1 );
+		0x6068: SetObjProperty( house, "numlockdowns", 25 );
+		        SetObjProperty( house, "numsecure", 1 );
+		0x606a: SetObjProperty( house, "numlockdowns", 25 );
+		        SetObjProperty( house, "numsecure", 1 );
+		0x606c: SetObjProperty( house, "numlockdowns", 25 );
+		        SetObjProperty( house, "numsecure", 1 );
+		0x606e: SetObjProperty( house, "numlockdowns", 25 );
+		        SetObjProperty( house, "numsecure", 1 );
+		0x6074: SetObjProperty( house, "numlockdowns", 86 );
+		        SetObjProperty( house, "numsecure", 3 );
+		0x6076: SetObjProperty( house, "numlockdowns", 108 );
+		        SetObjProperty( house, "numsecure", 5 );
+		0x6078: SetObjProperty( house, "numlockdowns", 108 );
+		        SetObjProperty( house, "numsecure", 5 );
+		0x607a: SetObjProperty( house, "numlockdowns", 244 );
+		        SetObjProperty( house, "numsecure", 12 );
+		0x607c: SetObjProperty( house, "numlockdowns", 375 );
+		        SetObjProperty( house, "numsecure", 19 );
+		0x607e: SetObjProperty( house, "numlockdowns", 577 );
+		        SetObjProperty( house, "numsecure", 29 );
+		0x608c: SetObjProperty( house, "numlockdowns", 86 );
+		        SetObjProperty( house, "numsecure", 4 );
+		0x608d: SetObjProperty( house, "numlockdowns", 86 );
+		        SetObjProperty( house, "numsecure", 4 );
+		0x60a0: SetObjProperty( house, "numlockdowns", 42 );
+		        SetObjProperty( house, "numsecure", 3 );
+		0x60a2: SetObjProperty( house, "numlockdowns", 42 );
+		        SetObjProperty( house, "numsecure", 3 );
+		0x6098: SetObjProperty( house, "numlockdowns", 58 );
+		        SetObjProperty( house, "numsecure", 4 );
+		0x609c: SetObjProperty( house, "numlockdowns", 85 );
+		        SetObjProperty( house, "numsecure", 6 );
+		0x609a: SetObjProperty( house, "numlockdowns", 110 );
+		        SetObjProperty( house, "numsecure", 8 );
+		0x609e: SetObjProperty( house, "numlockdowns", 110 );
+		        SetObjProperty( house, "numsecure", 8 );
+		0x6096: SetObjProperty( house, "numlockdowns", 137 );
+		        SetObjProperty( house, "numsecure", 10 );
+		0x6388: SetObjProperty( house, "numlockdowns", 137 );
+		        SetObjProperty( house, "numsecure", 10 );
+		0x6bb8: SetObjProperty( house, "numlockdowns", 15 );
+		        SetObjProperty( house, "numsecure", 1 );
+	endcase
+
+endfunction
+
+function AddFriend( house, who, numb )
+
+	SendSysMessage( who, "Adding Friend " + numb + "." );
+
+	SendSysMessage( who, "Select character." );
+	var targetchr := Target( who );
+
+	if(!targetchr)
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	if(!targetchr.acctname)
+		SendSysMessage( who, "That cannot be added to the list." );
+		return;
+	endif
+
+	if(targetchr.acctname == GetObjProperty( house, "owneracct" ))
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+	
+	if( IsACoowner( house, targetchr))
+		SendSysMessage( who, "They are already a Co-Owner." );
+		return;
+	endif
+		
+	
+	var a;
+	foreach a in GetObjProperty( house, "friends")
+		if (targetchr.serial == a)
+		SendSysMessage( who, "They are already a friend.");
+		return;
+	endif
+	endforeach
+	
+	var friends := GetObjProperty( house, "friends");
+	friends[numb] := targetchr.serial;
+	SetObjProperty( house, "friends", friends);
+	SendSysMessage( who, "Friend " + numb + " added." );
+
+endfunction
+
+function DeleteFriend( house, who, numb )
+
+	if (!numb )
+		SendSysMessage( who, "Error Number!" );
+		return;
+	endif
+	var array1 := GetObjProperty( house, "friends" );			
+	var array2 := array1[numb];
+	if ( !array2 || array2 == 0 )
+		SendSysMessage( who, "No friend in this slot.");
+		return;
+	endif
+	
+	var serial := CInt(array2);
+	var friend;
+	if( serial )
+		friend := SystemFindObjectBySerial(serial);
+		if( !friend )
+			friend := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+		endif	
+	endif
+
+	if( friend )
+		SendSysMessage( who, "Friend " + (numb) + " - " + friend.name + " - has been deleted." );
+	else
+		SendSysMessage( who, "Friend " + numb + " deleted." );
+	endif
+	
+	array1[numb] := 0;
+	SetObjProperty( house, "friends", array1);
+	
+	
+endfunction
+
+function ListFriend( house, who )
+
+	var i;
+	var nothing;
+	var serial;
+	var friend;
+
+	for(i := 0; i < MAX_FRIENDS; i := i + 1)
+		serial := CInt(GetObjProperty( house, "friend" + i ));
+		if( serial )
+			friend := SystemFindObjectBySerial(serial);
+			if( !friend )
+				friend := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+			endif
+		
+			if( friend )
+				SendSysMessage( who, "Friend " + (i+1) + " - " + friend.name );
+				nothing := 1;
+			endif
+		endif
+	endfor
+
+	if(!nothing)
+		SendSysMessage( who, "The list is empty." );
+	endif
+
+endfunction
+
+function ClearFriend( house, who )
+var array1 := array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+SetObjProperty( house, "friends", array1);
+SendSysMessage( who, "All friends have been wiped.");
+
+endfunction
+
+function AddBan( house, who, numb )
+
+	SendSysMessage( who, "Personal banning number: " + numb + "." );
+
+	SendSysMessage( who, "Select character." );
+	var targetchr := Target( who );
+
+	if(!targetchr)
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	if(!targetchr.acctname)
+		SendSysMessage( who, "That cannot be added to the list." );
+		return;
+	endif
+
+	if(targetchr.serial == GetObjProperty( house, "ownerserial" ))
+		SendSysMessage( who, "You can't ban yourself." );
+		return;
+	endif
+	
+	var coown := GetObjProperty( house, "coowners");
+	var i := 1;
+	var a;
+	foreach a in coown
+		if (targetchr.serial == a)
+			if( YesNo(who, "Remove Co-Owner Status?"))
+				coown[i] := 0;
+				SetObjProperty( house, "coowners", coown);
+				SendSysMessage( who, "Co-Owner status removed." );
+			else
+				SendSysMessage( who, "Canceled." );
+				return;
+			endif
+		else
+			i := i + 1;
+		endif
+	endforeach
+	
+	var friends := GetObjProperty( house, "friends");
+	i := 1;
+	a := 0;
+	foreach a in friends
+		if (targetchr.serial == a)
+			if( YesNo(who, "Remove Friend Status?"))
+				friends[i] := 0;
+				SetObjProperty( house, "friends", friends);
+				SendSysMessage( who, "Friend status removed." );
+			else
+				SendSysMessage( who, "Canceled." );
+				return;
+			endif
+		else
+			i := i + 1;
+		endif
+		
+	endforeach
+	
+	var banned := GetObjProperty( house, "bannedlist");
+	banned[numb] := targetchr.serial;
+	SetObjProperty( house, "bannedlist", banned);
+	SendSysMessage( who, "Banning " + targetchr.name + " as number" + numb+"." );
+
+endfunction
+
+function DeleteBan( house, who, numb )
+
+	if (!numb )
+		SendSysMessage( who, "Error Number!" );
+		return;
+	endif
+	var array1 := GetObjProperty( house, "bannedlist" );			
+	var array2 := array1[numb];
+	if ( !array2 || array2 == 0 )
+		SendSysMessage( who, "No Banned in this slot.");
+		return;
+	endif
+	
+	var serial := CInt(array2);
+	var banned;
+	if( serial )
+		banned := SystemFindObjectBySerial(serial);
+		if( !banned )
+			banned := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+		endif	
+	endif
+
+	if( banned )
+		SendSysMessage( who, "Ban on " + (numb) + " - " + banned.name + " - has been lifted." );
+	else
+		SendSysMessage( who, "Ban " + numb + " lifted." );
+	endif
+	
+	array1[numb] := 0;
+	SetObjProperty( house, "bannedlist", array1);
+	
+
+endfunction
+
+function ListBan( house, who )
+
+	var i;
+	var nothing;
+	var serial;
+	var banned;
+
+	for(i := 1; i <= MAX_BANNED; i := i + 1)
+		serial := CInt(GetObjProperty( house, "Banned" + i ));
+		if(serial)
+			banned := SystemFindObjectBySerial(serial);
+			if( !banned )
+				banned := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+			endif
+		
+			if( banned )
+				SendSysMessage( who, "Banned " + i + " - " + banned.name );
+				nothing := 1;
+			endif
+		endif
+	endfor
+
+	if(!nothing)
+		SendSysMessage( who, "The list is empty." );
+	endif
+
+endfunction
+
+function Eject( house, who,sign )
+
+	var targetchr := Target( who );
+
+	if(!targetchr)
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	if (targetchr.multi.serial != house.serial)
+		SendSysMessage( who, "You can only eject people that are in your house." );
+		return;
+	endif
+
+
+	if(targetchr.acctname == GetObjProperty( house, "owneracct" ))
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	MoveCharacterToLocation( targetchr, sign.x, sign.y, 0, MOVECHAR_FORCELOCATION );
+
+	SendSysMessage( who, targetchr.name + " was ejected!" );
+
+endfunction
+
+function AddCoowner( house, who, numb )
+
+	SendSysMessage( who, "Adding Co-Owner " + numb + "." );
+
+	SendSysMessage( who, "Select character." );
+	var targetchr := Target( who );
+
+	if(!targetchr)
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	if(!targetchr.acctname)
+		SendSysMessage( who, "That cannot be added to the list." );
+		return;
+	endif
+
+	if(targetchr.serial == GetObjProperty( house, "ownerserial" ))
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+	
+	
+	if( IsACoowner( house, targetchr))
+		SendSysMessage( who, "They are already a Co-Owner." );
+		return;
+	endif
+	
+	var friends := GetObjProperty( house, "friends");
+	var i := 1;
+	var a;
+	foreach a in friends
+		if (targetchr.serial == a)
+			friends[i] := 0;
+			SetObjProperty( house, "friends", friends);
+			SendSysMessage( who, "Player removed from friends list.");
+		else
+			i := i + 1;
+	endif
+	endforeach
+	
+	var coowners := GetObjProperty( house, "coowners");
+	coowners[numb] := targetchr.serial;
+	SetObjProperty( house, "coowners", coowners);
+	SendSysMessage( who, "Co-owner " + numb + " added." );
+
+
+endfunction
+
+function DeleteCoowner( house, who, numb )
+
+	if (!numb )
+		SendSysMessage( who, "Error Number!" );
+		return;
+	endif
+	var array1 := GetObjProperty( house, "coowners" );			
+	var array2 := array1[numb];
+	if ( !array2 || array2 == 0 )
+		SendSysMessage( who, "No Co-Owner in this slot.");
+		return;
+	endif
+	
+	var serial := CInt(array2);
+	var coowner;
+	if( serial )
+		coowner := SystemFindObjectBySerial(serial);
+		if( !coowner )
+			coowner := SystemFindObjectBySerial(serial,SYSFIND_SEARCH_OFFLINE_MOBILES);
+		endif	
+	endif
+
+	if( coowner )
+		SendSysMessage( who, "Co-owner " + (numb) + " - " + coowner.name + " - has been deleted." );
+	else
+		SendSysMessage( who, "Co-owner " + numb + " deleted." );
+	endif
+	
+	array1[numb] := 0;
+	SetObjProperty( house, "coowners", array1);
+	
+	
+endfunction
+
+function ListCoowner( house, who )
+
+	var i, nothing:=0, coowner;
+	for(i := 1; i <= MAX_CO_OWNERS; i := i + 1)
+		coowner := SystemFindObjectBySerial( CInt(GetObjProperty( house, "Co-owner" + i )) );
+		if( coowner )
+			SendSysMessage( who, "Co-owner " + i + " - " + coowner.name );
+			nothing :=1;
+		endif
+	endfor
+
+	if (nothing==0) SendSysMessage( who, "The list is empty." ); endif
+
+endfunction
+
+function ChangeHouseOwner( who, house )
+
+	var oldownerserial := GetObjProperty( house, "ownerserial");
+	if( oldownerserial == who.serial )
+		return 0;
+ 	elseif(who.acctname)
+		SetObjProperty( house, "ownerserial", who.serial );
+		SetObjProperty( house, "owneracct", who.acctname );
+		SendSysMessage( who, "House transfer was successful." );
+		SendSysMessage( who, "It would be wise to change the locks soon." );
+		return 1;
+ 	endif
+	SendSysMessage( who, "House transfer was NOT successful." );
+	return 0;
+
+endfunction
+
+
+
+///////////////////////////////////////////////////////////////////////
+function HouseFunctionLock(who, house, num )
+	
+        var itemt := Target( who, TGTOPT_NOCHECK_LOS );
+
+	if(!itemt)
+                SendSysMessage( who, "Canceled." );
+		return;
+	endif
+	var parent_locked :=0;
+
+	if( IsInStaticHouse( itemt.x , itemt.y , itemt.z ) == house )
+		if( num == 1 )
+			if(( GetObjProperty( house, "numlockdowns" ) > 0 ) && (itemt.movable))
+
+				if( IsCarpet( itemt ) )
+					MoveItemToLocation(itemt, CInt(itemt.x), CInt(itemt.y), CInt(itemt.z)+1, MOVECHAR_FORCELOCATION);
+				endif
+					itemt.movable := 0;
+					SetObjProperty( house, "numlockdowns", GetObjProperty( house, "numlockdowns") - 1 );
+					SetObjProperty( itemt, "lockeddown", 1 );
+					SendSysMessage( who, "Locked Down" );
+
+			elseif (GetObjProperty( itemt, "lockeddown" ))
+                                SendSysMessage( who, "That is already locked down." );
+			
+			elseif( itemt.movable == 0 && !GetObjProperty(itemt, "lockeddown"))
+                                SendSysMessage( who, "This can not be locked down." );
+      else
+                                SendSysMessage( who, "The house has no more lockdowns remaining." );
+			endif
+		else
+			if(GetObjProperty( itemt, "lockeddown" ))
+				itemt.movable := 1;
+				EraseObjProperty( itemt, "lockeddown" );
+				SetObjProperty( house, "numlockdowns", GetObjProperty( house, "numlockdowns") + 1 );
+                                SendSysMessage( who, "Released" );
+			else
+                                SendSysMessage( who, "You can't release this." );
+			endif
+		endif
+	else
+                SendSysMessage( who, "That is not inside the building." );
+	endif
+
+endfunction
+
+///////////////////////////////////////////////////////////////////////
+function HouseFunctionSecure( who, house, num , permis )
+
+	var tlcx := GetObjProperty( house, "tlcx" );
+	var tlcy := GetObjProperty( house, "tlcy" );
+	var tlcz := GetObjProperty( house, "tlcz" );
+	var brcx := GetObjProperty( house, "brcx" );
+	var brcy := GetObjProperty( house, "brcy" );
+	var brcz := GetObjProperty( house, "brcy" );
+	
+	var tlc2x := GetObjProperty( house, "tlc2x" );
+	var tlc2y := GetObjProperty( house, "tlc2y" );
+	var tlc2z := GetObjProperty( house, "tlc2z" );
+	var brc2x := GetObjProperty( house, "brc2x" );
+	var brc2y := GetObjProperty( house, "brc2y" );
+	var brc2z := GetObjProperty( house, "brc2y" );
+
+	var itemt;
+	
+	if( num == 3 ) // num = 3 (delete)
+                itemt := Target( who );
+		if( !itemt )
+                        SendSysMessage( who, "Canceled." );
+			return;
+		endif
+		if(GetObjProperty( itemt, "houseserial" ) == house.serial)
+			//done in secureDestroy for new secure but old ones need help
+			var check;
+			/*
+			If(!IsInStaticHouse(itemt.x, itemt.y, itemt.z);
+				SendSysMessage(who, "This isn't in your house!");
+			endif
+			*/			
+			DestroyItem(check);
+			if (itemt.objtype==0xe41 || itemt.objtype==0xe40)
+				SetObjProperty( house, "numsecure", CInt(GetObjProperty( house, "numsecure") + 1) );                         
+			endif
+			DestroyItem(itemt);
+			SendSysMessage( who, "Secure Off." );
+			return;
+		else
+                        SendSysMessage( who, "This is a secure container." );
+			return;
+		endif
+	else // num = 1, 2 (add secure east, south)
+                itemt := TargetCoordinates( who );
+		if( !itemt )
+                        SendSysMessage( who, "Canceled." );
+			return;
+		endif
+		
+		var InsideHouse := IsInStaticHouse( itemt.x, itemt.y, itemt.z);
+		
+		if( !InsideHouse )
+			SendSysMessage( who, "This is not inside a house.");
+			return;
+		endif
+		
+		if( InsideHouse != house )
+			SendSysMessage( who, "This is not inside your house.");
+			return;
+		endif
+		
+		if( GetObjProperty( house, "numsecure" ) )
+			var itemid := "staticsecurechest";
+			/*if( num == 1 )
+				itemid := 0xe41;
+			else
+				itemid := 0xe40;
+			endif*/
+
+			var securechest := CreateItemAtLocation( itemt.x, itemt.y, itemt.z, itemid, 1 );
+			var inside := 1;
+
+
+			
+			if( !inside)
+				if (!IsOwner( who, (securechest.multi )))
+					SendSysMessage( who, "You're not the owner, Canceled." );
+
+					DestroyItem(securechest);
+					return;
+				endif
+			endif
+			
+			//Broadcast(securechest.multi + " " +who.multi);
+			if (securechest.multi.serial == who.multi.serial &&  securechest.multi.serial!=error)
+				inside:=1;
+			endif
+			if( !inside)
+				if( InsideTent( itemt, house ) )
+					inside := 1;
+				endif
+			endif
+			if (inside)
+				/*var newbox := CreateItemInContainer( box, itemid, 1);
+				box.movable := 0;
+				SetObjProperty( box, "boxserial", CInt( newbox.serial ) );
+				SetObjProperty( box, "houseserial", CInt( house.serial ) );
+				box.usescript := ":housing:securecont";
+				*/
+				securechest.movable:=0;
+				SetObjProperty( securechest, "houseserial", CInt( house.serial ) );
+				SetObjProperty( house, "numsecure", CInt( GetObjProperty( house, "numsecure") - 1 ) );
+				case(permis)
+					"owner":SetObjProperty( securechest, "permission", "owner" );
+					"coowner":SetObjProperty( securechest, "permission", "coowner" );
+					"friend":SetObjProperty( securechest, "permission", "friend" );
+					"public":SetObjProperty( securechest, "permission", "public" );
+				endcase
+					
+				if( num == 1 )
+					securechest.graphic := 0xe41;
+				else
+					securechest.graphic := 0xe40;
+				endif				
+				/*
+				SetObjProperty( house, "numsecure", CInt( GetObjProperty( house, "numsecure") - 1 ) );
+				*/
+            SendSysMessage( who, "Secure On." );
+			else
+				//DestroyItem(box);
+				DestroyItem(securechest);
+            SendSysMessage( who, "That is not inside the building.");
+			endif
+		else
+        SendSysMessage( who, "The house has no more secure containers remaining." );
+		endif
+	endif
+
+endfunction
+
+///////////////////////////////////////////////////////////////////////
+function InsideTent(who,house)
+
+	if (who.x<=house.x+3 && who.x>=house.x-2 && who.y<=house.y+3 && who.y>=house.y-2)
+		return 1;
+	else
+		return 0;
+	endif
+
+endfunction
+
+///////////////////////////////////////////////////////////////////////
+
+function Demolish(who, house, sign)
+
+	var house_objtype := house.objtype; // To create a replacement deed.
+
+	deleteHouse( house );
+
+	//Re-create the deed
+	var id := ReadConfigFile( "itemdesc" ); 
+	var elem := id[house_objtype];
+	var deed_objtype := GetObjtypeByName( elem.Name + "deed");
+	
+	CreateItemInBackpack(who, deed_objtype );
+
+endfunction
+
+function NameValidation(thestring)
+  var i, validstr := {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "a", "b", "c",
+  		      "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
+  		      "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", ",", ".", "?",
+  		      "/", "\\", "[", "]", "(", ")", "%", "$", "#", "@", "!", "^", "&",
+  		      "*", ":", ";", "+", "-", "'", "`", " "};
+  thestring:=lower(thestring);
+  for(i:=1;i<=len(thestring);i:=i+1)
+    if(!(thestring[i] in validstr)) return 0; endif
+  endfor
+  return 1;
+endfunction
+
+function IsACoowner( sign, who )
+
+	var i, coownerserial, found, coowner;
+	var house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
+	found:=0;
+
+	if(!house)
+		return -1;
+	endif	
+
+	coownerserial := GetObjProperty( house, "coowners" );
+	foreach coowner in coownerserial
+		if( coowner==who.serial )
+			found:=1;
+		endif
+	endforeach
+	
+	if( GetObjProperty(house, "ownerserial") == who.serial)
+		found:= 1;
+	endif
+	
+	return found;
+
+endfunction
+
+Function RunSaleGump(who, sign)
+	
+	GFInitGump( 50, 50 );
+	GFPage(1);
+	GFNoClose();
+	GFNoDispose();
+	GFNoMove();
+	GFResizePic( 0, 0, 5054, 200, 300 );
+  GFGumpPicTiled( 6, 14, 188, 2, 3600 );
+  GFGumpPicTiled( 6, 32, 188, 2, 3600 );
+  GFGumpPicTiled( 6, 158, 188, 2, 3600 );
+  GFGumpPicTiled( 6, 253, 188, 2, 3600 );
+  GFCheckerTrans( 6, 6, 188, 288 );
+  GFTilePic( 10, 35, 8900 );
+  GFTilePic( 160, 35, 8950 );
+  GFGumpPic( -7, -7, 10460 );
+  GFGumpPic( 180, -7, 10460 );
+  GFGumpPic( -7, 280, 10460 );
+  GFGumpPic( 180, 280, 10460 );
+  GFTextLine( 50, 14, 38, "House For Sale");
+  GFTextLine( 50, 40, 1160, GetObjProperty(sign, "HouseName"));
+  GFTextLine( 8, 80, 63, "This house is now on sale.");
+  GFTextLine( 8, 95, 63, "At the price of");
+  GFTextLine( 110, 95, 53, "$"+GetObjProperty(sign, "price")+".");
+  GFTextLine( 8, 110, 63, "Its a bargin.");
+  GFTextLine( 8, 125, 63, "It also comes with the");
+  GFTextLine( 8, 140, 63, "following.");
+  GFTextLine( 8, 160, 63, "Secures:");
+  GFTextLine( 110, 160, 53, GetObjProperty(sign, "numsecure")+".");
+  GFTextLine( 8, 175, 63, "Lock Downs:");
+  GFTextLine( 110, 175, 53, GetObjProperty(sign, "numlockdowns")+".");
+  GFTextLine( 8, 250, 63, "Would you be interested?");
+  
+  
+  Var Accept := GFButtonID( 25, 270, G_BUTTON_OKAY_0, G_BUTTON_OKAY_1, 1);
+  GFButtonID( 115, 270, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1);
+  var choice := GFSendGump( who );
+  
+  If(choice[Accept.keyid] == 1)
+  	MakeSale(who, sign);
+  else
+  	SendSysMessage(who, "Thanks for stopping by.");
+  endif
+EndFunction
+
+Function MakeSale( who, sign )
+	var lockid := Getobjproperty( sign , "lockid" );
+	If( who.spendgold(getobjproperty(sign, "price")) )
+		SetObjProperty( sign , "ownerserial", who.serial );
+		SetObjProperty( sign , "owneracct" , who.acctname );
+		SetObjProperty( sign , "upkeeptime", ReadGameClock() + 604800);
+		SendSysMessage(who, "You have been given 1 weeks upkeep free.");
+		SendSysMessage(who, "Owner set.");
+		
+		var bankbox := FindBankBox( who );
+	   
+		var packkey := CreateItemInBackpack( who, UOBJ_GOLD_KEY );
+		if (!packkey)
+			PrintTextAbovePrivate( who, "Their backpack is too full!", who );
+			return;
+		endif
+	
+		var bankkey := CreateItemInContainer( bankbox, UOBJ_GOLD_KEY );
+		if (!bankkey)
+			PrintTextAbovePrivate( who, "Their bankbox is too full!", who );
+			DestroyItem( packkey );
+			return;
+		endif
+	
+		SetObjProperty( packkey, "lockid", lockid );
+		SetObjProperty( bankkey, "lockid", lockid );
+		Sign.color := 0;
+		EraseObjProperty( sign, "OnSale" );
+	else
+		SendSysMessage( who, "You don't have enough gold." );
+		return;
+	endif
+EndFunction
+
+Function PayUpkeep( who, sign )
+
+	sign.color := 0;
+	
+	var deposit := GetObjProperty( sign, "price" ) / 25;
+	var timeleft := ((((GetObjProperty( sign , "upkeeptime" ) - ReadGameClock()) / 60 ) / 60 ) / 24 );
+			GFInitGump( 10, 60 );
+			GFPage(0);
+      //GFNoDispose();
+      
+			GFResizePic( 0, 0, 5054, 280, 207 );
+  		GFGumpPicTiled( 6, 6, 268, 22, 2624 );
+  		GFGumpPicTiled( 6, 30, 268, 50, 2624 );
+  		GFGumpPicTiled( 6, 82, 268, 90, 2624 );
+  		GFGumpPicTiled( 6, 174, 268, 27, 2624 );
+  		GFCheckerTrans( 6, 6, 268, 195 );
+  		
+  		GFTilePic( 230, 35, 8900 );
+  		GFGumpPic( -7, -7, 10460 );
+  		GFGumpPic( 260, -7, 10460 );
+  		GFGumpPic( -7, 182, 10460 );
+  		GFGumpPic( 260, 182, 10460 );
+  		
+  		GFTextLine( 100, 6 , TEXT_COLOR_GREEN, "UPKEEP MENU" );
+  		GFTextLine( 8, 35 , TEXT_COLOR_GREEN, "Upkeep for this house is: " );
+  		GFTextLine( 165, 35 , TEXT_COLOR_YELLOW, "$"+deposit ); //Cost
+  		GFTextLine( 8, 55 , TEXT_COLOR_GREEN, "Your upkeep will last for:   days." );
+  		GFTextLine( 165, 55 , TEXT_COLOR_YELLOW, timeleft ); //days left
+  	
+  		GFTextLine( 8, 95 , TEXT_COLOR_GREEN, "Maximum upkeep payable is 4 weeks." );
+  		
+  		GFTextLine( 8, 125 , TEXT_COLOR_RED, "Buy Upkeep for how many weeks?" );
+  		var opt1;
+  		var opt2;
+  		var opt3;
+  		var opt4;
+  		case( GetUpkeepAmount( sign ) )
+  		0:
+  			GFSetRadioGroup( 1 );
+  			GFTextLine( 260, 145 , TEXT_COLOR_YELLOW, "4" );
+  			opt4 := GFRadioButton( 235, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  			GFTextLine( 185, 145 , TEXT_COLOR_YELLOW, "3" );
+  			opt3 := GFRadioButton( 160, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  			GFTextLine( 110, 145 , TEXT_COLOR_YELLOW, "2" );
+  			opt2 := GFRadioButton( 85, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  			GFTextLine( 35, 145 , TEXT_COLOR_YELLOW, "1" );
+  			opt1 := GFRadioButton( 10, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  		1:
+  			GFTextLine( 185, 145 , TEXT_COLOR_YELLOW, "3" );
+  			opt3 := GFRadioButton( 160, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  			GFTextLine( 110, 145 , TEXT_COLOR_YELLOW, "2" );
+  			opt2 := GFRadioButton( 85, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  			GFTextLine( 35, 145 , TEXT_COLOR_YELLOW, "1" );
+  			opt1 := GFRadioButton( 10, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  		2:
+  			GFTextLine( 110, 145 , TEXT_COLOR_YELLOW, "2" );
+  			opt2 := GFRadioButton( 85, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  			GFTextLine( 35, 145 , TEXT_COLOR_YELLOW, "1" );
+  			opt1 := GFRadioButton( 10, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  		3:
+  			GFTextLine( 35, 145 , TEXT_COLOR_YELLOW, "1" );
+  			opt1 := GFRadioButton( 10, 145, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, 0 );
+  		endcase
+  		
+			var GUMPOK := GFButtonID( 60, 177, G_BUTTON_OKAY_0, G_BUTTON_OKAY_0, 1);
+			GFButtonID( 170, 177, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+  		
+  		var choice := GFSendGump( who );
+			var upamount;
+	if(choice[GUMPOK.keyid])	
+		if	(choice[opt1.keyid])
+			upamount := 1;
+		elseif(choice[opt2.keyid])
+			upamount := 2;
+		elseif(choice[opt3.keyid])
+			upamount := 3;
+		elseif(choice[opt4.keyid])
+			upamount := 4;
+		else
+			OpenSign( who, sign, "home" );
+			return;
+		endif
+	else
+		OpenSign( who, sign, "home" );
+		return;
+	endif
+	
+			deposit := deposit*upamount;
+			
+	if (YesNo(who, "Do you want to pay $" +deposit+ " upkeep on this house?"))
+		if( !who.spendgold(deposit) )
+			sendsysmessage(who, "You don't have enough money.");
+			return;
+		else
+			SendSysMessage(who, "Your upkeep has been extended for " + upamount+ " weeks.");
+			var upkeeptime := GetObjProperty(sign, "upkeeptime") + (604800 * upamount);
+			SetObjProperty( sign, "upkeeptime", upkeeptime);
+			return;
+		endif
+	endif
+	return;
+EndFunction
+	
+Function GetUpkeepAmount( sign )
+	
+	var upkeepleft := GetObjProperty( sign , "upkeeptime" );
+	var thetime := readgameclock();
+	var timeleft := (((((upkeepleft - thetime) /60) /60) /24) /7);
+	return (0 + cint(timeleft));
+
+EndFunction

@@ -1,0 +1,35 @@
+////////////////////////////////////////////////////////////////////
+// makesummoned.src - Renuo							//
+// Makes npcs considered as a 'summon' (i.e. no corpse at death	//
+////////////////////////////////////////////////////////////////////
+
+use uo;
+use basic;
+use os;
+
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_makesummoned( who )
+	if (!checkStaff(who, "setprop", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	SendSysMessage( who, "Select an NPC" );
+
+	var obj := Target( who );
+	if( obj.isA(POLCLASS_NPC ))
+			var value := GetObjProperty(obj, "summoned");
+			if( value == 1 )
+				SendSysMessage( who, "Property unchanged." );
+			else
+				SendSysMessage(who, "NPC is now considered 'summoned'.");				
+				SetObjProperty(obj, "summoned", 1);
+				SetObjProperty(obj, "LFucker", who.name + who.serial);
+			endif
+	else
+		SendSysMessage(who, "canceled.");
+	endif
+
+endprogram
+

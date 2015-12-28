@@ -1,0 +1,27 @@
+use uo;
+use os;
+
+include "bardbook";
+
+program use_scroll( who, scroll )
+
+	set_critical(1);
+	if (scroll.amount)
+		var songid := GetObjProperty(scroll, "SongID");
+		songid := CInt(songid);
+			
+		var song := GetScript( songid );
+		SetObjProperty( who, "#Casting", 1 );
+		SetObjProperty( who, "SongScroll", 1 );
+
+		start_script( song, who );
+	
+		while( GetObjProperty( who, "#Casting" ) )
+			sleepms( 250 );
+		endwhile
+
+		EraseObjProperty( who, "SongScroll" );		
+	endif
+
+endprogram
+

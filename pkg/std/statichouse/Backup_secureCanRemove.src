@@ -1,0 +1,7 @@
+use uo;
+
+include "utility";
+
+program CanRemoveScript(who, container, item, movetype)
+	return 1;
+endprogram

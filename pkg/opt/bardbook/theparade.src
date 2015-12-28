@@ -1,0 +1,108 @@
+use uo;
+use os;
+use cfgfile;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+include "include/speedhackRecallCheck";
+
+var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
+
+program minstrelsjourney( caster )
+
+	if(!TryToCast( caster, 9 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var bx:=1455;
+	var by:=1568;
+	var bz:=30;
+
+	var bx1:=1453;
+	var by1:=1567;
+	var bz1:=30;
+	var bx2:=1454;
+	var by2:=1567;
+	var bz2:=30;
+	var bx3:=1455;
+	var by3:=1567;
+	var bz3:=30;
+	var bx4:=1456;
+	var by4:=1567;
+	var bz4:=30;
+	var bx5:=1457;
+	var by5:=1567;
+	var bz5:=30;
+	var bx6:=1458;
+	var by6:=1567;
+	var bz6:=30;
+
+	var com1 := GetObjProperty( caster, "bparty1" );
+	var com2 := GetObjProperty( caster, "bparty2" );
+	var com3 := GetObjProperty( caster, "bparty3" );
+	var com4 := GetObjProperty( caster, "bparty4" );
+	var com5 := GetObjProperty( caster, "bparty5" );
+	var com6 := GetObjProperty( caster, "bparty6" );
+	
+	sleep(4);
+
+	if(com1)
+		if(!com1.dead)
+			if((Distance (caster, com1)<7))
+				SendSysMessage( com1, "Your bard's melody has magically taken you to Britain");
+				MoveCharacterToLocation( com1, bx1, by1, bz1 );
+			endif
+		endif
+	endif
+	if(com2)
+		if(!com2.dead)
+			if((Distance (caster, com2)<7))
+				SendSysMessage( com2, "Your bard's melody has magically taken you to Britain");
+				MoveCharacterToLocation( com2, bx2, by2, bz2 );
+			endif
+		endif
+	endif
+	if(com3)
+		if(!com3.dead)
+			if((Distance (caster, com3)<7))
+				SendSysMessage( com3, "Your bard's melody has magically taken you to Britain");
+				MoveCharacterToLocation( com3, bx3, by3, bz3 );
+			endif
+		endif
+	endif
+	if(com4)
+		if(!com4.dead)
+			if((Distance (caster, com4)<7))
+				SendSysMessage( com4, "Your bard's melody has magically taken you to Britain");
+				MoveCharacterToLocation( com4, bx4, by4, bz4 );
+			endif
+		endif
+	endif
+	if(com5)
+		if(!com5.dead)
+			if((Distance (caster, com5)<7))
+				SendSysMessage( com5, "Your bard's melody has magically taken you to Britain");
+				MoveCharacterToLocation( com5, bx5, by5, bz5 );
+			endif
+		endif
+	endif
+	if(com6)
+		if(!com6.dead)
+			if((Distance (caster, com6)<7))
+				SendSysMessage( com6, "Your bard's melody has magically taken you to Britain");
+				MoveCharacterToLocation( com6, bx6, by6, bz6 );
+			endif
+		endif
+	endif
+
+	MoveCharacterToLocation( caster, bx, by, bz );
+	SetSpeedCheckNote(caster);
+
+	PlaySoundEffect( caster, 0x1FD );
+
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram
+

@@ -17,7 +17,11 @@ program textcmd_destroy( who )
     if (tgt)
         if (tgt.item)
             SetObjProperty( tgt.item, "destroyit", 1 );
+            
+    		var gmdata := {	"destory", tgt.serial+ " / "+tgt.name,"x: "+tgt.x, "y: "+tgt.y,"z: "+tgt.z,"concealed: "+who.concealed , "na"};
+				logcommand(who, gmdata);
             DestroyItem( tgt.item );
+            
         else
             SendSysMessage( who, "You can only destroy items" );
         endif

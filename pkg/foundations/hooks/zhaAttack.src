@@ -5,6 +5,7 @@ use os;
 include "zhaSpecialMonsterAttacks";
 include "include/hitscriptinc";
 include "include/guardcall";
+include "include/classes";
 
 
 var cfg := ReadConfigFile(":combat:itemdesc");
@@ -36,6 +37,8 @@ exported function ZHAAttackfunc( attacker, defender )
 		if (GetObjProperty(attacker, "SpecialAttack"))
 			DoSpecialMonsterAttack(attacker, defender, weaponType, GetObjProperty(attacker, "SpecialAttack"));
 			return 1;
+		else
+			return 0;
 		endif
 	endif	
 	
@@ -45,7 +48,9 @@ exported function ZHAAttackfunc( attacker, defender )
 		return 1;
 	endif
 	
-	return 0;	
+	//var thiefmod := GetObjProperty( attacker , CLASSEID_THIEF );
+		MeleeAttack( attacker, defender );
+		return 1;
 endfunction 
 
 

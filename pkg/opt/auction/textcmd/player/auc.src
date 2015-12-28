@@ -376,7 +376,9 @@ function buildinfo(who, whichone)
         if (timeleft<=0)
         data3[12] := "Bidding is closed.";
 	else
-	data3[12] := timeleft;
+	var minutes := CInt(timeleft/60);
+	var seconds := timeleft - (60*minutes);
+	data3[12] := minutes + ":" + seconds;
 	endif
 	data3[10] := GetObjProperty(whichone, "starting");
         data3[11] := GetObjProperty(whichone, "bid");

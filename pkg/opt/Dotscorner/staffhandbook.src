@@ -1,50 +1,9 @@
 use uo;
 use os;
 
+include "include/gumps";
 include "dotutils";
 
-var layout := {
-	"page 0",
-	"gumppic 30 30 2203",
-	"text 100 40 28 0",
-	"text 65 40 75 1",
-	"text 170 40 35 2",
-
-	"text 90 65 0 3",
-	"button 65 70  2104 2103 1 0 4",
-	"button 175 70  2104 2103 1 0 5",
-
-	"text 90 85 0 6",
-	"button 65 90  2104 2103 1 0 7",
-	"button 175 90  2104 2103 1 0 8",
-
-	"text 90 105 0 9",
-	"button 65 110  2104 2103 1 0 10",
-	"button 175 110  2104 2103 1 0 11",
-
-	"text 90 125 0 12",
-	"button 65 130  2104 2103 1 0 13",
-	"button 175 130  2104 2103 1 0 14"
-
-};
-
-var data := {
-	"Privileges",
-	"On",
-	"Off",
-	"Hear Ghosts",
-	"",
-	"",
-	"See Ghosts",
-	"",
-	"",
-	"See Hidden",
-	"",
-	"",
-	"Invulnerable",
-	"",
-	""
-};
 
 program staffhandbook(who, handbook)
 
@@ -69,27 +28,178 @@ program staffhandbook(who, handbook)
 endprogram
 
 function ShowPrivGump(who)
+	var hearghostscolour := 38;
+	var seeghostscolour := 38;
+	var seehiddencolour := 38;
+	var invulcolour := 38;
+	var dblclickanycolour := 38;
+	var dyeanycolour := 38;
+	var ignoredoorscolour := 38;
+	var losanycolour := 38;
+	var moveanycolour := 38;
+	var seeinvisitemscolour := 38;
+	var allcolour := 38;
+	
+	if (who.enabled("hearghosts") == 1)
+		hearghostscolour := 63;
+	endif 
+	if (who.enabled("seeghosts") == 1)
+		seeghostscolour := 63;
+	endif 
+	if (who.enabled("invul") == 1)
+		invulcolour := 63;
+	endif 
+	if (who.enabled("seehidden") == 1)
+		seehiddencolour := 63;
+	endif 
+	if (who.enabled("dblclickany") == 1)
+		dblclickanycolour := 63;
+	endif 
+	if (who.enabled("dyeany") == 1)
+		dyeanycolour := 63;
+	endif 
+	if (who.enabled("ignoredoors") == 1)
+		ignoredoorscolour := 63;
+	endif 
+	if (who.enabled("losany") == 1)
+		losanycolour := 63;
+	endif 
+	if (who.enabled("moveany") == 1)
+		moveanycolour := 63;
+	endif 
+	if (who.enabled("seeinvisitems") == 1)
+		seeinvisitemscolour := 63;
+	endif 
+	if (who.enabled("all") == 1)
+		allcolour := 63;
+	endif 
+	
+	   
+	var currentline := 10;
+	GFInitGump( 10 , 10 );
+	GFPage( 0 );
+	
+	GFResizePic(0, 0, BKGND_STONESLAB, 400, 330);
+	GFTextLine( 165, currentline, 53, "STAFF BOOK v2.0");
+	currentline := currentline + 30;
+	GFTextLine(365, 290, 38, "Exit");
+	var Exitbutton := GFButtonID( 350, 295,  2104, 2103, 1 );
+	
+	GFTextLine( 100, currentline, 53, "Privileges");
+	GFTextLine( 65, currentline, 63, "On");
+	GFTextLine( 170, currentline, 38, "Off");
+	currentline := currentline + 30;
 
-	var res := SendDialogGump( who, layout, data );
+	GFTextLine( 90, currentline - 5, hearghostscolour, "Hear Ghosts");
+	var GrantHG := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var RevokeHG := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-	case( res[0] )
+	GFTextLine( 90, currentline-5, seeghostscolour, "See Ghosts");
+	var GrantSG := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var RevokeSG := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-		4: GrantPriv( who, "hearghosts" );
-		5: RevokePriv( who, "hearghosts" );
+	GFTextLine( 90, currentline-5, seehiddencolour, "See Hidden");
+	var GrantSH := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var RevokeSH := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-		7: GrantPriv( who, "seeghosts" );
-		8: RevokePriv( who, "seeghosts" );
+	GFTextLine( 90, currentline-5, invulcolour, "Invulnerable");
+	var GrantINVUL := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var RevokeINVUL := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-		10: GrantPriv( who, "seehidden" );
-		11: RevokePriv( who, "seehidden" );
+	GFTextLine( 90, currentline-5, dblclickanycolour, "Double Click Any");
+	var Grantdblclickany := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokedblclickany := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-		13: GrantPriv( who, "invul" );
-		14: RevokePriv( who, "invul" );
+	GFTextLine( 90, currentline-5, dyeanycolour, "Dye Any");
+	var Grantdyeany := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokedyeany := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-	endcase
+	GFTextLine( 90, currentline-5, ignoredoorscolour, "Ignore Doors");
+	var Grantignoredoors := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokeignoredoors := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
-	return res[0];
+	GFTextLine( 90, currentline-5, losanycolour, "LOS Any");
+	var Grantlosany := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokelosany := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
 
+	GFTextLine( 90, currentline-5, moveanycolour, "Move Any");
+	var Grantmoveany := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokemoveany := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
+
+	GFTextLine( 90, currentline-5, seeinvisitemscolour, "See Invis Items");
+	var Grantseeinvisitems := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokeseeinvisitems := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
+
+	GFTextLine( 90, currentline-5, allcolour, "All");
+	var Grantall := GFButtonID( 65, currentline,  2104, 2103, 1 );
+	var Revokeall := GFButtonID( 175, currentline,  2104, 2103, 1 );
+	currentline := currentline + 20;
+	
+	
+
+
+	var choice := GFSendGump(who);
+
+	if (choice[GrantHG.keyid])
+		GrantPriv( who, "hearghosts" );
+	elseif (choice[RevokeHG.keyid])
+		RevokePriv( who, "hearghosts" );
+	elseif (choice[GrantSG.keyid])
+		GrantPriv( who, "seeghosts" );
+	elseif (choice[RevokeSG.keyid])
+		RevokePriv( who, "seeghosts" );
+	elseif (choice[GrantSH.keyid])
+		GrantPriv( who, "seehidden" );
+	elseif (choice[RevokeSH.keyid])
+		RevokePriv( who, "seehidden" );
+	elseif (choice[GrantINVUL.keyid])
+		GrantPriv( who, "invul" );
+	elseif (choice[RevokeINVUL.keyid])
+		RevokePriv( who, "invul" );
+	elseif (choice[Grantdblclickany.keyid])
+		GrantPriv( who, "dblclickany" );
+	elseif (choice[Revokedblclickany.keyid])
+		RevokePriv( who, "dblclickany" );
+	elseif (choice[Grantdyeany.keyid])
+		GrantPriv( who, "dyeany" );
+	elseif (choice[Revokedyeany.keyid])
+		RevokePriv( who, "dyeany" );
+	elseif (choice[Grantignoredoors.keyid])
+		GrantPriv( who, "ignoredoors" );
+	elseif (choice[Revokeignoredoors.keyid])
+		RevokePriv( who, "ignoredoors" );
+	elseif (choice[Grantlosany.keyid])
+		GrantPriv( who, "losany" );
+	elseif (choice[Revokelosany.keyid])
+		RevokePriv( who, "losany" );
+	elseif (choice[Grantmoveany.keyid])
+		GrantPriv( who, "moveany" );
+	elseif (choice[Revokemoveany.keyid])
+		RevokePriv( who, "moveany" );
+	elseif (choice[Grantseeinvisitems.keyid])
+		GrantPriv( who, "seeinvisitems" );
+	elseif (choice[Revokeseeinvisitems.keyid])
+		RevokePriv( who, "seeinvisitems" );
+	elseif (choice[Grantall.keyid])
+		GrantPriv( who, "all" );
+	elseif (choice[Revokeall.keyid])
+		RevokePriv( who, "all" );
+	elseif (choice[Exitbutton.keyid])
+		return 0;
+	endif
+	
+	return 1;
+	
 endfunction
 
 

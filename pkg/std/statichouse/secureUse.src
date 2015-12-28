@@ -1,0 +1,82 @@
+use uo;
+use os;
+
+include "securechests";
+include "utility";
+
+program securechest_use(who, chest)
+	var houseSerial := GetObjProperty(chest, "houseserial");
+	var permission := GetObjProperty( chest, "permission");
+	case( permission )
+		"owner":
+		if ( houseSerial )
+		var house := SystemFindObjectBySerial(houseSerial);
+		if (house)
+			if (!IsOwner(who, house))
+				SendSysMessage(who, "Only an owner of the house can open this.");
+				break;
+			endif
+		endif
+	endif
+	
+	if (Distance( chest, who )>5)
+				break;
+	endif
+	
+	var securechestish :=FindSecureChest( chest.serial );
+	if (securechestish)
+		SendOpenSpecialContainer( who, securechestish );
+	endif
+	
+		"coowner":
+		if ( houseSerial )
+		var house := SystemFindObjectBySerial(houseSerial);
+		if (house)
+			if (!IsOwner(who, house) && !IsCoOwner(who, house))
+				SendSysMessage(who, "Only an owner or co-owner of the house can open this.");
+				break;
+			endif
+		endif
+	endif
+	
+	if (Distance( chest, who )>5)
+		return;
+	endif
+	
+	var securechestish :=FindSecureChest( chest.serial );
+	if (securechestish)
+		SendOpenSpecialContainer( who, securechestish );
+	endif
+	
+		"friend":
+		if ( houseSerial )
+		var house := SystemFindObjectBySerial(houseSerial);
+		if (house)
+			if (!IsOwner(who, house) &&!IsCoOwner(who, house) && !IsFriend(who, house))
+				SendSysMessage(who, "Only an owner, co-owner or friend of the house can open this.");
+				break;
+			endif
+		endif
+	endif
+	
+	if (Distance( chest, who )>5)
+		return;
+	endif
+	
+	var securechestish :=FindSecureChest( chest.serial );
+	if (securechestish)
+		SendOpenSpecialContainer( who, securechestish );
+	endif
+	
+		"public":
+	if (Distance( chest, who )>5)
+		return;
+	endif
+	
+	var securechestish :=FindSecureChest( chest.serial );
+	if (securechestish)
+		SendOpenSpecialContainer( who, securechestish );
+	endif
+endcase
+endprogram
+

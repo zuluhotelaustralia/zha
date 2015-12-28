@@ -1,6 +1,7 @@
 
 use uo;
 use os;
+use util;
 
 program textcmd_online( character)
 
@@ -17,11 +18,29 @@ function MakeAndProcessGump( who)
 				  "text 135 30 5 0");
 			
 	var data	:= array( "Online players:");
+	var i;
 
 	var playername;
 	var lastindex:=0;
 
-	var players	:= EnumerateOnlineCharacters();
+	var tempplayers := EnumerateOnlineCharacters();
+	
+	var players := array;
+	var totalplayers := len( tempplayers );
+
+	//Randomize players	
+	var obj;
+	var index; 
+	while( len( players ) != totalplayers )
+	
+		index := RandomInt( len( tempplayers ) ) + 1;
+		obj := tempplayers[ index ];
+		
+		players.append(obj);
+		tempplayers.erase(index);
+		tempplayers.sort();
+		
+	endwhile
 
 	var start	:= 1;
 	var count	:= 0;
@@ -29,7 +48,7 @@ function MakeAndProcessGump( who)
 	var page	:= 1;
 	var perpage	:= 20;
 	var y 	:= 70;
-	var i;
+
 	var j;
 	var uhunter;
 
@@ -46,7 +65,14 @@ function MakeAndProcessGump( who)
 			layout.append( "button 125 481 5537 5538 0 " + (page - 1) ); // Prev button for current page
 		endif
 		if(!players[i].cmdlevel)
-			layout.append( "text 85 " + y + " 0 " + len(data) );
+		
+			var NameColour := 0; //Fellow guild members are highlighted green
+			if(who.guildid != 0 && players[i].guildid == who.guildid)
+				NameColour := 75;
+			endif
+			
+			layout.append( "text 85 " + y + " " + NameColour + " " + len(data) );
+			
 			//layout.append( "button 300 " + (y+5) + " 2118 2117 1 0 " + i );
 			data.append( players[i].name );
 			y := y + 20;

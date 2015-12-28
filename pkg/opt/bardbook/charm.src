@@ -1,0 +1,83 @@
+use uo;
+use os;
+use cfgfile;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+include "include/random";
+
+program cast_charm( caster )
+
+	var cast_on;
+	var mult;
+	var bard := GetObjProperty(caster, "IsBard");
+	if (!bard)
+		mult := 2;
+	else
+		mult := bard;
+	endif
+
+	if(!TryToCast( caster, 3 ));
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	SendSysMessage( caster, "Charm what?" );
+
+	var npc := CanTargetSpell( caster );
+
+	var npcstr := GetBaseStrength(npc);
+	var npcint := GetBaseIntelligence(npc);
+	var skill := GetEffectiveSkill( caster, 29 );
+	var charming := skill*mult;
+	var rand := Random(400);
+	var chaos := Random(10);
+	var cdiff := npcint;
+	if(chaos>1)
+		cdiff := cdiff + rand;
+	else
+		cdiff := cdiff - rand;
+	endif
+
+	var karma := GetObjProperty(npc, "Karma");	
+	
+	if(npcstr > 999)
+		SendSysMessage( caster, "The creature is too strong!");
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	elseif(npcint > 999)
+		SendSysMessage( caster, "The creature is too ingelligent!");
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	elseif(!npc.isA(POLCLASS_NPC) )
+		SendSysMessage( caster, "You can't charm that!");
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	elseif(karma>0)
+		SendSysMessage( caster, "You can't charm that!");
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	elseif(npc.enabled("invul"))
+		SendSysMessage( caster, "You can't charm that!");
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	elseif(cdiff>charming)
+		SendSysMessage( caster, "The creature outwits you!");
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	SetObjProperty( npc, "master", caster.serial );
+	SetObjProperty( npc, "script", npc.script );
+	SetObjProperty( npc, "duration", mult*60 );
+	npc.setmaster( caster );
+	npc.script := "tamed";
+	RestartScript(npc);
+	SendSysMessage( caster, "Creature charmed!");
+	PlaySoundEffect( caster, 0x512 );
+	EraseObjProperty( caster, "#Casting" );
+
+	start_script( "processcharm", npc );
+
+endprogram

@@ -1207,13 +1207,13 @@ Set_Script_Option(SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES, 1);
   if(!chr)
     chr:=SystemFindObjectBySerial(choose,SYSFIND_SEARCH_OFFLINE_MOBILES);
   else
-  endif
     if(guild.getprop("guildabv")=="NONE")
       guildname:=guild.getprop("guildname");
     else
       guildname:=guild.getprop("guildname");
     endif
     SendSysMessage(chr, "You have been accepted to the guild "+guildname+".",3,70);
+  endif
   if(GetObjProperty(chr, "guild_id"))
     SendSysMessage(who,chr.name+" is already in a guild.",3,34);
     sleep(3);

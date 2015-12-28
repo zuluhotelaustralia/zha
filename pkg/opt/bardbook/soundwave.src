@@ -1,0 +1,49 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+include "include/damages";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_ENERGY_BOLT;
+const SPELL_EFFECT_ID		:= FX_SPELL_ENERGY_BOLT;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_ENERGY_BOLT;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_ENERGY_BOLT;
+
+program soundwave( caster, cast_on )
+
+	if(!TryToCast( caster, 4 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	cast_on := CanTargetSpell( caster );
+	if( !cast_on )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	Send_Attack( cast_on, caster );
+
+	PlayMovingEffect(caster,
+                                 cast_on,
+                                 SPELL_EFFECT_ID,
+                                 SPELL_EFFECT_SPEED,
+                                 SPELL_EFFECT_LOOP,
+                                 explode := 0);
+
+	PlaySoundEffect( caster, 0x4CF );
+
+	var skill := GetEffectiveSkill(caster, SKILLID_PROVOCATION);
+	var bard := GetObjProperty(caster, "IsBard");
+	if(bard)
+		skill := CInt(skill*(1.1+(bard/5)));
+	endif
+
+	var dmg := skill/4;
+	ApplyTheDamage( cast_on, caster, dmg, DMGID_PHYSICAL );
+
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram

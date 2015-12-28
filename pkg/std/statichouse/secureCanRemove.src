@@ -1,0 +1,55 @@
+use uo;
+
+include "utility";
+
+program CanRemoveScript(who, container, item, movetype)
+	
+	if ( movetype != MOVETYPE_PLAYER )
+		return 1;
+	endif
+	var top := getTopContainer(container);
+	var houseSerial := GetObjProperty(top, "houseserial");
+	if ( houseSerial )
+		var house := SystemFindObjectBySerial(houseSerial);
+		if (house)
+			
+			var permission := GetObjProperty( container, "permission");
+			case( permission )
+				"owner":
+					if (IsOwner(who, house))
+						return 1;
+					else
+						return 0;
+					endif	
+				
+				"coowner":
+					if (IsOwner(who, house) || IsCoOwner(who, house))
+						return 1;
+					else
+						return 0;
+					endif	
+	
+				"friend":
+					if (IsOwner(who, house) || IsCoOwner(who, house))
+						return 1;
+					else
+						return 0;
+					endif	
+					
+				"public":
+					return 1;
+					
+			endcase
+		endif
+	endif
+	
+	return 1;
+endprogram
+
+function getTopContainer(container)
+	while (container.container)
+		container := container.container;
+	endwhile
+	
+	return container;
+endfunction

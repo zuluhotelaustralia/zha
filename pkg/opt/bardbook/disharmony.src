@@ -1,0 +1,35 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/client";
+
+program disharmony( caster )
+
+	if(!TryToCast( caster, 8 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var bx:=caster.x;
+	var by:=caster.y;
+	var bz:=caster.z;
+	var bard := GetObjProperty( caster, "IsBard" );
+	var range := 3+(bard*3);
+
+	var victims := ListMobilesNearLocation( bx, by, bz, range );
+	
+	foreach mobile in victims
+		if(mobile.isA(POLCLASS_NPC)&& !mobile.enabled("invul"))
+			SetObjProperty(mobile, "originalscript", mobile.script);
+			mobile.script := ":bardbook:disharmonyai";
+			RestartScript(mobile);
+			sleepms(200);
+		endif
+	endforeach
+	
+	PlaySoundEffect( caster, 0xFF );
+
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram

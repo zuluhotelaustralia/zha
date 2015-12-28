@@ -776,7 +776,7 @@ function TakeCurrentSkillLevelInNote( who , skillid )
 				 
 	var i;
 	for( i := 1 ; i <= len( combat_skills ) ; i := i + 1 )
-		if( combat_skills[i] = skillid )
+		if( combat_skills[i] == skillid )
 			break;
 		endif
 	endfor
@@ -792,7 +792,7 @@ function TakeCurrentSkillLevelInNote( who , skillid )
 
 	var rawskill := GetRawSkill( who , skillid );
 	foreach item in ListEquippedItems( who )
-		if( GetObjProperty( item , "skilladv" ) = skillid )
+		if( GetObjProperty( item , "skilladv" ) == skillid )
 			rawskill := rawskill - Cint( GetObjProperty( who , "advamount" + skillid + "s" + item.serial ) );
 		endif
 	endforeach

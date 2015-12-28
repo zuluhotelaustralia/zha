@@ -1,0 +1,52 @@
+use os;
+use uo;
+use cfgfile;
+
+include "include/client";
+
+program processcharm( npc, mult )
+
+var duration := GetObjProperty( npc, "duration" );
+
+sleep(duration/10);
+
+GoWild( npc );
+
+endprogram
+
+
+function GoWild( npc )
+
+var masterserial := GetObjProperty( npc, "master" );
+var npccfg := ReadConfigFile( "npcdesc" );
+var elem := FindConfigElem( npccfg, npc.npctemplate );
+
+var tamedarray:= GetObjProperty(npc.master, "tamed_serials");
+if (!tamedarray)
+	return 0;
+endif
+var temparray:=array;
+foreach ts in tamedarray
+	if (ts!=npc.serial)
+		temparray.append(ts);
+	endif
+endforeach
+if (temparray.size()==0)
+	EraseObjProperty(npc.master, "tamed_serials");
+else
+	SetObjProperty(npc.master, "tamed_serials", temparray);
+endif
+
+
+npc.script := npccfg[npc.npctemplate].script;
+npc.name := npccfg[npc.npctemplate].name;
+PrintTextAbove( npc, npc.name + " can roam free again!" );
+
+npc.setmaster( 0 );
+EraseObjProperty(npc, "master");
+
+
+RestartScript(npc);
+
+endfunction
+

@@ -70,6 +70,8 @@ program cast_darkness( parms )
 	var level	:= ModifyWithMagicEfficiency( caster, 20 + CInt( magery / 15 ) );
 	var duration	:= GetModDuration( caster );
 
+	var perc := magery / 3;
+
 	if( level > 30 )
 		level	 := 30;
 	endif
@@ -95,15 +97,28 @@ program cast_darkness( parms )
 		endif
 	endif
 
+	duration := duration / 100;
+
+	var prot := GetObjProperty( cast_on, "NecroProtection" );
+
+	if( prot )
+		perc := perc / prot;
+		duration := duration / prot;
+	endif
+
 	if( !GetObjProperty( cast_on, "#PermNightSight" ) )
 		cast_on.setlightlevel( level, Resisted( caster, cast_on, circle, duration ) );
         	SetObjProperty( cast_on, "#Blinded", 1 );
+		SetObjProperty( cast_on, "#Bperc", perc );
+		SendSysMessage( caster, "Target is now blinded for " + duration + "seconds, with a miss chance of " + perc + "%");
+		SendSysMessage( cast_on, "You are now blinded for " + duration + "seconds, with a miss chance of " + perc + "%");
         else
         	SendSysMessage( cast_on, "You're protected from the spell effect." );
         endif
        
         EraseObjProperty( caster, "#Casting" );
         sleep( CInt( duration / 2 ) );
-        EraseObjProperty( cast_on, "#Blinded" );
+	  EraseObjProperty( cast_on, "#Blinded" );
+	  EraseObjProperty( cast_on, "#Bperc" );
 
 endprogram

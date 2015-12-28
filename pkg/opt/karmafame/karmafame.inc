@@ -511,9 +511,9 @@ function FameExperiencePointModifier(who, skillid, points)
 		return points;
 	endif
 	
-	//at this stage only skills up to 90 get fame experience point bonus
+	//at this stage only skills up to 129 get fame experience point bonus
 	var skill := GetEffectiveSkill( who, skillid );
-	if (skill>90)
+	if (skill>129)
 		return points;
 	endif	
 	
@@ -523,11 +523,11 @@ function FameExperiencePointModifier(who, skillid, points)
 	var fameindex := GetFameID(fame); //returns 1+ based on whether fame is greater than certain increments.
 
 	//random chance of bonus points based on fame
-	var rand := RandomInt(30)+1; //between 1 and 30
+	var rand := RandomInt(20)+1; //between 1 and 20
 	//e.g. max fameindex is 5 (for over 10000 fame)... 
 	//so if have over 10k fame you have a 5 in 30 chance of bonus points
 	//if between 0 and 1249... its 1 in 30
-	if (rand>fameindex) 
+	if (rand>1) 
 		return points;
 	endif
 	////Broadcast(fameindex + " - " +rand);
@@ -536,13 +536,13 @@ function FameExperiencePointModifier(who, skillid, points)
 	var fame_to_use;
 
 	if (fameindex>=3) //2500+
-		mod:=5;
+		mod:=20;
 		fame_to_use:=160;
 	elseif(fameindex>=2) // 1250-2499
-		mod:=4;
+		mod:=10;
 		fame_to_use:=80;
 	else	//0-1249
-		mod:=3;
+		mod:=5;
 		fame_to_use:=40;
 	endif
 	if (fame - fame_to_use > 0)

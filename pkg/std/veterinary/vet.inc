@@ -179,6 +179,11 @@ function TryToVetRes( character, patient, bandages, npctemplate )
 		return;
 	endif
 	
+	if(CInt(GetObjProperty( patient, "cut" )) == 1)
+		PrintTextAbovePrivate(patient, "*You see that the creature has been cut up and cannot be revived*", character);
+		sleep(1);
+		return;
+	endif
 	//check to make sure that two people dont do this at same time thus spawning many monsters
 	if( ! GetObjProperty( patient, "resattempt" ) )
 		SetObjProperty( patient, "resattempt", 1 );

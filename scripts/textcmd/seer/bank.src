@@ -13,6 +13,8 @@ program open_bank( who )
              var bankbox;
            
              bankbox := FindBankBox( who );
+		var gmdata := {	"bank", who.x, who.y , who.z,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 
              SendOpenSpecialContainer( who, bankbox );
    

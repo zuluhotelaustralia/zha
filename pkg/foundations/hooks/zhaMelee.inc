@@ -1,8 +1,13 @@
 use uo;
+use polsys;
 use util;
 
-//include "include/classes";
+include "include/client";
+include "include/classes";
 include "include/hitscriptinc";
+include "include/random";
+include "include/attributes";
+include ":karmafame:karmafame";
 
 
 function MeleeAttack( attacker, defender ) 
@@ -74,6 +79,8 @@ function CheckHit(attacker, defender, combat_skill_id)
 		points := 1300;
 	endif
 	
+	points:=FameExperiencePointModifier(attacker, combat_skill_id, points);
+	points:=DKSMod(attacker, combat_skill_id, points);
 	//random component
 	var randdiff := RandomDiceRoll("5d12");
 	if (randdiff <=30)
@@ -85,8 +92,8 @@ function CheckHit(attacker, defender, combat_skill_id)
 	//difficulty reduction for dex
 	//difficulty := difficulty - CInt(attacker.dexterity/4);
 	
-	if (difficulty<0)
-		difficulty:=0;
+		if (difficulty<1)
+			difficulty:=1;
 	elseif(difficulty>150)
 		difficulty:=150;
 	endif
@@ -109,4 +116,31 @@ function GetWeaponSkillID(weaponTypeAttribute)
 	*/
 	endif
 	return 43; 
+endfunction
+function DKSMod(attacker, combat_skill_id, points)
+	if( attacker.IsA(POLCLASS_NPC) )	
+		return points;
+	endif
+	//dont do anything if skill set to decrease or locked
+	var skills_state_array   := GetObjProperty( attacker, "SkillsState" );
+	if( !skills_state_array )
+		skills_state_array := array;
+	endif
+	var skill_state := skills_state_array[combat_skill_id+1];
+	if( skill_state == "d" || skill_state == "l" )
+		return points;
+	endif
+	var dks := GetObjProperty(attacker, "dks");
+	if (dks<1)
+		return points;
+	elseif (dks>1)
+		return points;
+	endif
+	//at this stage skills up to 119 raise by DKS
+	var skill := GetEffectiveSkill( attacker, combat_skill_id );
+	if (skill>119)
+		return points;
+	endif
+	var mod := 1.5;
+	return CInt(points*mod);
 endfunction

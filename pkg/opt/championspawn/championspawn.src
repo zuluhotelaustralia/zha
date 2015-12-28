@@ -1,12 +1,14 @@
-/* Champion Spawn                       **
-** Used for Champion Spawn point system **
-** Seravy - seravy@gmail.com            */
+/* Champion Spawn                       			**
+** Used for Champion Spawn point system 			**
+** Seravy - seravy@gmail.com            			**
+** Updated by GIB - jmorland.barrett@gmail.com*/
 
 use basic;
 use uo;
 use util;
 
 include "include/cmdlevel_check";
+include "include/gumps";
 
 program championspawn( who, championSpawn )
 
@@ -23,7 +25,7 @@ program championspawn( who, championSpawn )
 
   if( who.isA(POLCLASS_MOBILE) && !who.isA(POLCLASS_NPC))
     if( who.cmdlevel >= CMDLEVEL_GAME_MASTER )
-      championSpawnControl(who, championSpawn);
+      championSpawnControl(who, championSpawn, 1);
     else
       sendsysmessage( who, "You feel warmth from the stone, reacting from your touch");
     endif
@@ -46,7 +48,6 @@ program championspawn( who, championSpawn )
 
   SetObjProperty(championSpawn, "runningscript", 1);
   set_critical(0);
-  //Broadcast( "Script is now running"); // DEBUG MESSAGE
 
   var resetCounter := GetObjProperty(championSpawn, "resetCounter");
 
@@ -67,6 +68,8 @@ program championspawn( who, championSpawn )
   var spawned := GetObjProperty(championSpawn, "spawned");
   var level := GetObjProperty(championSpawn, "level");
   var waittime := GetObjProperty(championSpawn, "waittime");
+  var gcenabled := GetObjProperty(championSpawn, "gcenable");
+  var gcchance := GetObjProperty(championSpawn, "gcchance");
 
   if (!spawned)
     spawned := {};
@@ -80,17 +83,26 @@ program championspawn( who, championSpawn )
 
   if (!monstersAlive( spawned, championSpawn))
     if (waittime < ReadGameClock())
-
+   
       changeSkulls(level, championSpawn);
 
       dispelSpawn(championSpawn);
 
-      if (level == 6 && GetObjProperty(championSpawn, "nextRunWait"))
+			//RESET BLOCK//
+      if ((!gcenabled || gcenabled == 0) && level == 6 && GetObjProperty(championSpawn, "nextRunWait"))
+        level := 1;
+        SetObjProperty( championSpawn, "level", level);
+        endSeq( championSpawn);
+      elseif (gcenabled == 1 && level == 7 && GetObjProperty(championSpawn, "nextRunWait" ) && GetObjProperty(championSpawn, "gcspawned"  ) == 1)
+        level := 1;
+        SetObjProperty( championSpawn, "level", level);
+        EraseObjProperty( championSpawn, "gcspawned");
+        endSeq( championSpawn);
+      elseif ((gcenabled == 1 && level == 6 && GetObjProperty(championSpawn, "nextRunWait" ) && ( !GetObjProperty(championSpawn, "gcspawned"  ) || GetObjProperty(championSpawn, "gcspawned"  ) != 1 )) && RandomInt(100) > gcchance)
         level := 1;
         SetObjProperty( championSpawn, "level", level);
         endSeq( championSpawn);
       endif
-
       if (setTimer(championSpawn, times, level))
         createMonsters(level, monsters, numbers, championSpawn);
       else
@@ -106,7 +118,6 @@ program championspawn( who, championSpawn )
   endif
 
   EraseObjProperty( championSpawn, "runningscript");
-  //Broadcast( "Script is now finished");
 
 endprogram
 
@@ -116,9 +127,10 @@ endprogram
 function createMonsters( level, monsters, numbers, championSpawn)
   var spawned := {};
   var monsterMade := 0;
-
+  var gctext:= GetObjProperty(championSpawn, "gctext");
+  var gcloot:= GetObjProperty(championSpawn, "gcloot");
   while (monsters[level] == "nothing")
-    if (level >= 5)
+    if (level >= 6)
       if (monsters[1] != "nothing")
         level := 1;
       else
@@ -131,7 +143,7 @@ function createMonsters( level, monsters, numbers, championSpawn)
 
   var spawnLoc := { championSpawn.x, championSpawn.y, championSpawn.z };
   var noLoot := GetObjProperty(championSpawn, "noLoot");
-  for i := 1 to numbers[level]
+  for  i := 1 to numbers[level];
     spawnLoc := getSpawnLocation(championSpawn);
     monsterMade := CreateNpcFromTemplate( monsters[level], spawnLoc[1], spawnLoc[2], spawnLoc[3]);
     if (!monsterMade)
@@ -139,7 +151,7 @@ function createMonsters( level, monsters, numbers, championSpawn)
       if (!monsterMade)
         foreach person in EnumerateOnlineCharacters()
           if (person.cmdlevel > 1)
-            SendSysMessage(person, "Error making the "+i+" Champion Spawn template, '"+monsters[level]+"' at "+championSpawn.x+", "+championSpawn.y+", "+championSpawn.z+". Please Fix!", 3, 38);
+            broadcast("Error making the "+i+" Champion Spawn template, '"+monsters[level]+"' at "+championSpawn.x+", "+championSpawn.y+", "+championSpawn.z+". Please Fix!", 3, 38);
           endif
         endforeach
       else
@@ -147,24 +159,35 @@ function createMonsters( level, monsters, numbers, championSpawn)
       endif
     else
       set_critical(1);
-      if (noLoot)
+      SetObjProperty( monsterMade, "AtDeathScript", ":championspawn:refreshspawns" );
+      SetObjProperty( monsterMade, "championSpawn", championspawn.serial );
+      if (noLoot && level != 6)
         SetObjProperty(monsterMade, "noloot", 1 );
         SetObjProperty(monsterMade, "guardkill", 1 );
       endif
+      if (level == 6)
+      	if (gcloot != 1)
+        	SetObjProperty(monsterMade, "noloot", 1 );
+        	SetObjProperty(monsterMade, "guardkill", 1 );
+        endif
+      	SetObjProperty(championSpawn, "gcspawned", 1 );
+      endif
+      
       SetObjProperty(monsterMade, "untamable", 1 );
-      SetObjProperty( monsterMade, "AtDeathScript", ":championspawn:refreshspawns" );
-      SetObjProperty( monsterMade, "championSpawn", championspawn.serial );
       set_critical(0);
 
       spawned.append(monsterMade.serial);
     endif
-
+    if( level == 6 )
+    	sleepms(500);
+      PrintTextAbove( monsterMade,gctext,3,38 );
+     endif
   endfor
 
   SetObjProperty( championSpawn, "spawned", spawned);
   SetObjProperty( championSpawn, "nextRunWait", level);
 
-  if (level > 5)
+  if (level > 6)
     level := 1;
   else
     level := level + 1;
@@ -233,6 +256,7 @@ endfunction
 ** depending on the level            */
 function changeSkulls(level, championSpawn)
   var skulls := GetObjProperty(championSpawn, "skulls");
+  var tempskull;
   if (!skulls)
     return 0;
   endif
@@ -247,21 +271,24 @@ function changeSkulls(level, championSpawn)
 
   var colours := GetObjProperty(championSpawn, "colours");
   if (!colours)
-    colours := { 0, 1383, 1400 };
+    colours := {{ 0, 1383, 1400 },{ 0, 1383, 1400 },{ 0, 1383, 1400 },{ 0, 1383, 1400 },{ 0, 1383, 1400 }};
   endif
 
   for i := 1 to level // Finished
-    skulls[i].color := colours[2];
+  	tempskull := colours[i];
+    skulls[i].color := tempskull[2];
   endfor
   if (level <= skulls.size())
     for i := level to skulls.size() // To be done
-      skulls[i].color := colours[1];
+  	tempskull := colours[i];
+    skulls[i].color := tempskull[1];
     endfor
   endif
   if (level > 0 && !GetObjProperty(championSpawn, "nextRunWait") && (level <= skulls.size())) // Active
     PlayLightningBoltEffect(skulls[level]);
     PlaySoundEffect( skulls[level], 0x2A );
-    skulls[level].color := colours[3];
+  	tempskull := colours[level];
+    skulls[level].color := tempskull[3];
   endif
 return 1;
 endfunction
@@ -281,8 +308,7 @@ function endSeq(championSpawn)
   if (!endDuration)
     endDuration := 30;
   endif
-
-  if (unlock || (gatedest[1] && gatedest[2]))
+  if (unlock || (cInt(gatedest[1])+cInt(gatedest[2])+cInt(gatedest[3]) > 0))
     var unlockItem;
     var portalGate;
     var destGate;
@@ -296,21 +322,20 @@ function endSeq(championSpawn)
         unlockItem.locked := 0;
       endif
     endif
-
     if (gatedest[1] && gatedest[2])
       set_critical( 1 );
       portalGate := CreateItemAtLocation( championSpawn.x, championSpawn.y, championSpawn.z, 0x0f6c, 1 );
       if (!portalGate) return; endif
-      SetObjProperty( portalGate, "GateDestX", gatedest[1] );
-      SetObjProperty( portalGate, "GateDestY", gatedest[2] );
-      SetObjProperty( portalGate, "GateDestZ", gatedest[3] );
+      SetObjProperty( portalGate, "GateDestX", cInt(gatedest[1]) );
+      SetObjProperty( portalGate, "GateDestY", cInt(gatedest[2]) );
+      SetObjProperty( portalGate, "GateDestZ", cInt(gatedest[3]) );
       SetObjProperty( portalGate, "perma", 1);
       set_critical( 0 );
       PlaySoundEffect( portalGate,  0x020f );
       
-      if (!GetObjProperty(championSpawn, "noReturnPortal"))
+      if (gatedest[4] == 1)
       set_critical( 1 );
-        destGate := CreateItemAtLocation( gatedest[1], gatedest[2], gatedest[3], 0x0f6c, 1 );
+        destGate := CreateItemAtLocation( cInt(gatedest[1]), cInt(gatedest[2]), cInt(gatedest[3]), 0x0f6c, 1 );
         SetObjProperty( destGate, "GateDestX", championSpawn.x );
         SetObjProperty( destGate, "GateDestY", championSpawn.y );
         SetObjProperty( destGate, "GateDestZ", championSpawn.z );
@@ -364,7 +389,8 @@ function endSeq(championSpawn)
       DestroyItem( portalGate );
       DestroyItem( destGate );
     endif
-
+	else
+		sleep( endDuration );
   endif
   
   SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
@@ -377,13 +403,19 @@ endfunction
 function monstersAlive( spawned, championSpawn)
 
   var tempspawns := {};
+  var tempnpc;
+	//broadcast( "lens: "+ cint(spawned.size()));
   foreach spawn in spawned
-    if (SystemFindObjectBySerial(spawn))
-      tempspawns.append(spawn);
+    //broadcast("spawned: "+spawn);
+  	tempnpc := SystemFindObjectBySerial(spawn);
+    if (getobjproperty(tempnpc, "championSpawn") == cint(championSpawn.serial))
+   // broadcast("temp: "+tempnpc.serial);
+      tempspawns.append(tempnpc.serial);
     endif
   endforeach
+	//broadcast( "lent: "+ cint(tempspawns.size()));
 
-  SetObjProperty( championSpawn, "spawned", spawned);
+  SetObjProperty( championSpawn, "spawned", tempspawns);
 
   if (tempspawns.size() <= 0)
     return 0;
@@ -436,8 +468,31 @@ endfunction
 /* Champion Spawn Control Gump          **
 ** Used for managing the Champion Spawn **
 ** point system by setting up cprops etc**
-** Seravy - seravy@gmail.com            */
-function championSpawnControl( who, championSpawn)
+** Seravy - seravy@gmail.com            **
+******************************************
+** Updated by GIB - jono@benme.com.au   */
+function championSpawnControl( who, championSpawn, page)
+
+var page1, page2, page3,page4,page5,page6,page7,page8;
+	case(page)
+		1:
+		page1 := 1;		page2 := 2;		page3 := 3;		page4 := 4;		page5 := 5;		page6 := 6; page7:= 7; page8:= 8;
+		2:
+		page1 := 2;		page2 := 1;		page3 := 3;		page4 := 4;		page5 := 5;		page6 := 6; page7:= 7; page8:= 8;
+		3:
+		page1 := 3;		page2 := 2;		page3 := 1;		page4 := 4;		page5 := 5;		page6 := 6; page7:= 7; page8:= 8;
+		4:
+		page1 := 4;		page2 := 2;		page3 := 3;		page4 := 1;		page5 := 5;		page6 := 6; page7:= 7; page8:= 8;
+		5:
+		page1 := 5;		page2 := 2;		page3 := 3;		page4 := 4;		page5 := 1;		page6 := 6; page7:= 7; page8:= 8;
+		6:
+		page1 := 6;		page2 := 2;		page3 := 3;		page4 := 4;		page5 := 5;		page6 := 1; page7:= 7; page8:= 8;
+		7:
+		page1 := 7;		page2 := 2;		page3 := 3;		page4 := 4;		page5 := 5;		page6 := 6; page7:= 1; page8:= 8;
+		8:
+		page1 := 8;		page2 := 2;		page3 := 3;		page4 := 4;		page5 := 5;		page6 := 6; page7:= 7; page8:= 1;
+	endcase
+	
   var active := GetObjProperty(championSpawn, "active");
   var monsters := GetObjProperty(championSpawn, "monsters");
   var numbers := GetObjProperty(championSpawn, "numbers");
@@ -447,29 +502,82 @@ function championSpawnControl( who, championSpawn)
   var checkLOS := GetObjProperty(championSpawn, "checkLOS");
   var dispel := GetObjProperty(championSpawn, "dispel");
 
+  var gcchance := GetObjProperty(championSpawn, "gcchance");
+  var gcenable := GetObjProperty(championSpawn, "gcenable");
+  var gcloot := GetObjProperty(championSpawn, "gcloot");
+  var gctext := GetObjProperty(championSpawn, "gctext");
   var gatedest := GetObjProperty(championSpawn, "gatedest");
   var unlock := GetObjProperty(championSpawn, "unlock");
   var script := GetObjProperty(championSpawn, "script");
+  var notifiers := GetObjProperty(championSpawn, "skulls");
+  var notifiercolours := GetObjProperty(championSpawn, "colours");
   var endDuration := GetObjProperty(championSpawn, "endDuration");
+  var currentcolours;
+  var monster1, monster2, monster3, monster4, monster5, monster6;
+	var amount1 := 0, amount2 := 0, amount3 := 0, amount4 := 0, amount5 := 0, amount6 := 0;
+	var timer1 := 0, timer2 := 0, timer3 := 0, timer4 := 0, timer5 := 0, timer6 := 0;
+	var notifier1 := 0, notifier2 := 0, notifier3 := 0, notifier4 := 0, notifier5 := 0;
+	var setcolour1 := array{ 0, 1383, 1400 }, setcolour2  := array{ 0, 1383, 1400 }, setcolour3 := array{ 0, 1383, 1400 }, setcolour4 := array{ 0, 1383, 1400 }, setcolour5 := array{ 0, 1383, 1400 };
+	var activeString;
+	var activeColour;
+	var newgctext;
 
 
 if (!monsters || TypeOf(monsters) <> "Array" || monsters.size() < 5)
   monsters := {};
-  for i := 1 to 5
+  for i := 1 to 6
     monsters[i] := "nothing";
+  endfor
+elseif (monsters.size() == 5)
+monsters[6] := "nothing";
+endif
+
+if (!gcenable || gcenable == 0)
+  gcenable := 0;
+  gcchance := 0;
+endif
+
+if (!gctext)
+  gctext := "Who summons me?";
+endif
+
+if (!gcchance)
+  gcchance := 0;
+endif
+
+if (!notifiercolours || TypeOf(notifiercolours) <> "Array" || notifiercolours.size() < 3)
+  notifiercolours := {};
+  for i := 1 to 5
+    notifiercolours[i] := { 0, 1383, 1400 };
+  endfor
+elseif (notifiercolours.size == 3)
+  foreach colour in notifiercolours
+  	currentcolours.append( colour );
+  endforeach
+  notifiercolours := { currentcolours, currentcolours, currentcolours, currentcolours, currentcolours };
+  currentcolours := 0;
+endif
+if (!notifiers || TypeOf(notifiers) <> "Array" || notifiers.size() < 5)
+  notifiers := {};
+  for i := 1 to 5
+    notifiers[i] := 0;
   endfor
 endif
 if (!numbers || TypeOf(numbers) <> "Array" || numbers.size() < 5)
   numbers := {};
-  for i := 1 to 5
-    numbers[i] := 11-(i*2);
+  for i := 1 to 6
+    numbers[i] := 13-(i*2);
   endfor
+elseif (numbers.size() == 5)
+	numbers[6] := 1;
 endif
 if (!times || TypeOf(times) <> "Array" || times.size() < 5)
   times := {};
-  for i := 1 to 5
+  for i := 1 to 6
     times[i] := CInt((i*10)/2);
   endfor
+elseif (times.size() == 5)
+	times[6] := 120;
 endif
 if (!gatedest || TypeOf(gatedest) <> "Array" || gatedest.size() < 3)
   gatedest := {};
@@ -486,8 +594,13 @@ endif
 if (!endDuration)
   endDuration := 0;
 endif
-if (!active)
+if (!active || active == 0 )
   active := 0;
+  activeString := "Activate";
+  activeColour := 38;
+elseif (active == 1)
+  activeString := "Deactivate";
+  activeColour := 63;
 endif
 if (!noLoot)
   noLoot := 0;
@@ -501,189 +614,361 @@ endif
 if (!dispel)
   dispel := 0;
 endif
+if (!gatedest[4])
+  gatedest[4] := 0;
+endif
 
-  var cslayout := {
-                  "nodispose",
-                  "page 0",
-                  "resizepic 100 100 2600 300 400",
-                  "text 145 123 52 0",
-                  "page 1",
-                  "checkbox 120 145 210 211 "+active+" 100",
-                  "text 140 143 0 1",
-                  "text 150 170 5 2",
-                  "text 260 170 5 3",
-                  "text 315 170 5 4",
+	GFInitGump( 10 , 10 );
+	GFPage(0);
+	GFNoDispose();
+	GFResizePic(0, 0, BKGND_STONESLAB, 400, 330);
+	GFCheckerTrans(3, 3, 394, 20); // Top trans
+	GFCheckerTrans(3, 26, 90, 273); // Left Trans
+	GFCheckerTrans(96, 26 , 300, 273); // Right Trans
+	GFCheckerTrans(3, 302, 394, 25); // Bottom Trans
+	GFTextMid(10, 1, 380, 53, "Champion Spawn Control v2.0");
+	
+	GFTextLine(35, 50, 63, "Round 1");
+	GFTextLine(35, 80, 63, "Round 2");
+	GFTextLine(35, 110, 63, "Round 3");
+	GFTextLine(35, 140, 63, "Round 4");
+	GFTextLine(35, 170, 63, "Round 5");
+	GFTextLine(35, 200, 63, "GChampion");
+	GFTextLine(35, 230, 63, "General");
+	GFTextLine(35, 260, 63, "End");
+	GFTextLine(35, 300, activeColour, activeString);
 
-                  // 1
-                  "text 130 190 10 5",
-                  "GumpPic 145 190 2445",
-                  "TextEntry 150 190 95 20 39 0 6",
-                  "GumpPic 250 190 2443",
-                  "TextEntry 255 190 50 20 39 5 7",
-                  "GumpPic 315 190 2443",
-                  "TextEntry 320 190 50 20 39 10 8",
+	
+	var Round1Button := GFButtonID( 20, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var Round2Button := GFButtonID( 20, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var Round3Button := GFButtonID( 20, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var Round4Button := GFButtonID( 20, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var Round5Button := GFButtonID( 20, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var Round6Button := GFButtonID( 20, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var GeneralButton := GFButtonID( 20, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var EndSeqButton := GFButtonID( 20, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var ActivateButton := GFButtonID( 20, 305, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 340, 303, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+	var linecount := 30;
+	
 
-                  // 2
-                  "text 130 210 10 9",
-                  "GumpPic 145 210 2445",
-                  "TextEntry 150 210 95 20 39 1 10",
-                  "GumpPic 250 210 2443",
-                  "TextEntry 255 210 50 20 39 6 11",
-                  "GumpPic 315 210 2443",
-                  "TextEntry 320 210 50 20 39 11 12",
+	GFPage(page1); //Round 1 Control*******************************************************************
+	currentcolours := notifiercolours[1];
+	GFTextLine(100, linecount, 63, "Monster Template:");	
+			linecount := linecount + 15;
+	monster1 := GFTextEntry( 100, linecount, 95, 20, 39, text := monsters[1] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Amount:");	
+			linecount := linecount + 15;
+	amount1 := GFTextEntry( 100, linecount, 95, 20, 39, text := numbers[1] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Time Until Next:");	
+			linecount := linecount + 15;
+	timer1 := GFTextEntry( 100, linecount, 95, 20, 39, text := times[1] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Serial:");	
+			linecount := linecount + 15;
+	notifier1 := GFTextEntry( 100, linecount, 95, 20, 39, text := notifiers[1] );
+  var note1Button := GFButtonID( 180, linecount+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Colours:");
+			linecount := linecount +15;			
+	GFTextLine(100, linecount, 63, "Before:");
+	setcolour1[1] := GFTextEntry( 145, linecount, 65, 20, 39, text := currentcolours[1] );
+	GFTextLine(190, linecount, 63, "During:");
+	setcolour1[2] := GFTextEntry( 235, linecount, 65, 20, 39, text := currentcolours[2] );
+	GFTextLine(295, linecount, 63, "After:");
+	setcolour1[3] := GFTextEntry( 335, linecount, 65, 20, 39, text := currentcolours[3] );
+			linecount := linecount + 25;
+			
+	GFPage(page2); //Round 2 Control*******************************************************************
+	
+	linecount := 30;
+	currentcolours := notifiercolours[2];
+	GFTextLine(100, linecount, 63, "Monster Template:");	
+			linecount := linecount + 15;
+	monster2 := GFTextEntry( 100, linecount, 95, 20, 39, text := monsters[2] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Amount:");	
+			linecount := linecount + 15;
+	amount2 := GFTextEntry( 100, linecount, 95, 20, 39, text := numbers[2] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Time Until Next:");	
+			linecount := linecount + 15;
+	timer2 := GFTextEntry( 100, linecount, 95, 20, 39, text := times[2] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Serial:");	
+			linecount := linecount + 15;
+	notifier2 := GFTextEntry( 100, linecount, 95, 20, 39, text := notifiers[2] );
+  var note2Button := GFButtonID( 180, linecount+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Colours:");
+			linecount := linecount +15;			
+	GFTextLine(100, linecount, 63, "Before:");
+	setcolour2[1] := GFTextEntry( 145, linecount, 65, 20, 39, text := currentcolours[1] );
+	GFTextLine(190, linecount, 63, "During:");
+	setcolour2[2] := GFTextEntry( 235, linecount, 65, 20, 39, text := currentcolours[2] );
+	GFTextLine(295, linecount, 63, "After:");
+	setcolour2[3] := GFTextEntry( 335, linecount, 65, 20, 39, text := currentcolours[3] );
+			linecount := linecount + 25;
+			
+	GFPage(page3); //Round 3 Control*******************************************************************
+	
+	linecount := 30;
+	currentcolours := notifiercolours[3];
+	GFTextLine(100, linecount, 63, "Monster Template:");	
+			linecount := linecount + 15;
+	monster3 := GFTextEntry( 100, linecount, 95, 20, 39, text := monsters[3] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Amount:");	
+			linecount := linecount + 15;
+	amount3 := GFTextEntry( 100, linecount, 95, 20, 39, text := numbers[3] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Time Until Next:");	
+			linecount := linecount + 15;
+	timer3 := GFTextEntry( 100, linecount, 95, 20, 39, text := times[3] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Serial:");	
+			linecount := linecount + 15;
+	notifier3 := GFTextEntry( 100, linecount, 95, 20, 39, text := notifiers[3] );
+  var note3Button := GFButtonID( 180, linecount+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Colours:");
+			linecount := linecount +15;			
+	GFTextLine(100, linecount, 63, "Before:");
+	setcolour3[1] := GFTextEntry( 145, linecount, 65, 20, 39, text := currentcolours[1] );
+	GFTextLine(190, linecount, 63, "During:");
+	setcolour3[2] := GFTextEntry( 235, linecount, 65, 20, 39, text := currentcolours[2] );
+	GFTextLine(295, linecount, 63, "After:");
+	setcolour3[3] := GFTextEntry( 335, linecount, 65, 20, 39, text := currentcolours[3] );
+			linecount := linecount + 25;
+			
+	GFPage(page4); //Round 4 Control*******************************************************************
+	
+	linecount := 30;
+	currentcolours := notifiercolours[4];
+	GFTextLine(100, linecount, 63, "Monster Template:");	
+			linecount := linecount + 15;
+	monster4 := GFTextEntry( 100, linecount, 95, 20, 39, text := monsters[4] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Amount:");	
+			linecount := linecount + 15;
+	amount4 := GFTextEntry( 100, linecount, 95, 20, 39, text := numbers[4] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Time Until Next:");	
+			linecount := linecount + 15;
+	timer4 := GFTextEntry( 100, linecount, 95, 20, 39, text := times[4] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Serial:");	
+			linecount := linecount + 15;
+	notifier4 := GFTextEntry( 100, linecount, 95, 20, 39, text := notifiers[4] );
+  var note4Button := GFButtonID( 180, linecount+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Colours:");
+			linecount := linecount +15;			
+	GFTextLine(100, linecount, 63, "Before:");
+	setcolour4[1] := GFTextEntry( 145, linecount, 65, 20, 39, text := currentcolours[1] );
+	GFTextLine(190, linecount, 63, "During:");
+	setcolour4[2] := GFTextEntry( 235, linecount, 65, 20, 39, text := currentcolours[2] );
+	GFTextLine(295, linecount, 63, "After:");
+	setcolour4[3] := GFTextEntry( 335, linecount, 65, 20, 39, text := currentcolours[3] );
+			linecount := linecount + 25;
+			
+	GFPage(page5); //Round 5 Control*******************************************************************
+	
+	linecount := 30;
+	currentcolours := notifiercolours[5];
+	GFTextLine(100, linecount, 63, "Monster Template:");	
+			linecount := linecount + 15;
+	monster5 := GFTextEntry( 100, linecount, 95, 20, 39, text := monsters[5] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Amount:");	
+			linecount := linecount + 15;
+	amount5 := GFTextEntry( 100, linecount, 95, 20, 39, text := numbers[5] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Time Until Next:");	
+			linecount := linecount + 15;
+	timer5 := GFTextEntry( 100, linecount, 95, 20, 39, text := times[5] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Serial:");	
+			linecount := linecount + 15;
+	notifier5 := GFTextEntry( 100, linecount, 95, 20, 39, text := notifiers[5] );
+  var note5Button := GFButtonID( 180, linecount+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Notifier Colours:");
+			linecount := linecount +15;			
+	GFTextLine(100, linecount, 63, "Before:");
+	setcolour5[1] := GFTextEntry( 145, linecount, 65, 20, 39, text := currentcolours[1] );
+	GFTextLine(190, linecount, 63, "During:");
+	setcolour5[2] := GFTextEntry( 235, linecount, 65, 20, 39, text := currentcolours[2] );
+	GFTextLine(295, linecount, 63, "After:");
+	setcolour5[3] := GFTextEntry( 335, linecount, 65, 20, 39, text := currentcolours[3] );
+			linecount := linecount + 25;
+	
+	GFPage(page6); //Grand Champion Control*******************************************************************
+			
 
-                  // 3
-                  "text 130 230 10 13",
-                  "GumpPic 145 230 2445",
-                  "TextEntry 150 230 95 20 39 2 14",
-                  "GumpPic 250 230 2443",
-                  "TextEntry 255 230 50 20 39 7 15",
-                  "GumpPic 315 230 2443",
-                  "TextEntry 320 230 50 20 39 12 16",
+	linecount := 30;
+	GFTextLine(100, linecount, 63, "Grand Champion(s):");	
+			linecount := linecount + 25;
+	GFTextLine(100, linecount, 63, "Enabled:");	
+  var newgcenable := GFCheckBox( 150, linecount, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(gcenable) );
+			linecount := linecount + 25;
+			
+			
+	GFTextLine(100, linecount, 63, "chance:  (%)");	
+ 	linecount := linecount + 15;
+  var newgcchance := GFTextEntry( 100, linecount, 95, 20, 39, text := gcchance );
+	linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "template:");	
+			linecount := linecount + 15;
+	monster6 := GFTextEntry( 100, linecount, 95, 20, 39, text := monsters[6] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Amount:");	
+			linecount := linecount + 15;
+	amount6 := GFTextEntry( 100, linecount, 95, 20, 39, text := numbers[6] );
+			linecount := linecount + 25;
+			
+	GFTextLine(100, linecount, 63, "Time Until End:");	
+			linecount := linecount + 15;
+	timer6 := GFTextEntry( 100, linecount, 95, 20, 39, text := times[6] );
+			linecount := linecount + 25;
+	GFTextLine(100, linecount, 63, "Loot On:");	
+  var newgcloot := GFCheckBox( 150, linecount, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(gcloot) );
+			linecount := linecount + 25;
+	GFTextLine(100, linecount, 63, "Say on Spawn:");	
+			linecount := linecount + 15;
+	newgctext := GFTextEntry( 100, linecount, 155, 20, 39, text := gctext );
+			linecount := linecount + 25;
+	
+	GFPage(page7); //General Control*******************************************************************
+  	
+  
+	linecount := 30;
+	GFTextLine(100, linecount, 63, "Spawn Radius:");	
+ 	linecount := linecount + 15;
+  var newradius := GFTextEntry( 100, linecount, 95, 20, 39, text := radius );
+	linecount := linecount + 25;
+	
+	GFTextLine(100, linecount, 63, "No Loot:");	
+ 	linecount := linecount + 15;
+  var newnoLoot := GFCheckBox( 100, linecount+3, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(noLoot) );
+	linecount := linecount + 25;
+	
+	GFTextLine(100, linecount, 63, "Check LOS:");	
+ 	linecount := linecount + 15;
+  var newcheckLOS := GFCheckBox( 100, linecount+3, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(checkLOS) );
+	linecount := linecount + 25;
+	GFTextLine(100, linecount, 63, "Dispel Walls:");	
+ 	linecount := linecount + 15;
+  var newdispel := GFTextEntry( 100, linecount, 95, 20, 39, text := dispel );
+	linecount := linecount + 25;
+	
+	GFPage(page8);//End Control*******************************************************************
+	linecount := 30;
+	
+	GFTextLine(100, linecount, 63, "Gate Dest: (XYZ)");	
+ 	linecount := linecount + 15;
+  var newgatedestx := GFTextEntry( 100, linecount, 45, 20, 39, text := gatedest[1] );
+  var newgatedesty := GFTextEntry( 150, linecount, 45, 20, 39, text := gatedest[2] );
+  var newgatedestz := GFTextEntry( 200, linecount, 45, 20, 39, text := gatedest[3] );
+ 	linecount := linecount + 15;
+	GFTextLine(100, linecount, 63, "Return Gate:");	
+ 	linecount := linecount + 15;
+  var newreturngate := GFCheckBox( 100, linecount+3, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(gatedest[4]) ); //return gate
+ 	linecount := linecount + 30;
+ 	
+	GFTextLine(100, linecount, 53, "And/Or");	
+ 	linecount := linecount + 15;
+ 	
+	GFTextLine(100, linecount, 63, "Unlock Container: (Serial)");	
+ 	linecount := linecount + 15;	
+  var newunlock := GFTextEntry( 100, linecount, 45, 20, 39, text := unlock );
+  var unlockButton := GFButtonID( 170, linecount+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+  
+ 	linecount := linecount + 30;	
+	GFTextLine(100, linecount, 53, "And/Or");	
+ 	linecount := linecount + 15;
+	GFTextLine(100, linecount, 63, "Run Script:");	
+ 	linecount := linecount + 15;	
+  var newscript := GFTextEntry( 100, linecount, 45, 20, 39, text := script );
+  
+ 	linecount := linecount + 15;	
+	GFTextLine(100, linecount, 53, "And/Or");	
+  linecount := linecount + 15;
+	GFTextLine(100, linecount, 63, "End Duration: (Time till reset)");	
+ 	linecount := linecount + 15;	
+  var newendDuration := GFTextEntry( 100, linecount, 45, 20, 39, text := endDuration );
 
-                  // 4
-                  "text 130 250 10 17",
-                  "GumpPic 145 250 2445",
-                  "TextEntry 150 250 95 20 39 3 18",
-                  "GumpPic 250 250 2443",
-                  "TextEntry 255 250 50 20 39 8 19",
-                  "GumpPic 315 250 2443",
-                  "TextEntry 320 250 50 20 39 13 20",
-
-                  // 5
-                  "text 130 270 10 21",
-                  "GumpPic 145 270 2445",
-                  "TextEntry 150 270 95 20 39 4 22",
-                  "GumpPic 250 270 2443",
-                  "TextEntry 255 270 50 20 39 9 23",
-                  "GumpPic 315 270 2443",
-                  "TextEntry 320 270 50 20 39 14 24",
-
-                  "text 130 300 10 25", // Radius
-                  "GumpPic 175 300 2443",
-                  "TextEntry 180 300 50 20 39 15 26",
-                  "checkbox 260 300 210 211 "+checkLOS+" 98", // Check LOS
-                  "text 280 303 5 27",
-
-                  "checkbox 130 320 210 211 "+noLoot+" 99", // Monster loot
-                  "text 150 323 5 28",
-
-                  "text 270 325 10 29", // Dispel
-                  "GumpPic 310 325 2443",
-                  "TextEntry 315 325 50 20 39 16 30",
+// **************************************************END OF GUMP**********************************************************
+	var choice := GFSendGump(who);
 
 
-                  "text 130 344 52 31", // End Seq
-                  "GumpPic 190 353 96", // Divider Lines
+monsters := { GFExtractData(monster1.keyid, choice)  , GFExtractData(monster2.keyid, choice) , GFExtractData(monster3.keyid, choice) , GFExtractData(monster4.keyid, choice) , GFExtractData(monster5.keyid, choice) , GFExtractData(monster6.keyid, choice) };
 
-                  "text 130 360 43 32", // Gate Dest
-                  "GumpPic 195 360 2443",
-                  "TextEntry 200 360 50 20 39 17 33",
-                  "GumpPic 253 360 2443",
-                  "TextEntry 258 360 50 20 39 18 34",
-                  "GumpPic 315 360 2443",
-                  "TextEntry 320 360 50 20 39 19 35",
+var thecolour1 := {cInt(GFExtractData(setcolour1[1].keyid, choice)), cInt(GFExtractData(setcolour1[2].keyid, choice)), cInt(GFExtractData(setcolour1[3].keyid, choice))};
+var thecolour2 := {cInt(GFExtractData(setcolour2[1].keyid, choice)), cInt(GFExtractData(setcolour2[2].keyid, choice)), cInt(GFExtractData(setcolour2[3].keyid, choice))};
+var thecolour3 := {cInt(GFExtractData(setcolour3[1].keyid, choice)), cInt(GFExtractData(setcolour3[2].keyid, choice)), cInt(GFExtractData(setcolour3[3].keyid, choice))};
+var thecolour4 := {cInt(GFExtractData(setcolour4[1].keyid, choice)), cInt(GFExtractData(setcolour4[2].keyid, choice)), cInt(GFExtractData(setcolour4[3].keyid, choice))};
+var thecolour5 := {cInt(GFExtractData(setcolour5[1].keyid, choice)), cInt(GFExtractData(setcolour5[2].keyid, choice)), cInt(GFExtractData(setcolour5[3].keyid, choice))};
 
-                  "text 140 375 43 36", // Or/And
-
-                  "text 130 390 43 37", // Unlock
-                  "GumpPic 205 390 2445",
-                  "TextEntry 210 390 95 20 39 20 38",
-
-                  "text 140 405 43 39", // Or/And
-
-                  "text 130 420 43 40", // Script
-                  "GumpPic 205 420 2445",
-                  "TextEntry 210 420 95 20 39 21 41",
-
-                  "text 220 450 43 42", // Duration
-                  "GumpPic 245 450 2443",
-                  "TextEntry 250 450 50 20 39 22 43",
-                  "text 310 450 43 44",
-
-                  "text 145 468 48 45"
-                  };
-
-  var csdata := {
-                "Champion Spawn System",
-                "Enabled",
-                "Monster Temp",
-                "Amount",
-                "Time After",
-                "1",
-                monsters[1],
-                numbers[1],
-                times[1],
-                "2",
-                monsters[2],
-                numbers[2],
-                times[2],
-                "3",
-                monsters[3],
-                numbers[3],
-                times[3],
-                "4",
-                monsters[4],
-                numbers[4],
-                times[4],
-                "5",
-                monsters[5],
-                numbers[5],
-                times[5],
-
-                "Radius",
-                radius,
-                "Check LOS",
-                "No Monster Loot",
-                "Dispel",
-                dispel,
-
-                "End Seq",
-
-                "Gate Dest",
-                gatedest[1],
-                gatedest[2],
-                gatedest[3],
-                "Or/And",
-                "Unlock serial",
-                unlock,
-                "Or/And",
-                "Run Script",
-                script,
-                "For",
-                endDuration,
-                "sec",
-
-                "Version 1, seravy@gmail.com"
-                };
-
-var result := SendDialogGump( who, cslayout, csdata );
-
-monsters := { result[0][4, len(result[0])], result[1][4, len(result[1])], result[2][4, len(result[2])], result[3][4, len(result[3])], result[4][4, len(result[4])] };
 SetObjProperty(championSpawn, "monsters", monsters);
-numbers := { CInt(result[5][4, len(result[5])]), CInt(result[6][4, len(result[6])]), CInt(result[7][4, len(result[7])]), CInt(result[8][4, len(result[8])]), CInt(result[9][4, len(result[9])]) };
+SetObjProperty(championSpawn, "gcchance", cInt(GFExtractData(newgcchance.keyid, choice)));
+SetObjProperty(championSpawn, "gctext", GFExtractData(newgctext.keyid, choice));
+numbers := { cInt(GFExtractData(amount1.keyid, choice)) , cInt(GFExtractData(amount2.keyid, choice)) , cInt(GFExtractData(amount3.keyid, choice)) , cInt(GFExtractData(amount4.keyid, choice)) , cInt(GFExtractData(amount5.keyid, choice)) , cInt(GFExtractData(amount6.keyid, choice)) };
 SetObjProperty(championSpawn, "numbers", numbers);
-times := { CInt(result[10][5, len(result[10])]), CInt(result[11][5, len(result[11])]), CInt(result[12][5, len(result[12])]), CInt(result[13][5, len(result[13])]), CInt(result[14][5, len(result[14])]) };
+notifiers := { cInt(GFExtractData(notifier1.keyid, choice)) , cInt(GFExtractData(notifier2.keyid, choice)) , cInt(GFExtractData(notifier3.keyid, choice)) , cInt(GFExtractData(notifier4.keyid, choice)) , cInt(GFExtractData(notifier5.keyid, choice)) };
+times := { cInt(GFExtractData(timer1.keyid, choice)) , cInt(GFExtractData(timer2.keyid, choice)) , cInt(GFExtractData(timer3.keyid, choice)) , cInt(GFExtractData(timer4.keyid, choice)) , cInt(GFExtractData(timer5.keyid, choice)) , cInt(GFExtractData(timer6.keyid, choice)) };
+gatedest := {cInt(GFExtractData( newgatedestx.keyid, choice)),cInt(GFExtractData( newgatedesty.keyid, choice)),cInt(GFExtractData( newgatedestz.keyid, choice)),cInt(GFExtractData( newreturngate.keyid, choice))};
+SetObjProperty(championSpawn, "skulls", notifiers);
 SetObjProperty(championSpawn, "times", times);
-radius := CInt(result[15][5, len(result[15])]);
-SetObjProperty(championSpawn, "radius", radius);
-dispel := CInt(result[16][5, len(result[16])]);
-SetObjProperty(championSpawn, "dispel", dispel);
-gatedest := { CInt(result[17][5, len(result[17])]), CInt(result[18][5, len(result[18])]), CInt(result[19][5, len(result[19])]) };
+SetObjProperty(championSpawn, "radius", cInt(GFExtractData(newradius.keyid, choice)));
+SetObjProperty(championSpawn, "dispel", cInt(GFExtractData(newdispel.keyid, choice)));
+notifiercolours := {thecolour1, thecolour2, thecolour3, thecolour4, thecolour5};
+SetObjProperty(championSpawn, "colours", notifiercolours);
 SetObjProperty(championSpawn, "gatedest", gatedest);
-unlock := CInt(result[20][5, len(result[20])]);
-SetObjProperty(championSpawn, "unlock", unlock);
-script := result[21][5, len(result[21])];
-SetObjProperty(championSpawn, "script", script);
-endDuration := CInt(result[22][5, len(result[22])]);
-SetObjProperty(championSpawn, "endDuration", endDuration);
+SetObjProperty(championSpawn, "unlock", cInt(GFExtractData(newunlock.keyid, choice)));
+SetObjProperty(championSpawn, "script", GFExtractData(newscript.keyid, choice));
+SetObjProperty(championSpawn, "endDuration", cint(GFExtractData(newendDuration.keyid, choice)));
 
-if (result[98])
+if (choice[newgcenable.keyid])
+  SetObjProperty(championSpawn, "gcenable", 1);
+else
+  SetObjProperty(championSpawn, "gcenable", 0);
+endif 
+if (choice[newgcloot.keyid])
+  SetObjProperty(championSpawn, "gcloot", 1);
+else
+  SetObjProperty(championSpawn, "gcloot", 0);
+endif 
+if (choice[newcheckLOS.keyid])
   SetObjProperty(championSpawn, "checkLOS", 1);
 else
   SetObjProperty(championSpawn, "checkLOS", 0);
 endif  
-if (result[99])
+if (choice[newnoLoot.keyid])
   SetObjProperty(championSpawn, "noLoot", 1);
 else
   SetObjProperty(championSpawn, "noLoot", 0);
@@ -691,16 +976,79 @@ endif
 
 SetObjProperty( championSpawn, "LFucker", who.name+who.serial);
 
-if (result[100])
-  SetObjProperty(championSpawn, "active", 1);
-  SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
-  sendsysmessage( who, "Champion Spawn is now enabled");
-  return 1;
-else
-  SetObjProperty(championSpawn, "active", 0);
-  sendsysmessage( who, "Champion Spawn is disabled");
-  resetSpawn( championSpawn);
-  return 0;
+if (choice[Round1Button.keyid])
+  championSpawnControl( who, championSpawn, 1);
+elseif (choice[Round2Button.keyid])
+  championSpawnControl( who, championSpawn, 2);
+elseif (choice[Round3Button.keyid])
+  championSpawnControl( who, championSpawn, 3);
+elseif (choice[Round4Button.keyid])
+  championSpawnControl( who, championSpawn, 4);
+elseif (choice[Round5Button.keyid])
+  championSpawnControl( who, championSpawn, 5);
+elseif (choice[Round6Button.keyid])
+  championSpawnControl( who, championSpawn, 6);
+elseif (choice[GeneralButton.keyid])
+  championSpawnControl( who, championSpawn, 7);
+elseif (choice[EndSeqButton.keyid])
+  championSpawnControl( who, championSpawn, 8);
+elseif (choice[note1Button.keyid])
+   sendsysmessage( who, "Target a new first notifier.");
+  var new1target := target(who);
+  var newnotifiers := GetObjProperty(championSpawn, "skulls");
+  newnotifiers[1] := new1target.serial;
+  SetObjProperty( championSpawn, "skulls", newnotifiers);
+  championSpawnControl( who, championSpawn, 1);
+elseif (choice[note2Button.keyid])
+   sendsysmessage( who, "Target a new second notifier.");
+  var new2target := target(who);
+  var newnotifiers := GetObjProperty(championSpawn, "skulls");
+  newnotifiers[2] := new2target.serial;
+  SetObjProperty( championSpawn, "skulls", newnotifiers);
+  championSpawnControl( who, championSpawn, 2);
+elseif (choice[note3Button.keyid])
+   sendsysmessage( who, "Target a new third notifier.");
+  var new3target := target(who);
+  var newnotifiers := GetObjProperty(championSpawn, "skulls");
+  newnotifiers[3] := new3target.serial;
+  SetObjProperty( championSpawn, "skulls", newnotifiers);
+  championSpawnControl( who, championSpawn, 3);
+elseif (choice[note4Button.keyid])
+   sendsysmessage( who, "Target a new fourth notifier.");
+  var new4target := target(who);
+  var newnotifiers := GetObjProperty(championSpawn, "skulls");
+  newnotifiers[4] := new4target.serial;
+  SetObjProperty( championSpawn, "skulls", newnotifiers);
+  championSpawnControl( who, championSpawn, 4);
+elseif (choice[note5Button.keyid])
+   sendsysmessage( who, "Target a new fifth notifier.");
+  var new5target := target(who);
+  var newnotifiers := GetObjProperty(championSpawn, "skulls");
+  newnotifiers[5] := new5target.serial;
+  SetObjProperty( championSpawn, "skulls", newnotifiers);
+  championSpawnControl( who, championSpawn, 5);
+elseif (choice[unlockButton.keyid])
+  var newunlocktarget := target(who);
+  SetObjProperty( championSpawn, "unlock", newunlocktarget.serial);
+  championSpawnControl( who, championSpawn, 8);
+elseif (choice[ActivateButton.keyid])
+  if (!active || active == 0 )
+   SetObjProperty(championSpawn, "active", 1);
+   SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+   sendsysmessage( who, "Champion Spawn is enabled");
+   championSpawnControl( who, championSpawn, 1);
+   return 1;
+  elseif (active == 1)
+   SetObjProperty(championSpawn, "active", 0);
+   sendsysmessage( who, "Champion Spawn is disabled");
+   resetSpawn( championSpawn);
+   championSpawnControl( who, championSpawn, 1);
+   return 0;
+  endif
+elseif (choice[ExitButton.keyid])
+   SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+   sendsysmessage( who, "Goodbye.");
+   return 0;
 endif
 
 endfunction

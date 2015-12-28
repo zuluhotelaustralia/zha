@@ -1,0 +1,166 @@
+use uo;
+use os;
+
+include "include/gumps";
+include "include/yesno";
+
+program send_get_gump(who)
+
+		SetDefaultBags(who);
+		return;
+
+endprogram
+
+
+function SetDefaultBags(who)
+
+	SendGump(who);
+	return;
+	
+endfunction
+
+
+function SendGump(who)
+
+	var reagcolour 		:= 38;
+	var pagancolour 	:= 38;
+	var ammocolour 		:= 38;
+	var gemscolour 		:= 38;
+	var scrollscolour := 38;
+	var goldcolour 		:= 38;
+	var mapscolour 		:= 38;
+	var allcolour 		:= 38;
+
+
+	var bagarray:=GetObjProperty(who, "DefaultBag");
+	if (!bagarray)
+		bagarray := {};
+	endif
+	
+	if(bagarray[1])
+		reagcolour := 63 ;
+	endif
+	if(bagarray[2])
+		pagancolour := 63 ;
+	endif
+	if(bagarray[3])
+		ammocolour := 63 ;
+	endif
+	if(bagarray[4])
+		gemscolour := 63 ;
+	endif
+	if(bagarray[5])
+		scrollscolour := 63 ;
+	endif
+	if(bagarray[6])
+		goldcolour := 63 ;
+	endif
+	if(bagarray[7])
+		mapscolour := 63 ;
+	endif
+	if(bagarray[5] && bagarray[4] && bagarray[3] && bagarray[2] && bagarray[1] && bagarray[6] && bagarray[7])
+		allcolour := 63 ;
+	endif
+
+	GFInitGump( 10 , 10 );
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_STONESLAB, 400, 330);
+	GFCheckerTrans(3, 3, 394, 20); // Top trans
+	GFCheckerTrans(3, 26, 195, 273); // Left Trans
+	GFCheckerTrans(201, 26 , 195, 273); // Right Trans
+	GFCheckerTrans(3, 302, 394, 25); // Bottom Trans
+	GFTextMid(10, 1, 380, 53, "Set Get Bags");
+
+	//Left Menu
+	GFTextLine(35, 50, reagcolour, "Reags");
+	var reagsButton := GFButtonID( 20, 53, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 70, pagancolour, "Pagans");
+	var pagansButton := GFButtonID( 20, 73, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 100, ammocolour, "Ammo");
+	var ammoButton := GFButtonID( 20, 103, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 130, gemscolour, "Gems");
+	var gemsButton := GFButtonID( 20, 133, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 160, scrollscolour, "Scrolls");
+	var scrollsButton := GFButtonID( 20, 163, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 190, goldcolour, "Gold");
+	var goldButton := GFButtonID( 20, 193, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 220, mapscolour, "Maps");
+	var mapsButton := GFButtonID( 20, 223, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(35, 250, allcolour, "All");
+	var allButton := GFButtonID( 20, 253, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	//Right Text
+	GFTextMid(220, 30, 185, 53, "Use this page to set");
+	GFTextMid(220, 47, 185, 53, "your catch bags.");
+	GFTextMid(220, 64, 185, 53, "Bag name will be green if");
+	GFTextMid(220, 81, 185, 53, "set and red if unset.");
+	GFTextMid(220, 115, 185, 53, "Using all will set all");
+	GFTextMid(220, 132, 185, 53, "items to the same bag.");
+
+	//Bottom Menu
+	GFTextLine(315, 305, 38, "Exit");
+	var exitGMGumpbutton  := GFButtonID( 300, 308, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+	
+	if (choice[reagsButton.keyid])
+		SetDefaultBag(who, "reags");
+		SendGump(who);
+	elseif (choice[pagansButton.keyid])
+		SetDefaultBag(who, "pagans");
+		SendGump(who);
+	elseif (choice[ammoButton.keyid])
+		SetDefaultBag(who, "ammo");
+		SendGump(who);
+	elseif (choice[gemsButton.keyid])
+		SetDefaultBag(who, "gems");
+		SendGump(who);
+	elseif (choice[scrollsButton.keyid])
+		SetDefaultBag(who, "scrolls");
+		SendGump(who);
+	elseif (choice[goldButton.keyid])
+		SetDefaultBag(who, "gold");
+		SendGump(who);
+	elseif (choice[mapsButton.keyid])
+		SetDefaultBag(who, "maps");
+		SendGump(who);
+	elseif (choice[allButton.keyid])
+		SetDefaultBag(who, "all");
+		SendGump(who);
+	endif
+endfunction
+
+function SetDefaultBag(who, type)
+
+	SendSysMessage(who, "Target a bag/backpack/pouch to set for "+type);
+	var bag:= Target(who);
+	if (!bag)
+		SendSysMessage(who, "Cancelled");
+		return;
+	elseif (bag.container!=who.backpack)
+		SendSysMessage(who, "The container must be in your backpack");
+		return;
+	elseif (bag.graphic != 0xe75 && bag.graphic != 0xe76 && bag.graphic != 0xe79)
+		SendSysMessage(who, "Container must be a bag, backpack or pouch!");
+		return;
+	endif
+	
+	var bagarray:=GetObjProperty(who, "DefaultBag");
+	if (!bagarray)
+		bagarray := {};
+	endif
+	
+	case type
+			"reags":		bagarray[1] := bag.serial;
+			"pagans": 	bagarray[2] := bag.serial;
+			"ammo":			bagarray[3] := bag.serial;
+			"gems":			bagarray[4] := bag.serial;
+			"scrolls":	bagarray[5] := bag.serial;
+			"gold":			bagarray[6] := bag.serial;
+			"maps":			bagarray[7] := bag.serial;
+			"all":			bagarray 		:= {bag.serial,bag.serial,bag.serial,bag.serial,bag.serial,bag.serial,bag.serial};
+	endcase
+
+			SetObjProperty(who, "DefaultBag", bagarray);
+	
+endfunction

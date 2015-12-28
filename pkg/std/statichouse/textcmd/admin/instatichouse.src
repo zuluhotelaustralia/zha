@@ -1,0 +1,18 @@
+use cfgfile;
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/statichouses";
+
+
+program instatichouse(character)
+	var house := IsInStaticHouse(character.x, character.y, character.z);
+	
+	if(house)
+		SendSysmessage(character, "You are inside the house named: " + GetObjProperty(house, "HouseName"));
+	else
+		SendSysMessage(character, "You are not inside any static house.");
+	endif
+endprogram

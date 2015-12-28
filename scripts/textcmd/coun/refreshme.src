@@ -14,6 +14,9 @@ program textcmd_refreshme( who )
 		return 0;
 	endif
 	
+		var gmdata := {	"refreshme", "na", "na", "na","concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
+	
     SetHp(who, GetMaxHp(who));
     SetMana(who, GetMaxMana(who));
     SetStamina(who, GetMaxStamina(who));

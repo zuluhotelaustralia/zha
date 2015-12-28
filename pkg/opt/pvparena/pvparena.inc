@@ -128,6 +128,8 @@ function cleanup(stone, fightactive := 1)
 	
 	EraseObjProperty(stone, PVPARENA_MEMBERS);
 	EraseObjProperty(stone, PVPARENA_ACTIVE);
+	EraseObjProperty(stone, "team1size");
+	EraseObjProperty(stone, "team2size");
 endfunction
 
 // This function determines whether or not a player can join the battle.

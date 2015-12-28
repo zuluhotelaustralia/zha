@@ -39,6 +39,7 @@ program spell_resurrect( parms )
 		endif
 	endif
 	
+	if (cast_on.multi.serial == caster.multi.serial)
 	if (checkIfGhostNearHouseDoor(cast_on))
 		SendSysMessage(caster, "Your magic does not work near house doors!");
 		return;
@@ -79,4 +80,9 @@ program spell_resurrect( parms )
 		ResurrectMobile( cast_on, caster );
 	endif
 
+	else
+	SendSysMessage(caster, "Your magic cannot reach the patient.");
+	return;
+	endif
+	return;
 endprogram

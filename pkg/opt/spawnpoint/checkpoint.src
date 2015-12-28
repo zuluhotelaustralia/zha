@@ -428,6 +428,12 @@ function CreateSpawnPointNpc( byref point, byref template, byref pt_data )
 		return critter;
 	endif
 
+        if(getobjproperty(point, "QuestStoneSerial"))
+                 setobjproperty(critter, "QuestStoneSerial", getobjproperty(point, "QuestStoneSerial"));
+        endif
+        If(getobjproperty(point, "SetQuestPointReward"))
+                 setobjproperty(critter, "SetQuestPointReward", getobjproperty(point, "SetQuestPointReward"));
+        endif
 	critter.hidden := 1;
 	var appear := CInt(pt_data[4]);
 	if( appear )

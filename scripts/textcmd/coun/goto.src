@@ -13,6 +13,8 @@ program textcmd_goto( character, whom )
 	whom := upper( whom );
 	var chr := MakeAndProcessGump( character,whom);
 	if( chr )
+	var data := {	"goto", cstr(chr.name), chr.serial, "na", chr.x+", "+chr.y+", "+chr.z,"concealed: "+character.concealed,"na",cstr(whom)};
+	logcommand(character, data);
 		MoveCharacterToLocation( character, chr.x, chr.y, chr.z, MOVECHAR_FORCELOCATION );
 		ShowFlame( character );
 	endif

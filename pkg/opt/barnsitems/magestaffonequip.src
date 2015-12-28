@@ -5,8 +5,8 @@ use uo;
 use os;
 
 program magestaff(who, staff) 
-	if (GetObjProperty(who, "IsMage")<7)
-		SendSysMessage(who, "A Staff of the Magi can only be equipped by a level 7 mage.",3,53);
+	if (GetObjProperty(who, "IsMage")<4)
+		SendSysMessage(who, "A Staff of the Magi can only be equipped by a level 4 mage.",3,53);
 		return 0;
 	endif
 	SendSysMessage(who, "The staff whispers: Master, to find out how to use me, say 'magestaff help'",3,53);

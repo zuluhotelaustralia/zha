@@ -20,6 +20,9 @@ program textcmd_kill( who )
 			RevokePrivilege( mob, "invul" );
 			SetObjProperty( mob, "guardkill", 1);
 			ApplyRawDamage( mob, CInt(GetHp(mob)+3) );
+			
+		var gmdata := {	"kill", mob.name, mob.serial , "x: "+mob.x+" y: "+mob.y+" z: "+mob.z,"concealed: "+who.concealed,"na","na"};
+		logcommand(who, gmdata);
 		else
 			SendSysMessage( who, "That Tickles!" );
 		endif

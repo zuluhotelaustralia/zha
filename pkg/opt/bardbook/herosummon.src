@@ -1,0 +1,86 @@
+use uo;
+use os;
+use basic;
+
+include "include/npcbackpacks";
+include "include/attributes";
+include "include/client";
+
+program summon_creature( parms )
+
+	var caster		:= parms[1];
+	var npctemplate	:= parms[2];
+	var cast_loc		:= parms[3];
+	var sfx		:= parms[4];
+	var delay		:= parms[5];
+
+	var music		:= GetEffectiveSkill( caster, SKILLID_MUSICIANSHIP);
+	var bard		:= GetObjProperty( caster, "IsBard");
+
+	if( delay )
+		sleep( delay );
+	endif
+
+	var duration		:= music;
+	if(bard)
+		duration := music*bard;
+	endif
+
+	PlaySoundEffect( caster, sfx );
+
+	Detach();
+
+	var thecritter := CreateNpcFromTemplate( npctemplate, CInt(cast_loc.x), CInt(cast_loc.y), CInt(cast_loc.z) );
+
+	SetObjProperty( thecritter, "master", caster.serial );
+	SetObjProperty( thecritter, "noloot", 1 );
+	SetObjProperty( thecritter, "summoned", 1 );
+	thecritter.setmaster( caster );
+	thecritter.script := "tamed";
+	SetObjProperty( thecritter, "script", thecritter.script );
+	RestartScript( thecritter );
+
+	set_critical( 1 );
+
+	var power	:= 1+(bard/10);
+	var str	:= GetStrength(thecritter);
+	var int	:= GetIntelligence(thecritter);
+	var dex	:= GetDexterity(thecritter);
+
+	SetBaseStrength(thecritter, CInt(str * power) );
+	SetBaseIntelligence(thecritter, CInt(int * power) );
+	SetBaseDexterity(thecritter, CInt(dex * power) );
+
+	SetHp(thecritter, GetMaxHp(thecritter));
+	SetMana(thecritter, GetMaxMana(thecritter));
+	SetStamina(thecritter, GetMaxStamina(thecritter));
+
+	for i := 0 to SKILLID__HIGHEST
+		if( i != SKILLID_MAGICRESISTANCE )
+			var initskill := GetEffectiveSkill( thecritter, i );
+			if( initskill )
+				SetBaseSkill( thecritter, i, initskill * power / 100 );
+			endif
+		else
+			SetBaseSkill( thecritter, i, music );
+		endif
+	endfor
+
+	set_critical( 0 );
+
+	RestartScript( thecritter );
+
+	sleep( duration );
+
+	PlaySoundEffect( thecritter, 0x01fa );
+	PlayStationaryEffect( CInt(thecritter.x), CInt(thecritter.y), CInt(thecritter.z), 0x3728, 0xa, 0xa );
+	var backpack := FindExistingPack( thecritter.serial );
+	if( backpack )
+		foreach item in EnumerateItemsInContainer( backpack );
+  			MoveItemToLocation( item, thecritter.x, thecritter.y, thecritter.z, MOVEITEM_FORCELOCATION );
+		endforeach
+	endif
+	MoveCharacterToLocation( thecritter, 0, 0, 0, MOVECHAR_FORCELOCATION );
+	ApplyRawDamage(thecritter, GetHp(thecritter) + 3);
+
+endprogram
