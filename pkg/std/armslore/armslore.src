@@ -100,6 +100,9 @@ function EvaluateArmor( who, item )
 	endif
 
 	SendSysMessage( who, "This " + TruncateArticle(item.desc) + " " + a_desc + " and " + c_desc );
+	if( GetObjProperty( item, "FortifiedBy" ) && GetObjProperty( item, "BaseName" ) )
+		SendSysMessage(who, "The item also seems to have been fortified with a " + TruncateArticle( GetObjProperty( item, "BaseName" ) ) );
+	endif
 
 endfunction
 

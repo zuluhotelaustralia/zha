@@ -1,0 +1,99 @@
+use uo;
+use os;
+use math;
+use basic;
+use cfgfile;
+
+include ":bardbook:bardbook";
+
+program play (who, text)
+			
+	set_critical(1);
+	who.hidden := 0;
+	
+	if(!who.backpack || who.dead)
+		return 0;
+	endif
+	
+	
+	if( !text )
+		sendsysmessage(who, "Correct use .play <song>");
+		return;
+	endif
+	
+		var songnames := {
+		"Minstrels Journey",	// Chorus
+		"Companionship",
+		"Charm",
+		"Sound Wave",
+		"Song of Endurance",
+		"Song of Recovery",
+		"Song of Peace",
+		"Disharmony",
+		"The Parade",		// Performance
+		"The Fortress",
+		"The Hero",
+		"Mesmerize",
+		"Revival",
+		"Sound Barrier",
+		"Stunning Silence",
+		"Chaos"
+	};
+	
+	var validsong := 1;
+	
+	foreach song in songnames
+		if(text == song)
+			break;
+		endif
+		validsong := validsong + 1;
+	endforeach
+	
+	if( validsong >= 17)
+		sendsysmessage(who, "That is not a valid song name.");
+		return;
+	endif
+	
+	var book := FindObjtypeInContainer( who.backpack, 0xC100 );
+	if( !book )
+		sendsysmessage(who, "The book has to be in your backpack. This command cannot be used with scrolls.");
+	endif
+	
+	var hassong := 0;
+	var bits := { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+	var greater := CInt(GetObjProperty(book,"Greater"));
+	var lesser  := CInt(GetObjProperty(book,"Lesser"));
+	var songid := 0;
+
+	if (validsong <= 8)
+		if( lesser & bits[validsong] )
+			hassong := validsong;
+		endif
+	elseif( validsong > 8)
+		if( greater & bits[validsong / 2] )
+			hassong := validsong;
+		endif
+	else
+		sendsysmessage(who, "Something went terribly wrong.");
+	endif
+	
+	if( hassong == 0 )
+		sendsysmessage(who, "You don't have that song in your book.");
+	else
+		songid := hassong;
+	endif
+	
+var song := GetScript( songid );
+
+	if( GetObjProperty( book, "CastingOpts" ) )
+		SetObjProperty( who, "CastingOpts", GetObjProperty( book, "CastingOpts" ) );
+	endif
+
+	SetObjProperty( who, "#Casting", 1 );
+
+	start_script( song, who );
+	
+	while( GetObjProperty( who, "#Casting" ) )
+		sleepms( 500 );
+	endwhile
+endprogram

@@ -53,15 +53,10 @@ program cast_bless( parms )
 	if (GetGlobalProperty("traitors"))
 		CheckTraitor(caster, cast_on);
 	endif
-		
+
 	var mod_amount := GetModAmount( caster );
 	var duration := GetModDuration( caster );
-	if( CanMod( cast_on, "all" ) )
-		DoTempMod( cast_on, "all", mod_amount, duration );
-	else
-		SendSysMessage( caster, "Already under the influence!" );
-		return;
-	endif	
+	
 	var temptime := duration/60;
 	var timestr;
 	var timeleft := duration%60;	
@@ -85,6 +80,11 @@ program cast_bless( parms )
 	endif
 
 
+	if( CanMod( cast_on, "all" ) )
+		DoTempMod( cast_on, "all", mod_amount, duration );
+	else
+		SendSysMessage( caster, "Already under the influence!" );
+	endif
 	if (caster.serial == cast_on.serial)
 	   SendSysMessage( caster, "You have blessed yourself for " + mod_amount +" points. This will last for " + timestr+".",3,53 );
 	else

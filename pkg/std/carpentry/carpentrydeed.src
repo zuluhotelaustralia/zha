@@ -6,6 +6,7 @@ include "util/key";
 include "include/attributes";
 include "include/objtype";
 include "include/yesno";
+include "include/statichouses";
 
 const UOBJECT_DOORS_START	:= 0x0675;
 const UOBJECT_DOORS_END		:= 0x06f4;
@@ -48,15 +49,16 @@ program place_deed( who, deed )
 	endif
 
 	var playerhouse := who.multi;
-
+	var in_static := IsInStaticHouse( start.x, start.y, start.z );
 	var in_house	:= element.InHouse;
 	if( in_house )
-		if( !playerhouse  )
+		if( !playerhouse && !in_static  )
 			SendSysMessage( who, "You have to be in your house to place this item." );
 			return;
 		endif
 
-		if( GetObjProperty( who.multi, "ownerserial" ) != who.serial )
+		if( (GetObjProperty( who.multi, "ownerserial" ) != who.serial) && !IsStaticOwner( who, in_static))
+			if( !IsStaticCoOwner( who, in_static))
 			var co_owners := {};
 			var i;
 			for( i := 1; i <= 5; i := i + 1 )
@@ -70,7 +72,7 @@ program place_deed( who, deed )
 				return;
 			endif
 		endif
-
+		endif
 	endif
 
 	var movable	 := element.ObjMovable;
@@ -103,6 +105,9 @@ program place_deed( who, deed )
 
 	var the_item;
 	for( i := 1; i <= len(items); i := i + 1 )
+		if(( i != 1) && (!the_item))
+			return;
+		endif
 		var obj	:= CInt(  items[i] ) + objtypemod;
 		var x_mod	:= CInt( x_mods[i] );
 		var y_mod	:= CInt( y_mods[i] );
@@ -123,7 +128,16 @@ program place_deed( who, deed )
 	
 		the_item := CreateItemAtLocation( start.x + x_mod, start.y + y_mod, start.z, obj, 1 );
 
-		if (the_item.multi.serial != playerhouse.serial)
+		if( !the_item )
+			SendSysMessage( who, "You don't have enough space to place the item." );
+			SendSysMessage( who, "You must select an area free of any others item." );
+			foreach thingie in created
+				DestroyItem( thingie );
+				//SendSysMessage( who, "2");
+			endforeach
+			return;
+		endif
+		if ((the_item.multi.serial != playerhouse.serial) && ( !IsInStaticHouse(the_item.x, the_item.y, the_item.z)))
 			//Broadcast(the_item.multi);
 			//Broadcast(playerhouse);
 			SendSysMessage( who, "This must be placed within your house." );

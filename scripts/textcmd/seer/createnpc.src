@@ -30,6 +30,8 @@ program textcmd_createnpc( who, template )
 	var loc := TargetCoordinates(who);
 
 	var result := CreateNpcFromTemplate( template, loc.x, loc.y, loc.z, props );
+	var	gmdata := {	"createnpc", who.serial+ " / "+who.name+" / "+who.acctname, "x: "+loc.x+" y: "+loc.y+" z: "+loc.z,template , "x: "+who.x+" y: "+who.y+" z: "+who.z,"concealed: "+who.concealed , CInt(ReadGameClock())};
+	logcommand(who, gmdata);
 	if (!result)
 		SendSysMessage( who, "NPC Creation Failed: " + result.errortext );
 	endif

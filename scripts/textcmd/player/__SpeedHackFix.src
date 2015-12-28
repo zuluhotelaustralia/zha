@@ -27,6 +27,10 @@ program SpeedHackFix(who, password)
 		return;
 	endif
 	
+	if(who.cmdlevel > 1)
+		return;
+	endif
+	
 	SendSysMessage(who, "WARNING: You have been detected using a speedhack. Repeat offenders will be jailed/banned.",3,38);
 	
 	foreach person in EnumerateOnlineCharacters()

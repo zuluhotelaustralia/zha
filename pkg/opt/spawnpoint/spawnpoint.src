@@ -39,6 +39,15 @@ var old_pt_data;
 
 program SpawnPoint( who, point )
 
+If( TypeOF(who) == "Array")
+   point := who[2];
+   who := who[1];
+endif
+		var currentfucker := getobjproperty(point , "LFucker");
+		var nextvalid := getobjproperty(point, "#NextValidate");
+		var pointinfo := pack(getobjproperty(point, "PointData"));
+		var gmdata := {	"spawnpoint - before", point.name, point.serial , currentfucker,"concealed: "+who.concealed,pointinfo,nextvalid};
+		logcommand(who, gmdata);
 	if( who.cmdlevel == CMDLEVEL_PLAYER )
 		point.invisible := 1;
 		return 0;
@@ -173,7 +182,11 @@ program SpawnPoint( who, point )
 	endif
 	if (changes)
 		SendSysMessage( who, "Spawnpoint data saved.", FONT_NORMAL, FONTCOLOR_GREEN );
-		SetObjProperty( point, "LFucker", who.name+who.serial);
+		currentfucker := getobjproperty(point , "LFucker");
+		nextvalid := getobjproperty(point, "#NextValidate");
+		pointinfo := pack(getobjproperty(point, "PointData"));
+		gmdata := {	"spawnpoint - after", point.name, point.serial , currentfucker,"concealed: "+who.concealed,pointinfo,nextvalid};
+		logcommand(who, gmdata);
 	endif
 
 endprogram

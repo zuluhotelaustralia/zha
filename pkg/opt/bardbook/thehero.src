@@ -1,0 +1,23 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/client";
+
+program thehero( caster )
+
+	if(!TryToCast( caster, 11 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	var cast_loc := CanTargetArea( caster );
+	if (!cast_loc)
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	EraseObjProperty( caster, "#Casting" );
+	SummonCreature( caster, "thehero", cast_loc );
+
+endprogram

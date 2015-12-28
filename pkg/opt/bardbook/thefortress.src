@@ -1,0 +1,124 @@
+use os;
+use uo;
+
+include "bardbook";
+include "include/attributes";
+include "include/objtype";
+include "include/client";
+include "include/random";
+
+program thefortress( caster )
+
+	if(!TryToCast( caster, 10 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var fields1 := {};
+	var fields2 := {};
+	var fields3 := {};
+	var fields4 := {};
+	var duration;
+
+	var listeners := {};
+	var sufferers := {};
+
+	var x := caster.x;
+	var y := caster.y;
+	var z := caster.z;
+	var i;
+
+	sleep(2);
+	
+	fields1:= CreateNorthSouthField(caster, UOBJ_STONEWALL_NS, x , y+2, z, 4);
+	for (i := 1; i <= 5; i := i + 1)
+        	PlaySoundEffect(fields1[i], 0x476);
+	endfor
+
+	sleep(2);
+
+	fields2:= CreateNorthSouthField(caster, UOBJ_STONEWALL_NS, x, y-2, z, 4);
+	for (i := 1; i <= 5; i := i + 1)
+        	PlaySoundEffect(fields2[i], 0x476);
+	endfor  
+   
+	sleep(2);
+
+	fields3:= CreateEastWestField(caster, UOBJ_STONEWALL_EW, x+2, y, z, 4);
+	for (i := 1; i <= 5; i := i + 1)
+        	PlaySoundEffect(fields3[i], 0x476);
+	endfor
+     
+	sleep(2);
+
+	fields4:= CreateEastWestField(caster, UOBJ_STONEWALL_EW, x-2, y, z, 4);
+	for (i := 1; i <= 5; i := i + 1)
+        	PlaySoundEffect(fields4[i], 0x476);
+	endfor  
+
+	sleep(2);
+
+	EraseObjProperty( caster, "#Casting" );
+
+	Detach();
+	
+	var bard := GetObjProperty( caster, "IsBard" );
+	duration := 100 + (10*bard);
+
+	sleep(duration);
+
+	foreach fieldpart in fields1
+        	DestroyItem(fieldpart);
+	endforeach
+		foreach fieldpart in fields2
+        	DestroyItem(fieldpart);
+	endforeach
+		foreach fieldpart in fields3
+        	DestroyItem(fieldpart);
+	endforeach
+		foreach fieldpart in fields4
+        	DestroyItem(fieldpart);
+	endforeach
+
+endprogram
+
+function CreateNorthSouthField( caster, fieldtype, x, y, z, length := 4 )
+
+	var counter := 0;
+	var i;
+	var fires := { };
+
+	for ( i := x - 2; i <= x - 2 + length; i := i + 1)
+		if( !len(ListMobilesNearLocation( i, y, z, 0 )) )
+			counter := counter  + 1;
+			fires[counter] := CreateItemAtLocation( i, y, z, fieldtype, 1 );
+			SetObjProperty( fires[counter], "Creator", caster.serial );
+			SetObjProperty( fires[counter], "f", 1 );
+		endif
+	endfor
+
+	return fires;
+
+endfunction
+
+
+function CreateEastWestField( caster, fieldtype, x, y, z, length := 4  )
+	
+	var counter := 0;
+	var i;
+	var fires := { };
+
+	for ( i := y - 2; i <= y - 2 + length; i := i + 1)
+		if( !len(ListMobilesNearLocation( x, i, z, 0 )) )
+			counter := counter  + 1;
+			fires[counter] := CreateItemAtLocation( x, i, z, fieldtype, 1 );
+			SetObjProperty( fires[counter], "Creator", caster.serial );
+			SetObjProperty( fires[counter], "f", 1 );
+		endif
+	endfor
+
+	return fires;
+
+endfunction
+
+

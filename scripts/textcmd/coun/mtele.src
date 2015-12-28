@@ -18,16 +18,28 @@ program textcmd_tele( who )
 	endif
 	
     SendSysMessage( who, "Where do you want to teleport?" );
-
+var movestring := array{};
+var mob;
+var mobstring;
+var data;
     while (1)
         var where := TargetCoordinates( who );
         if (where)
             var result := MoveCharacterToLocation( who, where.x, where.y, where.z, MOVECHAR_FORCELOCATION );
+            if( where.mobile )
+            	mob := where.mobile;
+            	mobstring := " mob: "+cstr(mob.name)+"-"+mob.serial;
+            else
+            	mobstring := " mob: NA";
+            endif
+            movestring.append( where.x+", "+where.y+", "+where.z+mobstring+"->" );
 	    //showflame(who);
             if (!result)
                 SendSysMessage( who, result.errortext );
             endif
         else
+            data := {	"mtele", "na", "na", pack(movestring),"concealed: "+who.concealed,"na","na"};
+	logcommand(who, data);
             break;
         endif
     endwhile

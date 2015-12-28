@@ -1,0 +1,100 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+include "include/client";
+include "include/yesno";
+
+var EquipLayers := Array 
+{ 
+	LAYER_HAND1,   	// One handed weapon.
+	LAYER_HAND2,   	// Two handed weapon, shield or misc.
+	LAYER_SHOES,   	// Shoes.
+	LAYER_PANTS,   	// Pants.
+	LAYER_SHIRT,   	// Shirt.
+	LAYER_HELM,    	// Helm or Hat.
+	LAYER_GLOVES,  	// Gloves.
+	LAYER_RING, 	// Ring.
+	LAYER_NECK,  	// Neck.
+	LAYER_WAIST,   	// Waist (half apron).
+	LAYER_CHEST, 	// Torso (inner) (chest armor).
+	LAYER_WRIST, 	// Bracelet.
+	LAYER_TUNIC,  	// Torso (middle) (tunic, sash etc.).
+	LAYER_EARS,   	// Earrings.
+	LAYER_ARMS,  	// Arms.
+	LAYER_CAPE,  	// Back (cloak).
+	LAYER_ROBE,		// Torso (outer) (robe)
+	LAYER_SKIRT,	// Legs (outer) (skirt/robe).
+	LAYER_LEGS,		// Legs (inner) (leg armor).
+	LAYER_MOUNT		// Mount (horse, ostard etc.).
+};
+
+program undressall( who, text )
+	if (!checkStaff(who, "undressall", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	
+	if(!YesNo(who, "Are you sure you want to undress every player? (Includes offline players)"))
+		return 0;
+	endif
+	
+	Set_Script_Option( SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES, 1 );
+	
+	var AccountList := ListAccounts();
+	
+	var CharacterCount := 0;
+	var ItemCount := 0;
+	
+	var Account;
+	var Character;
+	var Item;
+	var Params;
+	var slot;
+	foreach AccountName in AccountList
+	
+		Account := FindAccount( AccountName );
+		
+		if(!Account || Account == error)
+			continue;
+		endif
+		
+		for ( slot := 1; slot <= 5; slot := slot +1 )
+		
+			Character := Account.GetCharacter(slot);
+			
+			if(!Character || Character == error)
+				continue;
+			endif
+			
+			CharacterCount := CharacterCount + 1;
+			
+			foreach LAYER in EquipLayers
+			
+				Item := GetEquipmentByLayer( Character, LAYER );
+				
+				if(!Item || Item == error)
+					continue;
+				endif
+				
+				Params := Array;
+				Params.Append(Character);
+				Params.Append(Item);
+
+				MoveItemToContainer( Item, Character.backpack ); //Calls unequip scripts etc automatically
+				
+				ItemCount := ItemCount + 1;
+				
+				
+			endforeach
+			
+		endfor
+		
+	endforeach
+	
+	print("Accounts: " + len(AccountList));
+	print("ItemCount: " + ItemCount);
+	print("CharacterCount: " + CharacterCount);
+	
+	
+	
+	
+endprogram

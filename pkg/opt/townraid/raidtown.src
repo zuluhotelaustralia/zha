@@ -8,6 +8,7 @@ use os;
 include "include/raidconsts";
 include "include/attributes";
 include "include/stringarrays";
+include ":queststone:queststone";
 
 var codename;
 var coords := {};
@@ -145,7 +146,7 @@ program RaidTown(prefs)
 
 	if ((goldamount) && (settings.goldgfx) && (prefs[PA_RAIDTYPE]==RAID_RAIDWITHGOLD))
 		goldpile := CreateItemAtLocation(raidsettings[SET_XGOAL], raidsettings[SET_YGOAL], GetWorldHeight( raidsettings[SET_XGOAL], raidsettings[SET_YGOAL] ), settings.goldgfx, 1);
-		goldpile.name := codename + " goldpile - " + goldamount + "gp remaining";
+		goldpile.name := codename + " goldpile - " + goldamount + " quest points remaining";
 		goldpile.movable := 0;
 		if (!goldpile)
 			staffreport("Goldpile could not be created, continuing without.");
@@ -161,10 +162,11 @@ program RaidTown(prefs)
 
 	var raiderarray := GetConfigStringArray( raiders, "npc" );
 	var raidertype := { };   //Template
+	var raiderpoints := { }; //Quest poitns for raider
 	var raideramount := { }; //How many to spawn
 	var raiderchance := { }; //Random Chance of spawning
 
-	var totalbadiesperwave := FillInRaiderArrays(raiderarray, raidertype, raideramount, raiderchance, 1);
+	var totalbadiesperwave := FillInRaiderArrays(raiderarray, raidertype, raiderpoints, raideramount, raiderchance, 1);
 
 
 	raidsettings[SET_TOTALRAIDERS] := (totalbadiesperwave*waves);
@@ -196,7 +198,7 @@ program RaidTown(prefs)
 
 	if ((goldamount) && (prefs[PA_REWARDPLAYERS]) && (prefs[PA_RAIDTYPE]==RAID_RAIDWITHGOLD))
 		sleep(4);
-		Playermessage("There shall be a " + goldamount + "gp split reward for the defenders if the monsters dont get to it first!");
+		Playermessage("There shall be a " + goldamount + " quest points split reward for the defenders if the monsters dont get to it first!");
 	endif
 
 	var numnpcs := 0;
@@ -224,7 +226,7 @@ program RaidTown(prefs)
 				while((totalrandomlyspawned < totalbadiesperwave) && RaidinProgress()); //change to mod
 					tospawn := RandomInt(len(raiderarray))+1;
 					if (CInt(raideramount[tospawn]) >= 1)
-						if (SpawnNPC(raidertype[tospawn],0,raiderchance[tospawn]) )
+						if (SpawnNPC(raidertype[tospawn],0, raiderpoints[tospawn],raiderchance[tospawn]) )
 							totalrandomlyspawned := totalrandomlyspawned + 1;
 							raideramount[tospawn] := raideramount[tospawn] - 1;
 							sleep(CInt(difficulty.spawndelay));
@@ -240,7 +242,7 @@ program RaidTown(prefs)
 				//** No Random Spawning
 				for (j := 1; j <= len(raiderarray); j:=j+1)
 					for (critnum:=0; critnum <= raideramount[j]; critnum:=critnum+1)
-						if (SpawnNPC(raidertype[j],0,raiderchance[j]))
+						if (SpawnNPC(raidertype[j],0,raiderpoints[j],raiderchance[j]))
 							sleep(CInt(difficulty.spawndelay));
 						endif
 
@@ -273,7 +275,7 @@ program RaidTown(prefs)
 
 
 	// - EndGuy Spawning Code -
-
+	var endraider := {};
 	raiderarray := { };
 	raiderarray := GetConfigStringArray( raiders, "endnpc" );
 
@@ -281,7 +283,8 @@ program RaidTown(prefs)
 		if (config.EndGuyString) Playermessage(config.EndGuyString); endif
 
 		for (i := 1; i <= len(raiderarray); i:=i+1)
-			SpawnNPC(raiderarray[i]);
+			endraider := SplitWords(raiderarray[i]);
+			SpawnNPC(endraider[1],0,CInt(endraider[2]));
 		endfor
 
 		sleep(12);
@@ -334,7 +337,7 @@ program RaidTown(prefs)
 endprogram
 
 
-function SpawnNPC(type, spawnaguard := 0, spawnchance := 0)
+function SpawnNPC(type, spawnaguard := 0, spawnpoints:= 0, spawnchance := 0)
 
 	var x,y,z;
 	var thecritter;
@@ -365,8 +368,18 @@ function SpawnNPC(type, spawnaguard := 0, spawnchance := 0)
 			info := Hex(GetMapInfo( x, y ).landtile);
 			if ((info < 0x406) || (info > 0x455))
 				thecritter := CreateNpcFromTemplate(type,x,y,z);
+				SetObjProperty(thecritter,"raider",1);
 				SetObjProperty(thecritter,"guardkill",1);
 				SetObjProperty(thecritter,"guardignore",1);
+				setobjproperty(thecritter, "QuestPoints", spawnpoints);
+				setObjProperty(thecritter, "QuestStoneSerial", 0x6C361768);
+				setObjProperty(thecritter,"AiSerial", thecritter.serial);
+				setObjProperty(thecritter,"RemoveFromQuestAfterDeath", 1);
+				
+				var stone := systemfindobjectbyserial( 0x6C361768 );
+				var qObjectives:=GetObjProperty(stone, "Objectives");
+				qObjectives.append( thecritter.serial );
+				setobjproperty( stone, "Objectives", qObjectives );
 
 				if (thecritter)
 					if (!spawnaguard)
@@ -504,7 +517,7 @@ function CreateWayponts(settings)
 endfunction
 
 
-function FillInRaiderArrays(raiderarray, byref raidertype, byref raideramount, byref raiderchance, totalrebuild := 0)
+function FillInRaiderArrays(raiderarray, byref raidertype, byref raiderpoints, byref raideramount, byref raiderchance, totalrebuild := 0)
 
 	var splitter := { };
 	var totaldudes := 0, i;
@@ -512,12 +525,13 @@ function FillInRaiderArrays(raiderarray, byref raidertype, byref raideramount, b
 	for (i := 1; i <= len(raiderarray); i:=i+1)
 		splitter := SplitWords(raiderarray[i]);
 		raidertype[i] := splitter[1];
-		raideramount[i] := CInt(splitter[2]);
+		raiderpoints[i] := CInt(splitter[2]);
+		raideramount[i] := CInt(splitter[3]);
 		if (!raideramount[i]) //keep compatibility with older cfgs
 			raideramount[i] := 1;
 		endif
-		if (CInt(splitter[3]))
-			raiderchance[i] := CInt(splitter[3]);
+		if (CInt(splitter[4]))
+			raiderchance[i] := CInt(splitter[4]);
 		else
 			raiderchance[i] := 0;
 		endif
@@ -612,12 +626,13 @@ function AutoRewardSystem(initialgold, isthereareward)
 		if (!isthereareward)
 			if (config.NoGoldLeft && goldpile) SendSysMessage(dude, config.NoGoldLeft); endif
 		else
-			SendSysMessage(dude, "You recive " + gp + "gp for your efforts in the raid.");
+			SendSysMessage(dude, "You recive " + gp + " quest points for your efforts in the raid.");
 			sleep(1);
 			//SendSysMessage(dude, "There were " + ppl-1 + " other defenders in the raid.");	
 			//sleep(1);
 			//SendSysMessage(dude, (initialgold-endgold) + "gp was looted by the monsters.");	
-			CreateItemInBackpack( dude, 0xeed, gp );
+			AwardQuestPoints(0x6C361768, dude.serial, gp);
+			//CreateItemInBackpack( dude, 0xeed, gp );
 		endif
 
 		EraseObjProperty(dude, "#imadefender");
@@ -630,7 +645,7 @@ endfunction
 function UpdateGoldInfo()
 	if (goldpile)
 		raidupdateinfo := GetGlobalProperty("raidupdateinfo"+raidid);
-		goldpile.name := codename + " goldpile - " + CInt(raidupdateinfo[UPD_GOLDLEFT]) + "gp remaining";
+		goldpile.name := codename + " goldpile - " + CInt(raidupdateinfo[UPD_GOLDLEFT]) + " quest points remaining";
 	endif
 endfunction
 

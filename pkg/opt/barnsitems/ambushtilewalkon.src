@@ -17,6 +17,10 @@ program ambushtilewalkon_lava( who, tile )
 		return;
 	endif
 	
+	if (who.cmdlevel >= 1)
+		return;
+	endif
+	
 	var mtilestatus := tileStatus(tile);
 	if (! mtilestatus[1]||!mtilestatus[2] )
 		return;
@@ -31,7 +35,11 @@ program ambushtilewalkon_lava( who, tile )
 	var i:=1;
 	var thecritter;
 	while (i<=CInt(mtilestatus[2]))
-		thecritter := CreateNpcFromTemplate( mtilestatus[1], CInt(tile.x), CInt(tile.y), CInt(tile.z) );
+		if( !getobjproperty( tile, "groupspawn" ) )
+			thecritter := CreateNpcFromTemplate( mtilestatus[1], CInt(tile.x), CInt(tile.y), CInt(tile.z) );
+		else
+			thecritter := CreateNpcFromGroup( tile, mtilestatus[1] );
+		endif
 		if (thecritter)
 			PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa );
 			PlaySoundEffect( thecritter, 0x280 );
@@ -60,4 +68,26 @@ function tileStatus(tile)
 	GetObjProperty(tile, "TimeInterval")};
 endfunction
 
+function CreateNpcFromGroup( tile, group )
 
+	var cfg := ReadConfigFile( ":spawnpoint:groups" );
+	if( !cfg )
+		return 0;
+	endif
+
+	var elem	:= cfg[group];
+	var possibles	:= GetConfigStringArray( elem, "spawn" );
+	if( !possibles.size() )
+		return 0;
+	endif
+
+	var template := possibles[RandomInt(possibles.size())+1];
+	if( !template )
+		return 0;
+	endif
+	
+	var critter := CreateNpcFromTemplate( template, CInt(tile.x), CInt(tile.y), CInt(tile.z) );
+
+	return critter;
+
+endfunction

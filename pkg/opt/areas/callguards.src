@@ -4,6 +4,7 @@ use npc;
 use cfgfile;
 
 include "include/areas";
+include "include/statichouses";
 
 const SEARCH_RANGE := 8;
 
@@ -45,7 +46,7 @@ function LookAround( who )
 			endif
 		elseif( !mobile.cmdlevel )
 			if( mobile.criminal )
-				if( IsInGuardedArea(mobile) )
+				if( IsInGuardedArea(mobile) && !IsInStaticHouse( mobile.x, mobile.y, mobile.z ) )
 					set_critical(1);
 					guard := CreateNpcFromTemplate( "guard", mobile.x, mobile.y, mobile.z );
 					if( guard )

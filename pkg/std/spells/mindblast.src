@@ -56,6 +56,9 @@ program cast_mind_blast( parms )
 
 	var my_int := ModifyWithMagicEfficiency( caster, CInt(GetIntelligence(caster)) );
 	var his_int := CInt(GetIntelligence(cast_on));
+	if( GetObjProperty( cast_on, CLASSEID_WARRIOR ))
+		his_int := his_int / 2;
+	endif
 	if( immunity == CURSED )
 		SendSysMessage( cast_on, "Your equipment increase the effect of the spell!" );
 		his_int := CInt(his_int / 2);

@@ -1,0 +1,22 @@
+use uo;
+
+include "include/spelldata";
+include "include/client";
+include "include/dotempmods";
+
+program cast_nightsight( caster, scroll )
+	
+	if (GetObjProperty(caster, "dks"))
+		SendSysMessage(caster,"Already under the influence!");
+		return 0;
+	endif	
+
+	var duration := 30000;
+	var mod_amount := 1;
+	PlaySoundEffect(caster, SFX_SPELL_NIGHT_SIGHT );
+	PlayObjectCenteredEffect( caster, FX_SPELL_NIGHT_SIGHT, SPEED_SPELL_NIGHT_SIGHT, LOOP_SPELL_NIGHT_SIGHT );
+	SendSysMessage( caster, "You will now learn faster for the next 8 hours.", 3,53 );
+	DoTempMod(caster, "dks", mod_amount, duration);
+	DestroyItem( scroll );
+
+endprogram

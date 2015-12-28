@@ -18,5 +18,8 @@ program textcmd_refresh(who)
 	SetHp(mobile, GetMaxHp(who));
     	SetMana(mobile, GetMaxMana(who));
     	SetStamina(mobile, GetMaxStamina(who));
+    	
+var data := {	"refresh", mobile.name, mobile.serial , mobile.acctname,"concealed: "+who.concealed,"x: "+mobile.x+" y: "+mobile.y+" z: "+mobile.z,"na"};
+logcommand(who, data);
 
 endprogram

@@ -1,0 +1,163 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_ID		:= FX_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_EARTH_BLESSING;
+
+program songofendurance( caster )
+
+	var com1 := GetObjProperty( caster, "bparty1" );
+	var com2 := GetObjProperty( caster, "bparty2" );
+	var com3 := GetObjProperty( caster, "bparty3" );
+	var com4 := GetObjProperty( caster, "bparty4" );
+	var com5 := GetObjProperty( caster, "bparty5" );
+	var com6 := GetObjProperty( caster, "bparty6" );
+	
+	if(!TryToCast(caster, 5 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var skill := GetEffectiveSkill( caster, 9 );
+	var bard := GetObjProperty( caster, "IsBard" );
+	var healed := skill/10;
+	var duration := (bard)+2;
+	var sleeptime := 4;
+	var i:= 0;
+	var chr;
+	var newstam1;
+	var newstam2;
+	var newstam3;
+	var newstam4;
+	var newstam5;
+	var newstam6;
+
+	if(bard)
+		healed := healed*(1+bard/10);
+	endif
+
+	SendSysMessage( caster, "You begin to revitalise your companions..." );
+	
+	while ( duration > 0 )
+			if(!com1.dead)
+			if((GetHP(com1)>1))
+				if((Distance (caster, com1)<15))
+					if( GetStamina(com1) < GetMaxStamina(com1) )
+						SendSysMessage( com1, "You recover stamina" );
+						PlayObjectCenteredEffect(com1,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com1, 0x28F );
+						newstam1 := (GetStamina(com1) + healed);
+						SetStamina( com1, newstam1 );
+					endif
+				endif
+			endif
+			endif
+		if(com2)
+			if(!com2.dead)
+			if((GetHP(com2)>1))
+				if((Distance (caster, com2)<15))
+					if( GetStamina(com2) < GetMaxStamina(com2) )
+						SendSysMessage( com2, "You recover stamina" );
+						PlayObjectCenteredEffect(com2,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com2, 0x28F );
+						newstam2 := (GetStamina(com2) + healed);
+						SetStamina( com2, newstam2 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com3)
+			if(!com3.dead)
+			if((GetHP(com3)>1))
+				if((Distance (caster, com3)<15))
+					if( GetStamina(com3) < GetMaxStamina(com3) )
+						SendSysMessage( com3, "You recover stamina" );
+						PlayObjectCenteredEffect(com3,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com3, 0x28F );
+						newstam3 := (GetStamina(com3) + healed);
+						SetStamina( com3, newstam3 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com4)
+			if(!com4.dead)
+			if((GetHP(com4)>1))
+				if((Distance (caster, com4)<15))
+					if( GetStamina(com4) < GetMaxStamina(com4) )
+						SendSysMessage( com4, "You recover stamina" );
+						PlayObjectCenteredEffect(com4,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com4, 0x28F );
+						newstam4 := (GetStamina(com4) + healed);
+						SetStamina( com4, newstam4 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com5)
+			if(!com5.dead)
+			if((GetHP(com5)>1))
+				if((Distance (caster, com5)<15))
+					if( GetStamina(com5) < GetMaxStamina(com5) )
+						SendSysMessage( com5, "You recover stamina" );
+						PlayObjectCenteredEffect(com5,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com5, 0x28F );
+						newstam5 := (GetStamina(com5) + healed);
+						SetStamina( com5, newstam5 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com6)
+			if(!com6.dead)
+			if((GetHP(com6)>1))
+				if((Distance (caster, com6)<15))
+					if( GetStamina(com6) < GetMaxStamina(com6) )
+						SendSysMessage( com6, "You recover stamina" );
+						PlayObjectCenteredEffect(com6,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com6, 0x28F );
+						newstam6 := (GetStamina(com6) + healed);
+						SetStamina( com6, newstam6 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		duration := duration - 1;
+		sleep( sleeptime );
+	endwhile
+
+	SendSysMessage( caster, "You finish your song of endurance." );
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram
+
+                                               

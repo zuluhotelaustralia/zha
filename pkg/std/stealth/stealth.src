@@ -12,6 +12,7 @@ use uo;
 include "include/client";
 include "include/attributes";
 include "include/classes";
+include "include/damages";
 
 const POINTS	:= 200;
 
@@ -33,7 +34,7 @@ program skill_stealth( chr )
 		SendSysMessage(chr, "You refuse to skulk about like a common thief!");
 		return;
 	endif
-	if( !CheckSkill( chr, SKILLID_STEALTH, -2, 200 ) )
+		if( !CheckSkill( chr, SKILLID_STEALTH, -2, 200 ) )
 		chr.hidden := 0;
 		PrintTextAbovePrivate( chr, "You have revealed yourself!", chr );
 		return;
@@ -43,9 +44,24 @@ program skill_stealth( chr )
 
 	if (class==CLASSEID_THIEF || class==CLASSEID_NINJA)
 		steps := CInt(steps * ClasseBonusByLevel(GetClasseLevel(chr)));
+		var healed := (thief*2)+10;
+		var duration := (thief*2)+2;
+		var sleeptime := 3;
+		chr.stealthsteps := steps;
+		PrintTextAbovePrivate( chr, "You are now moving stealthily, recovering in the shadows", chr );
+		while ( duration > 0 && !chr.dead && chr.hidden )
+			if( GetHp(chr) < GetMaxHp(chr) )
+				HealDamage( chr, CInt(healed) );
+				duration := duration - 1;
+				sleep( sleeptime );
+			else
+				duration := 0;
+			endif
+		endwhile
+		return;
+	else
+		chr.stealthsteps := steps;
+		PrintTextAbovePrivate( chr, "You are now moving stealthily", chr );
 	endif
-
-	chr.stealthsteps := steps;
-	PrintTextAbovePrivate( chr, "You are now moving stealthily", chr );
 
 endprogram

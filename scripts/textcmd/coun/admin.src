@@ -158,6 +158,7 @@ program textcmd_testgump( who )
 	endif
 
 	var players := EnumerateOnlineCharacters();
+	var gmdata;
 	FillInArrays( players,who);
 
 	var res := SendDialogGump(who, layout, data );
@@ -209,12 +210,16 @@ program textcmd_testgump( who )
 
 	elseif( action == 1 ) // GOTO
 		MoveCharacterToLocation( who, client.x, client.y, client.z, MOVECHAR_FORCELOCATION );
+		gmdata := {	"admin: goto", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+client.x+" y: "+client.y+" z: "+client.z,"na"};
+		logcommand(who, gmdata);
 		ShowFlame(who);
 		return;
 
 	elseif( action == 2 ) // SUMMON
 
 		MoveCharacterToLocation( client, who.x, who.y, who.z, MOVECHAR_FORCELOCATION );
+		gmdata := {	"admin: summon", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+who.x+" y: "+who.y+" z: "+who.z,"na"};
+		logcommand(who, gmdata);
 		ShowFlame(client);
 		return;
 
@@ -243,6 +248,8 @@ program textcmd_testgump( who )
 		tempitem.decayAt := ReadGameClock() + 30;
 		client.setParalyzed(1);
 		ShowFlame(client);
+		gmdata := {	"admin: summoncage", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+client.x+" y: "+client.y+" z: "+client.z,"na"};
+		logcommand(who, gmdata);
 		return;
 
 	elseif( action == 4 ) // LIGHTNING
@@ -254,16 +261,23 @@ program textcmd_testgump( who )
 		sleep(2);
 		PlayLightningBoltEffect( client );
 		PlaySoundEffect( client, 0x0029 );
+		
+		gmdata := {	"admin: lightning", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+client.x+" y: "+client.y+" z: "+client.z,"na"};
+		logcommand(who, gmdata);
 		return;
 
 	elseif( action == 5 ) // JAIL
 		if( release )
 			SendSysMessage( who, playername + " is already jailed.");
+		gmdata := {	"admin: jail", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"Already in jail","na"};
+		logcommand(who, gmdata);
 			return;
 		endif
 	
 		if( client.cmdlevel >= who.cmdlevel && who.cmdlevel < 5 )
 			SendSysMessage( client, who.name + " is trying to jail you.");
+		gmdata := {	"admin: jail", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"Higher Level Staff","na"};
+		logcommand(who, gmdata);
 			return;
 		endif
 
@@ -295,6 +309,8 @@ program textcmd_testgump( who )
 		MoveCharacterToLocation( client, 5304, 1184, 0, 0 );
 		SendSysMessage( client, "You have been jailed" );
 		SendSysMessage( who, playername + " has been jailed." );
+		gmdata := {	"admin: jail", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"days: "+val,"release: "+(ReadGameClock() + time)};
+		logcommand(who, gmdata);
 //		DisconnectClient(client);
 //		acc.disable();
 
@@ -311,6 +327,8 @@ program textcmd_testgump( who )
 		SendSysMessage( client, "You have been freed.");
 		SendSysMessage( who, playername + " has been freed." );
 		MoveCharacterToLocation( client, 1475, 1645, 20, 0);
+		gmdata := {	"admin: forgive", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"NA","release time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 		return;
 
 	elseif( action == 7 ) // NOTES
@@ -337,6 +355,8 @@ program textcmd_testgump( who )
 		endfor
 
 		acc.setprop( "Notes", note );
+		gmdata := {	"admin: notes", client.name, client.serial , client.acctname,"concealed: "+who.concealed,note,"time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 
 		return;
 
@@ -350,6 +370,8 @@ program textcmd_testgump( who )
 
 		SendSysMessage( client, "MSG from Staff: " + themessage );
 		SendSysMessage( who, "MSG sent." );
+		gmdata := {	"admin: message", client.name, client.serial , client.acctname,"concealed: "+who.concealed,themessage,"time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 		return;
 
 	elseif( action == 9 ) // RESURRECT
@@ -374,6 +396,8 @@ program textcmd_testgump( who )
 				newcolor := who.truecolor;
 			endif
 		
+		gmdata := {	"admin: res", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 			who.color := newcolor;
 		else
 			SendSysMessage( who, playername + " is not dead!" );
@@ -387,6 +411,8 @@ program textcmd_testgump( who )
 			return;
 		endif
 	
+		gmdata := {	"admin: kick", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 		DisconnectClient( client );
 		return;
 
@@ -404,6 +430,8 @@ program textcmd_testgump( who )
 			return;
 		endif
 	
+		gmdata := {	"admin: ban", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 		acc.ban();
 		return;
 
@@ -419,6 +447,8 @@ program textcmd_testgump( who )
 			SetObjProperty( client, "guardkill", 1 );
 			ApplyRawDamage( client, GetHp(client) + 3 );
 			SendSysMessage( who, playername + " has been killed!" );
+			gmdata := {	"admin: kill", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+client.x+" y: "+client.y+" z: "+client.z,"time: "+ReadGameClock()};
+			logcommand(who, gmdata);
 		else
 			SendSysMessage( who, playername + " was dead already!" );
 		endif
@@ -431,11 +461,16 @@ program textcmd_testgump( who )
 			client.color := client.truecolor;
 			SendSysMessage( who, "Race has been removed." );
 			SendSysMessage( client,"Your race has been removed." );
+			
+			gmdata := {	"admin: remove race", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+			logcommand(who, gmdata);
 			return;
 		endif
 
 	elseif( action == 14 ) // REMOVE GUILD
 		RemoveGuild( who, client );
+		gmdata := {	"admin: remove guild", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+		logcommand(who, gmdata);
 	endif
 
 endprogram

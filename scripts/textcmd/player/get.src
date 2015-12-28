@@ -1,19 +1,19 @@
 use uo;
 use os;
-use cfgfile;
 
-var REAGS := {0xf7a, 0xf7b, 0xf84, 0xf85, 0xf86, 0xf88, 0xf8c, 0xf8d};
-var PAGANS := {0xf78, 0xf79, 0xf7c, 0xf7d, 0xf7e, 0xf7f, 0xf80, 0xf81, 0xf82, 0xf83, 0xf87, 0xf89, 0xf8a, 0xf8b, 0xf8e, 0xf8f, 0xf90, 0xf91};
-var AMMO := {0xf3f, 0x6051, 0xb200, 0x1bfb, 0x824e};
-var GEMS := {0xf0f, 0xf10, 0xf11, 0xf13, 0xf15, 0xf16, 0xf18, 0xf25, 0xf30, 0xc539, 0xc53a, 0xc538};
-
-include "include/time";
+var REAGS 	:= {0xf7a, 0xf7b, 0xf84, 0xf85, 0xf86, 0xf88, 0xf8c, 0xf8d};
+var PAGANS 	:= {0xf78, 0xf79, 0xf7c, 0xf7d, 0xf7e, 0xf7f, 0xf80, 0xf81, 0xf82, 0xf83, 0xf87, 0xf89, 0xf8a, 0xf8b, 0xf8e, 0xf8f, 0xf90, 0xf91};
+var AMMO 		:= {0xf3f, 0x6051, 0xb200, 0x1bfb, 0x824e};
+var GEMS 		:= {0xf0f, 0xf10, 0xf11, 0xf13, 0xf15, 0xf16, 0xf18, 0xf25, 0xf30, 0xc539, 0xc53a, 0xc538};
+var GOLD 		:= {0xEED, 0xeee, 0xeef};
+var MAPS 		:= {0x6000, 0x6003, 0x6004, 0x6005, 0x6006, 0x6007};
 
 program get_items_from_corpse(who, types)
 
 	if (!types)
-		SetDefaultBag(who);
-		return;
+			SendSysMessage(who, "Usage: .setget to set catch bags");
+			SendSysMessage(who, "Usage: .get <reags> <pagans> <ammo> <gems> <scrolls> <gold> <maps>");
+			return;
 	endif
 
 	var typearray := SplitWords(types);
@@ -23,13 +23,14 @@ program get_items_from_corpse(who, types)
 	endfor
 
 	foreach type in typearray
-		if (type!="reags" && type!="pagans" && type!="ammo" && type!="gems" && type!="scrolls")
-			SendSysMessage(who, "Usage: .get <reags> <pagans> <ammo> <gems> <scrolls>");
+		if (type!="reags" && type!="pagans" && type!="ammo" && type!="gems" && type!="scrolls" && type!="gold" && type!="maps")
+			SendSysMessage(who, "Usage: .setget to set catch bags");
+			SendSysMessage(who, "Usage: .get <reags> <pagans> <ammo> <gems> <scrolls> <gold> <maps>");
 			return;
 		endif
 	endforeach
 
-	SendSysMessage(who, "Select an NPC corpse to loot");
+	SendSysMessage(who, "Select an NPC corpse or treasure chest to loot");
 	var corpse := Target(who, TGTOPT_CHECK_LOS);
 	if (!corpse)
 		SendSysMessage(who, "Cancelled");
@@ -37,62 +38,71 @@ program get_items_from_corpse(who, types)
 	elseif (Distance(who, corpse)>1)
 		SendSysMessage(who, "You are too far away to do that");
 		return;
-	elseif (!corpse.isa(POLCLASS_CORPSE))
-		SendSysMessage(who, "That's not a corpse!");
+	elseif (!corpse.isa(POLCLASS_CORPSE) && !corpse.isa(POLCLASS_CONTAINER))
+		SendSysMessage(who, "That's not a corpse or treasure chest!");
 		return;
-	elseif (!GetObjProperty(corpse, "npctemplate"));
+	elseif (corpse.isa(POLCLASS_CORPSE) && !GetObjProperty(corpse, "npctemplate"))
 		SendSysMessage(who, "That's not an NPC corpse!");
 		return;
-	endif
-
-	var bagserial:=GetObjProperty(who, "DefaultBag");
-	var bag:=0;
-	if (!bagserial)
-		bagserial:=SetDefaultBag(who);
-		if (!bagserial)
-			return;
-		endif
-	endif
-	
-	foreach item in EnumerateItemsInContainer(who.backpack)
-		if (item.serial == bagserial)
-			bag:=item;
-			break;
-		endif
-	endforeach
-	
-	if (!bag)
-		bagserial:=SetDefaultBag(who);
-		if (!bagserial)
-			return;
-		endif
-
-		foreach item in EnumerateItemsInContainer(who.backpack)
-			if (item.serial == bagserial)
-				bag:=item;
-				break;
-			endif
-		endforeach
-	endif
-	
-	if (!bag)
+	elseif (GetObjProperty(corpse, "houseserial"))
+		SendSysMessage(who, "You can't use this command on house chests!");
+		return;
+	elseif (GetObjProperty(corpse, "locked") == 1)
+		SendSysMessage(who, "You can't use this on locked items!");
 		return;
 	endif
+
+	var bagarray:=GetObjProperty(who, "DefaultBag");
+	var bag:=0;
+	if (!bagarray)
+			SendSysMessage(who, "Usage: .setget to set catch bags");
+			return;
+	endif
+	var newbagarray := {};
+	var i;
+	for( i := 1; i <= 7; i := i + 1 )
+  	bag := SystemFindObjectBySerial(bagarray[i], SYSFIND_SEARCH_STORAGE_AREAS);
+		if (bag.container!=who.backpack)
+			newbagarray[i] := "";
+		else
+			newbagarray[i] := bag.serial;
+		endif
+	endfor
+
+	SetObjProperty(who, "DefaultBag", newbagarray);
 	
 	foreach type in typearray
 		case type
-			"reags":	GrabItems(who, corpse, bag, REAGS);
-			"pagans":	GrabItems(who, corpse, bag, PAGANS);
-			"ammo":		GrabItems(who, corpse, bag, AMMO);
-			"gems":		GrabItems(who, corpse, bag, GEMS);
-			"scrolls":	GrabScrolls(who, corpse, bag);
+			"gold":			GrabItems(who, corpse, GOLD, "gold");
+			"reags":		GrabItems(who, corpse, REAGS, "reags");
+			"pagans":		GrabItems(who, corpse, PAGANS, "pagans");
+			"ammo":			GrabItems(who, corpse, AMMO, "ammo");
+			"gems":			GrabItems(who, corpse, GEMS, "gems");
+			"maps":			GrabItems(who, corpse, MAPS, "maps");
+			"scrolls":	GrabScrolls(who, corpse);
 		endcase
 	endforeach
 
 endprogram
 
-function GrabItems(who, corpse, bag, type)
+function GrabItems(who, corpse, type, typename)
 
+var bagarray := 	GetObjProperty(who, "DefaultBag");
+var bag;
+case typename
+			"reags":		bag := bagarray[1];
+			"pagans": 	bag := bagarray[2];
+			"ammo":			bag := bagarray[3];
+			"gems":			bag := bagarray[4];
+			"gold":			bag := bagarray[6];
+			"maps":			bag := bagarray[7];
+	endcase
+	
+	if (!bag)
+		SendSysMessage(who, "You need to set a bag for "+typename+" using .setget");
+		return;
+	endif
+	
 	SetObjProperty(who, "fastlooting", 1);
 	foreach item in EnumerateItemsInContainer(corpse)
 		if (item.objtype in type)
@@ -108,86 +118,24 @@ function GrabItems(who, corpse, bag, type)
 
 endfunction
 	
-function GrabScrolls(who, corpse, bag)
-
+function GrabScrolls(who, corpse)
+	var bagarray := 	GetObjProperty(who, "DefaultBag");
+	var bag:= 	bagarray[5];
 	var obj;
-	var warned:=0;
 	SetObjProperty(who, "fastlooting", 1);
 	foreach item in EnumerateItemsInContainer(corpse)
 		obj:=item.objtype;
-		//if (!(obj.objtype==0xefa)) // spellbook
-			//break;
-		//else
-		if (item.container.serial==corpse.serial)
-			if ((obj >= 0x1f2d && obj <= 0x1f6c) || 
-			(obj >= 0xa100 && obj <=0xa110) ||
-			(obj >= 0xb100 && obj <= 0xb110))
-				if (CreateItemInContainer(bag, obj, item.amount))
-					SendSysMessage(who, "Grabbed "+item.desc);
-					DestroyItem(item);
-				else
-					SendSysMessage(who, "Failed to move "+item.desc);
-				endif
+		if ((obj >= 0x1f2d && obj <= 0x1f6c) || 
+		(obj >= 0xa100 && obj <=0xa110) ||
+		(obj >= 0xb100 && obj <= 0xb110))
+			if (CreateItemInContainer(bag, obj, item.amount))
+				SendSysMessage(who, "Grabbed "+item.desc);
+				DestroyItem(item);
+			else
+				SendSysMessage(who, "Failed to move "+item.desc);
 			endif
-		elseif (item.container.objtype==0xefa && !warned)
-			foreach player in EnumerateOnlineCharacters()
-				if (player.cmdlevel)
-					SendSysMessage(player, who.name+" is trying to use .get bug!", 3, 38);
-				endif
-			endforeach
-			warned:=1;
-			logcheat(who);
 		endif
 	endforeach
 	EraseObjProperty(who, "fastlooting");
 	
-endfunction			
-
-function SetDefaultBag(who)
-
-	SendSysMessage(who, "Target a bag/backpack/pouch");
-	var bag:= Target(who);
-	if (!bag)
-		SendSysMessage(who, "Cancelled");
-		return;
-	elseif (bag.container!=who.backpack)
-		SendSysMessage(who, "The container must be in your backpack");
-		return;
-	elseif (bag.graphic != 0xe75 && bag.graphic != 0xe76 && bag.graphic != 0xe79)
-		SendSysMessage(who, "Container must be a bag, backpack or pouch!");
-		return;
-	endif
-	
-	SetObjProperty(who, "DefaultBag", bag.serial);
-	return bag.serial;
-	
-endfunction
-
-function logcheat(who)
-	var desc := who.name + " / " + who.acctname;
-	
-	var elemkey := who.acctname;
-	var props := array;
-	var prop := array;
-	prop .+ pname;
-	prop .+ pvalue;
-	
-	prop.pname := "charname";
-	prop.pvalue := who.name;
-	props[1] := prop;
-	
-	prop.pname := "serial";
-	prop.pvalue := who.serial;
-	props[2] := prop;
-	
-	prop.pname := "coords";
-	prop.pvalue := CStr(who.x) + " " + CStr(who.y);
-	props[3] := prop;
-	
-	prop.pname := "datetime";
-	prop.pvalue := NowString();
-	props[4] := prop;
-	
-	AppendConfigFileElem( "spellbookabusers", "haxor", elemkey, props );
-	UnloadConfigFile("spellbookabusers");
 endfunction

@@ -11,6 +11,8 @@ program thaw( gm )
     var res := TargetCoordinates( gm );
     if (res.mobile)
         res.mobile.frozen := 0;
+        var gmdata := {	"thaw", res.name, res.serial , res.acctname,"concealed: "+gm.concealed,"na","na"};
+logcommand(gm, gmdata);
 	if (GetObjProperty(res.mobile, "frozen"))
 		EraseObjProperty(res.mobile,"frozen");
 	else

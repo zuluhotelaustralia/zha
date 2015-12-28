@@ -14,6 +14,7 @@ program concealme( who, text )
 	else    	
     		who.concealed := 1;
   	endif
-	
+		var	gmdata := {	"concealme", who.serial+ " / "+who.name+" / "+who.acctname, "x: "+who.x, "y: "+who.y,"z: "+who.z,"concealed: "+who.concealed , CInt(ReadGameClock())};
+		logcommand(who, gmdata);
 	SetObjProperty(who, "#lastconcealed", CInt(ReadGameClock()));
 endprogram

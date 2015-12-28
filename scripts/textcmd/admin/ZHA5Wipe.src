@@ -1,0 +1,300 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+include "include/client";
+include "include/yesno";
+include "util/bank";
+include "../pkg/std/boat/setup";
+include "../pkg/std/housing/housemanagement";
+include "../pkg/opt/karmafame/karmafame";
+
+var blankarray := {};
+var EquipLayers := Array 
+	{ 
+		LAYER_HAND1,   	// One handed weapon.
+		LAYER_HAND2,   	// Two handed weapon, shield or misc.
+		LAYER_SHOES,   	// Shoes.
+		LAYER_PANTS,   	// Pants.
+		LAYER_SHIRT,   	// Shirt.
+		LAYER_HELM,    	// Helm or Hat.
+		LAYER_GLOVES,  	// Gloves.
+		LAYER_RING, 		// Ring.
+		LAYER_NECK,  	// Neck.
+		LAYER_WAIST,   	// Waist (half apron).
+		LAYER_CHEST, 	// Torso (inner) (chest armor).
+		LAYER_WRIST, 	// Bracelet.
+		LAYER_TUNIC,  	// Torso (middle) (tunic, sash etc.).
+		LAYER_EARS,   	// Earrings.
+		LAYER_ARMS,  	// Arms.
+		LAYER_CAPE,  	// Back (cloak).
+		LAYER_ROBE,		// Torso (outer) (robe)
+		LAYER_SKIRT,		// Legs (outer) (skirt/robe).
+		LAYER_LEGS,		// Legs (inner) (leg armor).
+		LAYER_MOUNT	// Mount (horse, ostard etc.).
+	};
+
+	
+// This is pretty much all trees
+var DeletableTypes := Array
+	{
+		0x0DA4, // Trees start
+		0x0DA6,
+		0x0D9A,
+		0x0D98,
+		0x0DA0,
+		0x0D9E,
+		0x0D1E,
+		0x0D1B,
+		0x0D1D,
+		0x0CAA,
+		0xe001,
+		0xe002,
+		0xe003,
+		0xe004,
+		0xe006,
+		0xe007,
+		0xe00,
+		0xcab,
+		0xd96,
+		0xdaa,
+		0xda2,
+		0xca8,
+		0xd9a,
+		0xda6,
+		0xd9e,
+		0xcaa,
+		0xd1b,
+		0xd1e,
+		0xd1f,
+		0xd1d,
+		0xd1c,
+		0xd22,
+		0xd23,
+		0xd24,
+		0xd21,
+		0xd20, //Trees end
+		0x0F3C //Horse dung
+		
+	};
+	
+var bank := FindStorageArea( "World Bank" );
+var merchant  := FindStorageArea( "Merchant Storage" );
+var tamed	 := FindStorageArea( "Tamed Storage" );
+
+var Trees := ReadConfigFile(":botanik:tree");
+
+program ZH5Wipe( who, text)
+	if (!checkStaff(who, "ZH5Wipe", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	
+	if(!YesNo(who, "Are you sure you want to perform a wipe?"))
+		return 0;
+	endif
+	
+	Set_Script_Option( SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES, 1 );
+	Set_Script_Option( SCRIPTOPT_NO_RUNAWAY, 1 );
+	
+	
+	Print( "Wiping Toplevel items" );
+	TopLevelWipe();
+	Print( "Wiping Player Items" );
+	WipePlayerItems();
+	Print( "Wiping Multis" );
+	MultiWipe();
+	
+endprogram
+
+function WipePlayerItems( )
+	
+	var AccountList := ListAccounts();
+	
+	var CharacterCount := 0;
+	var ItemCount := 0;
+	
+	var Account;
+	var Character;
+	var Item;
+	var Params;
+	var slot;
+	var ContainerItems;
+	var NewPack;
+	foreach AccountName in AccountList
+	
+		Account := FindAccount( AccountName );
+		
+		if(!Account || Account == error)
+			continue;
+		endif
+		
+
+		
+		for ( slot := 1; slot <= 5; slot := slot +1 )
+		
+			Character := Account.GetCharacter(slot);
+			
+			if(!Character || Character == error || ( getCommandLevel(Character) > 1 ) )
+				continue;
+			endif
+			
+			MoveCharacterToLocation( Character, 1475, 1645, 20, MOVECHAR_FORCELOCATION );
+			
+			CharacterCount := CharacterCount + 1;
+			
+			foreach LAYER in EquipLayers
+			
+				Item := GetEquipmentByLayer( Character, LAYER );
+				
+				
+				if(!Item || Item == error)
+					continue;
+				endif
+				
+				Item.Moveable := 1;
+				
+
+				MoveItemToContainer( Item, Character.backpack ); //Calls unequip scripts etc automatically
+				
+				
+				ItemCount := ItemCount + DestroyItem(Item);
+				
+			endforeach
+			
+			ItemCount := ItemCount + DestroyItem( Character.backpack );
+			NewPack := CreateItemAtLocation(5284, 1173, 0, 0xe75, 1); //Backpack
+			EquipItem( Character, NewPack );
+			
+			if(NewPack)
+				CreateItemInContainer(NewPack, 0xeed, 1000); //1000 gps
+				CreateItemInContainer(NewPack, 0xf51, 1).newbie := 1; //Newbied dagger
+				CreateItemInContainer(NewPack, 0x1517, 1).newbie := 1; //Newbied shirt
+				CreateItemInContainer(NewPack, 0x170f, 1).newbie := 1; //Newbied shoes
+				if(Character.gender) 
+					CreateItemInContainer(NewPack, 0x1f01, 1); // Female, plain dress
+					CreateItemInContainer(NewPack, 0x1516, 1).newbie := 1; //Newbied skirt
+				else
+					CreateItemInContainer(NewPack, 0x1f03, 1); // Male, robe
+					CreateItemInContainer(NewPack, 0x152e, 1).newbie := 1; //Newbied short pants
+				endif
+			else
+				Print("Couldnt backpack: " + NewPack.errortext);
+			endif
+			
+			Character.Hidden := 1;
+			SetFame(Character, 0);
+			SetKarma(Character, 0);
+			Character.title_suffix := "";
+			SetObjProperty( Character, "Quester", blankarray);
+			
+			WipeBank( Character );
+			
+
+		endfor
+		
+	endforeach
+	
+	print("Accounts: " + len(AccountList));
+	print("ItemCount: " + ItemCount);
+	print("CharacterCount: " + CharacterCount);
+	
+	
+	
+	
+endfunction
+
+function ToplevelWipe( )
+
+	var ItemCount := 0;
+	var NpcCount := 0;
+
+	Print( "Destroying all npcs, top level items, please wait..." );
+	
+	var Objects := ListObjectsInBox(0, 0, -128, 6142, 4094, 128);
+	var ContainerItems;
+	foreach obj in Objects
+		if ( obj.isa(POLCLASS_ITEM) && ShouldDelete(obj) )
+			DestroyItem(obj);
+			ItemCount := ItemCount +1;
+		elseif( obj.objtype == 0xa322 )
+			WipeQuestsData( obj );
+		endif
+		
+		if(obj.isa(POLCLASS_CONTAINER))
+			ContainerItems := EnumerateItemsInContainer( obj );
+			foreach item in ContainerItems
+				DestroyItem(item);
+				ItemCount := ItemCount + 1;
+			endforeach
+		endif
+		
+		if(obj.isa(POLCLASS_NPC))
+			
+			DestroyRootItemInStorageArea( merchant, obj.serial + " FS");
+			DestroyRootItemInStorageArea( merchant, obj.serial + " PB");
+			DestroyRootItemInStorageArea( merchant, obj.serial + " 1C");
+			DestroyRootItemInStorageArea( tamed, "Bankbox  " + obj.serial );
+			
+			RevokePrivilege( obj, "invul" );
+			SetObjProperty( obj, "guardkill", 1);
+			ApplyRawDamage( obj, CInt(GetHp(obj)+3) );
+			
+			NpcCount := NpcCount + 1;
+		
+		endif
+			
+			
+		
+	endforeach
+	
+	Print( "Wiped " + ItemCount + " items" );
+	Print( "Killed " + NpcCount + " npcs" );
+endfunction
+
+function MultiWipe();
+	var wipedHouses := 0;
+	var wipedBoats := 0;
+	
+	var Multis := ListMultisInBox(0, 0, -128, 6142, 4094, 128);
+	
+	foreach multi in Multis
+		if( multi.isa( POLCLASS_BOAT) ) //Ship
+			deleteboat(Multi);
+			wipedBoats := wipedBoats + 1;
+		else
+			deleteHouse(multi);
+			wipedHouses := wipedHouses + 1;
+		endif
+	endforeach
+	
+	Print( "Processed " + wipedBoats + " Boats" );
+	Print( "Processed " + wipedHouses + " Houses" );
+	
+endfunction
+
+function ShouldDelete(item)
+	foreach Type in DeletableTypes
+		if(item.objtype == Type)
+			return 1;
+		endif
+	endforeach
+	
+	if(item.movable != 0 || item.multi || item.isa(POLCLASS_EQUIPMENT) || item.isa(POLCLASS_ARMOR) || item.isa(POLCLASS_CORPSE) )
+		return 1;
+	endif
+	
+	return 0;
+endfunction
+
+function WipeBank( Player )
+
+	DestroyRootItemInStorageArea( bank, "Bankbox of " + Player.serial);
+
+endfunction
+
+function WipeQuestsData( stone )
+
+	setobjproperty( stone, "CompletedPlayers", blankarray);
+	setobjproperty( stone, "playerquestpoints", blankarray);
+	setobjproperty( stone, "playerserials", blankarray);
+	
+endfunction

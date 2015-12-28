@@ -1,0 +1,164 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_ID		:= FX_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_EARTH_BLESSING;
+
+program songofendurance( caster )
+
+	var com1 := GetObjProperty( caster, "bparty1" );
+	var com2 := GetObjProperty( caster, "bparty2" );
+	var com3 := GetObjProperty( caster, "bparty3" );
+	var com4 := GetObjProperty( caster, "bparty4" );
+	var com5 := GetObjProperty( caster, "bparty5" );
+	var com6 := GetObjProperty( caster, "bparty6" );
+	
+	if(!TryToCast(caster, 6 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var skill := GetEffectiveSkill( caster, 9 );
+	var bard := GetObjProperty( caster, "IsBard" );
+	var healed := skill/10;
+	var duration := (bard)+2;
+	var sleeptime := 4;
+	var i:= 0;
+	var chr;
+	var newhp1;
+	var newhp2;
+	var newhp3;
+	var newhp4;
+	var newhp5;
+	var newhp6;
+
+	if(bard)
+		healed := healed*(1+bard/10);
+	endif
+	
+	SendSysMessage( caster, "You begin to heal your companions..." );
+	
+	while ( duration > 0 )
+			if(!com1.dead)
+			if((GetHP(com1)>1))
+				if((Distance (caster, com1)<15))
+					if( GetHP(com1) < GetMaxHP(com1) )
+						SendSysMessage( com1, "You recover health" );
+						PlayObjectCenteredEffect(com1,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com1, 0x28F );
+						newhp1 := (GetHP(com1) + healed);
+						SetHP( com1, newhp1 );
+					endif
+				endif
+			endif
+			endif
+		if(com2)
+			if(!com2.dead)
+			if((GetHP(com2)>1))
+				if((Distance (caster, com2)<15))
+					if( GetHP(com2) < GetMaxHP(com2) )
+						SendSysMessage( com2, "You recover health" );
+						PlayObjectCenteredEffect(com2,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com2, 0x28F );
+						newhp2 := (GetHP(com2) + healed);
+						SetHP( com2, newhp2 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com3)
+			if(!com3.dead)
+			if((GetHP(com3)>1))
+				if((Distance (caster, com3)<15))
+					if( GetHP(com3) < GetMaxHP(com3) )
+						SendSysMessage( com3, "You recover health" );
+						PlayObjectCenteredEffect(com3,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com3, 0x28F );
+						newhp3 := (GetHP(com3) + healed);
+						SetHP( com3, newhp3 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com4)
+			if(!com4.dead)
+			if((GetHP(com4)>1))
+				if((Distance (caster, com4)<15))
+					if( GetHP(com4) < GetMaxHP(com4) )
+						SendSysMessage( com4, "You recover health" );
+						PlayObjectCenteredEffect(com4,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com4, 0x28F );
+						newhp4 := (GetHP(com4) + healed);
+						SetHP( com4, newhp4 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com5)
+			if(!com5.dead)
+			if((GetHP(com5)>1))
+				if((Distance (caster, com5)<15))
+					if( GetHP(com5) < GetMaxHP(com5) )
+						SendSysMessage( com5, "You recover health" );
+						PlayObjectCenteredEffect(com5,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com5, 0x28F );
+						newhp5 := (GetHP(com5) + healed);
+						SetHP( com5, newhp5 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		if(com6)
+			if(!com6.dead)
+			if((GetHP(com6)>1))
+				if((Distance (caster, com6)<15))
+					if( GetHP(com6) < GetMaxHP(com6) )
+						SendSysMessage( com6, "You recover health" );
+						PlayObjectCenteredEffect(com6,
+                                 	SPELL_EFFECT_ID,
+                                 	SPELL_EFFECT_SPEED,
+                                 	SPELL_EFFECT_LOOP);
+						PlaySoundEffect( com6, 0x28F );
+						newhp6 := (GetHP(com6) + healed);
+						SetHP( com6, newhp6 );
+					endif
+				endif
+			endif
+			endif
+		endif
+		duration := duration - 1;
+		sleep( sleeptime );
+	endwhile
+
+	SendSysMessage( caster, "You finish your song of recovery." );
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram
+
+                                               
+

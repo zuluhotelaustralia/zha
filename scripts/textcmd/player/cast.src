@@ -1,0 +1,121 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/bitwise";
+
+program pagan_cast (who, text)
+	
+	set_critical(1);
+	who.hidden := 0;
+	
+	if(!who.backpack || who.dead)
+		return 0;
+	endif
+	
+	if(len(text) < 1)
+		SendSysMessage(who, "Cast Usage: .cast <spell name> e.g. '.cast Earth Portal'");
+		return 0;
+	endif
+		
+	if(!can_cast(who, 28))
+		return 0;
+	endif
+	
+	if(GetObjProperty( who, "#Casting" ));
+		SendSysMessage(who, "Already casting");
+		return 0;
+	endif
+	
+	var spellname := lower(text);
+	var spellid := -1;
+	
+	case(spellname)
+	
+		//Necro
+		"control undead": 	spellid := 65; break;
+		"darkness": 		spellid := 66; break;
+		"decaying ray": 	spellid := 67; break;
+		"spectre's touch": 	spellid := 68; break;
+		"abyssalflame": 	spellid := 69; break;
+		"animate dead": 	spellid := 70; break;
+		"sacrifice": 		spellid := 71; break;
+		"wraith's breath": 	spellid := 72; break;
+		"sorcerers bane": 	spellid := 73; break;
+		"summon spirit": 	spellid := 74; break;
+		"wraithform": 		spellid := 75; break;
+		"wyvern strike": 	spellid := 76; break;
+		"kill": 			spellid := 77; break;
+		"liche": 			spellid := 78; break;
+		"plague": 			spellid := 79; break;
+		"spellbind": 		spellid := 80; break;
+		
+		//Earth		
+		"antidote": 		spellid := 81; break;
+		"owl sight": 		spellid := 82; break;
+		"shifting earth": 	spellid := 83; break;
+		"summon mammals": 	spellid := 84; break;
+		"call lightning": 	spellid := 85; break;
+		"earth blessing": 	spellid := 86; break;
+		"earth portal": 	spellid := 87; break;
+		"nature's touch": 	spellid := 88; break;
+		"gust of air": 		spellid := 89; break;
+		"rising fire": 		spellid := 90; break;
+		"shapeshift": 		spellid := 91; break;
+		"ice strike": 		spellid := 92; break;
+		"earth spirit": 	spellid := 93; break;
+		"flame spirit": 	spellid := 94; break;
+		"storm spirit": 	spellid := 95; break;
+		"water spirit": 	spellid := 96; break;
+		
+	endcase
+	
+	if(spellid == -1)
+		SendSysMessage(who, "Could not find a pagan spell called: " + text);
+		return 0;
+	endif
+	
+	var BookType;
+	var Offset;
+	
+	
+	if( spellid > MAX_NORMAL_SPELL && spellid <= MAX_NECRO_SPELL )
+		Offset := MAX_NORMAL_SPELL;
+		BookType := 0xA100; //Necro book
+	elseif( spellid > MAX_NECRO_SPELL && spellid <= MAX_EARTH_SPELL)
+		Offset := MAX_NECRO_SPELL;
+		BookType := 0xB100; //Earth book
+	endif
+	
+	var Book := FindObjtypeInContainer(who.backpack, BookType);
+
+	if(Book.serial)
+		var greaterflag := CInt(GetObjProperty( Book, "Greater" ));
+		var lesserflag := CInt(GetObjProperty( Book, "Lesser" ));
+		var OffsetID := spellid - Offset;
+		
+		if( OffsetID > 8 )
+			if( FlagCheck(greaterflag, OffsetID - 8) != 1 )
+				Book := 0;
+			endif
+		else
+			if( FlagCheck(lesserflag, OffsetID) != 1 )
+				Book := 0;
+			endif
+		endif
+	endif
+	
+	if(!Book)
+		SendSysMessage(who, "You don't know that spell.");
+		return 0;
+	endif
+	
+	//SendSysMessage(who, "Casting spellid: " + spellid + " from book: " + Book.desc);
+	
+	
+	
+	SetObjProperty( who, "#Casting", 1 );
+	
+	StartSpellEffect(who, spellid);
+	
+endprogram

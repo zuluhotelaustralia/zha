@@ -1,0 +1,116 @@
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/myutil";
+include "include/attributes";
+include "include/npcbackpacks";
+
+include "include/random";
+include "include/eventid";
+include "include/randname";
+include "include/npcutil";
+include "include/objtype";
+include "include/anchors";
+include "ai/main/killpcsloop";
+include "ai/combat/fight";
+include "ai/combat/firecombatevent";
+//include "ai/setup/animalsetup";
+include "ai/setup/modsetup";
+include "ai/main/loot";
+include "ai/main/sleepmode";
+include "include/npccast";
+//include "ai/combat/spellcombatevent";
+include "ai/setup/spellsetup";
+include "include/spelldata";
+include "include/classes";
+include "include/client";
+
+const MOVING_EFFECT_FIREBALL  := 0x36d4;
+const HALT_THRESHOLD := 8; // how close before he attacks?
+
+program KillPlayers()
+
+	if (GetObjProperty(me, "frozen"))
+		me.frozen := 1;
+	endif
+
+	SetWarMode( 0 );
+
+	main_AI_loop();
+
+endprogram
+
+function CloseDistance( opponent )
+
+    case Distance( me, opponent )
+        1:              // the most likely, so first 
+        0:
+            return 1;
+        default:
+		If(Random(100)<98)
+            RunToward( opponent );
+            sleepms(50);
+		return 0;
+		else
+		TitanStomp(me, opponent);
+		Return 1;
+		endif
+		Return 0;
+		
+    endcase
+
+endfunction
+
+function TitanStomp(me, opponent)
+
+	var utterance := Random(4);
+
+	case (utterance)
+        	0: say("You will be crushed!");
+        	1: say("You will all die!");
+        	2: say("Fear the strength of the Titans!");
+        	3: say("RAAAARRRGH!");
+	endcase
+
+	var circle  := 8;
+
+	var fromhit;
+	
+	var victims := ListMobilesNearLocation( CInt(me.x), CInt(me.y), CInt(me.z), 6);
+	var dmg := 40+Random(30);
+	var okay;	
+
+	PlaySoundEffect( me, SFX_SPELL_EARTHQUAKE1 );
+	sleepms(100);
+	PerformAction( me, ANIM_CAST_DIR );
+	foreach mobile in victims
+		if(mobile.isA(POLCLASS_NPC))
+			okay := 0;			
+		else
+			ApplyTheDamage( mobile, me, dmg, DMGID_PHYSICAL );	
+			PlaySoundEffect( mobile, SFX_SPELL_EARTHQUAKE1 );
+			PlayObjectCenteredEffect( mobile, FX_SPELL_EARTHQUAKE, SPEED_SPELL_EARTHQUAKE, LOOP_SPELL_EARTHQUAKE );
+			PrintTextAbovePrivate( mobile, "The ground shakes as the Titan stomps!", mobile );
+		endif
+	endforeach
+
+	PlaySoundEffect( me, SFX_SPELL_EARTHQUAKE2 );
+
+        foreach item in ListItemsNearLocationOfType(CInt(me.x), CInt(me.y), CInt(me.z), CInt(6), UOBJ_STONEWALL_NS)
+		if( GetObjProperty(item, "f") )
+			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD,  LOOP_SPELL_DISPEL_FIELD );
+                	DestroyItem(item);
+		endif
+        endforeach
+
+        foreach item in ListItemsNearLocationOfType(CInt(me.x), CInt(me.y), CInt(me.z), CInt(6), UOBJ_STONEWALL_EW)
+		if( GetObjProperty(item, "f") )
+			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD,  LOOP_SPELL_DISPEL_FIELD );
+                	DestroyItem(item);
+		endif
+        endforeach
+       
+endfunction

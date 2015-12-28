@@ -9,6 +9,11 @@ include "queststone";
 
 program use_quest_stone(who, stone)
 
+        If(TypeOf(who) == "Array")
+           stone := who[2];
+           who := who[1];
+        endif
+        
 	if (!GetCurrentUser(stone))
 		SetCurrentUser(stone,who);
 	else
@@ -43,46 +48,49 @@ program use_quest_stone(who, stone)
 endprogram
 
 function GMControlGump(who, stone)
-	GFInitGump();
+	GFInitGump( 5 , 10 );
 	GFPage(1);
-	GFResizePic(0, 0, BKGND_PAPER_EX, 290, 510);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 290, 540);
 	var creator := SystemFindObjectBySerial(GetCreator(stone));
-	GFTextMid(10, 20, 230, 53, "Quest Stone Menu");
-	GFTextMid(10, 40, 230, 10, "Creator: " + creator.name);
+	GFTextMid(55, 10, 230, 53, "QUEST STONE MENU");
+	GFTextMid(55, 30, 230, 63, "Title: " + (stone.name - "Quest Stone: ") );
+	GFTextMid(30, 50, 230, 10, "Creator: " + creator.name);
 	GFTextLine(30, 70, 5, "Change Title");
-	GFTextLine(30, 100, 5, "Change Introduction");
-	GFTextLine(30, 130, 5, "Enter Quest webpage URL [optional]");
-	GFTextLine(30, 160, 5, "Quest Broadcast");
-	GFTextLine(30, 190, 5, "Player admin control");
-	GFTextLine(30, 220, 5, "Quest Spawn control");
-	GFTextLine(30, 250, 5, "One off objectives");
-	GFTextLine(30, 280, 5, "Personal objectives");
-	GFTextLine(30, 310, 5, "Item rewards");
-	GFTextLine(30, 340, 5, "Deployment/Registration options");
-	GFTextLine(30, 370, 5, "Finalise quest options");
-	GFTextLine(30, 400, 5, "Quester protection options");
-	GFTextLine(30, 430, 5, "PLAYER GUMP");
-	GFTextLine(30, 460, 5, "Instruction Manual");
-	GFTextLine(30, 490, 5, "Exit Queststone Gump");
+	GFTextLine(30, 100, 5, "Stone Colour");
+	GFTextLine(30, 130, 5, "Change Introduction");
+	GFTextLine(30, 160, 5, "Enter Quest webpage URL [optional]");
+	GFTextLine(30, 190, 5, "Quest Broadcast");
+	GFTextLine(30, 220, 5, "Player admin control");
+	GFTextLine(30, 250, 5, "Quest Spawn control");
+	GFTextLine(30, 280, 5, "One off objectives");
+	GFTextLine(30, 310, 5, "Personal objectives");
+	GFTextLine(30, 340, 5, "Item rewards");
+	GFTextLine(30, 370, 5, "Deployment/Registration options");
+	GFTextLine(30, 400, 5, "Finalise quest options");
+	GFTextLine(30, 430, 5, "Quester protection options");
+	GFTextLine(30, 460, 5, "PLAYER GUMP");
+	GFTextLine(30, 490, 5, "Instruction Manual");
+	GFTextLine(130, 510, 5, "Exit Queststone Gump");
 
 	
 	//GFTextMid(10, 120, 280, 10, "Current colour: " + CStr(dye.color));
 	
 	var titlebutton := GFButtonID( 10, 75, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var introbutton  := GFButtonID( 10, 105, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var webpagebutton  := GFButtonID( 10, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var questbroadcastbutton  := GFButtonID( 10, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var playeradminbutton  := GFButtonID( 10, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );	
-	var questspawnbutton  := GFButtonID( 10, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var oneoffobjbutton  := GFButtonID( 10, 255, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var permaobjbutton  := GFButtonID( 10, 285, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var itemrewardsbutton  := GFButtonID( 10, 315, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var deployoptionsbutton  := GFButtonID( 10, 345, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var finaliseoptionsbutton  := GFButtonID( 10, 375, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var questerprotectionbutton  := GFButtonID( 10, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var playergumpbutton  := GFButtonID( 10, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var instructionbutton  := GFButtonID( 10, 465, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var exitGMGumpbutton  := GFButtonID( 10, 495, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var colorbutton := GFButtonID( 10, 105, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var introbutton  := GFButtonID( 10, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var webpagebutton  := GFButtonID( 10, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var questbroadcastbutton  := GFButtonID( 10, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var playeradminbutton  := GFButtonID( 10, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );	
+	var questspawnbutton  := GFButtonID( 10, 255, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var oneoffobjbutton  := GFButtonID( 10, 285, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var permaobjbutton  := GFButtonID( 10, 315, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var itemrewardsbutton  := GFButtonID( 10, 345, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var deployoptionsbutton  := GFButtonID( 10, 375, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var finaliseoptionsbutton  := GFButtonID( 10, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var questerprotectionbutton  := GFButtonID( 10, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var playergumpbutton  := GFButtonID( 10, 465, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var instructionbutton  := GFButtonID( 10, 495, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitGMGumpbutton  := GFButtonID( 115, 515, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 
 	var choice := GFSendGump(who);
 	if (StoneUserElapsed(stone, who))
@@ -91,6 +99,9 @@ function GMControlGump(who, stone)
 	
 	if (choice[titlebutton.keyid])
 		changetitlegump(who, stone);
+		GMControlGump(who, stone);
+	elseif (choice[colorbutton.keyid])
+		setstonecolor(who, stone);
 		GMControlGump(who, stone);
 	elseif (choice[introbutton.keyid])
 		changeintrogump(who, stone);
@@ -222,23 +233,31 @@ function GMQuestSpawnGump(who, stone)
 
 	GFTextLine(30, 40, 5, "Show Quest Spawns");
 	GFTextLine(30, 70, 5, "Add Quest Spawn");
-	GFTextLine(30, 100, 5, "Remove Quest Spawn");
-	GFTextLine(30, 130, 5, "Clear All Quest Spawns");
-	GFTextLine(30, 160, 5, "Help");
+	GFTextLine(30, 100, 5, "Add Multiple Quest Spawn");
+	GFTextLine(30, 130, 5, "Remove Quest Spawn");
+	GFTextLine(30, 160, 5, "Remove Multiple Quest Spawn");
+	GFTextLine(30, 190, 5, "Clear All Quest Spawns");
+	GFTextLine(30, 220, 5, "Activate All Spawns");
+	GFTextLine(30, 250, 5, "Help");
 	
-	GFTextLine(30, 260, 5, "Exit Spawns Gump");
+	GFTextLine(30, 280, 5, "Exit Spawns Gump");
 
 	var showquestspawnsbutton  := GFButtonID( 10, 45, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var addquestspawnbutton  := GFButtonID( 10, 75, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var removequestspawnbutton  := GFButtonID( 10, 105, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var clearquestsspawnbutton  := GFButtonID( 10, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var helpbutton := GFButtonID( 10, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var exitQGumpbutton  := GFButtonID( 10, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var maddquestspawnbutton  := GFButtonID( 10, 105, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var removequestspawnbutton  := GFButtonID( 10, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var mremovequestspawnbutton  := GFButtonID( 10, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var clearquestsspawnbutton  := GFButtonID( 10, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var activatespawnbutton  := GFButtonID( 10, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var helpbutton := GFButtonID( 10, 255, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitQGumpbutton  := GFButtonID( 10, 285, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	
 	var choice := GFSendGump(who);
 	if (StoneUserElapsed(stone, who))
 		return;
 	endif
+	
+	var i;
 
 	if (choice[showquestspawnsbutton.keyid])
 		DisplayGMSpawnsGump(who, stone);
@@ -246,11 +265,24 @@ function GMQuestSpawnGump(who, stone)
 	elseif(choice[addquestspawnbutton.keyid])
 		addquestspawn(who, stone);
 		GMQuestSpawnGump(who, stone);
+	elseif(choice[maddquestspawnbutton.keyid])
+		while( i != 1 )
+		i :=	addquestspawn(who, stone);
+		endwhile
+		GMQuestSpawnGump(who, stone);
 	elseif (choice[removequestspawnbutton.keyid])
 		removequestspawn(who, stone);
 		GMQuestSpawnGump(who, stone);
+	elseif (choice[mremovequestspawnbutton.keyid])
+		while( i != 1 )
+			i := removequestspawn(who, stone);
+		endwhile
+		GMQuestSpawnGump(who, stone);
 	elseif (choice[clearquestsspawnbutton.keyid])
 		removeAllquestSpawns(who, stone);
+		GMQuestSpawnGump(who, stone);
+	elseif (choice[activatespawnbutton.keyid])
+		activateAllquestSpawns(who, stone);
 		GMQuestSpawnGump(who, stone);
 	elseif (choice[helpbutton.keyid])
 		helpquestspawn(who);
@@ -278,15 +310,132 @@ function changetitlegump(who, stone)
 endfunction
 
 function changeintrogump(who, stone)	
-	var intro:=EnterBigMessage(who, "Enter an intro for the quest");
+	var intro:=EnterBigIntro(who, "Enter an intro for the quest", stone);
 	ChangeQuestIntro(stone, intro);
 endfunction
 
-function sendQuestMessage(who, stone)
-	var mtext := SendTextEntryGump(who, "Quest message:");
-	QuestBroadcast(stone, "Quest broadcast: " + mtext);
+function setstonecolor(who, stone)
+	var mtext := SendTextEntryGump(who, "New Stone Colour:");
+	
+	if( !mtext )
+		return;
+	else
+		stone.color := cint(mtext);
+		sendsysmessage(who, "Stone is now: "+ cint(mtext) );
+		return;
+	endif
+	
 endfunction
 
+function sendQuestMessage(who, stone)
+	//var mtext := SendTextEntryGump(who, "Quest message:");
+	var creator := SystemFindObjectBySerial(GetCreator(stone));
+	GFInitGump( 150,  150 );
+	GFPage( 0 );
+	GFResizePic(0, -20, BKGND_STONESLAB , 290, 370);
+	GFTextMid(55, -10, 230, 53, "QUEST BROADCAST MENU");
+	GFTextLeft(10, 10, 63, "Quest Title: " + (stone.name - "Quest Stone: ") );
+	GFTextLeft(10, 30, 10, "Your Name: " + who.name);
+	GFTextLeft(10 ,50, 53, "MESSAGE:" );
+	GFResizePic(10, 70, BKGND_GOLDTRIM , 270, 30);
+	var bcasted := GFTextEntry(15, 75, 257, 20, 63, "");
+	
+	GFTextLeft(10, 110, 53, "SEND TO:");
+	GFTextLeft(20, 125, 5, "ALL");
+	GFTextLeft(20, 140, 5, "STAFF");
+	GFTextLeft(20, 155, 5, "REGISTERED");
+	
+	GFSetRadioGroup( 1 );
+	var recall := GFRadioButton( 7, 130, 0x938, 0x939, 0 );
+	var recstaff := GFRadioButton( 7, 145, 0x938, 0x939, 0 );
+	var recreg := GFRadioButton( 7, 160, 0x938, 0x939, 1 );
+	
+	GFTextLeft(110, 110, 53, "SENT BY:");
+	GFTextLeft(120, 125, 5, "QUEST NAME");
+	GFTextLeft(120, 140, 5, "CREATOR NAME");
+	GFTextLeft(120, 155, 5, "YOUR NAME");
+	GFTextLeft(120, 170, 5, "OTHER");
+	
+	GFSetRadioGroup( 2 );
+	var qname := GFRadioButton( 107, 130, 0x938, 0x939, 1 );
+	var cname := GFRadioButton( 107, 145, 0x938, 0x939, 0 );
+	var yname := GFRadioButton( 107, 160, 0x938, 0x939, 0 );
+	var oname := GFRadioButton( 107, 175, 0x938, 0x939, 0 );
+	
+	
+	GFResizePic(10, 190, BKGND_GOLDTRIM , 270, 30);
+	var other := GFTextEntry(15, 195, 257, 20, 63, "If Other.");
+	
+	GFTextLeft(10, 220, 53, "TEXT COLOR:");
+	GFTextLeft(20, 235, 5, "BLUE");
+	GFTextLeft(20, 250, 5, "GREEN");
+	GFTextLeft(20, 265, 5, "RED");
+	GFTextLeft(120, 235, 5, "YELLOW");
+	GFTextLeft(120, 250, 5, "GREY");
+	GFTextLeft(120, 265, 5, "WHITE");
+	GFTextLeft(60, 280, 5, "OTHER");
+	
+	
+	GFSetRadioGroup( 3 );
+	var txtclrblue := GFRadioButton( 7, 240, 0x938, 0x939, 1 );
+	var txtclrgreen := GFRadioButton( 7, 255, 0x938, 0x939, 0 );
+	var txtclrred := GFRadioButton( 7, 270, 0x938, 0x939, 0 );
+	var txtclryellow := GFRadioButton( 107, 240, 0x938, 0x939, 0 );
+	var txtclrgrey := GFRadioButton( 107, 255, 0x938, 0x939, 0 );
+	var txtclrwhite := GFRadioButton( 107, 270, 0x938, 0x939, 0 );
+	
+	GFResizePic(35, 290, BKGND_SILVERTRIM , 90, 35);
+	var ocolor := GFTextEntry(43, 297, 70, 20, 63, "INT ONLY.");
+	var txtclrothr := GFRadioButton( 47, 285, 0x938, 0x939, 0 );
+	
+	GFButtonID(160 ,320 , G_BUTTON_OKAY_0, G_BUTTON_OKAY_1, 1 );
+	var canc := GFButtonID(230 ,320 , G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+	var choice := GFSendGump( who );
+	var sending;
+	var receiving;
+	var txtcolor;
+	
+	if( choice[txtclrblue.keyid] == 1 )
+		txtcolor := 0x5F;
+	elseif( choice[txtclrgreen.keyid] == 1 )
+		txtcolor := 63;
+	elseif( choice[txtclrred.keyid] == 1 )
+		txtcolor := 38;
+	elseif( choice[txtclryellow.keyid] == 1 )
+		txtcolor := 53;
+	elseif( choice[txtclrgrey.keyid] == 1 )
+		txtcolor := 804;
+	elseif( choice[txtclrwhite.keyid] == 1 )
+		txtcolor := 904;
+	elseif( choice[txtclrothr.keyid] == 1 )
+		txtcolor := GFExtractData(ocolor.keyid, choice);
+	endif
+	
+	if( choice[qname.keyid] == 1 )
+		sending := (stone.name - "Quest Stone: ");
+	elseif( choice[cname.keyid] == 1 )
+		sending := creator.name;
+	elseif( choice[yname.keyid] == 1 )
+		sending := who.name;
+	elseif( choice[oname.keyid] == 1 )
+		sending := GFExtractData(other.keyid, choice);
+	endif
+	
+	if( choice[recall.keyid] == 1 )
+		receiving := 1;
+	elseif( choice[recstaff.keyid] == 1 )
+		receiving := 2;
+	elseif( choice[recreg.keyid] == 1 )
+		receiving := 3;
+	endif
+	
+	if( !GFExtractData(bcasted.keyid, choice) || choice[canc.keyid] == 1 )
+		return;
+	else
+		QuestBroadcast(stone, sending, receiving, cint(txtcolor), GFExtractData(bcasted.keyid, choice) );
+	endif
+		
+endfunction
 
 function EnterBigMessage(who, title)
 	GFInitGump();
@@ -324,6 +473,7 @@ function EnterBigMessage(who, title)
 	var choice := GFSendGump(who);
 	var mystring :="";
 	var tempstr;
+	
 	if (choice[OKbutton.keyid])
 		foreach m in textbox
 			//Broadcast(GFExtractData(m.keyid, choice));
@@ -335,6 +485,87 @@ function EnterBigMessage(who, title)
 		return mystring;
 	endif
 	return 0;	
+endfunction
+
+function EnterBigIntro(who, title, stone)
+	GFInitGump();
+	GFPage(0);
+	GFNoDispose();
+	GFNoClose();
+	GFResizePic( 0, 0, BKGND_GOLDTRIM, 350, 550);
+				
+	GFTextLine(55, 520, 63, "OKAY");
+	GFTextLine(115, 520, 38, "Cancel");
+		
+	GFTextLine(5, 5, 10, "Enter Introduction below.");
+
+	var OKbutton  := GFButtonID( 40, 525, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var cancelbutton  := GFButtonID( 100, 525, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var intropage := 1;
+	var contentsArray := MakeBookContentsArray(GetIntro(stone.serial));
+	var cancelArray := contentsArray;
+	var linecounter := 14;
+	var pagecount := 1;
+	var linecount := 0;
+	var x := 10;
+	var y := 30;
+	var textbox:=array;
+	if ( !contentsArray || contentsArray == 0 || cstr(contentsArray) == "");
+		textbox.append(GFTextEntry(x, 30, 300, 20, 53, ""));
+		textbox.append(GFTextEntry(x, 50, 300, 20, 53, ""));
+		textbox.append(GFTextEntry(x, 70, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 90, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 110, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 130, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 150, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 170, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 190, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 210, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 230, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 250, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 270, 300, 20, 53, "" ));
+		textbox.append(GFTextEntry(x, 290, 300, 20, 53, "" ));
+	else
+		foreach line in contentsArray
+		
+			if (linecounter >= 14)	
+				GFPage(intropage);
+				y := 30;
+				linecounter := 0;
+				linecount := 30;
+				if (len(contentsarray) / intropage > 14)
+					GFButtonPage( 310, 510, G_PARTY_ARROW_RIGHT_0, G_PARTY_ARROW_RIGHT_1, intropage+1 );
+				endif
+				if (intropage != 1)
+					GFButtonPage( 270, 510, G_PARTY_ARROW_LEFT_0, G_PARTY_ARROW_LEFT_1, intropage-1 );
+				endif
+				intropage := intropage + 1;
+			endif
+			textbox.append(GFTextEntry(x, y, 330, 530, 53, line));
+			linecount := linecount + 17;
+			linecounter := linecounter +1;
+			y := y + 20;
+		endforeach
+	endif
+	var choice := GFSendGump(who);
+	var mystring :="";
+	var tempstr;
+	if (choice[OKbutton.keyid])
+		foreach m in textbox
+			//Broadcast(GFExtractData(m.keyid, choice));
+			var tempstr:=GFExtractData(m.keyid, choice);
+			if (tempstr)
+				mystring:=mystring + " " + tempstr;
+			endif
+		endforeach
+		return mystring;
+	else
+		foreach m in cancelArray
+			mystring := mystring + " " + m;
+		endforeach
+		return mystring;
+	endif
 endfunction
 
 function showregisteredplayers(who, stone)
@@ -351,13 +582,14 @@ function addquestspawn(who, stone)
 	var spawn := Target(who);
 	if (!spawn)
 		SendSysMessage(who, "Nothing selected");
-		return;
+		return 1;
 	endif
 	if (spawn.objtype!=0xa300)
 		SendSysMessage(who, "That is not a spawn point");
-		return;
+		return 1;
 	endif
-	AddQuestSpawnPoint(stone, spawn);
+	AddQuestSpawnPoint(who, stone, spawn);
+	return 0;
 endfunction
 
 
@@ -366,13 +598,28 @@ function removequestspawn(who, stone)
 	var spawn := Target(who);
 	if (!spawn)
 		SendSysMessage(who, "Nothing selected");
-		return;
+		return 1;
 	endif
 	if (spawn.objtype!=0xa300)
 		SendSysMessage(who, "That is not a spawn point");
-		return;
+		return 1;
 	endif
 	RemoveQuestSpawnPoint(stone, spawn);
+	return 0;
+endfunction
+
+function activateAllquestSpawns(who, stone)
+	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");
+	var qObjectives := GetObjProperty(stone, "SpawnActive");
+	var spawn;
+	var result :=0;
+	var index:=1;
+	foreach q in qSpawnPoints
+		spawn := SystemFindObjectBySerial(q);
+		qObjectives[cint(spawn.serial)] := 1;
+	  SetObjProperty(stone, "SpawnActive",qObjectives);
+    PrintTextAbove(spawn, "Objective Armed");
+	endforeach
 endfunction
 
 function removeAllquestSpawns(who, stone)
@@ -411,6 +658,11 @@ function DisplayGMPlayersGump(who, stone)
 				players:=GetRegisteredPlayers(stone.serial, start, retrieve);
 				gumpresult := GMplayersInfoGump(who, players, page , "Registered Players", stone);
 			endif
+		elseif(gumpresult >= 99 )
+			who.concealed := 1;
+			MoveCharacterToLocation( who, players[cint(gumpresult) - 100].x, players[cint(gumpresult) - 100].y, players[cint(gumpresult) - 100].z);
+			GMPlayerChangesGump(who, stone, players[cint(gumpresult) - 100]);
+			return;
 		endif
 	endwhile
 endfunction
@@ -437,6 +689,7 @@ function GMplayersInfoGump(who, players, page, title, stone)
 	//Broadcast ("size of player array: " + sSize);
 	
 	var hButton:=array;
+	var goButton := array;
 	var tempstr;
 	for(i:=1;i<=sSize;i:=i+1)
 		
@@ -447,7 +700,8 @@ function GMplayersInfoGump(who, players, page, title, stone)
 		endif
 
 		GFTextLine(50, y, 5, tempstr);
-		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		hButton.append(GFButtonID(25, y+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 ));
+		goButton.append(GFButtonID(37, y+3, G_GREEN_SMALL_CIRCLE_1, G_RED_SMALL_CIRCLE_1, 1 ));
 		y:=y+20;
 	endfor
 	
@@ -483,6 +737,15 @@ function GMplayersInfoGump(who, players, page, title, stone)
 			return counter;
 		endif
 	endforeach
+	
+	counter := 0;
+	foreach b in goButton
+		counter:=counter+1;
+   	if (choice[b.keyid])
+			return 100+counter;
+		endif
+	endforeach
+	
 	return 0;
 endfunction
 
@@ -603,17 +866,19 @@ function GMOneOffObjGump(who, stone)
 
 	GFTextLine(30, 70, 5, "List one-off objectives");
 	GFTextLine(30, 130, 5, "Add monster objective");
-	GFTextLine(30, 160, 5, "Add item objective");
-	GFTextLine(30, 190, 5, "Add location objective");
-	GFTextLine(30, 220, 5, "Help");
+	GFTextLine(30, 160, 5, "Add multi-monster objectives");
+	GFTextLine(30, 190, 5, "Add item objective");
+	GFTextLine(30, 220, 5, "Add location objective");
+	GFTextLine(30, 250, 5, "Help");
 	
 	GFTextLine(30, 290, 5, "Exit 1 OFF Quest Objectives");
 
 	var listobjsbutton := GFButtonID( 10, 75, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var addmonsterbutton  := GFButtonID( 10, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var additembutton  := GFButtonID( 10, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var addlocbutton  := GFButtonID( 10, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var helpbutton := GFButtonID( 10, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+        var addmultimonsterbutton  := GFButtonID( 10, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var additembutton  := GFButtonID( 10, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var addlocbutton  := GFButtonID( 10, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var helpbutton := GFButtonID( 10, 255, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var exit1Obutton  := GFButtonID( 10, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	
 	var choice := GFSendGump(who);
@@ -625,6 +890,8 @@ function GMOneOffObjGump(who, stone)
 		DisplayGMOneOffObjectivesGump(who, stone);
 	elseif (choice[addmonsterbutton.keyid])
 		addMonsterOneOffObjective (who, stone);
+        elseif (choice[addmultimonsterbutton.keyid])
+		addMultiMonsterOneOffObjectives (who, stone);
 	elseif (choice[additembutton.keyid])
 		addItemOneOffObjective (who, stone);
 	elseif (choice[addlocbutton.keyid])
@@ -660,6 +927,26 @@ function addMonsterOneOffObjective (who, stone)
 	endif
 	var questPoints := CInt(SendTextEntryGump(who, "Award how many questpoints? [integer]"));
 	AddMonsterObjective(stone.serial, monster, questpoints);
+endfunction
+
+function addMultiMonsterOneOffObjectives (who, stone)
+        var questPoints := CInt(SendTextEntryGump(who, "Award how many questpoints for group? [integer]"));
+        var x;
+        while( x != 1)
+	   SendSysMessage(who, "Select a monster objective");
+	   var monster := Target(who);
+	   if (!monster)
+		   SendSysMessage(who, "Invalid selection");
+                    x := 1;
+                    return;
+           endif
+	   if (!monster.isA(POLCLASS_NPC))
+		SendSysMessage(who, "You must select an NPC");
+                x := 1;
+		return;
+	   endif
+	   AddMonsterObjective(stone.serial, monster, questpoints);
+        endwhile
 endfunction
 
 function addItemOneOffObjective (who, stone)
@@ -1292,7 +1579,7 @@ function DisplayGMSpawnsGump(who, stone)
 	while (gumpresult)
 		if (gumpresult<=20)
 		//show character changing gump
-			MoveCharacterToLocation(who,spawns[gumpresult].x, spawns[gumpresult].y, spawns[gumpresult].z);
+			RunSpawnEditGump(who, spawns[gumpresult], stone);
 			return;
 		endif
 		if (gumpresult==21)//prev
@@ -1317,7 +1604,8 @@ function GMSpawnsGump(who, spawns, page, title, stone)
 	GFInitGump();
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_SCROLL, 400, 500);
-	GFTextMid(100, 10, 200, 10, title);
+	GFTextLine(70, 10, 10, title);
+	GFTextLine(210, 10, 53, "Points");
 	
 	var i;
 	var y := 40;
@@ -1337,7 +1625,12 @@ function GMSpawnsGump(who, spawns, page, title, stone)
 	var hButton:=array;
 	for(i:=1;i<=sSize;i:=i+1)
 		
-		GFTextLine(50, y, 5, spawns[i].name);
+		GFTextCrop(50, y, 150, 50, 5, spawns[i].name);
+		if( !GetObjProperty(spawns[i], "SetQuestPointReward" ) )
+			GFTextLine( 210 , y , 38, "N/A");
+		else
+			GFTextLine(210, y, 53, GetObjProperty(spawns[i], "SetQuestPointReward" ));
+		endif
 		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
 		y:=y+20;
 	endfor
@@ -1417,9 +1710,10 @@ function GMItemRewardsGump(who, stone)
 	elseif (choice[helpbutton.keyid])
 		helprewards(who);
 	elseif (choice[exitQGumpbutton.keyid])
+		GMControlGump(who, stone);
 		return;
 	endif
-
+GMItemRewardsGump(who, stone);
 endfunction
 
 function helprewards(who)
@@ -1433,10 +1727,10 @@ function helprewards(who)
 endfunction
 
 function AddRewardItem(stone, who)
-	if (GetNumberOfQuestRewardItems(stone)>=10)
+	/*if (GetNumberOfQuestRewardItems(stone)>=10)
 			SendSysMessage(who, "Only 10 items are permitted to be offered as quest reward items per queststone.");
 			return;
-	endif
+	endif*/
 	SendSysMessage(who, "Select the item to add as a quest reward");
 	var item := Target(who);
 	if (!item)
@@ -1839,41 +2133,326 @@ endfunction
 function playerGump(who, stone)
 	var title := GetQuestTitle(stone.serial);
 	var webURL := GetObjProperty(stone, "WebPageURL");
-	GFInitGump();
-	GFPage(1);
-	GFResizePic(0, 0, BKGND_SCROLL, 360, 330);
-		
-	GFTextMid(10, 20, 280, 53, "Quest: " + title);
-
-	GFTextLine(90, 50, 5, "Quest Introduction");
+	GFInitGump( 10 , 10 );
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_STONESLAB, 400, 330);
+	GFCheckerTrans(3, 3, 394, 20); // Top trans
+	GFCheckerTrans(3, 26, 195, 273); // Left Trans
+	GFCheckerTrans(201, 26 , 195, 273); // Right Trans
+	GFCheckerTrans(3, 302, 394, 25); // Bottom Trans
+	GFTextMid(10, 1, 380, 53, "Quest: " + title);
+	
+	GFTextLine(35, 50, 63, "Quest Introduction");
 	if (webURL)
-		GFTextLine(90, 80, 5, "View Quest Web Page");
+		GFTextLine(35, 80, 63, "View Quest Web Page");
 	endif
-	GFTextLine(90, 110, 5, "Register for the quest");
-	GFTextLine(90, 140, 5, "Return quest item");
-	GFTextLine(90, 170, 5, "My progress");
-	GFTextLine(90, 200, 5, "Quest rules");
-	GFTextLine(90, 230, 5, "Obtain quest reward");
-	GFTextLine(90, 260, 5, "Resign from this quest");
-	GFTextLine(90, 290, 5, "Exit");
+	GFTextLine(35, 110, 63, "Register for the quest");
+	GFTextLine(35, 140, 63, "Return quest item");
+	GFTextLine(35, 170, 63, "My progress");
+	GFTextLine(35, 200, 63, "Quest rules");
+	GFTextLine(35, 230, 63, "Obtain quest reward");
+	GFTextLine(35, 260, 63, "Resign from this quest");
+	//GFTextLine(335, 310, 38, "Exit");
 
 	
-	var ShowIntroButton := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var ShowIntroButton := GFButtonPage( 20, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 7 );
 	
 	var webPagebutton;
 	if (webURL)
-		webPagebutton := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+		webPagebutton := GFButtonID( 20, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	endif
-	var registerPlayerButton := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var returnItemButton := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var myProgressButton := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var questRulesButton := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var buyQuestItemButton := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var quitQuestButton := GFButtonID( 60, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var exitButton := GFButtonID( 60, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFButtonPage( 20, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var returnItemPage := GFButtonPage( 20, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 2 );
+	var myProgressButton := GFButtonPage( 20, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 3 );
+	var questRulesButton := GFButtonPage( 20, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 4 );
+	var buyQuestItemButton := GFButtonPage( 20, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 5 );
+	var quitQuestButton := GFButtonPage( 20, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 6 );
+	var exitButton := GFButtonID( 340, 303, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+	var registerPlayerButton;
+	var linecount := 30;
+	
+	GFPage(1);
+	
+	if (IsRegistered(stone, who.serial) ||
+		 IsBanned(stone, who.serial) ||
+		 IsCompleted(stone, who.serial) ||
+		  IsCompleted(stone, who.serial) ||
+		  !CheckRegistrationCondition(who, stone) ||
+		  !IsRegistrationOpen(stone) ||
+		  !CheckQuestPrequisite(stone, who.serial))
+		if (IsBanned(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You have been banned");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"from joining this quest.");
+			linecount := linecount + 30;
+		endif
+		
+		if(IsCompleted(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You have already completed this");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"quest and cannot complete");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"it again.");
+			linecount := linecount + 30;
+		endif
+		
+		if(!CheckRegistrationCondition(who, stone))
+			GFTextMid(220, linecount, 185, 53,"This quest is restricted to");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"players who are");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,GetRegistrationConditionString(stone));
+			linecount := linecount + 30;
+		endif
+		
+		if(!IsRegistrationOpen(stone))
+			GFTextMid(220, linecount, 185, 38,"The quest is not yet");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 38,"available.");
+			linecount := linecount + 30;
+		endif
+		
+		if (!CheckQuestPrequisite(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You must complete the quest ");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,GetQuestTitle(GetPrerequisiteQuest(stone)));
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"before being allowed to register. ");
+			linecount := linecount + 30;
+		endif
+		
+		if (IsRegistered(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You are already registered");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"for this quest.");
+			linecount := linecount + 30;
+		endif
+		
+	else
+		GFTextMid(220, linecount, 185, 53,"Would you like to register?");
+			linecount := linecount + 25;
+		registerPlayerButton := GFButtonID( 245, linecount, G_BUTTON_APPLY_0, G_BUTTON_APPLY_1, 1 );
+		GFButtonID( 310, linecount, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+	endif
+	
+	
+	//Return quest item.
+	GFPage(2);
+	
+	linecount := 30;
+	
+	GFTextMid(215, linecount, 225, 53, "QUEST ITEMS");
+	linecount := linecount + 25;
+	var returnItemButton := GFButtonID( 385, linecount+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextMid(230, linecount, 185, 63,"Return a quest item.");
+	linecount := linecount + 25;
+	var returnMultiItemButton := GFButtonID( 385, linecount+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextMid(220, linecount, 185, 63,"Return multiple quest items.");
+	
+	
+	//Quest Progress
+	GFPage(3);
+	
+	linecount := 30;
+	
+	if (IsRegistered(stone, who.serial))
+		GFTextMid(220, linecount, 185, 53,"You currently have");
+		linecount := linecount + 15;
+		GFTextMid(220, linecount, 185, 53,GetPlayersQuestPoints(stone.serial, who.serial) + " questpoints.");
+		linecount := linecount + 30;
+		
+		var persobjectives:=GetObjProperty(stone, "PersonalObjectives");
+		var objectives:=GetObjProperty(stone, "Objectives");
+		var counter:=0;
+		if (persobjectives)
+			foreach obj in persobjectives
+				if (IsPersonalObjectiveCompleted(who, obj, stone.serial))
+					counter := counter+1;
+				endif			
+			endforeach
+			
+			GFTextMid(215, linecount, 185, 53,counter + "/" + persobjectives.size() + " completed");
+			linecount := linecount + 30;
+			GFTextMid(215, linecount, 185, 53," personal objectives.");
+			linecount := linecount + 30;
+		endif
+		counter:=0;
+		if (objectives)
+			foreach obj in objectives
+				if (IsObjectiveCompleted(stone, obj))
+					counter := counter+1;
+				endif			
+			endforeach
+			GFTextMid(215, linecount, 185, 53,counter + "/" + objectives.size() + " one-off objectives for this");
+			linecount := linecount + 15;
+			GFTextMid(215, linecount, 185, 53, "quest have been completed.");
+			linecount := linecount + 30;
+		endif
+		if (IsCompleted(stone, who.serial))
+			GFTextMid(215, linecount, 185, 63,"You have completed this quest.");
+			linecount := linecount + 30;
+		endif
+		
+	else
+			GFTextMid(215, linecount, 185, 53,"You are not registered");
+			linecount := linecount + 15;
+			GFTextMid(215, linecount, 185, 53,"for this quest.");
+			linecount := linecount + 30;
+	endif
+	
+	var buypage := 5;
+	var currentpage := 1;
+	var i;
+	var y := linecount + 30;
+	var hButton:=array;
+	var hTilePics :=array;
+	var backpackitems:=EnumerateItemsInContainer(GetStoneStorageArea(stone));
+	var questbuyitems := array;
+	var itemcounter := 5;
+	for(i:=1;i<=backpackitems.size();i:=i+1)
+		var qbuy := GetObjProperty(backpackitems[i], "QuestBuyValue");
+		if (qbuy) //only displays quest buy items
+			questbuyitems.append(backpackitems[i]);
+		endif
+	endfor
+	
+	foreach qitem in questbuyitems
+		
+		if (itemcounter >= 5)	
+			GFPage(buypage);
+			itemcounter := 0;
+			linecount := 30;
+			if (cdbl(len(questbuyitems)) / (currentpage) > 5)
+				GFButtonPage( 340, 275, G_PARTY_ARROW_RIGHT_0, G_PARTY_ARROW_RIGHT_1, buypage+10 );
+			endif
+			if (currentpage != 1)
+				GFButtonPage( 220, 275, G_PARTY_ARROW_LEFT_0, G_PARTY_ARROW_LEFT_1, buypage-10 );
+			endif
+			buypage := buypage + 10;
+			currentpage := currentpage + 1;
+			itemcounter := 0;
+			y := linecount + 30;
+		endif
+	
+	GFTextMid(215, linecount, 200, 53, "QUEST REWARD ITEMS");
 
+		var qbuy := GetObjProperty(qitem, "QuestBuyValue");
+		GFTextLine(225, y, 10, qitem.desc);
+		GFTextLine(205, y+17, 52, "Points required: " + qbuy);
+		hButton.append(GFButtonID(205, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		hTilePics.append(GFTilePic( 350, y, qitem.graphic));
+		y:=y+45;
+		itemcounter := itemcounter + 1;
+	endforeach
+	
+	var counter:=0;
+	
+	if (StoneUserElapsed(stone, who))
+		return;
+	endif
+	
+//Resign Gump	
+	GFPage(6);
+	linecount := 30;
+		if (!IsRegistered(stone, who.serial) ||
+		 IsBanned(stone, who.serial) ||
+		 IsCompleted(stone, who.serial) ||
+		  IsCompleted(stone, who.serial) ||
+		  !CheckRegistrationCondition(who, stone) ||
+		  !IsRegistrationOpen(stone) ||
+		  !CheckQuestPrequisite(stone, who.serial))
+		if (IsBanned(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You have been banned");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"from this quest.");
+			linecount := linecount + 30;
+		endif
+		
+		if(IsCompleted(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You have already completed this");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"quest and cannot");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"resign.");
+			linecount := linecount + 30;
+		endif
+		
+		if(!CheckRegistrationCondition(who, stone))
+			GFTextMid(220, linecount, 185, 53,"This quest is restricted to");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"players who are ");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,GetRegistrationConditionString(stone));
+			linecount := linecount + 30;
+		endif
+		
+		if(!IsRegistrationOpen(stone))
+			GFTextMid(220, linecount, 185, 38,"The quest is not yet");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 38,"available.");
+			linecount := linecount + 30;
+		endif
+		
+		if (!CheckQuestPrequisite(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You must complete the quest ");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,GetQuestTitle(GetPrerequisiteQuest(stone)));
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"before being allowed to register. ");
+			linecount := linecount + 30;
+		endif
+		
+		
+		if (!IsRegistered(stone, who.serial))
+			GFTextMid(220, linecount, 185, 53,"You have to register");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"before you can");
+			linecount := linecount + 15;
+			GFTextMid(220, linecount, 185, 53,"quit this quest.");
+			linecount := linecount + 30;
+		endif
+		
+	else
+		GFTextMid(220, linecount, 185, 53,"Would you like to resign from");
+			linecount := linecount + 25;
+		GFTextMid(220, linecount, 185, 53," this quest?");
+			linecount := linecount + 25;
+		quitQuestButton := GFButtonID( 245, linecount, G_BUTTON_APPLY_0, G_BUTTON_APPLY_1, 1 );
+		GFButtonID( 310, linecount, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+	endif
+	
+//Quest Intro Gump
+	var intropage := 7;
+	var contentsArray := MakeBookContentsArray(GetIntro(stone.serial));
+	var linecounter := 14;
+	var pagecount := 1;
+	linecount := 30;
+	//16 lines per page
+	foreach line in contentsArray
+		
+		if (linecounter >= 14)	
+			GFPage(intropage);
+			linecounter := 0;
+			linecount := 30;
+			if (len(contentsarray) / (intropage - 6) >= 14)
+				GFButtonPage( 340, 275, G_PARTY_ARROW_RIGHT_0, G_PARTY_ARROW_RIGHT_1, intropage+1 );
+			endif
+			if (intropage != 7)
+				GFButtonPage( 220, 275, G_PARTY_ARROW_LEFT_0, G_PARTY_ARROW_LEFT_1, intropage-1 );
+			endif
+			intropage := intropage + 1;
+		endif
+		
+		
+		
+		
+		GFTextMid(220, linecount, 185, 53, line);
+		linecount := linecount + 17;
+		linecounter := linecounter +1;
+	endforeach
 	
 	var choice := GFSendGump(who);
+	var returned := 0;
 	if (StoneUserElapsed(stone, who))
 		return;
 	endif
@@ -1886,7 +2465,13 @@ function playerGump(who, stone)
 	elseif(choice[registerPlayerButton.keyid])
 		registerQuestPlayer(who, stone);
 	elseif(choice[returnItemButton.keyid])
+		SendSysMessage(who, "Select the quest item objective you wish to return", 3 ,53);
 		returnItem(who, stone);
+	elseif(choice[returnMultiItemButton.keyid])
+	SendSysMessage(who, "Select the quest items you wish to return", 3 ,53);
+		while (returned != 1)
+			returned := returnItem(who, stone);
+		endwhile
 	elseif(choice[myProgressButton.keyid])	
 		myProgressGump(who, stone);
 	elseif(choice[questRulesButton.keyid])	
@@ -1898,7 +2483,39 @@ function playerGump(who, stone)
 	elseif(choice[exitButton.keyid])
 		return;
 	endif
+	
+	foreach b in hButton
+   	if (choice[b.keyid])
+			//condition: if quest set so that must be in completed list to buy items then check if in list
+			if (GetRewardQuestItems(stone) == REWARDQUESTITEMS_NO)
+				SendSysMessage(who, "This quest has been set not to reward items at this time.", 3, 53);
+				return;
+			endif
+			
+			if (GetRewardQuestItems(stone) == REWARDQUESTITEMS_COMPLETED)
+				if (!IsCompleted(stone, who.serial))
+					SendSysMessage(who, "This quest has been set so that items are only rewarded after it has been completed. Complete the quest and then try again.", 3, 53);
+					return;
+				endif
+			endif
+			if ( len(questbuyitems) > 1);
+				if (BuyQuestRewardItem(questbuyitems[counter+1],stone,who))
+					SendSysMessage(who, "" + questbuyitems[counter+1].desc + " has been placed in your bankbox" ,3, 53);
+				else
+					SendSysMessage(who, "You cannot buy that" ,3, 53);
+				endif
+			else
+				
+				if (BuyQuestRewardItem(questbuyitems[1],stone,who))
+					SendSysMessage(who, "" + questbuyitems[1].desc + " has been placed in your bankbox" ,3, 53);
+				else
+					SendSysMessage(who, "You cannot buy that" ,3, 53);
+				endif
+			endif
 
+		endif
+		counter := counter +1;
+	endforeach
 endfunction
 
 function showIntro(who, stone)
@@ -1989,29 +2606,28 @@ endfunction
 
 function returnItem(who, stone)
 //change this so that u must drop item onto stone
-	SendSysMessage(who, "Select the quest item objective you wish to return", 3 ,53);
 	var item := Target(who);
 	if (StoneUserElapsed(stone, who))
-		return;
+		return 0;
 	endif
 
 	if (!item)
 		SendSysMessage(who, "Nothing selected", 3, 53);
-		return;
+		return 1;
 	endif
 	if (item.container!=who.backpack)
 		SendSysMessage(who, "The item must be in your backpack!", 3, 53);
-		return;
+		return 0;
 	endif
 	if (! item.isA(POLCLASS_ITEM))
 		SendSysMessage(who, "That is not an item", 3 ,53);
-		return;
+		return 0;
 	endif
 	if (IsObjectiveRegistered(stone, item.serial)) //one off objective unique item quest obj
 		if (ReturnQuestItemObjective(stone.serial, who.serial, item.serial))
 			SendSysMessage(who, "Quest item returned!", 3 ,53);
 			MoveItemToContainer( item, GetStoneStorageArea(stone));
-			return;
+		return 0;
 		endif
 	endif
 
@@ -2019,10 +2635,11 @@ function returnItem(who, stone)
 		//Broadcast("obj type is registered");
 		if(ReturnQuestObjectTypeObjective(stone.serial, who, item))
 			SendSysMessage(who, "You have returned a quest item!", 3 ,53);
-			return;
+		return 0;
 		endif
 	endif
 	SendSysMessage(who, "Item not returned.", 3, 53);
+	return 0;
 endfunction
 
 function playerQuitQuest(who, stone)
@@ -2107,8 +2724,6 @@ function playerQuestBuyItemsGump(stone, who)
 	return 0;
 
 endfunction
-
-
 
 function questRulesGump(who, stone)	
 	GFInitGump();
@@ -2307,7 +2922,7 @@ function GMQuesterProtectionGump(who, stone)
 
 	GFInitGump();
 	GFPage(1);
-	GFResizePic(0, 0, BKGND_PAPER_EX, 500, 300);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 500, 330);
 	GFTextMid(10, 15, 280, 10, "Quester protection options");	
 	GFTextLine(90, 50, 53, "Current quest point penalty: " + GetKillerQuestPointPenalty(stone));
 	var lootingallowed:=GetLootingAllowed(stone);
@@ -2329,16 +2944,18 @@ function GMQuesterProtectionGump(who, stone)
 	GFTextLine(90, 140, 5, "Allow looting of fellow questers");
 	GFTextLine(90, 170, 5, "Don't Allow looting of fellow questers");
 	GFTextLine(90, 200, 5, "(Toggle) At Death Questers get autoteled to queststone with items: currently " + autstr);
-	GFTextLine(90, 230, 5, "Help");
-	GFTextLine(90, 260, 5, "Exit");
+        GFTextLine(90, 230, 5, "Set Autotele Respawn Point");
+	GFTextLine(90, 260, 5, "Help");
+	GFTextLine(90, 290, 5, "Exit");
 
 	
 	var setfellowkillermax := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var allowlooting := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var dontallowlooting := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var autoteledeath := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var helpbtn := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	var exitButton := GFButtonID( 60, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var autotelepoint := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var helpbtn := GFButtonID( 60, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 
 	var choice := GFSendGump(who);
 	if (StoneUserElapsed(stone, who))
@@ -2357,6 +2974,8 @@ function GMQuesterProtectionGump(who, stone)
 		else
 			SetAutoTeleDeath(stone, 1); //on
 		endif
+        elseif (choice[autotelepoint.keyid])
+                SetAutoTelePoint(who,Stone);
 	elseif (choice[helpbtn.keyid])
 		helpplayerprotection(who);
 	elseif(choice[exitButton.keyid])
@@ -2384,6 +3003,16 @@ function EnterKillerQuestPointPenalty(who, stone)
 	endif
 endfunction
 
+function SetAutoTelePoint(who, stone)
+   SendSysMessage(who,"Select The Point For Respawn.");
+   var rspwn := target(who);
+   if( !rspwn)
+      SendSysMessage(who, "No Target Found.", 3, 38);
+      SendSysMessage(who, "Canceled.");
+      Return;
+   endif
+   EnableAutoTelePoint(Stone, rspwn.x, rspwn.y, rspwn.z);
+endfunction
 
 function helpplayerprotection(who)
 	var helpstring:= "Quester protection options: Background - queststones afford the following protection to questers when the quest is deployed:" +

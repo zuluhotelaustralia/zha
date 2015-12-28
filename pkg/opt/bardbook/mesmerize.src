@@ -1,0 +1,73 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_PARALYZE;
+const SPELL_EFFECT_ID		:= FX_SPELL_PARALYZE;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_PARALYZE;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_PARALYZE;
+
+program mesmerize( caster )
+
+	if(!TryToCast( caster, 12 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var cast_on := CanTargetSpell( caster );
+	if( !cast_on )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	Send_Attack( cast_on, caster );
+
+	PlayMovingEffect(caster,
+                                 cast_on,
+                                 SPELL_EFFECT_ID,
+                                 SPELL_EFFECT_SPEED,
+                                 SPELL_EFFECT_LOOP,
+                                 explode := 0);
+
+	PlaySoundEffect( caster, 0x1ED );
+
+	var circle := 3;
+
+	var immunity := IsProtected( caster, cast_on, circle );
+	if( immunity == 1 )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var magery := GetEffectiveSkill(caster, SKILLID_PROVOCATION);
+
+	if( immunity == 2 )
+		SendSysMessage( cast_on, "One of your equipped item increase the effect of the spell!" );
+		magery := magery * 2;
+		circle := circle * 2;
+	endif
+
+	var prot := GetObjProperty( cast_on, "FreeAction" );
+	if( prot == 1)
+		SendSysMessage( cast_on, "You are magically protected from mesmerizing effects" );
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	elseif( prot == -1 )
+		magery := magery * 2;
+		circle := circle * 2;
+	endif
+
+	var amt := 2 + CInt(magery / 10);
+	var bard := GetObjProperty( caster, "IsBard" );
+	amt := amt * (1+(bard/10));
+	DoTempMod(cast_on, "p", 1, amt);
+
+	EraseObjProperty( caster, "#Casting" );
+	return;
+ 
+endprogram
+
+

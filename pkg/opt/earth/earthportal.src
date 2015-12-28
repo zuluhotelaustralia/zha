@@ -7,17 +7,29 @@ include "include/recalling";
 include "include/objtype";
 include "include/client";
 include "../pkg/std/housing/utility";
+include "include/statichouses";
 
 program cast_earth_portal( caster )
 
 	var circle := GetCircle( SPELLID_EARTH_PORTAL );
 	var duration := CInt(GetEffectiveSkill( caster, SKILLID_MAGERY ) / 2);
+	var casterinstatic := IsInStaticHouse( caster.x, caster.y, caster.z );
 
  	if( TryToCast( caster, SPELLID_EARTH_PORTAL ) != SUCCESS )
  		EraseObjProperty(caster, "#Casting");
 		return;
 	endif
 
+	if( casterinstatic )
+		if( !IsStaticOwner( caster, casterinstatic )  )
+			if( !IsStaticCoowner( caster, casterinstatic ) )
+				if( !IsStaticFriend( caster, casterinstatic ) )
+						SendSysMessage( caster, "You can't gate in this house." );
+				return;
+				endif
+			endif
+		endif
+	endif
 	if( caster.multi )
 		if( !IsOwner( caster, caster.multi )  )
 			if( !IsFriend( caster, caster.multi ) )
@@ -63,7 +75,18 @@ program cast_earth_portal( caster )
 	var tox := CInt(GetObjProperty( cast_on, "x" ));
 	var toy := CInt(GetObjProperty( cast_on, "y" ));
 	var toz := CInt(GetObjProperty( cast_on, "z" ));
+	var casttostatic := IsInStaticHouse( tox, toy, toz );
 
+	if( casttostatic )
+		if( !IsStaticOwner( caster, casttostatic )  )
+			if( !IsStaticCoowner( caster, casttostatic ) )
+				if( !IsStaticFriend( caster, casttostatic ) )
+						SendSysMessage( caster, "You cannot gate to this house." );
+				return;
+				endif
+			endif
+		endif
+	endif
 	if( !tox && !toy && !toz )
 		SendSysMessage(caster, "That is a blank rune!");
 		EraseObjProperty( caster, "#Casting" );

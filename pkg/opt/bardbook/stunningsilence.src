@@ -1,0 +1,74 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_SPECTER_TOUCH;
+const SPELL_EFFECT_ID		:= FX_SPELL_SPECTER_TOUCH;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_SPECTER_TOUCH;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_SPECTER_TOUCH;
+
+program mesmerize( caster )
+
+	if(!TryToCast( caster, 15 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var cast_on := CanTargetSpell( caster );
+	if( !cast_on )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+	
+	Send_Attack( cast_on, caster );
+
+	PlayMovingEffect(caster,
+                                 cast_on,
+                                 SPELL_EFFECT_ID,
+                                 SPELL_EFFECT_SPEED,
+                                 SPELL_EFFECT_LOOP,
+                                 explode := 0);
+
+	PlaySoundEffect( caster, 0x1D6 );
+
+	var circle := 6;
+
+	var immunity := IsProtected( caster, cast_on, circle );
+	if( immunity == 1 )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var magery := GetEffectiveSkill(caster, SKILLID_PROVOCATION);
+	
+	var amt := 2 + CInt(magery / 30);
+	var bard := GetObjProperty( caster, "IsBard" );
+	amt := amt * (1+(bard/10));
+
+	var prot := GetObjProperty( cast_on, "FreeAction" );
+	if( prot == 1)
+		SendSysMessage( cast_on, "Your Free Action bonus reduces the stun" );
+		amt := amt /2;
+	elseif( prot == -1 )
+		amt := amt * 2;
+	endif
+
+	if(cast_on.IsA(POLCLASS_NPC))
+		amt := amt * 1.5;
+	else
+		amt := amt / 2;
+	endif
+
+	cast_on.frozen := 1;
+	SendSysMessage( cast_on, "You have been stunned by " + caster.name + "!" );
+	sleep( amt );
+	cast_on.frozen := 0;
+	SendSysMessage( cast_on, "You are no longer stunned.");
+
+	EraseObjProperty( caster, "#Casting" );
+	return;
+ 
+endprogram

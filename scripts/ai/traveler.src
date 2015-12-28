@@ -65,7 +65,7 @@ function cleareventque()
 endfunction
 
 
-function BuildGate( who, vartion_id )
+function BuildGate( who, vartion_id, myx, myy, myz )
 
 	if( !GetPayment( who ) )
 		return;
@@ -86,7 +86,7 @@ function BuildGate( who, vartion_id )
 	//Create Gates
 	set_critical(1);
 
-	var gate1 := CreateItemAtLocation( who.x, who.y, who.z, UOBJ_BLUE_MOONGATE, 1 );
+	var gate1 := CreateItemAtLocation( myx, myy, myz, UOBJ_BLUE_MOONGATE, 1 );
 	var gate2 := CreateItemAtLocation( tox, toy, toz, UOBJ_BLUE_MOONGATE, 1 );
 
 	if (!gate1 || !gate2)
@@ -168,6 +168,10 @@ endfunction
 
 function BuildTravelGump(who)
 
+	var myx := who.x;
+	var myy := who.y;
+	var myz := who.z;
+
 	var layout := {
 			"page 0",
 			"resizepic 0 0 3600 280 250",
@@ -231,6 +235,6 @@ function BuildTravelGump(who)
 		return;
 	endif
 
-	BuildGate( who, result[0] );
+	BuildGate( who, result[0], myx, myy, myz );
 
 endfunction

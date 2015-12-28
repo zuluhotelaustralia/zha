@@ -5,6 +5,17 @@ include "include/spelldata";
 
 program use_scroll( who, scroll )
 
+	if(!who.backpack)
+		return;
+	endif
+	if(scroll.container != who.backpack)
+		SendSysMessage(who, "The scroll must be in your backpack");
+		return 0;
+	endif
+	if(who.objtype != who.trueobjtype || GetObjProperty( who, "IsLiche" ) )
+		SendSysMessage(who, "You must return to your true form in order to use this");
+		return 0;
+	endif
 	if( scroll.amount )
 		var spellid := GetObjProperty(scroll, "SpellId");
 		SubtractAmount( scroll, 1 );

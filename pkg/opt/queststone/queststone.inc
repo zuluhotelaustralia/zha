@@ -8,6 +8,7 @@ include "include/utility";
 include "include/stringarrays";
 include "include/itemutil";
 include "include/classes";
+include "include/yesno";
 
 //update removed qCompletedObjectives prop and replaced with qPObjComp+stoneserial prop
 
@@ -84,6 +85,9 @@ function GetLootingAllowed(stone)
 endfunction
 
 function SetAutoTeleDeath(stone, val)
+If(Getobjproperty(stone, "AutoTelePoint"))
+   EnableAutoTelePoint(stone, stone.x, stone.y, stone.z);
+endif
 	SetObjProperty(stone, "AutoTeleDeath", val);
 endfunction
 
@@ -231,7 +235,7 @@ function RemoveBannedPlayer(stone, player_serial)
 	return result;
 endfunction
 
-function AddQuestSpawnPoint(stone, spawn)
+function AddQuestSpawnPoint(who, stone, spawn)
 	var spawnmonsters:= GetObjProperty(spawn, "PointData");
 	//check spawn for suitability
 	if (spawnmonsters[1]!="NPC"&&spawnmonsters[1]!="Group")
@@ -245,7 +249,8 @@ function AddQuestSpawnPoint(stone, spawn)
 		//Broadcast("nothing in pserial[1]"); 
 		SetObjProperty(stone, "SpawnPoints",{spawn.serial});
 		SetObjProperty(spawn, "QuestStoneSerial", stone.serial); //0 points is starting default
-		PrintTextAbove(stone, "Spawnpoint added to quest");
+		PrintTextAbove(spawn, "Spawnpoint added to quest");
+                RunSpawnEditGump(who, spawn, stone);
 		return;
 	endif
 	
@@ -259,13 +264,17 @@ function AddQuestSpawnPoint(stone, spawn)
 	SetObjProperty(spawn, "QuestStoneSerial", stone.serial);
 	SetObjProperty(stone, "SpawnPoints",qSpawnPoints);
 	PrintTextAbove(stone, "Spawnpoint added to quest");
+ 
+        RunSpawnEditGump(who, spawn, stone);
 	return 1;
 endfunction
 
 function RemoveQuestSpawnPoint(stone, spawn)
 	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");
+  var activespawns := GetObjProperty(stone, "SpawnActive");
+        
 	var tempQSPoints:=array;
-	var result :=0;
+ 
 	foreach q in qSpawnPoints
 		if (q!=spawn.serial)
 			tempQSPoints.append(q);
@@ -282,7 +291,7 @@ function deleteAllQuestSpawnPointsRefs(stone)
 	var index:=1;
 	foreach q in qSpawnPoints
 		spawn := SystemFindObjectBySerial(q);
-		EraseObjProperty(spawn, "QuestStoneSerial");
+		RemoveQuestSpawnPoint(stone, spawn);
 	endforeach
 	
 	EraseObjProperty(stone, "SpawnPoints");
@@ -319,7 +328,13 @@ function QuestAwardNPCDeath(queststone_serial, corpse_serial)
 	if (!IsRegistered(stone, player_serial))
 		//Broadcast("not registered");
 		return 0;
-	endif	
+	endif
+	/*
+        //Check To See If Spawn Is Active For This Quest
+        If(!IsSpawnActive(stone, spawn_serial))
+        broadcast("spawninactive");
+           return 0;
+        endif*/
 	//completed players cant get more questpoints
 	if (IsCompleted(stone, player_serial))
 			return 0;
@@ -545,7 +560,7 @@ function RemoveObjective(queststone_serial, objective_serial)
 	SetObjProperty(stone, "Objectives", tempObj);
 	SetObjProperty(stone, "ObjCompletedMessages", tempObjCompMessage);
 	SetObjProperty(stone, "ObjCompleteStatus", tempObjCompStatus);
-	PrintTextAbove(stone, "Objective removed from quest");
+	//PrintTextAbove(stone, "Objective removed from quest");
 	return 1;
 endfunction
 
@@ -572,7 +587,7 @@ function RemovePersonalObjective(stone, objective_serial)
 	SetObjProperty(stone, "PersonalObjectives", tempObj);
 	SetObjProperty(stone, "PersonalObjMessages", tempCompMessages);
 	
-	PrintTextAbove(stone, "Objective removed from quest");
+//	PrintTextAbove(stone, "Objective removed from quest");
 endfunction
 
 function IsObjectiveRegistered(stone, objective_serial)
@@ -726,12 +741,12 @@ function ReturnQuestMonsterObjective(stone_serial, player_serial, monster_serial
 	
 	//completed players cant complete objectives
 	if (IsCompleted(stone, player_serial))
-			//Broadcast("completed quest");
+		//	Broadcast("completed quest");
 			return 0;
 	endif
 	
 	if (!IsQuestDeployed(stone))
-		//Broadcast("not deployed");
+	//	Broadcast("not deployed");
 		return 0; //if quest has not been deployed then no objectives can be completed.
 	endif
 	
@@ -740,9 +755,9 @@ function ReturnQuestMonsterObjective(stone_serial, player_serial, monster_serial
 		return;//objective not found
 	endif
 	if (!IsObjectiveCompleted(stone, monster_serial))
-		//Broadcast("objective not completed");
-		//Broadcast("stoneserial: " +stone.serial);
-		//Broadcast("objectivserial: " + monster_serial);
+	//	Broadcast("objective not completed");
+	//	Broadcast("stoneserial: " +stone.serial);
+	//	Broadcast("objectivserial: " + monster_serial);
 		if (! dontComplete)
 			SetObjectiveComplete(stone, monster_serial);
 		endif
@@ -750,10 +765,10 @@ function ReturnQuestMonsterObjective(stone_serial, player_serial, monster_serial
 		AwardQuestPoints(stone_serial, player_serial, questpoints);
 		return;
 	endif
-	//Broadcast("erm?");
-	//Broadcast("stoneserial: " +stone.serial);
-	//Broadcast("objectivserial: " + monster_serial);
-	//Broadcast("stone.name: " + stone.name);
+	Broadcast("erm?");
+	Broadcast("stoneserial: " +stone.serial);
+	Broadcast("objectivserial: " + monster_serial);
+	Broadcast("stone.name: " + stone.name);
 
 endfunction
 
@@ -1065,6 +1080,9 @@ function GetSpawns(stone_serial, start, returnSize)
 		
 	for(i:=start;i<=maxQS&&tempSpawns.size()<returnSize;i:=i+1)
 		temp:=SystemFindObjectBySerial(CInt(qSpawnRefs[i]));
+		if( !temp.serial)
+			RemoveDeadSpawn(CInt(qSpawnRefs[i]), stone_serial);
+		endif
 		tempSpawns.append(temp);
 	endfor
 	return tempSpawns;
@@ -1166,14 +1184,30 @@ function BuyQuestRewardItem(item,stone,who)
 	return 0;
 endfunction
 
-function QuestBroadcast(stone, message)
-	var pserials:=GetObjProperty(stone, "playerserials");
-	foreach p in pserials
-		var player := SystemFindObjectBySerial(p);
-		if (player)
-			SendSysMessage(player, message,3, 53);
-		endif
-	endforeach
+function QuestBroadcast(stone, sending, receiving, txtcolor, message)
+	
+case(receiving)
+		1:
+			Broadcast( cstr(sending) + ": " + cstr(message), 3 , txtcolor);
+		3:
+			var pserials:=GetObjProperty(stone, "playerserials");
+			foreach p in pserials
+				var player := SystemFindObjectBySerial(p);
+				if (player)
+					SendSysMessage(player, cstr(sending) + ": " + cstr(message), 3 , txtcolor);
+				endif
+			endforeach
+			//and send to queststone owner
+			var owner := SystemFindObjectBySerial(GetCreator(stone));
+			SendSysMessage(owner, cstr(sending) + ": " + cstr(message),3, txtcolor);
+		2:
+			foreach p in EnumerateOnlineCharacters()
+				if (p.cmdlevel >= 1)
+					SendSysMessage(p, cstr(sending) + ": " + cstr(message), 3 , txtcolor);
+				endif
+			endforeach
+			return ;
+Endcase
 	//and send to queststone owner
 	var owner := SystemFindObjectBySerial(GetCreator(stone));
 	SendSysMessage(owner, message,3, 53);
@@ -1185,7 +1219,7 @@ function BroadcastOneOffCompletedMessage(stone, objective_serial)
 	if (!message||message=="")
 		return;
 	endif
-	QuestBroadcast(stone, message);
+	QuestBroadcast(stone, , , , message);
 endfunction
 
 function BroadcastPersonalCompletedMessage(stone, objective_serial, who)
@@ -1202,8 +1236,10 @@ function IsRegistrationOpen(queststone)
 endfunction
 
 function IsQuestDeployed(queststone)
+var dep := cint(GetObjProperty(queststone, "QuestDeployed"));
+//broadcast(dep);
 	//returns 1 if questpoints should be awarded and objectives set to completed...
-	return (GetObjProperty(queststone, "QuestDeployed")==1);
+	return dep;
 endfunction
 
 function GetRewardQuestItems(queststone)
@@ -1245,7 +1281,7 @@ function MakeBookContentsArray(contentsString)
 	
 	foreach word in wordsArray
 		//Broadcast("word: " + word + "   size: " + len(word));
-		if (len(tempString)+len(word)<21)
+		if (len(tempString)+len(word)<30)
 			tempString := tempString + " " + word;
 			//Broadcast(tempString);
 		else
@@ -1395,17 +1431,24 @@ function DoPrivateFinal(stone, player)
 	SendSysMessage(player, "Well done you have completed the quest!",3 ,53);
 	SendFinalPersonalMessage(stone, player);
 	PlaySoundEffect( player, 0x003e );
+
+	var tox := GetObjProperty (stone, "tox");
+    	var toy := GetObjProperty (stone, "toy");
+    	var toz := GetObjProperty (stone, "toz");
+
+	MoveCharacterToLocation( player, tox, toy, toz);
+	
 endfunction
 
 function DoPublicFinal(stone, player)
-	QuestBroadcast(stone, "The quest has been completed. The final objective was achieved by " + player.name);	
-	QuestBroadcast(stone, "The quest and all protections will officially end in 2 minutes");
+	QuestBroadcast(stone, , , , "The quest has been completed. The final objective was achieved by " + player.name);	
+	QuestBroadcast(stone, , , , "The quest and all protections will officially end in 2 minutes");
 	sleep(60);
-	QuestBroadcast(stone, "The quest and all protections will officially end in 1 minute");
+	QuestBroadcast(stone, , , , "The quest and all protections will officially end in 1 minute");
 	sleep(60);
 	CompleteAllPlayers(stone);
 	SetRegistrationOpen(stone, 0);
-	QuestBroadcast(stone, "The quest has been completed. The final objective was achieved by " + player.name);
+	QuestBroadcast(stone, , , , "The quest has been completed. The final objective was achieved by " + player.name);
 	SendFinalPublicMessage(stone);
 	SendSoundEffectAll(stone, 0x003e);
 endfunction
@@ -1432,7 +1475,7 @@ function SendFinalPublicMessage(stone)
 	sleep(5); //a bit of delay so that objective met message and final message are separate
 	var finalmessage := GetQuestFinal(stone);
 	if (finalmessage)
-		QuestBroadcast(stone, finalmessage);
+		QuestBroadcast(stone, , , , finalmessage);
 	endif
 endfunction
 
@@ -1794,7 +1837,7 @@ function RemovePersonalObjectTypeObjective(stone, object_type)
 	SetObjProperty(stone, "PersonalObjectives", tempObj);
 	SetObjProperty(stone, "PersonalObjMessages", tempCompMessages);
 	RemoveObjectTypeData(stone, object_type);
-	PrintTextAbove(stone, "Objective removed from quest");
+//	PrintTextAbove(stone, "Objective removed from quest");
 endfunction
 
 function AddNewObjectTypeData(stone, obj_type, obj_type_name, questpoints, specificname:="", spawnorigin:=0, amount:=1)
@@ -2265,3 +2308,159 @@ function CleanUpDeadPersonalObjectives(stone)
 		endif
 	endforeach
 endfunction
+
+function RunSpawnEditGump(who, spawn, stone)
+var sro;
+var sr;
+var io := "No.";
+if(GetObjProperty(spawn, "SetQuestPointReward" ))
+   sr := GetObjProperty(spawn, "SetQuestPointReward" );
+else
+   sr := "N/A.";
+endif
+var qObjectives := GetObjProperty(stone, "SpawnActive");
+
+If( !qObjectives )
+   qObjectives := dictionary{cint(spawn.serial) -> 0};
+endif
+
+if (qObjectives[cint(spawn.serial)] == 1)
+   io := "Yes.";
+elseif (qObjectives[cint(spawn.serial)] == 0)
+   io := "No.";
+else
+    qObjectives.append(cint(spawn.serial));
+    qObjectives[cint(spawn.serial)] := 0;
+    io := "No.";
+endif
+
+if(GetObjProperty(spawn, "SetQuestPointReward" ))
+   sro := "On.";
+else
+   sro := "Off.";
+endif
+        GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 230, 400);
+
+	GFTextLine(20, 20, 230, spawn.desc);
+        GFTextLine(20, 40, 66,"("+spawn.x+","+spawn.y+","+spawn.z+")");
+	GFTextLine(30, 120, 5, "Goto Spawn");
+	GFTextLine(30, 150, 5, "Open Spawn Gump");
+	GFTextLine(30, 180, 5, "Remove Spawn");
+	GFTextLine(30, 210, 5, "Delete Spawn");
+	GFTextLine(30, 260, 5, "Is Objective: "+io);
+	GFTextLine(30, 290, 5, "Is Set Reward: "+sro);
+	GFTextLine(30, 320, 5, "Set Reward: "+sr );
+
+	GFTextLine(30, 370, 5, "Exit Spawn Changes");
+
+
+	//GFTextMid(10, 120, 280, 10, "Current colour: " + CStr(dye.color));
+
+	var gotospawnbutton := GFButtonID( 10, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var openspawnbutton := GFButtonID( 10, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var removespawnbutton  := GFButtonID( 10, 185, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var deletespawnbutton  := GFButtonID( 10, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var isobjbutton  := GFButtonID( 10, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var issetrwdbutton  := GFButtonID( 10, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setrwdamtbutton  := GFButtonID( 10, 325, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitPlayerGumpbutton  := GFButtonID( 10, 375, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+	if (StoneUserElapsed(stone, who))
+		return;
+	endif
+
+	if (choice[gotospawnbutton.keyid])
+		MoveCharacterToLocation(who,spawn.x, spawn.y, spawn.z);
+                RunSpawnEditGump(who, spawn, stone);
+	elseif (choice[openspawnbutton.keyid])
+                Start_Script(":spawnpoint:spawnpoint", array{ who, spawn });
+                RunSpawnEditGump(who, spawn, stone);
+	elseif (choice[removespawnbutton.keyid])
+//Remove Spawn Point From Quest.
+           If(YesNo(who, "Are You Sure You Want To Remove This Spawn From Quest?"))
+              RemoveQuestSpawnPoint(stone, spawn);
+           else
+              SendSysMessage(who, "Canceled.");
+           endif
+           Return;
+	elseif (choice[deletespawnbutton.keyid])
+//Destroy The Spawn Point
+           If(YesNo(who, "Are You Sure You Want To Destroy This Spawn?"))
+              RemoveQuestSpawnPoint(stone, spawn);
+	      DestroyItem(spawn);
+           else
+              SendSysMessage(who, "Canceled.");
+           endif
+           Return;
+	elseif (choice[isobjbutton.keyid])
+//Enable/Disable objective status
+                 If( qObjectives[cint(spawn.serial)] == 1 )
+                    qObjectives[cint(spawn.serial)] := 0;
+	            SetObjProperty(stone, "SpawnActive",qObjectives);
+                 else
+                    qObjectives[cint(spawn.serial)] := 1;
+	            SetObjProperty(stone, "SpawnActive",qObjectives);
+                    PrintTextAbove(spawn, "Objective Armed");
+                 endif
+                 RunSpawnEditGump(who, spawn, stone);
+	elseif (choice[issetrwdbutton.keyid])
+//Enable/Disable Static Points For completing spawn.
+                If( GetObjProperty(spawn, "SetQuestPointReward" ))
+                   EraseObjProperty(spawn, "SetQuestPointReward");
+                   SendSysMessage(who, "Static Reward Points Disabled");
+                else
+                 var reward := CInt(SendTextEntryGump(who, "How many quest points are rewarded? [integer]"));
+                 SendSysMessage(who, "Objective Set With Reward Of: "+reward);
+                 SetObjProperty(spawn, "SetQuestPointReward", reward);
+                endif
+                RunSpawnEditGump(who, spawn, stone);
+	elseif (choice[setrwdamtbutton.keyid])
+ //change amount of point awarded for completing spawn.
+               If( !GetObjProperty(spawn, "SetQuestPointReward" ))
+                   SendSysMessage(who, "Static Reward Points Are Disabled. Please Enable.", 3, 38);
+                   SendSysMessage(who, "Canceled.");
+                else
+		   var reward := CInt(SendTextEntryGump(who, "How many quest points are rewarded? [integer]"));
+                   SendSysMessage(who, "Objective Set With Reward Of: "+reward, 3 , 30);
+                   SetObjProperty(spawn, "SetQuestPointReward", reward);
+                Endif
+                RunSpawnEditGump(who, spawn, stone);
+	elseif (choice[exitPlayerGumpbutton.keyid])
+		return;
+	endif
+endfunction
+
+Function IsSpawnActive(stone, spawn)
+var glenn := Getobjproperty(Stone, "SpawnActive");
+If(glenn[cint(spawn)] == 1 )
+return 1;
+endif
+Return 0;
+
+Endfunction
+
+Function EnableAutoTelePoint(Stone, ox, oy, oz)
+   var coords := struct{ x, y , z };
+   coords.x := ox;
+   coords.y := oy;
+   coords.z := oz;
+   SetObjProperty(Stone, "AutoTelePoint", coords);
+endfunction
+
+Function RemoveDeadSpawn(spawn_serial, stone_serial)
+	var stone := SystemFindObjectBySerial(stone_serial);
+	
+	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");
+        
+	var tempQSPoints:=array;
+ 
+	foreach q in qSpawnPoints
+		if (q!=spawn_serial)
+			tempQSPoints.append(q);
+		endif
+	endforeach
+	SetObjProperty(stone, "SpawnPoints",tempQSPoints);
+EndFunction

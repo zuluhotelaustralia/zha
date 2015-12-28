@@ -14,7 +14,7 @@ program cast_release(caster)
 	var elem;
 	var conf := ReadConfigFile ("::npcdesc");
 
-	if(TryToCast(caster, SPELLID_RELEASE) = SUCCESS)
+	if(TryToCast(caster, SPELLID_RELEASE) == SUCCESS)
 		SendSysMessage(caster, "Select target.");
 		var victim := CanTargetThing(caster, 8, TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
 		if (!victim)
@@ -27,7 +27,7 @@ program cast_release(caster)
 	        	return;
 	    	endif
 	
-		if (!(victim.script = "tamed"))
+		if (!(victim.script == "tamed"))
 			SendSysmessage(caster, "This creatures is already free");
 			return;
 		endif

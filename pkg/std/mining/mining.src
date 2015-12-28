@@ -42,6 +42,11 @@ const MAX_CHANCE	:= 155;
 
 program use_picktool( character, tool )
 
+	if(Character.multi)
+		SendSysMessage( character, "You cannot mine here!" );
+		sleep(2);
+		return;
+	endif
 	if( !ReserveItem( tool ) )
 		return;
 	endif
@@ -64,6 +69,10 @@ program use_picktool( character, tool )
 		return;
 	endif
 
+    if( (use_on.objtype == 0xF3C ) && ( tool.objtype == 0x0f39 ) )
+    	Move_Shit( character, use_on );
+      return;
+    endif
   Autoloop_init( character );
 
   while (Autoloop_more() && not character.dead)
@@ -318,8 +327,8 @@ function DigForSand( character, use_on, info )
 		endif
 	endfor
 
-	Broadcast("Check diff of sand ("+info.landtile+"):" + GetHarvestDifficulty( "sand", use_on.x, use_on.y, info.landtile ));
-	Broadcast("Check diff of sand ("+info.landtile+"):" + GetHarvestDifficulty( "ore", use_on.x, use_on.y, info.landtile ));
+	Print("Check diff of sand ("+info.landtile+"):" + GetHarvestDifficulty( "sand", use_on.x, use_on.y, info.landtile ));
+	Print("Check diff of sand ("+info.landtile+"):" + GetHarvestDifficulty( "ore", use_on.x, use_on.y, info.landtile ));
 
 	//if( CheckSkill( character, SKILLID_MINING, tdiff, tdiff * POINTS_MULTIPLIER ) )
 	if( CheckSkill( character, SKILLID_MINING, -1, DEFAULT_POINTS ) )

@@ -1,0 +1,158 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/attributes";
+include "include/client";
+include "include/res";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_ID		:= FX_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_EARTH_BLESSING;
+
+program songofendurance( caster )
+
+	var com1 := GetObjProperty( caster, "bparty1" );
+	var com2 := GetObjProperty( caster, "bparty2" );
+	var com3 := GetObjProperty( caster, "bparty3" );
+	var com4 := GetObjProperty( caster, "bparty4" );
+	var com5 := GetObjProperty( caster, "bparty5" );
+	var com6 := GetObjProperty( caster, "bparty6" );
+	
+	if(!TryToCast(caster, 13 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var x := caster.x;
+	var y := caster.y;
+	var z := caster.z;
+
+	if(!com1.dead)
+	if((GetHP(com1))<1)
+		if((Distance (caster, com1)<10))
+			SendSysMessage( com1, "You have been revived by " + caster.name );
+			PlayObjectCenteredEffect(com1,
+                  SPELL_EFFECT_ID,
+	            SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com1, 0x1F8 );
+			sleep(1);
+			Resurrect( com1 );
+			FixColor( com1 );
+			SetStamina(com1, Cint(GetMaxStamina(com1) / 10));
+			SetHp(com1, Cint(GetMaxHp(com1) / 10));
+			SetMana(com1, Cint(GetMaxMana(com1) / 10));
+			CheckResRobe(com1);
+			MoveCharacterToLocation( com1, x, y, z );
+		endif
+	endif
+	endif
+	if(com2.dead)
+	if((GetHP(com2))<1)
+		if((Distance (caster, com2)<10))
+			SendSysMessage( com2, "You have been revived by " + caster.name );
+			PlayObjectCenteredEffect(com2,
+                  SPELL_EFFECT_ID,
+                  SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com2, 0x1F8 );
+			sleep(1);
+			Resurrect( com2 );
+			FixColor( com2 );
+			SetStamina(com2, Cint(GetMaxStamina(com2) / 10));
+			SetHp(com2, Cint(GetMaxHp(com2) / 10));
+			SetMana(com2, Cint(GetMaxMana(com2) / 10));
+			CheckResRobe(com2);
+			MoveCharacterToLocation( com2, x, y, z );
+		endif
+	endif
+	endif
+	if(com3.dead)
+	if((GetHP(com3))<1)
+		if((Distance (caster, com3)<10))
+			SendSysMessage( com3, "You have been revived by " + caster.name );
+			PlayObjectCenteredEffect(com3,
+                  SPELL_EFFECT_ID,
+                  SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com3, 0x1F8 );
+			sleep(1);
+			Resurrect( com3 );
+			FixColor( com3 );
+			SetStamina(com3, Cint(GetMaxStamina(com3) / 10));
+			SetHp(com3, Cint(GetMaxHp(com3) / 10));
+			SetMana(com3, Cint(GetMaxMana(com3) / 10));
+			CheckResRobe(com3);
+			MoveCharacterToLocation( com3, x, y, z );
+		endif
+	endif
+	endif
+	if(com4.dead)
+	if((GetHP(com4))<1)
+		if((Distance (caster, com4)<10))
+			SendSysMessage( com4, "You have been revived by " + caster.name );
+			PlayObjectCenteredEffect(com4,
+                 	SPELL_EFFECT_ID,
+                 	SPELL_EFFECT_SPEED,
+                 	SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com4, 0x1F8 );
+			sleep(1);
+			Resurrect( com4 );
+			FixColor( com4 );
+			SetStamina(com4, Cint(GetMaxStamina(com4) / 10));
+			SetHp(com4, Cint(GetMaxHp(com4) / 10));
+			SetMana(com4, Cint(GetMaxMana(com4) / 10));
+			CheckResRobe(com4);
+			MoveCharacterToLocation( com4, x, y, z );
+		endif
+	endif
+	endif
+	if(com5.dead)
+	if((GetHP(com5))<1)
+		if((Distance (caster, com5)<10))
+			SendSysMessage( com5, "You have been revived by " + caster.name );
+			PlayObjectCenteredEffect(com5,
+                 	SPELL_EFFECT_ID,
+                	SPELL_EFFECT_SPEED,
+                 	SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com5, 0x1F8 );
+			sleep(1);
+			Resurrect( com5 );
+			FixColor( com5 );
+			SetStamina(com5, Cint(GetMaxStamina(com5) / 10));
+			SetHp(com5, Cint(GetMaxHp(com5) / 10));
+			SetMana(com5, Cint(GetMaxMana(com5) / 10));
+			CheckResRobe(com5);
+			MoveCharacterToLocation( com5, x, y, z );
+		endif
+	endif
+	endif
+	if(com6.dead)
+	if((GetHP(com6))<1)
+		if((Distance (caster, com6)<10))
+			SendSysMessage( com6, "You have been revived by " + caster.name );
+			PlayObjectCenteredEffect(com6,
+                 	SPELL_EFFECT_ID,
+                 	SPELL_EFFECT_SPEED,
+                 	SPELL_EFFECT_LOOP);
+			PlaySoundEffect( com6, 0x1F8 );
+			sleep(1);
+			Resurrect( com6 );
+			FixColor( com6 );
+			SetStamina(com6, Cint(GetMaxStamina(com6) / 10));
+			SetHp(com6, Cint(GetMaxHp(com6) / 10));
+			SetMana(com6, Cint(GetMaxMana(com6) / 10));
+			CheckResRobe(com6);
+			MoveCharacterToLocation( com6, x, y, z );
+		endif
+	endif
+	endif
+
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram
+
+                                               
+

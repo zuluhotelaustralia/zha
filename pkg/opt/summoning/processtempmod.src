@@ -88,6 +88,8 @@ program processtempmods( parms )
 				SetDexterityMod(who, GetDexterityMod(who) + mmod[2] );
 				SetIntelligenceMod(who, GetIntelligenceMod(who) + mmod[2] );
 				who.ar_mod := who.ar_mod + CInt(mmod[2] / 3);
+		"dks":
+				SetObjProperty(who, "dks", 1);
 	endcase
 	allmods[pos][2] := mmod[2]; // Overwrite old mod in case it was changed while checking for minimum values.
 

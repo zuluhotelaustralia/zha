@@ -1,0 +1,84 @@
+use uo;
+use os;
+
+include "bardbook";
+include "include/client";
+include "include/yesno";
+
+program cast_companion( caster )
+
+	var cast_on;
+	var size;
+	var bard := GetObjProperty(caster, "IsBard");
+	if (!bard)
+		size := 2;
+	else
+		size := bard;
+	endif
+
+	if(!TryToCast( caster, 2 ));
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var bparty1 := GetObjProperty(caster, "bparty1");
+	if(bparty1)
+		if(!YesNo(caster, "Set new companions?"))
+			SendSysMessage(caster, "Companions unchanged");
+			EraseObjProperty( caster, "#Casting" );
+			return;
+		endif
+	endif
+
+	EraseObjProperty( caster, "bparty1" );
+	EraseObjProperty( caster, "bparty2" );
+	EraseObjProperty( caster, "bparty3" );
+	EraseObjProperty( caster, "bparty4" );
+	EraseObjProperty( caster, "bparty5" );
+
+	var i := 0;
+	while(i < size)
+		i := i + 1;
+		cast_on := CanTargetSpell( caster );
+		if( !cast_on )
+			EraseObjProperty( caster, "#Casting" );
+			return;
+		elseif(!YesNo(cast_on, "Accept companionship with " + caster.name + "?"))
+			SendSysMessage(caster, "Companionship refused.");
+			EraseObjProperty( caster, "#Casting" );
+			return;
+		elseif( cast_on == caster )
+			EraseObjProperty( caster, "#Casting" );
+			SendSysMessage( caster, "You cannot be your own companion!");
+			return;
+		elseif( cast_on.isA(POLCLASS_NPC))
+			EraseObjProperty( caster, "#Casting" );
+			SendSysMessage( caster, "You cannot be a companion with that!");
+			return;
+		elseif( cast_on.serial == GetObjProperty( caster, "bparty1" ))
+		 	EraseObjProperty( caster, "#Casting" );
+			SendSysMessage( caster, "Companion " + cast_on.name + " was already added.");
+			return;
+		elseif( cast_on.serial == GetObjProperty( caster, "bparty2" ))
+		 	EraseObjProperty( caster, "#Casting" );
+			SendSysMessage( caster, "Companion " + cast_on.name + " was already added.");
+			return;
+		elseif( cast_on.serial == GetObjProperty( caster, "bparty3" ))
+		 	EraseObjProperty( caster, "#Casting" );
+			SendSysMessage( caster, "Companion " + cast_on.name + " was already added.");
+			return;
+		elseif( cast_on.serial == GetObjProperty( caster, "bparty4" ))
+		 	EraseObjProperty( caster, "#Casting" );
+			SendSysMessage( caster, "Companion " + cast_on.name + " was already added.");
+			return;
+		else
+			SendSysMessage( caster, "Companion " + cast_on.name + " added.");
+			SetObjProperty( caster, "bparty" + i, cast_on.serial );
+		endif
+	endwhile
+	
+	SendSysMessage( caster, "Companions formed!");
+	PlaySoundEffect( caster, 0x40C );
+	EraseObjProperty( caster, "#Casting" );
+
+endprogram

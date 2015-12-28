@@ -7,6 +7,9 @@ include "include/spelldata";
 include "include/dotempmods";
 include "include/classes";
 include "include/client";
+include "include/aoslbr";
+include "include/statichouses";
+
 
 const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_WRAITHFORM;
 const SPELL_EFFECT_ID		:= WRAITHFORM_MORPH_EFFECT;
@@ -66,25 +69,60 @@ program cast_wraithform( parms )
 
 		var targets := ListMobilesNearLocation( CInt(caster.x), CInt(caster.y), CInt(caster.z), CInt(range));
 		foreach mobile in targets
-			if( ( mobile.serial != caster.serial ) && ( mobile.dead == 0 ))
+			if( ( mobile.serial != caster.serial ) && ( mobile.dead == 0 ) )
 				var protect := IsProtected( caster, mobile, circle );
 				if( protect != IMMUNED )
 					if (AutoCallGuardCheck(caster, mobile))
+						EraseObjProperty( caster, "#Casting" );
+						caster.graphic	:= oldchargraphic;
+						caster.color	:= oldcharcolor;
+						PlayObjectCenteredEffect( caster, WRAITHFORM_MORPH_EFFECT, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP );
+						PlaySoundEffect( caster, WRAITHFORM_MORPH_SOUND );
+						fixPlayerGraphic(caster);
 						return;
-					endif
+					endif					
+
 					var dmg := RandomDiceStr( damagedie );
 					if( protect == CURSED )
 						dmg := dmg * 2;
 					endif
-			
-					PlayObjectCenteredEffect( mobile, WRAITHFORM_DRAIN_EFFECT, 7, 0x10 );
-					PlaySoundEffect( mobile, WRAITHFORM_DRAIN_SOUND );
-					if (!mobile.multi)
-						ApplyPlanarDamage( caster, mobile, circle, dmg, plane);
+					var casterinstatic := IsInStaticHouse( caster.x, caster.y, caster.z );
+					var mobinstatic := IsInStaticHouse( mobile.x, mobile.y, mobile.z );
+					var okay := 1;
+					if( casterinstatic || mobinstatic ) //check for static housing
+						okay:=0;
+
+						if(caster.multi || mobile.multi)
+							if(caster.multi.serial == mobile.multi.serial) if((CInt(mobile.z)==CInt(caster.z)) || (CInt(mobile.z)<CInt(caster.z)+10)) okay:=1; endif endif
+						else
+							okay:=1;
+						endif
+						
+						if( okay == 0 && casterinstatic.serial == mobinstatic.serial )
+							if((CInt(mobile.z)==CInt(caster.z)) || (CInt(mobile.z)<CInt(caster.z)+10)) 
+								okay:=1; 
+							endif
+						endif
+						
+					elseif( !casterinstatic || !mobinstatic )
+						if(caster.multi || mobile.multi)
+							okay:=0;
+							if(caster.multi.serial == mobile.multi.serial) if((CInt(mobile.z)==CInt(caster.z)) || (CInt(mobile.z)<CInt(caster.z)+10)) okay:=1; endif endif
+						else 
+							okay:=0;
+							if((CInt(mobile.z)==CInt(caster.z)) || (CInt(mobile.z)<CInt(caster.z)+10))
+									okay:=1; 
+							endif
+						endif
 					endif
-					SetMana(caster, GetMana(caster) + dmg);
-					if( GetMana(caster) > GetMaxMana(caster) )
-						SetMana(caster, caster.maxmana);
+					if( okay )
+						PlayObjectCenteredEffect( mobile, WRAITHFORM_DRAIN_EFFECT, 7, 0x10 );
+						PlaySoundEffect( mobile, WRAITHFORM_DRAIN_SOUND );
+						ApplyPlanarDamage( caster, mobile, circle, dmg, plane);
+						SetMana(caster, GetMana(caster) + dmg);
+						if( GetMana(caster) > GetMaxMana(caster) )
+							SetMana(caster, caster.maxmana);
+						endif
 					endif
 				endif
 			endif
@@ -103,5 +141,5 @@ program cast_wraithform( parms )
 	caster.color	:= oldcharcolor;
 	PlayObjectCenteredEffect( caster, WRAITHFORM_MORPH_EFFECT, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP );
 	PlaySoundEffect( caster, WRAITHFORM_MORPH_SOUND );
-
+	fixPlayerGraphic(caster);
 endprogram

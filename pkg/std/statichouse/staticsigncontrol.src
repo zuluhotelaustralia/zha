@@ -1,0 +1,290 @@
+use cfgfile;
+use uo;
+use os;
+
+include "include/objtype";
+include "util/bank";
+include "util/key";
+include "include/statichouses";
+
+const UOBJECT_DOORS_START := 0x0675;
+const UOBJECT_DOORS_END   := 0x06f4;
+const UOBJECT_SECURES_START := 0x0e40;
+const UOBJECT_SECURES_END   := 0x0e43;
+
+
+program statichouse_controlscript(house)
+
+
+	while(house) //exit loop if item is destroyed
+		
+		if(ReadGameClock() > GetObjProperty( house, "upkeeptime") && !GetObjProperty(house, "OnSale") )
+				if(GetObjProperty( house, "neglected") && ReadGameClock() > GetObjProperty( house, "neglecttime"))
+					DestroyHouse( house );
+					PrintTextAbove( house, "This house is being reposessed!!");
+				else
+					house.color := 1305;
+					var neglecttime := ReadGameClock() + 10;//7200;
+					var bankbox := GetObjProperty( house, "bankbox");
+					var x:=house.x, y:=house.y;
+					var warning := CreateItemInContainer( bankbox, 0x14F0, 1 );
+					warning.color := 1305;
+					SetName( warning, "You haven't paid the upkeep for the house at " + x + ", " + y + " ! You have two days to pay it." );
+					SetObjProperty( house, "neglecttime", neglecttime);
+					SetObjProperty( house, "neglected", 1);
+				endif
+		endif
+				
+				
+		//Check For Banned
+		var obj;
+		var tlcx := GetObjProperty( house, "tlcx" );
+	  var tlcy := GetObjProperty( house, "tlcy" );
+		var brcx := GetObjProperty( house, "brcx" );
+		var brcy := GetObjProperty( house, "brcy" );
+		if( Typeof(tlcx) == "Integer" && tlcy && brcx & brcy )
+			foreach mobile in ListObjectsInBox( tlcx,tlcy,0, brcx,brcy,100 )
+				if( (mobile.IsA(POLCLASS_NPC) || mobile.acctname) && mobile != error)
+					if( IsBanned(house, mobile) )
+						MoveCharacterToLocation( mobile, house.x, house.y, house.z, MOVECHAR_FORCELOCATION);
+						PlaySoundEffect( mobile, 0x0207 );
+						SendSysMessage( mobile, "You are banned from this house and not allowed inside.");
+					endif
+				endif
+			endforeach
+		else
+			Broadcast("Please report to staff. HE-ERR1-" + house.serial);
+			Print("HE-ERR1-" + house.serial);
+		endif
+
+		if(!GetObjProperty( house, "OnSale"))
+			var tlcx := GetObjProperty( house, "tlcx" );
+			var tlcy := GetObjProperty( house, "tlcy" );
+			var brcx := GetObjProperty( house, "brcx" );
+			var brcy := GetObjProperty( house, "brcy" );
+			
+			sleep(10);
+			DecayReset( cint(tlcx), cint(tlcy), cint(brcx), cint(brcy));
+			
+			if( getobjproperty(house, "numrect") > 1 )
+				var tlc2x := GetObjProperty( house, "tlc2x" );
+				var tlc2y := GetObjProperty( house, "tlc2y" );
+				var brc2x := GetObjProperty( house, "brc2x" );
+				var brc2y := GetObjProperty( house, "brc2y" );
+			
+				DecayReset( cint(tlc2x), cint(tlc2y), cint(brc2x), cint(brc2y));
+			endif
+			
+			sleep(10);
+		else
+			sleep(10);
+		endif
+		
+	endwhile
+	
+endprogram
+
+function DestroyHouse( house )
+
+	EraseObjProperty( house, "Renting" );
+	EraseObjProperty( house, "OnSale" );
+	EraseObjProperty( house, "ownerserial" );
+	EraseObjProperty( house, "owneracct" );
+	
+	EraseObjProperty( house, "neglected" );
+	EraseObjProperty( house, "neglecttime" );
+	
+	var lockid := AllocLockId();
+	
+	SetObjProperty( house , "OnSale" , 1 ); 
+	SetObjProperty( house , "lockid", lockid );
+	
+	var maxsecures := GetObjProperty( house, "maxsecure");
+	var maxlockdowns := GetObjProperty( house, "maxlockdowns");
+	
+	SetObjProperty( house, "numlockdowns", CInt(maxlockdowns));
+	SetObjProperty( house, "numsecure", CInt(maxsecures));
+	
+	house.color := 1300;
+
+	var MAX_FRIENDS := 30;
+	var MAX_CO_OWNERS := 5;
+	
+	var okdestroy, i:=0;
+	
+	var tlcx := GetObjProperty( house, "tlcx" );
+	var tlcy := GetObjProperty( house, "tlcy" );
+
+	var brcx := GetObjProperty( house, "brcx" );
+	var brcy := GetObjProperty( house, "brcy" );
+	
+	var tlc2x := GetObjProperty( house, "tlc2x" );
+	var tlc2y := GetObjProperty( house, "tlc2y" );
+	
+	var brc2x := GetObjProperty( house, "brc2x" );
+	var brc2y := GetObjProperty( house, "brc2y" );
+
+	
+	foreach item in ListObjectsInBox( tlcx,tlcy,0, brcx,brcy,100 )
+	       if(item != error )
+		if ((item.invisible!=1) && (item.graphic!=8198))
+			okdestroy :=1;
+		else
+			okdestroy :=0;
+		endif
+	
+		if ( ((item.objtype >= UOBJECT_DOORS_START) && (item.objtype <= UOBJECT_DOORS_END)) )
+		item.locked :=1;
+		SetObjProperty( item , "lockid" , lockid );
+		okdestroy :=0; 	
+		endif
+		
+		if ( (item.objtype == 0x2000) ) okdestroy :=0; endif
+	
+		if (okdestroy==1)
+			if (item.corpsetype==error or !item.corpsetype or item.corpsetype=="")
+				DestroyItem( item );
+			endif
+			i:=i+1;
+		endif
+	endif
+	endforeach
+	
+	okdestroy :=0; 
+	
+	i := 0;
+	
+	foreach item in ListObjectsInBox( tlc2x,tlc2y,0, brc2x,brc2y,100 )
+	  if(  item != error )
+		if ((item.invisible!=1) && (item.graphic!=8198))
+			okdestroy :=1;
+		else
+			okdestroy :=0;
+		endif
+	
+		if ( ((item.objtype >= UOBJECT_DOORS_START) && (item.objtype <= UOBJECT_DOORS_END)) )
+		item.locked :=1;
+		SetObjProperty( item , "lockid" , lockid );
+		okdestroy :=0; 	
+		endif
+		
+		if ( (item.objtype == 0x2000) ) okdestroy :=0; endif
+	
+		if (okdestroy==1)
+			if (item.corpsetype==error or !item.corpsetype or item.corpsetype=="")
+				DestroyItem( item );
+			endif
+			i:=i+1;
+		endif
+		endif
+	endforeach
+	
+	
+	foreach mobile in ListMobilesNearLocation( house.x, house.y, house.z, 100 )
+		if( (mobile.IsA(POLCLASS_NPC) || mobile.acctname) && mobile != error)
+			if(IsInStaticHouse(mobile.x, mobile.y, mobile.z))
+				MoveCharacterToLocation( mobile, house.x, house.y, house.z, MOVECHAR_FORCELOCATION);
+				SendSysMessage( mobile, "You were ejected from the house due to unpaid housing bills!");
+			endif
+		endif
+	endforeach
+
+	var friends := array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);	
+	SetObjProperty(house, "friends", friends);
+
+	var coowners := array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);	
+	SetObjProperty(house, "coowners", coowners);
+
+	
+	return( 0 );
+endfunction
+
+
+function DebitOwner( owner, amount, house )
+
+	var totalgold := 0;
+
+	if (amount<=0 || !amount)
+		return 0;
+	endif
+
+	var bankbox := GetObjProperty( house, "bankbox");
+
+	if(!bankbox)
+		return 0;
+	endif
+	
+
+	foreach item in EnumerateItemsInContainer(bankbox)
+
+		if (item.objtype == UOBJ_GOLD_COIN)
+			if ( item.serial == item.serial )
+				totalgold := totalgold + item.amount;
+			else
+				return 0;
+			endif
+		endif
+	endforeach
+	
+
+	if (amount > totalgold)
+		return 0;
+	else
+		var amountLeft := amount;
+
+		foreach item in EnumerateItemsInContainer(bankbox)
+			if (item.objtype == UOBJ_GOLD_COIN)
+				if (item.amount <= amountLeft)
+					amountLeft := amountLeft - item.amount;
+					DestroyItem( item );
+				else
+					SubtractAmount(item, amountLeft);
+					break;
+				endif
+			endif
+		endforeach
+
+		return 1;
+	endif
+
+endfunction
+
+function DecayReset( tlcx, tlcy, brcx, brcy )
+var okdecay, i:=0, itemdecay;
+
+		if( Typeof(tlcx) == "Integer" && tlcy && brcx & brcy )
+			foreach item in ListObjectsInBox( tlcx,tlcy,0, brcx,brcy,100 )
+			       if( item != error )
+				if ((item.invisible!=1) && (item.graphic!=8198))
+					okdecay :=1;
+				else
+					okdecay :=0;
+				endif
+	
+				if ( ((item.objtype >= UOBJECT_DOORS_START) && (item.objtype <= UOBJECT_DOORS_END)) )
+				okdecay :=0; 	
+				endif
+		
+				if ( (item.objtype == 0x2000) ) okdecay :=0; endif
+		
+				if ( ((item.objtype >= UOBJECT_SECURES_START) && (item.objtype <= UOBJECT_SECURES_END)) ) okdecay :=0; endif
+	
+				if (okdecay==1)
+					if (item.corpsetype==error or !item.corpsetype or item.corpsetype=="")
+					item.decayat := ReadGameClock() + 5184000;  //60 RL days in the future
+					itemdecay := item.decayat;
+					endif
+					i:=i+1;
+					//PrintTextAbove( item, "Decay reset to:" + item.decayat+ " ." );
+				endif
+			endif
+			endforeach
+		else
+			Broadcast("Please report to staff. HE-ERR2");
+			Print("HE-ERR2-" + tlcx + ", " + tlcy + " / " + brcx + ", " + brcy);
+		endif
+
+
+//	SendSysMessage( character, "Statichouse decay reset for: " + i+ " items.");
+	return 1;
+endfunction

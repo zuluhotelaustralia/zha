@@ -136,6 +136,9 @@ var racepicked := who.title_race;
 	else
 		movecharactertolocation(who, 5149, 59, 25, MOVECHAR_FORCELOCATION);
 	endif
+				SetBaseStrength(who,90);
+        SetBaseIntelligence(who,90);
+        SetBaseDexterity(who,90);
 //	SendGateGump(who);
 
 endprogram

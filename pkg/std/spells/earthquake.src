@@ -9,8 +9,11 @@ include "include/spelldata";
 include "include/attributes";
 include "include/classes";
 include "include/client";
+include "include/statichouses";
 
 program earthquake( parms )
+
+set_script_option( SCRIPTOPT_NO_RUNAWAY, 1 );
 
 	const circle  := 8;
 	const element := EARTH;
@@ -34,6 +37,7 @@ program earthquake( parms )
 
 	var sx  := caster.x;
 	var sy  := caster.y;
+	var sz 	:= caster.z;
 	var shp := GetHp(caster);
 
 	sleep(2);
@@ -78,6 +82,17 @@ program earthquake( parms )
 				else
 					okay:=1;
 				endif
+				var casterinstatic := IsInStaticHouse( caster.x, caster.y, caster.z );
+				var mobinstatic := IsInStaticHouse( mobile.x, mobile.y, mobile.z ) ;
+				if( (casterinstatic || mobinstatic) && okay == 0 ) //check for static housing
+					okay:=0;
+					if( casterinstatic.serial == mobinstatic.serial )
+						if((CInt(mobile.z)==CInt(caster.z)) || (CInt(mobile.z)<CInt(caster.z)+10)) 
+							okay:=1; 
+						endif
+					endif
+				endif
+				
 				if (okay) ApplyElementalDamage( caster, mobile, circ, dmg, element); endif
 			endif
 		endif
@@ -85,28 +100,28 @@ program earthquake( parms )
 	sleep(2);
 	PlaySoundEffect( caster, SFX_SPELL_EARTHQUAKE2 );
 
-        foreach item in ListItemsNearLocationOfType(CInt(caster.x), CInt(caster.y), CInt(caster.z), CInt(range), UOBJ_STONEWALL_NS)
+        foreach item in ListItemsNearLocationOfType(CInt(sx), CInt(sy), CInt(sz), CInt(range), UOBJ_STONEWALL_NS)
 		if( GetObjProperty(item, "f") )
 			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
                 	DestroyItem(item);
 		endif
         endforeach
 
-        foreach item in ListItemsNearLocationOfType(CInt(caster.x), CInt(caster.y), CInt(caster.z), CInt(range), UOBJ_STONEWALL_EW)
+        foreach item in ListItemsNearLocationOfType(CInt(sx), CInt(sy), CInt(sz), CInt(range), UOBJ_STONEWALL_EW)
 		if( GetObjProperty(item, "f") )
 			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
                 	DestroyItem(item);
 		endif
         endforeach
        
-	foreach item in ListItemsNearLocationOfType(CInt(caster.x), CInt(caster.y), CInt(caster.z), CInt(range), UOBJ_EFIELD_NS)
+	foreach item in ListItemsNearLocationOfType(CInt(sx), CInt(sy), CInt(sz), CInt(range), UOBJ_EFIELD_NS)
 		if( GetObjProperty(item, "f") )
 			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
                 	DestroyItem(item);
 		endif
         endforeach
 
-        foreach item in ListItemsNearLocationOfType(CInt(caster.x), CInt(caster.y), CInt(caster.z), CInt(range), UOBJ_EFIELD_EW)
+        foreach item in ListItemsNearLocationOfType(CInt(sx), CInt(sy), CInt(sz), CInt(range), UOBJ_EFIELD_EW)
 		if( GetObjProperty(item, "f") )
 			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
                 	DestroyItem(item);

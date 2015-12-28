@@ -63,7 +63,10 @@ program antilooting( who, corpse, item )
 			endif
 		endif
 	
-		if( GetObjProperty( corpse, PROPID_CORPSE_IS_BLUE ) )
+		if( IsInAntiLootingArea(who) )
+			SendSysMessage( who, "You can't loot here." );
+			return 0;
+		elseif( GetObjProperty( corpse, PROPID_CORPSE_IS_BLUE ) )
 			who.setCriminal(1);
 			return AddLooter( who, corpse );
 		endif

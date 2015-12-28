@@ -1,0 +1,46 @@
+use uo;
+use os;
+use npc;
+
+include "include/eventid";
+include "include/dist";
+
+var npc := Self();
+
+program disharmonyai()
+	SetObjProperty(npc, "dont_restart_vitals", 1); // So vitals are not reset to maximum!
+
+	EnableEvents( SYSEVENT_ENGAGED + SYSEVENT_DAMAGED );
+	SetWarMode( 0 );
+
+	disharmony();
+  
+	EraseObjProperty(npc, "loctionx");
+	EraseObjProperty(npc, "loctiony");
+	EraseObjProperty(npc, "originalscript");
+	
+	DisableEvents( SYSEVENT_ENGAGED + SYSEVENT_DAMAGED );
+endprogram
+
+function disharmony()
+	var x := npc.x;
+	var y := npc.y;
+	
+	var originalscript := GetObjProperty(npc, "originalscript");
+	
+	if ((!x) || (!y))
+		return;
+	endif
+	
+	var i := 0;
+	while (i < 10)
+		i := i+1;
+		x := npc.x;
+		y := npc.y;
+		RunAwayFromLocation(x, y);
+	endwhile
+
+	npc.script := originalscript;
+	RestartScript(npc);
+
+endfunction

@@ -8,6 +8,10 @@ var CONCEALEDFIXPASSWORD := "Barns987612345"; //this must be same password as th
 //in the unlikely event that players find this out change this and the password in polhook.cfg
 
 program MountHackFix(who, password)
+
+	if(who.cmdlevel > 1)
+		return;
+	endif
 	
 	if (password!=CONCEALEDFIXPASSWORD)
 		SendSysMessage(who, "Unknown command: .__MountHackFix");

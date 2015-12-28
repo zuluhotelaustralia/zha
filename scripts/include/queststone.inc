@@ -9,7 +9,11 @@ function IsAutoTeleQuest(player)
 	foreach q in questarr
 		var stone := SystemFindObjectBySerial(q);
 		if (stone&&IsQuestDeployed(stone)&&GetAutoTeleDeath(stone))
-			return stone;
+			if(getobjproperty(stone, "AutoTelePoint"))
+				return getobjproperty(stone, "AutoTelePoint");
+			else
+				return stone;
+			endif
 		endif
 	endforeach
 	return 0;

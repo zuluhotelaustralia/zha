@@ -1,0 +1,116 @@
+use os;
+use uo;
+use basic;
+include "include/dotempmods";
+include "include/gumps";
+include "include/res";
+include "include/dismount";
+include "include/utility";
+include "monsterDuelGate";
+include "include/speedhackRecallCheck";
+include "include/queststone";
+include "../../../scripts/ai/main/npcinfo";
+
+
+program monsterDuelGateWalkon( who, moongate )
+	if (!ReserveItem(moongate))
+		SendSysMessage(who, "Someone is already using this gate.",3,53);
+		return 0;
+	endif
+	
+	if (!WalkonCheck(who, moongate))
+		return;
+	endif
+	
+	who.frozen := 1;
+	SetObjProperty( who, "frozen", 1 ); 
+	
+	 if (! PlayerAgreementGump(who))
+	 	SendSysMessage(who, "Cancelled.");
+		who.frozen := 0;
+		EraseObjProperty( who, "frozen");
+		return;
+	 endif
+  	who.frozen := 0;
+	EraseObjProperty( who, "frozen");
+
+	if (!WalkonCheck(who, moongate))
+		return;
+	endif
+	
+ 	SendSysMessage(who, "You enter the Monster Duel Gate!", 3, 53);
+	ReserveGate(moongate, who); 
+	RunMonsterPoint(moongate, who, 1);
+	RunBoundsChecker(moongate,who);
+endprogram
+
+function WalkonCheck(who, moongate)
+	if (!GetObjProperty(moongate, "BoundaryCoords"))
+		return 0;
+	endif
+	
+	if(who.dead)
+		return 0;
+	endif
+
+	var quest := GetAssociatedQuestSerial(moongate);
+	if (quest)
+		var stone:= SystemFindObjectBySerial(quest);
+		if (!stone)
+			return 0;
+		endif
+		if (!IsRegistered(stone, who.serial))
+			SendSysMessage(who, "You cannot pass through this gate. It is associated with a quest with which you are not registered.",3,53);
+			return 0;			
+		endif
+		if (!IsQuestDeployed(stone))
+			SendSysMessage(who, "You cannot pass through this gate. It is associated with a quest which is not yet deployed.",3,53);
+			return 0;			
+		endif	
+	endif
+	if (GetObjProperty(moongate, "PlayerDuelling"))
+		SendSysMessage(who, "You cannot pass through the gate at this time. Through the swirling gate you can see two tiny, distant figures fighting.",3,53);
+		return 0;
+	endif
+
+	 var firstmp := GetMonsterPoint(moongate, 1);
+	 if (!firstmp)
+		return 0;
+	 endif
+
+	return 1;
+endfunction
+
+function PlayerAgreementGump(who)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 700, 330);
+	
+	
+	GFTextMid(10, 10, 440, 53, "MONSTER DUEL GATE");
+	
+	GFTextLine(30, 40, 43, "WARNING! You are about to enter a MONSTER DUEL GATE");
+	GFTextLine(30, 70, 53, "If you select YES the following will happen -");
+	GFTextLine(50, 100, 63,"You will be teleported to a number of locations.");
+	GFTextLine(50, 130, 63, "At each location is a monster that you must kill to move to the next location.");
+	GFTextLine(50, 160, 63, "You will be automatically transported when the monster has been killed.");
+	GFTextLine(50, 190, 63,"If you die you will be transported here.");
+	GFTextLine(30, 220, 53,"If you log-off you will be transported here.");
+	GFTextLine(30, 250, 53,"Only one player can do be in the Monster Duel Gate at a time.");
+	
+	
+	GFTextLine(90, 280, 53, "YES");
+	GFTextLine(200, 280, 53, "NO");
+
+	var yesButton := GFButtonID( 60, 285, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var noButton := GFButtonID( 170, 285, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[yesButton.keyid])
+		return 1;
+	elseif(choice[noButton.keyid])
+		return 0;
+	endif
+endfunction

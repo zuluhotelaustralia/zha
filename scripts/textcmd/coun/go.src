@@ -34,6 +34,7 @@ var data := array(      // The data array that holds all the text to be displaye
 );
 
 program textcmd_go( who, text )
+	var gmdata;
 	if (!checkStaff(who, "go", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
@@ -77,6 +78,8 @@ program textcmd_go( who, text )
 
     // Teleport moble
     MoveCharacterToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y).Z, MOVECHAR_FORCELOCATION );
+    gmdata := {	"go", traveler.serial+ " / "+traveler.name+" / "+traveler.acctname, "x: "+dest.x, "y: "+dest.y,"z: "+dest.z,"concealed: "+who.concealed , dest.name};
+		logcommand(who, gmdata);
     showflame(traveler);
   else
 	var params := SplitWords( text );
@@ -85,10 +88,13 @@ program textcmd_go( who, text )
     endif
 
 	var res := MoveCharacterToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), MOVECHAR_FORCELOCATION );
-
+		gmdata := {	"go", who.serial+ " / "+who.name+" / "+who.acctname, "x: "+params[1], "y: "+params[2],"z: "+params[3],"concealed: "+who.concealed , "manual entry"};
+		logcommand(who, gmdata);
     if (!res)
         SendSysMessage( who, "Unable to go there: " + res.errortext );
     endif
+
+
     showflame(who);
 
   endif

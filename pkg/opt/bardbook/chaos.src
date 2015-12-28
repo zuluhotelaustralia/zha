@@ -1,0 +1,89 @@
+use uo;
+use cfgfile;
+
+include "bardbook";
+include "include/client";
+include "include/attributes";
+include "include/objtype";
+include "include/eventid";
+include "include/random";
+
+program chaos( caster )
+	
+	if(!TryToCast( caster, 16 ))
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+	var bx:=caster.x;
+	var by:=caster.y;
+	var bz:=caster.z;
+	var bard := GetObjProperty( caster, "IsBard" );
+	var range := 2+(bard*3);
+
+	var victims := ListMobilesNearLocation( bx, by, bz, range );
+
+	var count := 0;
+	var mobs := { };
+	var mobint;
+	var chance;
+	var pass;
+	
+	foreach mobile in victims
+	
+	pass := 1;
+
+		if(mobile.isA(POLCLASS_NPC))
+		chance := Random(100);
+		mobint := GetBaseIntelligence(mobile);
+		mobint := mobint / 10;
+			if( mobint > chance )
+				PrintTextAbove( mobile, mobile.name + " shrugs off chaotic effects.");
+				RestartScript( mobile );
+				pass := 0;
+			elseif( GetObjProperty(mobile, "unprovokable") )
+				PrintTextAbove( mobile, mobile.name + " is immune to chaotic effects.");
+				pass := 0;
+			elseif( mobile.script == "tamed" )
+				PrintTextAbove( mobile, mobile.name + " is immune to chaotic effects.");
+				pass := 0;
+			elseif( mobile.enabled("invul"))
+				PrintTextAbove( mobile, mobile.name + " is immune to chaotic effects.");
+				pass := 0;
+			endif
+			if( pass > 0 )
+				count := count + 1;
+				mobs[count] := mobile;
+				sleepms(200);
+			endif
+		endif
+	endforeach
+	
+	PlaySoundEffect( caster, 0x457 );
+
+	EraseObjProperty( caster, "#Casting" );
+
+	var ev := struct;
+	ev.+ type;
+	ev.+ source;
+	var shalf := count / 2;
+	var fhalf := 0;
+
+	while( shalf < count )
+		shalf := shalf + 1;
+		fhalf := fhalf + 1;
+		ev.source	:= caster;
+		ev.type		:= SYSEVENT_ENGAGED;
+		SendEvent( mobs[shalf], ev );
+		ev.source	:= mobs[fhalf];
+		ev.type		:= SYSEVENT_ENGAGED;
+		SendEvent( mobs[shalf], ev );
+		ev.source	:= mobs[shalf];
+		ev.type		:= EVID_PEACEMADE;
+		SendEvent( mobs[fhalf], ev );
+		ev.type		:= SYSEVENT_DAMAGED;
+		SendEvent( mobs[fhalf], ev );
+		PrintTextAbovePrivate( mobs[fhalf], mobs[fhalf].name + "'s mind is in chaos and attacks " + mobs[shalf].name + "!", caster );
+	endwhile
+
+endprogram

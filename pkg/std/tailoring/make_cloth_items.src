@@ -428,9 +428,14 @@ endfunction
 
 
 function FortifyHat( who, hat )
+	
+	if ( GetObjProperty(hat, "UnIDedMagicalItem") )
+		SendSysMessage( who, "That hat is unidentified!" );
+		return 0;
+	endif
 
-	if (hat.name["fortified"])
-		SendSysMessage( who, "That hat is already fortified!" );
+	if ( GetObjProperty(hat, "FortifiedBy") || hat.name["fortified"] )
+		SendSysMessage( who, "That has already been fortified!" );
 		return 0;
 	endif
 	
@@ -461,6 +466,22 @@ function FortifyHat( who, hat )
 
 	PlaySound( who );
 
+	var hatstr := GetObjProperty( hat, "str" );
+	var helmstr := GetObjProperty( helm, "str" );
+	var hatdex := GetObjProperty( hat, "dex" );
+	var helmdex := GetObjProperty( helm, "dex" );
+	var hatint := GetObjProperty( hat, "int" );
+	var helmint := GetObjProperty( helm, "int" );
+	var newstr;
+	var newdex;
+	var newint;
+	if(helmstr>0)
+		newstr := hatstr + helmstr;
+	elseif(helmdex>0)
+		newdex := hatdex + helmdex;
+	elseif(helmint>0)
+		newint := hatint + helmint;
+	endif
 	if( !CheckSkill( who, SKILLID_TAILORING, -1, 250 ) )
 		SendSysMessage( who, "You fail and ruin both, the hat and the helm." );
 		DestroyItem( hat );
@@ -468,9 +489,21 @@ function FortifyHat( who, hat )
 		return;
 	endif
 
+	var HelmQuality := helm.quality;
 	DupeItem( hat, helm );
+	if(HelmQuality != 1)
+		helm.quality := HelmQuality;
+	endif
+	SetObjProperty( helm, "FortifiedBy", who.name + " " + who.serial);
+	helm.hp := helm.maxhp;
 	SetName( helm, "a fortified " + TruncateArticle(hat.desc) );
-	SetObjProperty(helm, "FortifiedBy", who.name+ " " + who.serial);
+	if( newstr > 0)
+		SetObjProperty( helm, "str", newstr );
+	elseif( newdex > 0)
+		SetObjProperty( helm, "dex", newdex );
+	elseif( newint > 0)
+		SetObjProperty( helm, "int", newint );
+	endif
 	DestroyItem( hat );
 
 endfunction
@@ -492,7 +525,17 @@ function IsHat( what )
 		0x1719:
 		0x171a:
 		0x171b:
-		0x171c:		return 1;
+		0x171c:
+		0x141b:
+		0x141c:
+		0x1545:
+		0x1546:
+		0x1547:
+		0x1548:
+		0x1549:
+		0x154a:
+		0x154b:
+		0x154c:		return 1;
 
 		default:	return 0;
 	endcase

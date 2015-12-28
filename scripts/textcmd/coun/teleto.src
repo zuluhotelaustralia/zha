@@ -13,15 +13,16 @@ SendSysMessage(who, "Move where?");
 var where := TargetCoordinates(who);
 
 if (where)
-        MoveCharacterToLocation(what, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
-		  if (who.cmdlevel == 1)
 			var prevpos:=struct;
 			prevpos.x:=who.x;
 			prevpos.y:=who.y;
 			prevpos.z:=who.z;
+        MoveCharacterToLocation(what, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
+		  if (who.cmdlevel == 1)
 
 			councycommandlog(who, "teleto", what, prevpos, where);
-
+  	  var		gmdata := {	"teleto", "to x: "+what.x+" y: "+what.y+" z: "+what.z, "from x: "+prevpos.x+" y: "+prevpos.y+" z: "+prevpos.z , "na","concealed: "+who.concealed,"na","time: "+ReadGameClock()};
+			logcommand(who, gmdata);
 		  endif
 
 endif

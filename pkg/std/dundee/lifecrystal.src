@@ -8,7 +8,7 @@ program use_crystal( character, crystal )
 
 if(!ReserveItem(crystal)) return; endif
 
-SendSysMessage( character, "You smash the magic crystal!" );
+	PrintTextAbove( character, "*" + character.name + " smashes " + crystal.desc + "*" );
 
 var affected := ListMobilesNearLocation( character.x, character.y, character.z, 15 );
 
@@ -18,6 +18,10 @@ foreach cast_near in affected
 	EraseObjProperty(cast_near,"death");
 	SetObjProperty(cast_near,"freedeath",1);
 	SendSysMessage( cast_near, "Death pardons your next transgression into the nether realm..." );
+		if(manalevel > 0)
+			SetMana(cast_near, manalevel);
+			SendSysMessage( cast_near, "You were restored " + manalevel + " mana" );
+		endif
 endforeach
 
 AwardKarma( character, 100 );

@@ -6,6 +6,7 @@ include "include/spelldata";
 include "include/areas";
 include "include/client";
 include "../pkg/std/housing/utility";
+include "include/statichouses";
 
 program spell_gate( caster )
 	//ppl were exploiting this by casting gate, .suicide, running thru house doors
@@ -14,6 +15,7 @@ program spell_gate( caster )
 	var fromx := caster.x;
 	var fromy := caster.y;
 	var fromz := caster.z;
+	var casterinstatic := IsInStaticHouse( caster.x, caster.y, caster.z );
 	
 	var circle := 7;
 
@@ -31,6 +33,16 @@ program spell_gate( caster )
 		endif
 	endif
 	
+	if( casterinstatic )
+		if( !IsStaticOwner( caster, casterinstatic )  )
+			if( !IsStaticCoowner( caster, casterinstatic ) )
+				if( !IsStaticFriend( caster, casterinstatic ) )
+						SendSysMessage( caster, "You can't gate from this house." );
+				return;
+				endif
+			endif
+		endif
+	endif
 
 	SendSysMessage( caster, "Select a rune to gate from." );
 	var cast_on := CanTargetThing(caster, circle, TGTOPT_CHECK_LOS );
@@ -77,6 +89,17 @@ program spell_gate( caster )
 		endif
 	endif
 
+	var casttostatic := IsInStaticHouse( tox, toy, toz );
+	if( casttostatic )
+		if( !IsStaticOwner( caster, casttostatic )  )
+			if( !IsStaticCoowner( caster, casttostatic ) )
+				if( !IsStaticFriend( caster, casttostatic ) )
+						SendSysMessage( caster, "You cannot gate to this house." );
+				return;
+				endif
+			endif
+		endif
+	endif
 	set_critical(1);
 
 	if( !caster )

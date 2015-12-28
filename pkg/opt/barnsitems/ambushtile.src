@@ -22,6 +22,15 @@ function configGump(who, tile)
 	GFResizePic(0, 0, BKGND_SCROLL, 440, 530);
 	
 	var tstat := tileStatus(tile);
+	var groupspawn:= getobjproperty( tile, "groupspawn" );
+	var groups:= "Off.";
+	if(!groupspawn || (groupspawn == 0 ))
+		groups := "Off.";
+	else
+		groups := "On.";
+	endif
+		
+		
 	
 	GFTextMid(10, 10, 440, 70, "Configure Ambush Tile");
 	GFTextMid(10, 30, 440, 53, "Select any of the following options:");
@@ -30,11 +39,13 @@ function configGump(who, tile)
 	GFTextLine(90, 150, 5, "Npctemplate: " + tstat[1]);
 	GFTextLine(90, 170, 5, "Number to spawn at ambush: " + tstat[2]);
 	GFTextLine(90, 190, 5, "Time Interval (mins): " + CInt(tstat[3]/60));
+	GFTextLine(90, 210, 53, "Toggle Group Spawn Option: " + groups);
 	GFTextLine(90, 350, 53, "Add auxillary tile (extend area of location tile by tile)");
 	GFTextLine(90, 400, 53, "Reset all");
 	GFTextLine(90, 430, 53, "Exit");
 
 	var createMonsters := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var groupbtn := GFButtonID( 60, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var tilebtn := GFButtonID( 60, 355, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var resetallbtn := GFButtonID( 60, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var exitButton := GFButtonID( 60, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
@@ -49,6 +60,12 @@ function configGump(who, tile)
 		ResetAllOpts(tile);
 	elseif(choice[exitButton.keyid])
 		return;
+	elseif(choice[groupbtn.keyid]);
+		if(!groupspawn ||( groupspawn == 0 ))
+			setobjproperty( tile, "groupspawn", 1);
+		else
+			setobjproperty( tile, "groupspawn", 0);
+		endif
 	endif
 	configGump(who, tile);
 endfunction
