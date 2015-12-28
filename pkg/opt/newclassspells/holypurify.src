@@ -1,0 +1,78 @@
+/* Holy Spell - Purify                  **
+** Ultimate: Removes a curse off a item **
+** Seravy - seravy@gmail.com            */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/namingbyenchant";
+include "include/classes";
+include "include/packets";
+
+const COSTPERES := 10000;
+const GOLDCOIN := 0x0eed;
+const SPELL_ID := SPELL_ID_PURIFY;
+
+program cast_purify(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    EraseObjProperty( caster, "#Casting");
+    return;
+  else
+    caster := parms;
+    cast_on := Target(caster);
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var class:=GetClass(caster);
+  if(class != CLASSEID_PRIEST && class != CLASSEID_PALADIN)
+    SendSysMessage(caster, "You could never understand the true meaning of this spell like a true priest would.");
+  elseif(!ReserveItem(cast_on))
+    SendSysMessage(caster, "You cannot select this item.");
+  elseif(!GetObjProperty(cast_on, "Cursed"))
+    SendSysMessage(caster, "Feeling extremly stupid after realising that this item isn't cursed.");
+  elseif(!(cast_on in EnumerateItemsInContainer(caster.backpack)))
+    SendSysMessage(caster, "The item must be in your backpack to purify this.");
+  elseif(GetObjProperty(cast_on, "Cursed") == 2)
+    SendSysMessage(caster, "You cannot purify the curse in this state.");
+  elseif(GetObjProperty(cast_on, "CannotBeUncursed"))
+    SendSysMessage(caster, "You get the feeling this can never be uncursed.");
+  else
+    set_critical(1);
+    BanishCurse(cast_on);
+    var es := CalculateEquipSlots(caster, cast_on);
+    RevealCurse(cast_on);
+    SetObjProperty(cast_on, "Cursed", 3);
+    set_critical(0);
+    if (es < 1)
+      es := 1;
+    endif
+    var cost := (es * COSTPERES);
+    var skill := GetEffectiveSkill(caster, SKILLID_PIETY);
+    var chance := (skill/2);
+
+    if(!ConsumeSubstance(caster.backpack, GOLDCOIN, cost))
+      SendSysMessage(caster, "You need "+cost+" gold peices on you to purify this item.");
+    elseif(Random(101) <= chance)
+      SendSysMessage(caster, "You purify the item!");
+      PlayObjectCenteredEffectHuefx(caster, FX_SPELL_PURIFY, SPEED_SPELL_PURIFY, LOOP_SPELL_PURIFY, 1499);
+      PlaySoundEffect(caster, SFX_SPELL_PURIFY);
+      BanishCurse(cast_on);
+    else
+      PlayObjectCenteredEffect(caster, FX_SPELL_FAIL, 7, 7 );
+      PlaySoundEffect(caster, SFX_5B );
+      SendSysMessage(caster, "You fail to purify it as the item crumbles away in your hands!");
+      DestroyItem(cast_on);
+    endif
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

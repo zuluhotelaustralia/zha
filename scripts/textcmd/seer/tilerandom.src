@@ -1,0 +1,113 @@
+////////////////////////////////////////////////////////////////////////////
+//
+//  TILE.SRC - ingame command
+//
+//  This is a "fastbuild" command you supply itemnumber and Z height as
+//  arguments. If Z is left out it takes the first coordinates Z as
+//  the Z to be built on. This command is great for putting down floors
+//  etc.
+//
+//  Todo:
+//   Clean up the code when abs() is avail. and C-style for loops
+//   don't require initialization.
+//
+//  Author: ens 1999/01/02
+//
+//  Recent Modifications:
+//      1999/01/25 Ignatius Created the command.
+//      2001/01/22 Aspox added casuality to it.
+//
+////////////////////////////////////////////////////////////////////////////
+
+use uo;
+
+include "include/random";
+
+include "include/cmdlevel_check";
+
+program textcmd_tile( who, input )
+	if (!checkStaff(who, "tilerandom", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	if ( ! input )
+		SendSysMessage( who, "No arguments supplied. Usage: .tile startitem [enditem] [z]" );
+		return;
+	endif
+
+	var argarray := SplitWords( input ); // split the arguments.
+
+	var tileitem  := CInt( argarray[ 1 ] );
+	var tileitem2 := CInt( argarray[ 2 ] );
+	var tilez     := CInt( argarray[ 3 ] );
+
+	var tilernd   := 0;
+	if(tileitem2>tileitem)
+		tilernd:=tileitem2-tileitem+1;
+		SendSysMessage( who, "Random tiles from "+tileitem+" to "+(tileitem+(tilernd-1))+"." );
+	endif
+
+	var zvalid := 1;  // assume z is correct for now.
+
+	if ( ! tilez )
+		SendSysMessage( who, "No Z supplied. Using target #1 Z instead." );
+		zvalid := 0;
+	elseif ( ( tilez  < -127 ) || ( tilez > 128 ) ) // check the bounds.
+		SendSysMessage( who, "Z is out of bounds. Using target #1 Z instead." );
+		zvalid := 0;
+	endif
+
+	SendSysMessage( who, "Select coordinate #1" );
+	var coordstructone := TargetCoordinates( who );
+
+	if (! coordstructone)
+		SendSysMessage( who, "Missing coordinate. Aborting." );
+		return;
+	endif
+
+	SendSysMessage( who, "Select coordinate #2" );
+	var coordstructtwo := TargetCoordinates( who );
+
+	if (! coordstructtwo)
+		SendSysMessage( who, "Missing coordinate. Aborting." );
+		return;
+	endif
+
+	if ( ! zvalid ) // if we are to use the coord #1 Z, check it out.
+		if ( coordstructone.z < -127 || coordstructone.z > 128 )
+			SendSysMessage( who, "Z is out of bounds. Aborting." );
+			return;
+		endif
+		tilez := coordstructone.z;
+	endif
+
+	// dummy variables, won't be needed after rewrite of command.
+	var cntx, cnty;
+	var incx, incy;
+	var item := tileitem;
+
+	if ( coordstructone.x <= coordstructtwo.x )
+		incx:=+1;
+	else
+		incx:=-1;
+	endif
+
+	if ( coordstructone.y <= coordstructtwo.y )
+		incy:=+1;
+	else
+		incy:=-1;
+	endif
+
+	for(cnty:=coordstructone.y; cnty!=coordstructtwo.y; cnty:=cnty+incy)
+		for(cntx:=coordstructone.x; cntx!=coordstructtwo.x; cntx:=cntx+incx)
+			if(tilernd)
+				item:=tileitem+Random(tilernd);
+			endif
+			CreateItemAtLocation(cntx, cnty, tilez, item, 1);
+		endfor
+	endfor
+
+	SendSysMessage( who, "Command completed." );
+
+endprogram
+

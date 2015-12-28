@@ -1,0 +1,74 @@
+use basic;
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_getbuggers( who )
+	if (!checkStaff(who, "getbugitems", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	SendSysMessage(who, "Target a player.");
+	var player := Target(who);
+	if( !player )
+		return 0;
+	elseif( !player.isA(POLCLASS_MOBILE) )
+		SendSysMessage(who, "This isn't a mobile.");
+		return 0;
+	elseif( player.isA(POLCLASS_NPC) )
+		SendSysMessage(who, "This isn't a player.");
+		return 0;
+	else
+		var found;
+		var index;
+		var serial;
+		var serials := {};
+
+		set_critical(1);
+		foreach cprop_name in GetObjPropertyNames(player)
+			if( cprop_name["advamount"] )
+				index := find(cprop_name, "s", 10);
+				if( index )
+					serial := CInt(cprop_name[index+1, len(cprop_name)]);
+					if( serial )
+						found := 0;
+						foreach item in ListEquippedItems(player)
+							if( item.serial == serial )
+								found := 1;
+								break;
+							endif
+						endforeach
+					
+						if( found == 0 )
+							serials.append(serial);
+						endif
+					endif
+				endif
+			endif
+		endforeach
+		set_critical(0);
+	
+		if( serials.size() == 0 )
+			SendSysMessage(who, "This player never abused the skill item bug.");
+		else
+			var item;
+			foreach number in serials
+				item := SystemFindObjectBySerial(number);
+				if( !item )
+					item := SystemFindObjectBySerial(number, SYSFIND_SEARCH_OFFLINE_MOBILES);
+					if( !item )
+						item := SystemFindObjectBySerial(number, SYSFIND_SEARCH_STORAGE_AREAS);
+					endif
+				endif
+			
+				if( item )
+					SendSysMessage(who, "Serial " + Hex(number) + ": " + item.name + ".");
+				else
+					SendSysMessage(who, "Serial " + Hex(number) + ": No longer exists.");
+				endif
+			
+				sleep(10);
+			endforeach
+			SendSysMessage(who, "Finished.");
+		endif
+	endif
+endprogram		

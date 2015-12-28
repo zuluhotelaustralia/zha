@@ -1,0 +1,66 @@
+/* Psionics Spell - Exhaustion              **
+** Drains target's stam and keeps it low so ** 
+** they can only walk for a duration.       **
+** Seravy - seravy@gmail.com                */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_EXHAUSTION;
+
+program cast_exhaustion(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  PlayObjectCenteredEffect( cast_on, FX_SPELL_EXHAUSTION, SPEED_SPELL_EXHAUSTION, LOOP_SPELL_EXHAUSTION);
+  PlaySoundEffect( cast_on, SFX_SPELL_EXHAUSTION);
+
+  var level :=GetClasseLevel(caster);
+  var monklvl := 0;
+  if (GetClass(caster) == CLASSEID_MONK)
+    monklvl := level;
+  endif
+   
+  if (GetClass(caster) == CLASSEID_POWERPLAYER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_MONK)
+    level := CInt(level/5);
+  endif
+  
+
+  var skill := GetEffectiveSkill(caster, SKILLID_PSIONICS);
+  var duration := calcSmallDuration(skill, level);
+  EraseObjProperty( caster, "#Casting");
+
+  SetStamina(cast_on, 1);
+  duration := ReadGameClock() + duration;
+  var wasStam := GetStamina(cast_on);
+  while (ReadGameClock() < duration && (wasStam + 3 + monklvl) > GetStamina(cast_on))
+    if(GetStamina(cast_on) > 1)
+      SetStamina(cast_on, 1);
+    endif
+    wasStam := GetStamina(cast_on);
+    sleepms(250);
+  endwhile
+  
+
+endprogram

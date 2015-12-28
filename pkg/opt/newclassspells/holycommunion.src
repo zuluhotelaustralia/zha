@@ -1,0 +1,20 @@
+/* Holy Spell - Communion              **
+** Creates wine and bread in backpack  **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_COMMUNION;
+const COMMUNION_WINE := 0x9C7;
+const COMMUNION_BREAD := 0x103C;
+
+program cast_communion( caster )
+  PlaySoundEffect( caster, SFX_SPELL_COMMUNION );
+  PlayObjectCenteredEffect( caster, FX_SPELL_COMMUNION, SPEED_SPELL_COMMUNION, LOOP_SPELL_COMMUNION );
+  CreateItemInBackpack( caster, COMMUNION_WINE, 1 );
+  CreateItemInBackpack( caster, COMMUNION_BREAD, 1 );
+  EraseObjProperty( caster, "#Casting");
+endprogram

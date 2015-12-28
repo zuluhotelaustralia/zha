@@ -1,0 +1,80 @@
+use uo;
+
+include "include/spawnnet";
+include "include/objtype";
+include "include/cmdlevel_check";
+
+
+
+program show_tele( who, range )
+	if (!checkStaff(who, "showtele", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	if(!range)
+		range := 5;
+	endif
+
+	range := CInt(range);
+
+	if(!range)
+		SendSysMessage( who, "parameter range must be a number" );
+		return;
+	endif
+
+	var counter :=0;
+
+	foreach rune in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLACK_MOONGATE )
+		rune.graphic := UOBJ_BLACK_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach rune in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLACK_MOONGATE2 )
+		rune.graphic := UOBJ_BLACK_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLUE_MOONGATE )
+		gate.graphic := UOBJ_BLUE_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLUE_MOONGATE2 )
+		gate.graphic := UOBJ_BLUE_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_RED_MOONGATE )
+		gate.graphic := UOBJ_RED_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_RED_MOONGATE2 )
+		gate.graphic := UOBJ_RED_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_WHITE_MOONGATE )
+		gate.graphic := UOBJ_WHITE_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_WHITE_MOONGATE2 )
+		gate.graphic := UOBJ_WHITE_MOONGATE;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, 0xba37 )
+		gate.graphic := 0x1fd4;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, 0xba38 )
+		gate.graphic := 0x1822;
+		counter:=counter+1;
+	endforeach
+
+	SendSysMessage( who, "A total of "+counter+" teleporters have been shown." );
+
+endprogram

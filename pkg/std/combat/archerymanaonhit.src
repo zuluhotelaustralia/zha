@@ -1,0 +1,39 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//											//
+//	archerymanaonhit								//
+//											//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+use uo;
+
+include "include/damages";
+
+var cfg := ReadConfigFile(":combat:itemdesc");
+
+program avengingonhit( parms )
+
+	var attacker 	 := parms[1];
+	var defender 	 := parms[2];
+	var weapon 	 := parms[3];
+	var armor 	 := parms[4];
+	var basedamage := parms[5];
+	var rawdamage	 := parms[6];
+
+	var weaponType := cfg[attacker.weapon.objtype];
+	
+	if (weaponType.Attribute=="Archery")
+		var mymana := GetMana(defender);
+		if (mymana > rawdamage)
+			SetMana(defender, mymana-rawdamage);			
+			rawdamage:=CInt(rawdamage/3);			
+			PlayObjectCenteredEffect( defender, 0x37b9, 0x10, 0x5);
+			PlaySoundEffect( defender, 0x22a );
+		endif
+
+	endif
+	
+	ApplyTheDamage( defender, attacker, rawdamage );
+
+
+endprogram

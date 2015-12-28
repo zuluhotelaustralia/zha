@@ -1,0 +1,299 @@
+use uo;
+use cfgfile;
+use os;
+
+include "include/starteqp";
+include "include/npcbackpacks";
+include "include/eventid";
+include "../../pkg/opt/karmafame/karmafame";
+include "include/dismount";
+include "include/managers";
+include "include/queststone";
+include "include/tamedutil";
+include "include/constants/cmdlevels";
+include "include/time";
+include "../../pkg/opt/barnsitems/possessedgenerator";
+include "../../pkg/opt/barnsitems/monsterDuelGate";
+include "include/speedhackRecallCheck";
+
+
+
+program npcdeath(corpse)
+
+	set_script_option( SCRIPTOPT_NO_RUNAWAY, 1 );
+
+   	var npctemplate := GetObjProperty(corpse,"npctemplate");
+
+	set_critical(1);
+	
+	if (WasASkillTamedOrSpellboundMonster(corpse))
+		RemoveFromTamedArray(CInt(GetObjProperty(corpse, "master")), CInt(GetObjProperty(corpse, "serial")));
+	endif
+	
+	foreach mount in ListRootItemsInContainerOfObjtype(corpse, 0xf021)
+		if (! GetObjProperty(corpse, "nomountatdeath"))
+			if (GetObjProperty(corpse, "untamemountatdeath"))
+				dismount(corpse, mount, 1);
+			else
+				dismount(corpse, mount);
+			endif
+		else
+		   DestroyItem(mount);
+		endif
+	endforeach
+
+	//tell possessiongenerator if monster was a possessed nasty
+	var posGenSer := CInt(GetObjProperty(corpse, "PossessionGenerator"));
+	if (posGenSer)
+		var possessedgenerator := SystemFindObjectBySerial(posGenSer);
+		//Broadcast(possessedgenerator + " " + posGenSer);
+		if (possessedgenerator && possessedgenerator!=error)
+			FindPersonToPossess(possessedgenerator);
+		endif
+	endif
+	
+	// Create a gate on death.
+	var gateLocation := GetObjProperty(corpse, "OnDeathGateLocation");
+	var fromLocation := corpse;
+	if (!gateLocation)
+		var pointserial := GetObjProperty( corpse, PROPID_MOBILE_SPAWNPOINT_SERIAL );
+		if( pointserial )
+			var point := SystemFindObjectBySerial(pointserial);
+			if (point)
+				gateLocation := GetObjProperty(point, "OnDeathGateLocation");
+				fromLocation := point;
+			endif
+		endif
+	endif
+	if (gateLocation)
+		gateLocation := SplitWords(gateLocation);
+		var x := CInt(gateLocation[1]);
+		var y := CInt(gateLocation[2]);
+		var z := CInt(gateLocation[3]);
+		var duration := CInt(gateLocation[4]);
+		if (!duration)
+			duration := 30;
+		endif
+		if ((x || x==0) && (y || y==0) && (z || z==0))
+			var gate1 := CreateItemAtLocation( fromLocation.x, fromLocation.y, fromLocation.z, UOBJ_BLUE_MOONGATE, 1 );
+			var gate2 := CreateItemAtLocation( x, y, z, UOBJ_BLUE_MOONGATE, 1 );
+			SetObjProperty( gate1, "GateDestX", gate2.x );
+			SetObjProperty( gate1, "GateDestY", gate2.y );
+			SetObjProperty( gate1, "GateDestZ", gate2.z );
+			SetObjProperty( gate2, "GateDestX", gate1.x );
+			SetObjProperty( gate2, "GateDestY", gate1.y );
+			SetObjProperty( gate2, "GateDestZ", gate1.z );
+			SetObjProperty(gate1, "perma", 1);
+			SetObjProperty(gate2, "perma", 1);
+			var destroyInfo := array;
+			destroyInfo[1] := gate1;
+			destroyInfo[2] := gate2;
+			destroyInfo[3] := duration;
+			start_script(":snoitems:gateDestroyer", destroyInfo);
+		endif
+	endif
+
+	//run at death script
+	var atdeathscript := GetObjProperty(corpse, "AtDeathScript");
+	if (atdeathscript)
+		start_script(atdeathscript, corpse);
+	endif
+	
+	WarnManagerOfNpcDeath(corpse);
+
+//Check if corpse was a townraider spawn v0.7
+	if ( GetGlobalProperty("raidsonnow") )
+		var rpid := GetObjProperty( corpse, "#townraider" );
+		if (rpid)
+			set_critical(1);
+				SetGlobalProperty("raiddead"+rpid, GetGlobalProperty("raiddead"+rpid) + 1);
+			set_critical(0);
+		endif
+	endif
+/*
+	//Check if corpse was a townraider spawn
+	if ( GetGlobalProperty("raidname") )
+		if (GetObjProperty( corpse, "townraider" ))
+			var deaddudes := GetGlobalProperty("raiddead");
+			deaddudes := deaddudes + 1;
+			SetGlobalProperty("raiddead", deaddudes);
+			var killer:=getobjproperty(corpse,"KilledBy");
+			foreach chr in EnumerateOnlineCharacters()
+				if(chr.name=killer) CreateItemInBackpack(chr,0xeed,GetObjProperty(corpse,"killamount")); break; endif
+			endforeach
+		endif
+	endif
+*/
+
+	//check if the killer is a counselor
+	if (GetGlobalProperty("CounselorKillsLog"))
+		var killerserial:=GetObjProperty(corpse,"KilledBySerial");
+		var killer := SystemFindObjectBySerial(killerserial);
+		if (killer.cmdlevel == CMDLEVEL_COUNSELOR)
+			logCounselor(killer, corpse);
+		endif
+	endif
+
+	//check if monster was a quest objective
+	var quesstoneserial := GetObjProperty(corpse, "QuestStoneSerial");
+	if(quesstoneserial)
+		//Broadcast("monster objective - death.src");
+		var killerserial:=GetObjProperty(corpse,"KilledBySerial");
+		var monsterserial:=GetObjProperty(corpse,"AiSerial");
+		var monsterpoints:=GetObjProperty(corpse,"QuestPoints");
+		if (GetObjProperty(corpse,"RemoveFromQuestAfterDeath")==1)
+			MonsterObjectiveMet(quesstoneserial, killerserial, monsterserial, monsterpoints,1);
+			RemoveObjective(quesstoneserial, monsterserial);
+		else
+			MonsterObjectiveMet(quesstoneserial, killerserial, monsterserial, monsterpoints);
+		endif
+	endif
+	
+	
+	//check if monster is part of Monster Duel Gate
+	var monstDuelGateSer:=Cint(GetObjProperty(corpse, "monsterDuelController"));
+	if (monstDuelGateSer)
+		var pl_killer := SystemFindObjectBySerial(CInt(GetObjProperty(corpse,"KilledBySerial")));
+		var monstDuelGate := SystemFindObjectBySerial(monstDuelGateSer);
+		//if (monstDuelGate && pl_killer && !pl_killer.npctemplate)
+		if (monstDuelGate)
+			IncrementMonsterPoint(monstDuelGate, npctemplate, CInt(GetObjProperty(corpse, "monsterDuelControllerIndex")));
+		endif
+	endif	
+	
+	if (GetObjProperty(corpse, "rise"))
+		start_script("misc/rise", corpse);
+	endif
+
+	if (corpse.isA(POLCLASS_MOBILE)) corpse.color:=corpse.truecolor; endif
+
+	if (GetObjProperty(corpse,"color"))
+		corpse.color := CInt(GetObjProperty(corpse,"color"));
+	endif
+	
+	//to get rid of packanimal and playervendor storage
+	zapstorageareas(corpse);
+	
+   MoveBackpackToCorpse( corpse );
+
+	var nocorpse  := GetObjProperty(corpse,"nocorpse");
+	var summoned  := GetObjProperty(corpse,"summoned");
+	var guardkill := GetObjProperty(corpse,"guardkill");
+
+	foreach item in EnumerateItemsInContainer( corpse )
+		if( GetObjProperty( item, "noloot" ) )
+			DestroyItem(item);
+		elseif( item.container == corpse )
+			if( GetObjProperty( item, "dropitem" ) )
+				EraseObjProperty( item, "dropitem" );
+				MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL );
+			// elseif( nocorpse || summoned || guardkill )
+				//MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL ); DONT keep putting this in.  It wrecks the townraid where they drop all their stuff
+				// I DONT want that, plus there is something called dropitem, which is looted items.
+				// The above line causes a shit load of extra items and lag.
+				//moveitemtocontainer( item, corpse); //This line is useless and prevent some monsters from giving their loot back.
+			endif
+		endif
+	endforeach
+
+	var npc_cfg	:= ReadConfigFile( "::npcdesc" );
+	var soundfx	:= npc_cfg[npctemplate].deathsnd;
+	if (soundfx) PlaySoundEffect( corpse, soundfx ); endif
+
+	if( guardkill || summoned && !GetObjProperty(corpse, "leavecorpse"))
+		return DestroyItem(corpse);
+	endif
+
+        AdviseAttackers( corpse );
+
+
+	var noloot := 0;
+	var pointserial := GetObjProperty( corpse, PROPID_MOBILE_SPAWNPOINT_SERIAL );
+	if(pointserial)
+		var point := SystemFindObjectBySerial(pointserial);
+		if (point)
+			if(GetObjProperty(point, "noloot"))
+ 				noloot := 1;
+			endif
+		endif
+	endif
+
+    	if(GetObjProperty( corpse, "noloot") || noloot)
+			//allows previously snooped monsters items to be movable if they're killed. During snooping all their backpack
+			//items were set to unmovable (prevents players just taking items).
+			foreach item in EnumerateItemsInContainer( corpse )
+				//if ( GetObjProperty( item, "cansteal"))
+				item.movable:=1;
+				//endif
+			endforeach			
+			return;
+    	else
+       		MakeLoot(corpse);
+    	endif
+    
+   	if( nocorpse )
+    		foreach item in EnumerateItemsInContainer( corpse )
+    			if( item.container == corpse )
+    				MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL );
+    			endif
+    		endforeach
+    		DestroyItem(corpse);
+    	endif
+    set_critical(0);
+
+endprogram
+
+
+function zapstorageareas(me)
+
+	var myserial:=GetObjProperty(me,"serial");
+	if (!myserial) return; endif
+
+	var storage := FindStorageArea( "Merchant Storage" );
+	if (DestroyRootItemInStorageArea( storage, myserial + " FS"))
+		DestroyRootItemInStorageArea( storage, myserial + " PB");
+		DestroyRootItemInStorageArea( storage, myserial + " 1C");
+	endif
+
+	storage := FindStorageArea( "Tamed Storage" );
+	DestroyRootItemInStorageArea( storage, "Bankbox  " + Hex(myserial));
+
+endfunction
+
+function logCounselor(who, corpse)	
+	var props := array;
+	var prop := array;
+	prop .+ pname;
+	prop .+ pvalue;
+	
+	prop.pname := "char name";
+	prop.pvalue := who.name;
+	props[1] := prop;
+	
+	prop.pname := "char serial";
+	prop.pvalue := who.serial;
+	props[2] := prop;
+	
+	prop.pname := "char account";
+	prop.pvalue := who.acctname;
+	props[3] := prop;
+	
+	prop.pname := "npctemplate";
+	prop.pvalue := GetObjProperty(corpse, "npctemplate");
+	props[4] := prop;
+	
+	prop.pname := "char location";
+	prop.pvalue := who.x + " " + who.y + " " + who.z;
+	props[5] := prop;
+	
+	prop.pname := "corpse location";
+	prop.pvalue := corpse.x + " " + corpse.y + " " + corpse.z;
+	props[6] := prop;
+	
+	prop.pname := "datetime";
+	prop.pvalue := NowString();
+	props[7] := prop;
+	
+	AppendConfigFileElem("counselorkills", "kill", "", props );
+	UnloadConfigFile("counselorkills");
+endfunction

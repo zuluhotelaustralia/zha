@@ -1,0 +1,23 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setskill( who )
+	if (!checkStaff(who, "powerup", CMDLEVEL_SEER))
+		return 0;
+	endif
+var i;
+for (i := 0; i <= SKILLID__HIGHEST; i := i + 1)
+
+        print( "Setting Base Skill " + i + " to 100" );
+        var res := SetBaseSkill( who, i, 100 );
+        if (res == error)
+            SendSysMessage( who, "Unable to set raw skill: " + res.errortext );
+        else
+            SendSysMessage( who, "New Effective Skill: " + GetEffectiveSkill(who,i) );
+        endif
+    endfor
+endprogram

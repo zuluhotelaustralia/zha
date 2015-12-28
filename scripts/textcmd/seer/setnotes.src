@@ -1,0 +1,20 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_addnotes( who, text )
+	if (!checkStaff(who, "setnotes", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+SendSysMessage(who, " Use this command to set notes on items used as quest rewards.");
+SendSysMessage(who, " Usage: .setnotes (notes) ");
+
+  var thetarg := Target(who);
+    if (thetarg.isa(POLCLASS_ITEM))
+	SetObjProperty(thetarg, "notes", text);
+	SendSysMessage(who, " Notes have been written on this item. ");
+    else
+	SendSysMessage(who, " You may only set notes on items.");
+  endif
+endprogram

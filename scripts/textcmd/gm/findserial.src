@@ -1,0 +1,69 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program findSerial(who, serial)
+	if (!checkStaff(who, "gotoserial", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	serial := CInt(serial);
+	if( !serial )
+		return 0;
+	endif
+	
+	var object := getObject(serial);
+	if (!object)
+		SendSysMessage(who, "Object could not be found.");
+	endif
+	
+	while (object)
+		reportObject(who, object);
+		object := getObject(object.container.serial);
+	endwhile
+endprogram
+
+function getObject(serial)
+	if (serial)
+		var object := SystemFindObjectBySerial(serial);
+		if (!object)
+			object := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_STORAGE_AREAS);
+		endif
+		if (!object)
+			object := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+		endif
+		
+		return object;
+	else
+		return 0;
+	endif
+endfunction
+
+function reportObject(who, object)
+	SendSysMessage(who, "Type: " + TypeOf(object));
+	if (object.name)
+		SendSysMessage(who, "Name: " + object.name);
+	else
+		SendSysMessage(who, "Desc: " + object.desc);
+	endif
+	
+	var x, y, z;
+	
+	if ( object.isA(POLCLASS_HOUSE) )
+		var component := object.components[1];
+		if (!component)
+			component := object.items[1];
+		endif
+		x := component.x;
+		y := component.y;
+		z := component.z;
+	else
+		x := object.x;
+		y := object.y;
+		z := object.z;
+	endif
+	
+	SendSysMessage(who, "(" + x + ", " + y + ", " + z + ")");
+	
+	SendSysMessage(who, "------------------");
+endfunction

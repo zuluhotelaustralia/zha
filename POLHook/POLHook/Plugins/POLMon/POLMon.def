@@ -1,0 +1,5 @@
+LIBRARY POLMon
+EXPORTS
+POLHookPlugin
+KillPlugin
+ReloadPlugin

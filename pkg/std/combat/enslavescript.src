@@ -1,0 +1,47 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/attributes";
+include "include/damages";
+include "include/hitscriptinc";
+include "include/dotempmods";
+
+program enslave(attacker, defender, weapon, armor, basedamage, rawdamage)
+	
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+	
+
+	var slaveloc := GetGlobalProperty("enslaveLocation");
+	slaveloc :=SplitWords(slaveloc);
+	if (slaveloc && defender.acct)
+	
+		if ((GetHp(defender)<(GetMaxHp(defender)/2)) || (GetHp(defender)-rawdamage)<=0)
+			PrintTextAbovePrivate(attacker, attacker.name + " attempts to enslave you!", defender);
+			sleep(1);
+			if (!defender.dead && RandomDiceRoll("1d2")==1)
+				PlayLightningBoltEffect( defender );
+				PrintTextAbove(attacker, attacker.name + " has enslaved " + defender.name + "!");
+				MoveCharacterToLocation(defender, CInt(slaveloc[1]), Cint(slaveloc[2]), Cint(slaveloc[3]), MOVECHAR_FORCELOCATION);
+				PrintTextAbove(defender, "You have been enslaved and sent to the Slavers' Dungeon!");
+				PrintTextAbove(defender, "You will be able to leave in 3 hours time, unless you are rescued beforehand.");
+				SetObjProperty(defender, "#cantLeaveSlaversBefore", ReadGameClock()+1800);
+				PlaySoundEffect( defender, 0xf9 );
+				PlaySoundEffect( attacker, 0xf9 );
+				return;
+			endif
+			return;
+		endif		
+	endif
+	rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage);	
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+endprogram

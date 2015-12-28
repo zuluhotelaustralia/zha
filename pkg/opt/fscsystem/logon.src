@@ -1,0 +1,24 @@
+use uo;
+use os;
+
+include "fscsystem";  
+include "include/attributes";
+
+program logon_fscsystem( who )
+
+	// If Staff Member, welcome and put offline
+	if( who.cmdlevel > 0 )
+
+		// Log on FSC System
+		LogonFSC( who );
+
+	// If player check if he's flagged for loggin
+	else
+
+		if( CheckFSC( who ) )
+			LogonFSC( who );
+		endif
+
+	endif
+
+endprogram

@@ -1,0 +1,138 @@
+use uo;
+
+include "include/client";
+include "include/objtype";
+
+const TARGET_ITEM 		:= "I";
+const TARGET_TOUCHABLE 		:= "T";
+
+const UOBJECT_ORE 		:= 0x19b7;           
+const UOBJECT_ORE_END   	:= 0x19ba;
+const UOBJECT_INGOTS 		:= 0x1bef;        
+const UOBJECT_KILN_START 	:= 0x197a;          
+const UOBJECT_KILN_END 		:= 0x19b6;
+
+const UOBJECT_SAND 		:= 0xee18;
+const UOBJECT_GLASS 		:= 0xee20;
+const UOBJECT_GOLD_COINS 	:= 0x0eed;
+const UOBJECT_GOLD_INGOTS 	:= 0x1be9;
+
+
+
+program use_ore( character, ore )
+
+	if(!ReserveItem(ore))
+		return;
+	endif
+
+    	SendSysMessage( character, "What would you like to use that on?" );
+    	var use_on := Target( character );
+    	if( !use_on )
+        	return;
+    	endif
+
+    	if( Distance(character, use_on) > 3 )
+        	SendSysMessage(character, "You are not close enough!");
+        	return;
+    	endif
+   
+    	if ( ((use_on.objtype >= UOBJECT_KILN_START) && (use_on.objtype <= UOBJECT_KILN_END)) || (use_on.objtype == UOBJ_SMALL_FORGE) )
+            	case (ore.objtype)
+            
+            		UOBJECT_ORE: 		MakeIngots( character, ore );
+            					break;
+            				
+            		UOBJECT_SAND: 		MakeGlass( character, ore );
+            					break;
+            				
+            		UOBJECT_GOLD_COINS: 	MakeJewelry( character, ore );
+            					break;
+            				
+            		default:
+                		SendSysMessage(character, "You don't know how to use this!");
+        	endcase
+    	else
+        	SendSysMessage( character, "You must use this on a forge" );
+    	endif
+   
+endprogram
+
+
+
+function MakeGlass( character, ore )
+
+	if( !Accessible( character, ore ) )
+		SendSysMessage( character, "You don't have any sand!" );
+		return;
+	endif
+
+	var what := UOBJECT_GLASS;
+	if( CheckSkill( character, SKILLID_BLACKSMITHY, -1, 0 ))
+		var ingots := CreateItemInBackpack( character, what, GetAmount( ore ) );
+		if( ingots )
+			SetName( ingots, "Raw Glass" );
+			DestroyItem( ore );
+			SendSysMessage( character, "You create some glass and place it in your pack." );
+		endif
+	else
+		SubtractAmount( ore, 1 );
+		SendSysMessage( character, "You waste some sand." );
+	endif
+   
+endfunction
+
+
+
+function MakeIngots( character, ore )
+  
+	if( !Accessible( character, ore ) )
+		SendSysMessage( character, "You don't have any ore!" );
+ 		return;
+	endif
+
+	if( CheckSkill( character, SKILLID_BLACKSMITHY, -1, 0 ) )
+   
+		var ingots := CreateItemInBackpack( character, UOBJECT_INGOTS, GetAmount( ore ) );
+		if( ingots )
+			DestroyItem( ore );
+			SendSysMessage( character, "You create some ingots and place them in your pack." );
+		endif
+       
+	else
+		SubtractAmount( ore, 1 );
+		SendSysMessage( character, "You destroy some ore." );
+	endif
+   
+endfunction
+
+
+
+function MakeJewelry( character, ore )
+
+	if( !Accessible( character, ore ) )
+		SendSysMessage( character, "You can't reach that!" );
+		return;
+	endif
+
+	var what := UOBJECT_GOLD_INGOTS;
+
+	if( ore.amount < 100 )
+		SendSysMessage( character, "It doesn't look like you used enough gold" );
+	endif
+
+	if( CheckSkill( character, SKILLID_BLACKSMITHY, -1, 0 ) )
+		var theamount;
+		theamount := CInt( ore.amount / 100 );
+
+		var ingots := CreateItemInBackpack( character, UOBJECT_GOLD_INGOTS, theamount );
+		if (ingots)
+			SubtractAmount( ore, theamount * 100 );
+			SendSysMessage( character, "You create some gold ingots and place them in your pack." );
+		endif
+	else
+		SubtractAmount( ore, 50 );
+		SendSysMessage( character, "You destroy some material." );
+	endif
+
+endfunction
+

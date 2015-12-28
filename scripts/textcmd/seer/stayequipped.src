@@ -1,0 +1,17 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program StayEquipped( who )
+	if (!checkStaff(who, "stayequipped", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+      var item := Target( who );
+	if( item.objtype )
+		SetObjProperty( item, "StayEquipped", 1 );
+	endif
+
+endprogram
+
+ 

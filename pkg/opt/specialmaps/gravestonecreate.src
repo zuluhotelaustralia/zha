@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+program gravestonecreate(gravestone)
+	var gravemound:=CreateItemAtLocation( gravestone.x+1, gravestone.y, gravestone.z, "hauntedgrave", 1 );
+	var gravemound2:=CreateItemAtLocation( gravestone.x+2, gravestone.y, gravestone.z, "hauntedgravemound", 1 );
+	SetObjProperty(gravestone, "hauntedgrave1", gravemound.serial);
+	SetObjProperty(gravestone, "hauntedgrave2", gravemound2.serial);
+	if (!gravemound||!gravemound2)
+		DestroyItem(gravestone);
+	endif
+endprogram

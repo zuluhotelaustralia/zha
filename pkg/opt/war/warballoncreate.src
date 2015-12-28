@@ -1,0 +1,25 @@
+use uo;
+use os;
+
+include "war";
+
+program warballoncreate(ball, who)
+	//set default values
+	CloseWarRegistration(ball);
+	SetObjProperty(ball, "WarHappening", 0);
+	SetObjProperty(ball, "PlayerData",{});
+	SetAWOLTime(48, ball); //default AWOL time is 2 days
+	
+	//create guilds for both teams and set them to war
+	var guild1 := CreateGuild();
+	var guild2 := CreateGuild();
+	SetObjProperty(guild1, "guildabv", "warguild1");
+	SetObjProperty(guild2, "guildabv", "warguild2");
+	SetObjProperty(guild1, "guildname", "warguild1");
+	SetObjProperty(guild2, "guildname", "warguild2");
+	SetObjProperty(ball, "WarGuild1", guild1.guildid);
+	SetObjProperty(ball, "WarGuild2", guild2.guildid);
+	guild1.addenemyguild(guild2);
+	guild2.addenemyguild(guild1);
+endprogram
+

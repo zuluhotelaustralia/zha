@@ -1,0 +1,71 @@
+use uo;
+
+include "include/objtype";
+include "include/spelldata";
+include "include/areas";
+include "include/client";
+include "include/recalling";
+include "../pkg/std/housing/utility";
+include "include/classes";
+
+program recall (who)
+
+	if (!(GetObjProperty(who, CLASSEID_NINJA) == 8))
+		return;
+	endif
+	if(who.dead)
+	return;
+	endif
+	var esctime := GetObjProperty(who, "lastescape");
+	if(!esctime)
+	elseif( esctime > ReadGameClock() )
+		SendSysMessage( who, "You are not yet ready to escape.");
+		return 0;
+	endif
+
+	if( IsForbiddenAreaToRecallFrom( who ) )
+		SendSysMessage( who, "You can not escape this place." );
+		return 0;
+	endif
+
+	SendSysMessage( who, "Select a location to travel to." );
+
+	var escapepoint := GetObjProperty(who, "escapelocation");
+
+	if( !escapepoint )
+		SendSysMessage( who, "You have no where to escape to!");
+		return 0;
+	endif
+
+	var tox := escapepoint[1];
+	var toy := escapepoint[2];
+	var toz := escapepoint[3];
+
+	if( !tox && !toy && !toz )
+		SendSysMessage( who, "You have no where to escape to!");
+		return 0;
+	
+	elseif( IsForbiddenAreaToRecallTo( who, tox, toy, toz ) )
+		SendSysMessage( who, "You can't escape to this place." );
+		return 0;
+	endif
+
+	var multi := GetStandingHeight( tox, toy, toz ).multi;
+	if( multi )
+		if( !IsOwner( who, multi )  )
+			if( !IsFriend( who, multi ) )
+				SendSysMessage( who, "You can't escape to this location." );
+				return;
+			endif
+		endif
+	endif
+
+
+	PlaySoundEffect( who, SFX_SPELL_EXPLOSION );
+	PlayStationaryEffect( who.x, who.y, who.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+	MoveCharacterToLocation( who, tox, toy, toz );
+	SendSysMessage( who, "You gracefully escape.");
+	SetObjProperty(who, "lastescape", ReadGameClock()+86400);
+	
+
+endprogram

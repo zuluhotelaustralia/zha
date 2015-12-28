@@ -1,0 +1,15 @@
+use npc;
+use uo;
+include "include/attributes";
+
+
+program missingai()
+
+	var mob := Self();
+
+	//movecharactertolocation(mob, 5288 , 1176 , 0, 0x40000000);
+	SetObjProperty(mob, "guardkill", 1);
+	RevokePrivilege( mob, "invul" );
+	Damage( mob, GetHp(mob) );
+
+endprogram

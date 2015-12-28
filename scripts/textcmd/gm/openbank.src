@@ -1,0 +1,34 @@
+use uo;
+
+include "util/bank";
+include "include/cmdlevel_check";
+
+
+program openbank( who )
+	if (!checkStaff(who, "openbank", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var mobile := Target( who );
+	if( !mobile )
+		return;
+	endif
+
+	if( !mobile.isA(POLCLASS_MOBILE) )
+		SendSysMessage( who, "You must target a mobile." );
+		return;
+	endif
+
+	if( mobile.isA(POLCLASS_NPC) )
+		SendSysMessage( who, "You can only use this on players." );
+		return;
+	endif
+
+	var bankbox := FindBankBox( mobile );
+	if( bankbox )
+		SendOpenSpecialContainer( who, bankbox );
+	endif
+
+endprogram
+       

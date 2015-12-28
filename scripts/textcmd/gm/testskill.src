@@ -1,0 +1,20 @@
+use os;
+use uo;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program textcmd_setskill( who, text )
+	if (!checkStaff(who, "testskill", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    var params := SplitWords( text );
+    var targ := Target(who);
+    var skill := CInt( params[1] );
+
+    if (skill != error)
+    	var oldbase := GetBaseSkillBaseValue(targ, skill);
+        var res := SetBaseSkillBaseValue( targ, skill, oldbase + 0.1 );
+    endif
+endprogram

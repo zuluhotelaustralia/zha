@@ -1,0 +1,68 @@
+use uo;
+use os;
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+include "include/yesno";
+
+program spawntile_use(who, stone)
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, stone);
+
+endprogram
+
+
+function configGump(who, tile)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(100, 100, BKGND_PAPER_EX, 300, 220);
+
+	var ttemplate := GetObjProperty(tile, "createMonsterTemplate");
+	var tno := GetObjProperty(tile, "createMonsterTemplateNo");
+	var tnoLoot := GetObjProperty(tile, "noLoot");
+
+	GFTextMid(100, 110, 250, 58, "Configure Hell Spawn Tile");
+	GFTextLine(140, 140, 53, "Change monster template");
+	GFTextLine(150, 160, 5, "Current Npctemplate: " + ttemplate);
+
+	GFTextLine(140, 180, 53, "Change number of mosnters");
+	GFTextLine(150, 200, 5, "Number to spawn: " + tno);
+
+	GFTextLine(140, 220, 53, "Monsters give loot?");
+	GFTextLine(150, 240, 5, "No loot: " + tnoLoot);
+
+	GFTextLine(140, 270, 53, "Exit");
+
+	var changeTemplate := GFButtonID( 120, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var changenumber := GFButtonID( 120, 185, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var changenoLoot := GFButtonID( 120, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 120, 275, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[changeTemplate.keyid])
+		var mtemp := SendTextEntryGump( who, "Enter Monster Template. Assumes valid template");
+		if (mtemp)
+			SetObjProperty(tile, "createMonsterTemplate", mtemp);
+			SetObjProperty(tile, "LFucker", who.name + who.serial);
+		endif
+	elseif(choice[changenumber.keyid])
+		var mtemp := SendTextEntryGump( who, "Enter number of monsters to spawn.");
+		if (mtemp)
+			SetObjProperty(tile, "createMonsterTemplateNo", mtemp);
+			SetObjProperty(tile, "LFucker", who.name + who.serial);
+		endif
+	elseif(choice[changenoLoot.keyid])
+		var mtemp := YesNo(who, "Monsters should give NO loot?");
+		SetObjProperty(tile, "noLoot", mtemp);
+		SetObjProperty(tile, "LFucker", who.name + who.serial);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+	configGump(who, tile);
+endfunction

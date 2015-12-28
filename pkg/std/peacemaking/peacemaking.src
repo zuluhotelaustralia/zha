@@ -1,0 +1,211 @@
+use os;
+use uo;
+use cfgfile;
+
+include "include/client";
+include "include/attributes";
+include "include/objtype";
+include "include/skillpoints";
+include "include/bard";
+include "include/eventid";
+include "include/classes";
+
+
+program bard_peacemake( character )
+	var greaterpeaceinstrument:=findGreaterPeacemakingInstrument(character);
+	
+	//name set up
+	var greaterpeaceinstrumentname;
+	if (greaterpeaceinstrument)
+		if (greaterpeaceinstrument.name)
+			greaterpeaceinstrumentname:=greaterpeaceinstrument.name;
+		else
+			greaterpeaceinstrumentname:=greaterpeaceinstrument.desc;
+		endif
+	endif
+	
+	
+	
+	var instrument;
+	var didagreaterprov:=0;
+	if(greaterpeaceinstrument)
+		SendSysMessage( character, "You are using the " + greaterpeaceinstrumentname);
+		instrument:=greaterpeaceinstrument;
+	else
+		instrument:= findinstrument( character );
+	endif
+
+	var candounprovokable:=0;
+	if (greaterpeaceinstrument)
+		if (CInt(GetObjProperty(character, "IsBard")>=4) &&  (CInt(GetEffectiveSkill( character, SKILLID_PEACEMAKING))>=150 ))
+			SendSysMessage( character, "You use the " + greaterpeaceinstrumentname + " to its full capacity!");
+			candounprovokable:=1;
+		else	
+			SendSysMessage( character, "You must be a level 4 bard with 150 peacemaking to use the special power of " + greaterpeaceinstrumentname + "!");
+		endif
+	endif 
+
+
+	if( !instrument )
+		SendSysMessage( character, "You don't have an instrument to play!" );
+		return;
+	endif
+
+	var configfile := ReadConfigFile("::npcdesc");
+	var theobj;
+        var elem;
+	var difficulty;
+	var range := CInt(GetEffectiveSkill(character,SKILLID_PEACEMAKING)/10);
+	range := CInt( range * ClasseBonus( character, CLASSEID_BARD ) );
+
+	var affected	:= array;
+	var max_diff	:= 0;
+	var unprovinrange:=0;
+
+	foreach mobile in ListMobilesNearLocation( character.x, character.y, character.z, range )
+		if( mobile.warmode && mobile != character)
+			if (GetObjProperty(mobile, "unprovokable"))
+				unprovinrange:=1;
+				if (!candounprovokable)
+					continue;
+				endif
+			endif
+			elem := FindConfigElem( configfile, mobile.npctemplate );
+			if( !mobile.npctemplate && !mobile.cmdlevel )
+				difficulty := CInt( GetIntelligence(mobile) );
+			elseif( elem && !(elem.Privs == "invul") )
+				difficulty := CInt( elem.provoke );
+			else
+				continue;
+			endif
+
+			if( !difficulty )
+				difficulty := 100;
+			elseif( difficulty > 150 )
+				difficulty := 150;
+			endif
+		
+			if( difficulty > max_diff )
+				max_diff := difficulty;
+			endif
+		
+			affected.append( { mobile, difficulty } );
+		endif
+	endforeach
+
+	if( len(affected) )
+		var sfx_success;
+		var sfx_failure;
+		case( instrument.graphic )
+			UOBJ_HARP:	sfx_success := SFX_HARP_SUCC;
+					sfx_failure := SFX_HARP_FAIL;
+					break;
+				
+			UOBJ_LUTE:	sfx_success := SFX_LUTE_SUCC;
+					sfx_failure := SFX_LUTE_FAIL;
+					break;
+				
+			UOBJ_DRUM:	sfx_success := SFX_DRUM_SUCC;
+					sfx_failure := SFX_DRUM_FAIL;
+					break;
+				
+			UOBJ_TAMB:	sfx_success := SFX_TAMB_SUCC;
+					sfx_failure := SFX_TAMB_FAIL;
+					break;
+				
+			default:	PrintTextAbovePrivate( character, "That's not something you can play", character );
+					return;
+		endcase
+	
+		var ev := struct;
+		ev.+type;
+		ev.type := EVID_PEACEMADE;
+	
+		var succeeded	:= 0;
+		var points_given := 0;
+		var the_diff;
+		var mobile;
+		var points;
+		
+		//bard check
+		//bard bonus calc
+		//reduces the difficulty by a fifth of the level class percentage bonus. e.g. at level 1, 
+		//a peace of difficulty 100, would now be 95
+		//skill diff = 100/(1.05) = 95... at level 1
+		
+		var skilldiff;
+		var classbonus;
+		var bard  := IsBard(character);
+		if (bard)
+			classbonus := ClasseBonus( character, CLASSEID_BARD );
+			classbonus := ((classbonus - 1)/5)+1; //cuts the bonus to a fifth i.e. to 5% per level
+		endif
+		
+		
+		//skill checks
+		foreach element in affected
+			mobile	 := element[1];
+			the_diff := CInt( element[2] );
+			if( the_diff == max_diff && !points_given )
+				points := CInt( the_diff * 10 );
+				points_given := 1;
+			else
+				points := 0;
+			endif
+			
+			if (bard)
+				skilldiff:=CInt(the_diff/classbonus);
+			else
+				skilldiff:=the_diff;
+			endif			
+			
+			//Broadcast("peace difficulty: " + skilldiff + " for mobile " + mobile.name);
+	
+			if( CheckSkill( character, SKILLID_PEACEMAKING, skilldiff, points ) )
+				if( CheckSkill( character, SKILLID_MUSICIANSHIP, skilldiff, CInt(points / 3) ) )
+					succeeded := succeeded + 1;
+					SendEvent( mobile, ev );
+					PrintTextAbove( mobile, mobile.name + " is dazzled by the beautiful music!" );
+					mobile.warmode := 0;
+				endif
+			endif
+		endforeach
+	
+	
+		if( succeeded > 0 )
+			PlaySoundEffect( character, sfx_success );
+		else
+			PlaySoundEffect( character, sfx_failure );
+			PrintTextAbove( character, "*"+ character.name + " plays a musical instrument... poorly*" );
+		endif
+	else
+		if (unprovinrange)
+			SendSysMessage( character, "The monsters are immune to your music." );
+			return;
+		endif
+		SendSysMessage( character, "There's nothing to calm down in range." );
+		return;
+	endif
+
+	//check to see whether greater peace item breaks after use
+	//if (greaterpeaceinstrument && candounprovokable && unprovinrange)
+	//	if (CInt(RandomDiceRoll( "1d6"))==1)
+	//		SendSysMessage( character, "Oh no! Your " + greaterpeaceinstrumentname + " has broken!" );
+	//		DestroyItem(greaterpeaceinstrument);
+	//		sleep(1);
+	//		PlaySoundEffect( character, 0x3f );
+	//		return;
+	//	endif
+	//endif
+
+	
+endprogram
+
+function findGreaterPeacemakingInstrument(character)         
+	foreach item in EnumerateItemsInContainer(character.backpack)
+                if (item.objtype == 0xc55b ) //harp of greater peace
+                        return item;
+                endif
+        endforeach
+	return 0;
+endfunction

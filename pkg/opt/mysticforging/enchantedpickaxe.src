@@ -1,0 +1,82 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/classes";
+
+const MYSTICCRYSTAL := 0x75ea;
+const MYSTICSHARD := 0x75e9;
+const UACTION_PICK := 0x0b;
+const BREAKDIFF := 140;
+const MININGDIFF := 160;
+
+program enchanted_pickaxe (user, pickaxe)
+
+	//var i;
+	var sx := user.x;
+	var sy := user.y;
+	var shards;
+
+	if (!ReserveItem(pickaxe))
+		return;
+	elseif (!IsEquipped(user, pickaxe))
+		SendSysMessage(user, "You must equip that to mine");
+		return;
+	endif
+	SendSysMessage(user, "Select something to mine");
+	var crystal := Target(user);
+	if (!crystal)
+		SendSysMessage(user, "Cancelled");
+		return;
+	elseif (crystal.objtype != MYSTICCRYSTAL)
+		SendSysMessage(user, "You cannot use the enchanted pickaxe on that!");
+		return;
+	elseif (Distance(crystal, user) > 1)
+		SendSysMessage(user, "You are too far away to mine that!");
+		return;
+	endif
+	SendSysMessage(user, "You start to mine the mystic crystal...", 3, 55);
+
+	Repeat
+	var num_chops := Random(3) + 3;
+    	for i := 1 to num_chops
+    		PerformAction(user, UACTION_PICK);
+		PlaySoundEffect(user, 0x41);
+		sleepms(Random(500)+1000);
+		if (user.x != sx || user.y != sy || user.dead || user.hidden || GetObjProperty(user, "IsCrafter") < 5)
+			SendSysMessage(user, "You stop mining.");
+  			return;
+		endif
+    	endfor
+	var k;
+
+	// 1 in 8 chance of summoning or breaking tool
+	if (Random(12) > 10 && !GetObjProperty(crystal, "summoning"))
+		k:=(Random(100)+1);
+		if (k<90)
+			start_script("summonguardians", crystal);
+		else
+			if(!CheckSkill(user, SKILLID_MINING, BREAKDIFF, 0))
+				SendSysMessage(user, "Your tool breaks!");
+				DestroyItem(pickaxe);
+				return;
+			endif
+		endif
+	endif
+
+	if(CheckSkill(user, SKILLID_MINING, MININGDIFF, 0))
+		SendSysMessage(user, "You put a mystic crystal shard in your pack");
+		shards := CreateItemInBackpack(user, MYSTICSHARD, 1);
+    		if(!shards)
+      			shards := CreateItemAtLocation(user.x, user.y, user.z, MYSTICSHARD, 1);
+    		endif
+	else
+		SendSysMessage(user, "You fail to harvest any mystic crystal");
+	endif
+	until (user.x != sx || user.y != sy || user.dead || user.hidden || GetObjProperty(user, "IsCrafter") < 5);
+	SendSysMessage(user, "You stop mining");
+	
+		
+endprogram
+
+	

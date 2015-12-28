@@ -1,0 +1,19 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_mapinfo( who, text )
+	if (!checkStaff(who, "getmapinfo", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	var where := TargetCoordinates( who );
+	if (where)
+	    var mi := GetMapInfo( where.x, where.y );
+		if (mi)
+		    SendSysMessage( who, "GetMapInfo("+where.x+","+where.y+"): z="+mi.z+", landtile="+Hex(mi.landtile) );
+		else
+			SendSysMessage( who, "Error in GetMapInfo: " + mi.errortext );
+		endif
+	endif
+endprogram

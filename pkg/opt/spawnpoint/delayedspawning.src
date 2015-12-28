@@ -1,0 +1,15 @@
+use os;
+use uo;
+
+program delayed_spawning( parameter )
+	var delay := CInt(parameter[2]);
+	if( delay == error )
+		return 0;
+	else
+		sleep(delay+15);
+
+		if( parameter[1] )
+			return start_script("checkpoint", parameter[1]);
+		endif
+	endif
+endprogram

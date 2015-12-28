@@ -1,0 +1,9 @@
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setstrmod( who, strmod )
+	if (!checkStaff(who, "setstrmod", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SetStrengthMod(who, CInt(strmod));
+endprogram

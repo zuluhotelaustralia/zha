@@ -1,0 +1,8 @@
+include "include/cmdlevel_check";
+
+program textcmd_setstr( who, gt )
+	if (!checkStaff(who, "setgt", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    who.title_guild := gt;
+endprogram

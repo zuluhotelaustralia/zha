@@ -1,0 +1,81 @@
+use uo;
+use cfgfile;
+use os;
+
+include "include/std";
+include "include/client";
+include "include/gumps";
+include "include/objtype";
+include "include/zhacolors";
+
+const DYETYPE_HAIR := 0x6;
+const DYETYPE_BEARD := 0x7;
+
+program hairdye(who, dye)
+	if (!ReserveItem(dye))
+		PrintTextAbovePrivate(who, "That item is in use.", who);
+		return;
+	endif
+	
+	choicemenu(who, dye);
+endprogram
+
+function choicemenu(who, dye)
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_STONE, 300, 150);
+		
+	GFTextMid(10, 20, 280, 10, "Speckled & Pure Black are forbidden.");
+
+	GFTextLine(90, 50, 5, "Change Colour");
+	GFTextLine(90, 80, 5, "Apply Dye");
+	
+	GFTextMid(10, 120, 280, 10, "Current colour: " + CStr(dye.color));
+	
+	var changebutton := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var applybutton  := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	if (choice[changebutton.keyid])
+		changecolour(who, dye);
+	elseif (choice[applybutton.keyid])
+		applycolour(who, dye);
+	endif
+endfunction
+
+function changecolour(who, dye)
+	var newcolour := CInt( SendTextEntryGump(who, "Enter a colour [integer]") );
+	
+	if ((!newcolour && newcolour!=0) || isIllegalColour(newcolour))
+		SendSysMessage(who, "Canceled.");
+		return;
+	endif
+	
+	SendSysMessage(who, "Changed colour from " + CStr(dye.color) + " to " + CStr(newcolour) + ".");
+	dye.color := newcolour;
+endfunction
+
+function applycolour(who, dye)
+	var colour := dye.color;
+	var type := dye.objtype;
+
+	DestroyItem(dye);
+
+	if (isIllegalColour(colour))
+		PrintTextAbovePrivate(who, "That colour is illegal!", who);
+		return;
+	endif
+	
+	var layer;
+	case (type)
+		DYETYPE_HAIR:	layer := LAYER_HAIR;
+				SetObjProperty(who, "HairColour", CInt(colour));
+				break;
+		DYETYPE_BEARD: 	layer := LAYER_BEARD;
+				SetObjProperty(who, "BeardColour", CInt(colour));
+				break;
+	endcase
+	
+	var oldhair := GetEquipmentByLayer( who, layer );
+	oldhair.color := colour;
+endfunction

@@ -1,0 +1,11 @@
+use uo;
+use os;
+
+//include "include/objtype";
+include "securechests";
+
+program can_Insert( who, chest , movetype, INSERT_ADD_ITEM, item )
+	
+	return 1;
+endprogram
+

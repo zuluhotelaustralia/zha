@@ -1,0 +1,31 @@
+use uo;
+include "include/cmdlevel_check";
+
+program ownership( who )
+	if (!checkStaff(who, "changeowner", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+SendSysMessage( who, "Select house sign." );
+var sign := Target( who );
+
+
+if(!sign) return; endif
+
+var hserial := GetObjProperty( sign, "house_serial" );
+var house := SystemFindObjectBySerial( hserial );
+var oserial := GetObjProperty( house, "ownerserial" );
+
+if(!house) return; endif
+
+SendSysMessage( who, "Select new owner." );
+var person := Target( who );
+
+
+if (!person) return; endif
+
+SetObjProperty( house, "ownerserial", person.serial );
+SetObjProperty( house, "owneracct", person.acctname );
+SendSysMessage( who, "House transfer was successful." );
+
+endprogram

@@ -1,0 +1,21 @@
+
+use uo;
+include "include/attributes";
+
+program capoff( who )
+
+	SendSysMessage( who, "Capper protect/remove. Select player." );
+
+	var player := Target( who );
+
+	if( !player.npctemplate && !GetIntelligence(player) )
+		if( GetObjProperty( player, "CapOff" ) )
+			EraseObjProperty( player, "CapOff" );
+		else
+			SetObjProperty( player, "CapOff", 1 );
+		endif
+	else
+		SendSysMessage( who, "That isn't a player" );
+	endif
+
+endprogram

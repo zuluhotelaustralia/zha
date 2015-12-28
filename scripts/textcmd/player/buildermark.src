@@ -1,0 +1,16 @@
+/* buildermark                         **
+** Turns on/off builder mark question  **
+** Seravy - seravy@gmail.com           */
+use uo;
+use os;
+
+program textcmd_buildermark(me)
+  var buildermark := GetObjProperty(me, "BuilderMark");
+  if (!buildermark)
+    SendSysMessage(me, "You will now automaticly add the builder mark to any exceptional crafted items.");
+    SetObjProperty(me, "BuilderMark", 1);
+  else
+    SendSysMessage(me, "You will now be asked to add the builder mark to any exceptional crafted items.");
+    EraseObjProperty(me, "BuilderMark");
+  endif
+endprogram

@@ -1,0 +1,38 @@
+use uo;
+use os;
+
+include "include/classes";
+include "include/res";
+
+program rise_from_dead (who)
+
+	if (!who.dead || who.multi)
+		return;
+	endif
+	var class:= GetClass(who);
+	var level:= GetClasseLevel(who);
+	if (level < GET_RISE_AT_LEVEL)
+		return;
+	elseif (!(class==CLASSEID_PALADIN || class==CLASSEID_DEATHKNIGHT))
+		return;
+	endif
+	
+	var lastresat:=GetObjProperty(who, "#lastresat");
+	if (!lastresat)
+		lastresat:=0;
+	endif
+	var lastres:=ReadGameClock() - lastresat;
+	if (lastres < 86400)
+		SendSysMessage(who, "You cannot use this power for another "+(86400-lastres)/60+" minutes");
+		return;
+	endif
+	
+	ResurrectMobile(who);
+	if (class==CLASSEID_PALADIN)
+		SendSysMessage(who, "The Gods grant you a second chance!", 3, 5);
+	else
+		SendSysMessage(who, "You have risen from the grave!", 3, 38);
+	endif
+	SetObjProperty(who, "#lastresat", ReadGameClock());
+	
+endprogram

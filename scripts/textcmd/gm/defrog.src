@@ -1,0 +1,17 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program defrog(character, frog)
+	if (!checkStaff(character, "defrog", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+foreach person in EnumerateOnlineCharacters()
+        if (character.name == frog)
+                person.graphic := 0x190;
+        endif
+endforeach
+
+endprogram

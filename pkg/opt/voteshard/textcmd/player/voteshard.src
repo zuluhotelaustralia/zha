@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// Written by Arthus 29/4/2004
+// Don't tease my first effort :(
+/////////////////////////////////////////////////////////////////////////////
+
+use uo;
+
+include "include/packets";
+
+program openvotesite( who )
+
+var lastvote:=GetObjProperty(who, "#lastshardvote");
+	
+	SendSysMessage( who, "Now opening Gamers200. Thank you for voting." );
+
+	OpenWebSite(who, "http://www.gamers200.com/ultimaonline/index.php?do=v&i=256");
+
+	if (lastvote == error || ReadGameClock() > lastvote + 86400)
+
+			SetObjProperty(who, "#lastshardvote", ReadGameClock());
+		else
+			return;
+	endif	
+
+endprogram

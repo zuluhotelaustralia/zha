@@ -1,0 +1,10 @@
+use os;
+use uo;
+
+include "sendmsg";
+
+program SendMsg(parms)
+
+	SendTheMessage(parms.who, parms.chr);
+
+endprogram

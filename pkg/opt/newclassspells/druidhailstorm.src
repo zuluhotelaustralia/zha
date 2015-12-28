@@ -1,0 +1,72 @@
+/* Druid Spell - Hail Storm       **
+** Deals water damage to target.  **
+** Seravy - seravy@gmail.com      */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_HAILSTORM;
+// For Resisted()
+const SPELL_EFFECT_TYPE_MOVING := FX_SPELL_HAILSTORM;
+const SPELL_EFFECT_ID		 := FX_SPELL_HAILSTORM;
+const SPELL_EFFECT_SPEED	 := SPEED_SPELL_HAILSTORM;
+const SPELL_EFFECT_LOOP		 := LOOP_SPELL_HAILSTORM;
+
+program cast_hailstorm(parms)
+  var circle := GetCircle( SPELL_ID);
+  var element := WATER;
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  if( !fromhit )
+    cast_on := Reflected( caster, cast_on, circle);
+  endif
+
+  var immunity := IsProtected(caster, cast_on, circle);
+  if( immunity == IMMUNED )
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+  if( immunity == CURSED )
+    circle := circle * 2;
+  endif
+
+  var dmg := CInt(CalcSpellDamage( caster, cast_on, circle, SINGLE_TARGET_SPELL, SKILLID_NATURELORE));
+  ApplyElementalDamage(caster, cast_on, circle, dmg, element);
+
+  PlaySoundEffect( cast_on, SFX_SPELL_HAILSTORM);
+  PlayMovingEffect( caster, cast_on, FX_SPELL_HAILSTORM, SPEED_SPELL_HAILSTORM, LOOP_SPELL_HAILSTORM);
+  sleepms(100);
+  PlayMovingEffect( caster, cast_on, FX_SPELL_HAILSTORM2, SPEED_SPELL_HAILSTORM, LOOP_SPELL_HAILSTORM);
+  sleepms(150);
+  PlayMovingEffect( caster, cast_on, FX_SPELL_HAILSTORM, SPEED_SPELL_HAILSTORM, LOOP_SPELL_HAILSTORM);
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

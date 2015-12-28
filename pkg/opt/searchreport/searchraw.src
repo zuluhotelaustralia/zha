@@ -1,0 +1,14 @@
+use uo;
+use os;
+use file;
+
+program show_raw_data (who)
+
+	var file := ReadFile("searchdata.txt");
+	SendSysMessage(who, "------------");
+	foreach line in file
+		SendSysMessage(who, line);
+	endforeach
+	SendSysMessage(who, "------------");
+	
+endprogram

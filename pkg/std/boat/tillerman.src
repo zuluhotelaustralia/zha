@@ -1,0 +1,35 @@
+use os;
+use uo;
+
+include "util/key";
+include "include/objtype";
+include "../pkg/std/boat/plankutil";
+
+program renameboat( you, tillerman )
+  if ( GetObjProperty(tillerman,"owner") != you.serial )
+	PrintTextAbove(tillerman,"Stop that, or I'll throw ye overboard!");
+	return;
+  endif
+    var boatname := RequestInput( you, tillerman, "Enter a new name for this boat. (max 40 characters)" );
+  if ( boatname && NameValidation(boatname))
+	if ( len( boatname ) <= 40 )
+	  tillerman.name := boatname;
+	  SendSysMessage( you, "Boat is renamed." );
+	else
+	  SendSysMessage( you, "Too many characters in name." );
+	endif
+  endif
+endprogram
+
+function NameValidation(thestring)
+  var i, validstr := {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "a", "b", "c",
+  		      "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
+  		      "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", ",", ".", "?",
+  		      "/", "\\", "[", "]", "(", ")", "%", "$", "#", "@", "!", "^", "&",
+  		      "*", ":", ";", "+", "-", "'", "`", " "};
+  thestring:=lower(thestring);
+  for(i:=1;i<=len(thestring);i:=i+1)
+    if(!(thestring[i] in validstr)) return 0; endif
+  endfor
+  return 1;
+endfunction

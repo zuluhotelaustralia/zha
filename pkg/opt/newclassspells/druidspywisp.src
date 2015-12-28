@@ -1,0 +1,67 @@
+use uo;
+use os;
+
+include "newclassbook";
+include "include/client";
+include "include/npcbackpacks";
+
+const SPELL_ID := SPELL_ID_SPYWISP;
+
+program cast_spywisp( parms )
+	var caster;
+	if (parms[1] == "#MOB") //npc cast it
+		caster := parms[2];
+	else
+		caster := parms;
+	endif
+
+	PlaySoundEffect(caster, SFX_SPELL_SPYWISP);
+	
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_RANGER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_DRUID)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_NATURELORE);
+  var duration := calcLongDuration(skill, level);
+	SendSysMessage(caster, "You have a feeling that this spell will last around "+CInt(duration/60)+" minutes");
+
+	var currentspyserial := Cint(GetObjProperty(caster, "SpywispSerial"));
+	if (currentspyserial)
+		var currentspy := SystemFindObjectBySerial(currentspyserial);
+		killWisp(currentspy);
+	endif
+
+	var spy:=CreateNpcFromTemplate( "orc1", caster.x, caster.y, caster.z);
+	spy.graphic := 58;
+	spy.color := 73;
+	spy.name:= "spy wisp";
+	spy.setmaster(caster);
+	spy.script:="spywisp";
+	RestartScript(spy);
+	SetObjProperty(caster, "SpywispSerial",spy.serial);
+	SetObjProperty(spy, "master",caster.serial);
+	SetObjProperty(spy, "summoned",1);
+	SetObjProperty(spy, "dispelTime", (ReadGameClock()+duration));
+	EraseObjProperty(caster, "#Casting");
+	
+	detach();
+	sleep(duration);
+
+	killWisp(spy);
+endprogram
+
+function killWisp(currentspy)
+
+	if (GetHp(currentspy))
+		var backpack := FindExistingPack( currentspy.serial );
+		if( backpack )
+			foreach item in EnumerateItemsInContainer( backpack );
+				MoveItemToLocation( item, currentspy.x, currentspy.y, currentspy.z, MOVEITEM_FORCELOCATION );
+			endforeach
+		endif
+		MoveCharacterToLocation( currentspy, 0, 0, 0, MOVECHAR_FORCELOCATION );
+		ApplyRawDamage(currentspy, GetHp(currentspy) + 3);
+	endif
+endfunction

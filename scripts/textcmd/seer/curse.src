@@ -1,0 +1,42 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+program curse( character, text )
+	if (!checkStaff(character, "curse", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	var level;
+	if( text )
+		var params := SplitWords( text );
+ 		level := CInt( params[1] );
+		if (level > 3)
+			SendSysMessage(character, "The Curse level must be from 1 to 3.");
+			sleep(1);
+			SendSysMessage(character, "Use level 1 for unrevealed cursed items.");
+			SendSysMessage(character, "Never use level 1 on an item with cursed mods already, the mod will be done automatically.");
+			sleep(1);
+			SendSysMessage(character, "Use level 2 for revealed, non-unequippable cursed items.");
+			SendSysMessage(character, "The mods must be already cursed with that level.");
+			sleep(1);
+			SendSysMessage(character, "Use level 3 for revealed, unequippable cursed items.");
+			SendSysMessage(character, "As for level 2, the mods be be already cursed.");
+			return;
+		endif
+
+	else
+		level := 2;
+	endif
+
+	var what := TargetCoordinates( character );
+    	if (what)
+        	if (what.item)
+			SetObjProperty(what, "Cursed", level);
+		else
+			SendSysMessage( character, "You can only target an item " );
+		endif
+	endif
+
+endprogram

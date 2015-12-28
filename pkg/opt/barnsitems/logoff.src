@@ -1,0 +1,15 @@
+use uo;
+include "monsterDuelGate";
+include "include/speedhackRecallCheck";
+include "include/dotempmods";
+program logoff( character )
+	
+	//Broadcast(character.name + " exited the world." );
+	var mdgserial := GetObjProperty(character, "InMonsterDuelGate");
+	if (mdgserial)
+		var mdg := SystemFindObjectBySerial(mdgserial);
+		//if (mdg)
+		EndMonsterDuel(mdg, character);
+		//endif
+	endif
+endprogram

@@ -1,0 +1,117 @@
+// updated November 4, 2000
+// zulu (zulu@zuluhotel.com)
+
+use uo;
+use os;
+include "include/gumps";
+include "guildchat";
+
+
+program use_guild_chat(who,text)
+
+if (who.title_race=="ZuluCTF") return; endif
+
+  var nextmsg:=GetObjProperty(who, "nextmsg");
+  var msglimiter:= GetGlobalProperty("msglimiter");
+  if (!msglimiter)
+  	msglimiter:=5;
+  endif
+  if (nextmsg && nextmsg > ReadGameClock())
+  	SendSysMessage(who, "You can only send one message every "+msglimiter+" seconds");
+  	return;
+  endif
+  SetObjProperty (who, "nextmsg", ReadGameClock()+msglimiter);
+
+
+        var hear;
+        var guild_pl := GetObjProperty(who,"guild_id");
+
+        if (guild_pl.errortext)
+                return;
+        endif
+	if (!CheckSquelch(who))
+		return;
+	endif
+
+        if (text=="")
+
+		GFInitGump();
+		GFPage(0);
+		GFResizePic(0, 0, BKGND_BLACKSLAB, 378, 300);
+			
+		GFTextLine(20, 20, 10, "Choose guildchat hear-mode:");
+	
+		GFTextLine(50, 40, 5,  "Cancel");
+		GFTextLine(50, 60, 5,  "Hear all guilds");
+		GFTextLine(50, 80, 5, "Hear allied guilds only");
+		GFTextLine(50, 100, 5, "Hear own guild only");
+		GFTextLine(50, 120, 5, "Turn off guild messages");
+		GFTextLine(30, 140, 56, "Use .ca <message> to talk to allied guilds");
+		GFTextLine(30, 160, 68, "Use .co <message> to talk to own guild");
+		GFTextLine(20, 200, 10, "Choose guildchat talk-mode for .c :");
+		GFTextLine(50, 220, 68, "Set .c to send messages to own guild only");
+		GFTextLine(50, 240, 56, "Set .c to send messages to allied guilds only");
+		GFTextLine(50, 260, 44, "Set .c to send messages to all guilds");		
+		
+		var button1  := GFButtonID( 20, 45, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+		var button2  := GFButtonID( 20, 65, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+		var button3  := GFButtonID( 20, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+		var button4  := GFButtonID( 20, 105, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+		var button5  := GFButtonID( 20, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+		var button6  := GFButtonID( 20, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+		var button7  := GFButtonID( 20, 245, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+		var button8  := GFButtonID( 20, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	
+		var result := GFSendGump(who);
+		if (result[button1.keyid])
+			SendSysMessage(who, "Cancelled");
+			return;
+		elseif (result[button2.keyid])
+			SetObjProperty(who, "hearchat", HEAR_ALL);
+			SendSysMessage(who, "You will now hear messages from all guilds"); 
+		elseif (result[button3.keyid])
+			SetObjProperty(who, "hearchat", HEAR_ALLIED); 
+			SendSysMessage(who, "You will now hear messages from allied guilds only"); 
+		elseif (result[button4.keyid])
+			SetObjProperty(who, "hearchat", HEAR_OWN);
+			SendSysMessage(who, "You will now hear messages from your guild only"); 
+		elseif (result[button5.keyid])
+			SetObjProperty(who, "hearchat", HEAR_NONE);
+			SendSysMessage(who, "You will no longer receive guild messages");
+		elseif (result[button6.keyid])
+			SetObjProperty(who, "talkchat", SEND_OWN);
+			SendSysMessage(who, ".c will now send messages to your own guild only");
+		elseif (result[button7.keyid])
+			SetObjProperty(who, "talkchat", SEND_ALLIED);
+			SendSysMessage(who, ".c will now send messages to allied guilds only");
+		elseif (result[button8.keyid])
+			SetObjProperty(who, "talkchat", SEND_ALL);
+			SendSysMessage(who, ".c will now send messages to all guilds");
+		endif
+		return;
+        else  //text <> ""
+		if (!GetObjProperty(who, "talkchat"))
+			SetObjProperty(who, "talkchat", 3);
+		endif
+		var talk := GetObjProperty (who, "talkchat");
+		var addon  := ": ";
+		var guild := FindGuild(guild_pl);
+                if (guild.getprop("guildabv") != "NONE" && GetObjProperty(who,"abv")  == "0")
+                        addon := " ["+guild.getprop("guildabv")+"]: ";
+                endif
+		case (talk)
+			1:
+				msgown( CStr(who.name+addon+text), guild);
+			2:
+				msgallied( CStr(who.name+addon+text), guild);
+			default:
+				msgall( CStr(who.name+addon+text), guild);
+		endcase
+	endif
+
+endprogram
+
+
+
+
+

@@ -1,0 +1,22 @@
+
+use uo;
+use os;
+
+program auxambushtile_destroy(tile)
+
+	var ambushtileser := GetObjProperty(tile, "AssociatedAmbushTile");
+	var ambushtile := SystemFindObjectBySerial(ambushtileser);
+	if (ambushtileser && ambushtile)
+		var auxtileserials := GetObjProperty(ambushtile, "auxtilearray");
+		var tempauxserials := array;
+		if (auxtileserials[1])
+			foreach aux in auxtileserials
+				if (tile.serial!=aux)
+					tempauxserials.append(aux);
+				endif
+			endforeach
+			SetObjProperty(ambushtile, "auxtilearray", tempauxserials);
+		endif
+	endif
+	start_script("::maindestroy");
+endprogram

@@ -1,0 +1,73 @@
+use uo;
+use os;
+
+include "include/hitscriptinc";
+include "include/attributes";
+include "include/client";
+include "include/random";
+
+program voidscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+
+	var drained;
+	var drainer;
+	var stat := Random(3) + 1;
+	var amount := Random(6) + 10;
+	var cursed := GetObjProperty( weapon, "Cursed" );
+	
+	rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage + 15, 1 );
+
+	if( cursed )
+		rawdamage := CInt( rawdamage / 2 );
+		ApplyTheDamage( attacker, attacker, rawdamage );
+		drained := attacker;
+		drainer := defender;
+	else
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+		drained := defender;
+		drainer := attacker;
+	endif
+
+	case(stat)
+		1:	ApplyTheDamage( drained, attacker, amount );
+			SetHp(drainer, GetHp(drainer) + amount);
+			if( GetHp(drainer) > GetMaxHp(drainer))
+				SetHp(drainer, drainer.maxhp);
+			endif
+			break;
+
+		2:	SetMana(drained, GetMana(drained) - amount);
+			if( GetMana(drained) > GetMaxMana(drained))
+				SetMana(drained, 0);
+			endif
+			SetMana(drainer, GetMana(drainer) + amount);
+			if( GetMana(drainer) > GetMaxMana(drainer))
+				SetMana(drainer, drainer.maxmana);
+			endif
+			break;
+
+		3:	SetStamina(drained, GetStamina(drained) - amount);
+			if( GetStamina(drained) > GetMaxStamina(drained))
+				SetStamina(drained, 0);
+			endif
+			SetStamina(drainer, GetStamina(drainer) + amount);
+			if( GetStamina(drainer) > GetMaxStamina(drainer))
+				SetStamina(drainer, drainer.maxstamina);
+			endif
+			break;
+		
+		default:
+	endcase
+
+endprogram

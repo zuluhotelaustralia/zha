@@ -1,0 +1,57 @@
+use uo;
+use basicio;
+use basic;
+use cfgfile;
+
+program textcmd_res(me)
+	var tgt := TargetCoordinates( me );
+
+	if (tgt.mobile)
+
+			Resurrect( tgt.mobile );
+			LogIt(me, tgt.mobile);
+		else
+			SendSysMessage( me, "But that's not dead!" );
+	endif
+endprogram
+
+
+function LogIt(me, who)
+var where := who;
+var desc := "name: " + me.name + " / acct: " + me.acctname;
+
+
+var elemkey := desc;
+
+    var props:= array;
+    var prop:= array;
+    prop .+ pname;
+    prop .+ pvalue;
+
+    prop.pname := "x";
+    prop.pvalue := where.x;
+    props[1] := prop;
+
+    prop.pname := "y";
+    prop.pvalue := where.y;
+    props[2] := prop;
+
+    prop.pname := "z";
+    prop.pvalue := where.z;
+    props[3] := prop;
+
+    prop.pname := "account:";
+    prop.pvalue := who.acctname;
+    props[3] := prop;
+
+    prop.pname := "name:";
+    prop.pvalue := who.name;
+    props[4] := prop;
+   
+
+    AppendConfigFileElem( "textcmd.res", "res", elemkey, props );
+
+
+UnloadConfigFile("textcmd.res");
+
+endfunction

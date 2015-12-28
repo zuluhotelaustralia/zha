@@ -1,0 +1,37 @@
+use os;
+use uo;
+use cfgfile;
+
+include "include/dotempmods";
+include "include/attributes";
+include "include/mobileutil";
+include "include/drinkpotion";
+include "include/classes";
+include "include/client";
+
+program smokebomb( me, what )
+	if(!ReserveItem(what))
+		return;
+	endif
+	if(!IsNinja(me))
+		SendSysMessage(me, "Only a Ninja knows the use of this item.");
+		return;
+	endif
+	Detach();
+	var stealthbonus;
+	var strength := GetObjProperty(what, "ByTrueMage");
+	if( strength )
+		SendSysMessage( me, "This smokebomb is so potent that you will be able to move away unseen for several steps." );
+		ReleaseItem( what );
+		stealthbonus := 3 * CInt( strength );
+	else
+		ReleaseItem( what );
+		stealthbonus := 3;		
+	endif
+	PlaySoundEffect( me, SFX_SPELL_EXPLOSION );
+	PlayStationaryEffect( me.x, me.y, me.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+	DestroyItem( what );
+	me.hidden := 1;
+	me.stealthsteps := stealthbonus;
+
+endprogram

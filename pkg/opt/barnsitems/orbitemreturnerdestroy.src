@@ -1,0 +1,9 @@
+use uo;
+include "orbitemreturner";
+
+program orbitemreturnercontrol(orbitemreturner)
+	var orb:= findorb(orbitemreturner);
+	if (orb)
+		DestroyItem(orb);
+	endif
+endprogram

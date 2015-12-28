@@ -1,0 +1,9 @@
+include "include/cmdlevel_check";
+
+program concealme( who )
+	if (!checkStaff(who, "unconcealme", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+    who.concealed := 0;
+endprogram

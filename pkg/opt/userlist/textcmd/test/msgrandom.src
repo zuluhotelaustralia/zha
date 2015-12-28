@@ -1,0 +1,18 @@
+// adds num random names to UserList (for testing purpose)
+
+use os;
+use uo;
+
+include "../../userlist";
+include "include/cmdlevel_check";
+
+program textcmd_msgrandom(who, num)
+	if (!checkStaff(who, "msgrandom", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+	
+	num:=CInt(num);
+	SendSysMessage(who, "Adding "+num+" fake names.");
+	UserList(EVID_USERLIST_ALIASES, who, num);
+
+endprogram

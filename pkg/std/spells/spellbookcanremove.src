@@ -1,0 +1,5 @@
+
+program canremovescript(character, container, item, movetype)
+	//cant remove anything from a spellbook
+	return 0;
+endprogram

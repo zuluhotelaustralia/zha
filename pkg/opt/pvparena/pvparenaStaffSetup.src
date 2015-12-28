@@ -1,0 +1,250 @@
+include "include/constants/cmdlevels";
+include "include/yesno";
+include "include/gumps";
+include "pvparena";
+
+program staffSetupMenu(parms)
+	var who := parms[1];
+	var stone := parms[2];
+	
+	if (!who.cmdlevel)
+		SendSysMessage(who, "You are not authorised to use this.");
+		return;
+	endif
+	
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SILVERTRIM, 300, 170);
+		
+	GFTextMid(10, 20, 280, 10, "PVP Arena Staff Menu.");
+
+	GFTextLine(90, 50, 5, "Setup Properties");
+	GFTextLine(90, 80, 5, "Ban List Management");
+	GFTextLine(90, 110, 5, "Reset Arena");
+	
+	var setupButton := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var banButton  := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var resetButton  := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	if (choice[setupButton.keyid])
+		setupProps(who, stone);
+	elseif (choice[banButton.keyid])
+		banManagement(who, stone);
+	elseif (choice[resetButton.keyid])
+		resetArena(who, stone);
+	endif
+endprogram
+
+function setupProps(who, stone)
+	if (who.cmdlevel<CMDLEVEL_SEER) // Must be at least Seer
+		SendSysMessage(who, "Arena setup is for seer and up.", 3, 38);
+		return;
+	endif
+	
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SILVERTRIM, 500, 370);
+		
+	GFTextMid(10, 20, 480, 10, "PVP Arena Properties Setup.");
+
+	GFTextLine(90, 50, 5, "Battle Area: " + CStr(Unpack(GetObjProperty(stone, "BattleArea"))));
+	GFTextLine(90, 80, 5, "Spectator Area: " + CStr(Unpack(GetObjProperty(stone, "SpectatorArea"))));
+	GFTextLine(90, 110, 5, "Base 1: " + CStr(Unpack(GetObjProperty(stone, "Base1"))));
+	GFTextLine(90, 140, 5, "Base 2: " + CStr(Unpack(GetObjProperty(stone, "Base2"))));
+	GFTextLine(90, 170, 5, "Base 1 Starting Location: " + CStr(Unpack(GetObjProperty(stone, "Base1Start"))));
+	GFTextLine(90, 200, 5, "Base 2 Starting Location: " + CStr(Unpack(GetObjProperty(stone, "Base2Start"))));
+	GFTextLine(90, 230, 5, "Exit Location: " + CStr(Unpack(GetObjProperty(stone, "BattleOverPoint"))));
+	GFTextLine(90, 260, 5, "Set Doors");
+	GFTextLine(90, 290, 5, "Set Ready Stones");
+	var openText := "Close Arena";
+	if (GetObjProperty(stone, PVPARENA_NOTSETUP))
+		openText := "Open Arena";
+	endif
+	GFTextLine(90, 320, 5, openText);
+	
+	// look to text lines above for what they refer to
+	var button1 := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button2  := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button3  := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button4  := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button5  := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button6  := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button7  := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button8  := GFButtonID( 60, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button9  := GFButtonID( 60, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var button10  := GFButtonID( 60, 325, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var result := GFSendGump(who);
+	if (result[button1.keyid])
+		setXYXYProp(who, stone, "BattleArea");
+	elseif (result[button2.keyid])
+		setXYXYProp(who, stone, "SpectatorArea");
+	elseif (result[button3.keyid])
+		setXYXYProp(who, stone, "Base1");
+	elseif (result[button4.keyid])
+		setXYXYProp(who, stone, "Base2");
+	elseif (result[button5.keyid])
+		setXYZProp(who, stone, "Base1Start");
+	elseif (result[button6.keyid])
+		setXYZProp(who, stone, "Base2Start");
+	elseif (result[button7.keyid])
+		setXYZProp(who, stone, "BattleOverPoint");
+	elseif (result[button8.keyid])
+		setDoors(who, stone);
+	elseif (result[button9.keyid])
+		setReadyStones(who, stone);
+	elseif (result[button10.keyid])
+		finaliseSetup(who, stone);
+	endif
+endfunction
+
+function setXYXYProp(who, stone, prop)
+	SendSysMessage(who, "Select coordinate #1.");
+	var coord1 := TargetCoordinates(who);
+	
+	SendSysMessage(who, "Select coordinate #2.");
+	var coord2 := TargetCoordinates(who);
+	
+	if (!coord1 || !coord2)
+		SendSysMessage(who, "Canceled.");
+	endif
+	
+	var box := {};
+	
+	if ( coord1.x <= coord2.x )
+		box[1]	:= coord1.x;
+		box[2]	:= coord2.x;
+	else
+		box[1]	:= coord2.x;
+		box[2]	:= coord1.x;
+	endif
+
+	if ( coord1.y <= coord2.y )
+		box[3]	:= coord1.y;
+		box[4]	:= coord2.y;
+	else
+		box[3]	:= coord2.y;
+		box[4]	:= coord1.y;
+	endif
+	
+	SetObjProperty(stone, prop, Pack(box));
+endfunction
+
+function setXYZProp(who, stone, prop)
+	SendSysMessage(who, "Select coordinate.");
+	var coord := TargetCoordinates(who);
+	
+	if (!coord)
+		SendSysMessage(who, "Canceled.");
+	endif
+	
+	var point := {coord.x, coord.y, coord.z};	
+	
+	SetObjProperty(stone, prop, Pack(point));
+endfunction
+
+function setDoors(who, stone)
+	var doors := {};
+	var numdoors := CInt( SendTextEntryGump(who, "How many doors? [0-10]") );
+	if ((!numdoors && numdoors!=0) || numdoors < 0 || numdoors > 10)
+		SendSysMessage(who, "Canceled.");
+		return 0;
+	endif
+
+	var i;
+	for (i := 1; i <= numdoors; i := i + 1)
+		SendSysMessage(who, "Select door #" + CStr(i));
+		var nextdoor := Target(who, TGTOPT_NOCHECK_LOS);
+		if (!nextdoor || !nextdoor.isA(POLCLASS_DOOR))
+			SendSysMessage(who, "Canceled.");
+			return;
+		endif
+		doors.append(nextdoor.serial);
+	endfor
+	
+	SetObjProperty(stone, "nDoors", numdoors);
+	SetObjProperty(stone, "doors", Pack(doors));
+endfunction
+
+function setReadyStones(who, stone)
+	var stone1, stone2;
+	SendSysMessage(who, "Select team 1's ready stone.");
+	stone1 := Target(who, TGTOPT_NOCHECK_LOS);
+	if (!stone1)
+		SendSysMessage(who, "Canceled.");
+		return;
+	endif
+	
+	SendSysMessage(who, "Select team 2's ready stone.");
+	stone2 := Target(who, TGTOPT_NOCHECK_LOS);
+	if (!stone2)
+		SendSysMessage(who, "Canceled.");
+		return;
+	endif
+	
+	SetObjProperty(stone, "readystone1", stone1.serial);
+	SetObjProperty(stone, "readystone2", stone2.serial);
+endfunction
+
+function finaliseSetup(who, stone)
+	var open := 1 - GetObjProperty(stone, PVPARENA_NOTSETUP);
+	if (open)
+		SetObjProperty(stone, PVPARENA_NOTSETUP, 1);
+		SendSysMessage(who, "The arena has been deactivated.");
+	else
+		SetObjProperty(stone, PVPARENA_NOTSETUP, 0);
+		SendSysMessage(who, "The arena is now open to the players.");
+	endif
+endfunction
+
+function banManagement(who, stone)
+	var banlist := {};
+	if (GetObjProperty(stone, PVPARENA_BANLIST))
+		banlist := Unpack(GetObjProperty(stone, PVPARENA_BANLIST));
+	endif
+	var page := 1;
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SILVERTRIM, 300, 140);
+	
+	GFTextMid(10, 20, 280, 10, "PVP Arena Ban Management.");
+	GFTextLine(90, 50, 1209, "Ban");
+	GFTextLine(90, 80, 1209, "Unban");
+	var banbutton := GFButtonID(60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var unbanbutton := GFButtonID(60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var result := GFSendGump(who);
+	if (result[banbutton.keyid])
+		SendSysMessage(who, "Who do you want to ban from the arena?");
+		var tgt := Target(who, TGTOPT_NOCHECK_LOS);
+		if (!tgt || !(tgt.isa(POLCLASS_MOBILE) && !tgt.isA(POLCLASS_NPC) ) || tgt.cmdlevel || (tgt.serial in banlist))
+			SendSysMessage(who, "Canceled.");
+		endif
+		banlist.append(tgt.serial);
+
+	elseif (result[unbanbutton.keyid])
+		SendSysMessage(who, "Who do you want to unban from the arena?");
+		var tgt := Target(who, TGTOPT_NOCHECK_LOS);
+		if (!tgt || !(tgt.isa(POLCLASS_MOBILE) && !tgt.isA(POLCLASS_NPC)) || tgt.cmdlevel || !(tgt.serial in banlist))
+			SendSysMessage(who, "Canceled.");
+		endif
+		var i;
+		for (i := 1; i <= banlist.size(); i := i + 1)
+			if (banlist[i]==tgt.serial)
+				banlist.erase(i);
+				break;
+			endif
+		endfor
+	else
+		return;
+	endif
+	
+	SetObjProperty(stone, PVPARENA_BANLIST, Pack(banlist));
+endfunction
+
+function resetArena(who, stone)
+	cleanup(stone);
+	SendSysMessage(who, "Arena reset.");
+endfunction

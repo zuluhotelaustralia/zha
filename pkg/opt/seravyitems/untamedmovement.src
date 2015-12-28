@@ -1,0 +1,24 @@
+/* Untamed Movement Tile         **
+** If it creature is untamed it  **
+** will move to the location.    **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+program untamedmovement( who, item )
+
+  var destX := GetObjProperty(item, "destX");
+  var destY := GetObjProperty(item, "destY");
+  var destZ := GetObjProperty(item, "destZ");
+  var hasMaster := GetObjProperty(who, "master");
+
+  if(destX && destY && destZ)
+    if (who.isA(POLCLASS_NPC) && !hasMaster)
+      MoveCharacterToLocation( who, destX, destY, destZ, MOVECHAR_FORCELOCATION );
+      PrintTextAbove( who, "Untamed creatures are not allowd to move here!");
+    endif
+  endif
+
+endprogram
+

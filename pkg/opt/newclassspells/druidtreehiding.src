@@ -1,0 +1,104 @@
+/* Druid Spell - Tree Hiding     **
+** Caster is Disguised as a tree **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+include "include/checkcity";
+include "include/areas";
+
+const SPELL_ID := SPELL_ID_TREEHIDING;
+
+program cast_treehiding(parms)
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+  endif
+
+  if (CheckCity(caster) && !caster.cmdlevel)
+    EraseObjProperty( caster, "#Casting" );
+    SendSysMessage( caster, "You can't tree hide in town" );
+    return;
+  endif
+
+  if (IsInSafeArea(caster) && !caster.cmdlevel && !GetObjProperty(caster, "#duel"))
+    EraseObjProperty( caster, "#Casting" );
+    SendSysMessage( caster, "You can't tree hide in safe zones" );
+    return;
+  endif
+
+  if(!CanMod(cast_on, "poly"))
+    EraseObjProperty( caster, "#Casting" );
+    SendSysMessage( caster, "You cannot hide while polymorphed into something." );
+    return;
+  endif
+
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_RANGER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_DRUID)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_NATURELORE);
+  var duration := calcSummonDuration(skill, level);
+
+  SendSysMessage( caster, "You will be able to remain hidden for a max of around "+CInt(duration/60)+" Min(s).");
+  PolymorphMobile(caster, 0x6, caster.color, duration, 0);
+  PlaySoundEffect(caster, SFX_SPELL_TREEHIDING );
+
+  caster.frozen := 1;
+  caster.hidden := 1;
+  caster.squelch(duration);
+  var trunk := CreateItemAtLocation( caster.x, caster.y, caster.z, 0xCDA, 1 );
+  SetObjProperty(trunk, "f", 1);
+  trunk.movable := 0;
+  var leaves := CreateItemAtLocation( caster.x, caster.y, caster.z, 0xCDb, 1 );
+  SetObjProperty(leaves, "f", 1);
+  leaves.movable := 0;
+
+  SendGump(caster);
+  if(!caster.dead)
+    WipeMod(caster, "poly");
+    caster.graphic := caster.trueobjtype;
+    caster.hidden := 0;
+  endif
+  caster.frozen := 0;
+  caster.squelch(0);
+  DestroyItem(leaves);
+  DestroyItem(trunk);
+
+  EraseObjProperty( caster, "#Casting");
+endprogram
+
+
+function SendGump(caster)
+
+  var thlayout := {
+                  "page 0",
+                  "resizepic 0 0 83 140 55",
+                  "checkertrans 0 0 140 55",
+                  "page 1",
+                  "text 10 5 52 0",
+                  "button 40 22 2130 2129 1 0 1"
+                  };
+
+
+  var thdata := {
+                "Click here to unhide."
+		};
+
+  SendDialogGump( caster, thlayout, thdata );
+
+endfunction

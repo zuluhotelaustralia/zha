@@ -1,0 +1,17 @@
+use uo;
+include "include/cmdlevel_check";
+
+program itemcount( who )
+	if (!checkStaff(who, "itemcount", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	var core := polcore();
+	if( !core )
+		SendSysMessage( who, "No core found???!!!!" );
+		return;
+	endif
+
+	SendSysMessage( who, "The current item count is " + CInt(core.itemcount) + "." );
+
+endprogram

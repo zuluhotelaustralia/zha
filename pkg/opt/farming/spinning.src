@@ -1,0 +1,169 @@
+use uo;
+use cfgfile;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/myutil";
+include "include/time";
+
+const STARTWHEEL := 0x1015;
+const ENDWHEEL := 0x101e;
+
+program use_flax( me, flax)
+
+	if (not Accessible(me, flax))
+        	SendSysMessage(me, "Canceled");
+        	return;
+	endif
+
+  if(!ReserveItem(flax)) // Duping bug fixed by seravy. Used to use auctioner to reserve item.
+    PunishForBugAbusing(me, flax);
+    return; 
+  endif
+
+	var flaxtype := flax.objtype;
+	var allmyflax := EnumerateItemsInContainerOfObjType(me.backpack, flaxtype);
+
+	if ( (flaxtype != 0x0e1d) && (flaxtype != 0xfa0) && (flaxtype != 0x0fa1) )
+		if (!NearAWheel(me))//stuff on wheel makes yarn
+			SendSysMessage(me,"You must be closer to a spinning wheel!");
+			return;
+		endif
+	else
+		if (!NearALoom(me))//yarn or thread on a loom makes a bolt
+			SendSysMessage(me,"You must be closer to a Loom!");
+			return;
+		endif
+	endif
+
+	if ( CountFlax(me, allmyflax) < 5 )
+		SendSysMessage(me,"You need 5 of those to make anything!");
+		return;
+	endif
+
+	var done := 0;
+	while ( done < 25 )
+		if (!DestroyFive(me, allmyflax))
+			SendSysMessage(me,"Done!");
+			return;
+		endif
+		if ( flaxtype == 0x0e1d )
+				CreateItemInContainer( me.backpack, 0x0f95, 2);
+		elseif ( (flaxtype == 0xfa0) || (flaxtype == 0x0fa1) )
+				CreateItemInContainer( me.backpack, 0x0f95, 1);
+		else
+			CreateItemInContainer( me.backpack, 0x0e1d, 2 );
+		endif
+		if ( CountFlax(me, allmyflax) < 5 )
+			SendSysMessage(me,"Done!");
+			return;
+		endif
+		done := done + 1;
+	endwhile
+
+	SendSysMessage(me,"Done!");
+
+endprogram
+
+function DestroyFive(me, byref allmyflax);
+
+	var numflax := 0;
+	foreach item in (allmyflax)
+		if (item.amount >= (5-numflax) )
+			SubtractAmount(item,(5-numflax));
+			return 1;
+		else
+			numflax := numflax + item.amount;
+			if (!DestroyItem(item))
+				SendSysMessage(me,DestroyItem(item).errortext);
+				return 0;
+			endif
+			if (numflax > 4)
+				return 1;
+			endif
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+
+function CountFlax(me, byref allmyflax)
+
+	var numflax := 0;
+	foreach item in (allmyflax)
+		numflax := numflax + item.amount;
+	endforeach
+
+	return numflax;
+
+endfunction
+
+function NearAWheel(me)
+
+	foreach item in ListItemsNearLocation(me.x, me.y, me.z,2)
+		if ( (item.objtype >= STARTWHEEL && item.objtype <= ENDWHEEL) ||
+		   (item.objtype >= 0x10a4 && item.objtype <= 0x10a6) )
+			return 1;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+
+function NearALoom(me)
+
+	foreach item in ListItemsNearLocation(me.x, me.y, me.z,2)
+		if (item.objtype >= UOBJ_LOOM_START && item.objtype <= UOBJ_LOOM_END)
+			return 1;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+
+
+function PunishForBugAbusing(who, item)
+    var elemkey := who.acctname;
+    var props := array;
+    var prop := array;
+    prop .+ pname;
+    prop .+ pvalue;
+	
+    prop.pname := "charname";
+    prop.pvalue := who.name;
+    props[1] := prop;
+	
+    prop.pname := "serial";
+    prop.pvalue := who.serial;
+    props[2] := prop;
+	
+    prop.pname := "coords";
+    prop.pvalue := CStr(who.x) + " " + CStr(who.y);
+    props[3] := prop;
+	
+    prop.pname := "datetime";
+    prop.pvalue := NowString();
+    props[4] := prop;
+
+    prop.pname := "item";
+    prop.pvalue := "Thread: " + CStr(item.name) + " - "+ CStr(item.desc) + " - "+ CStr(item.serial);
+    props[4] := prop;
+	
+    AppendConfigFileElem( "::log-itemdupe", "haxor", elemkey, props );
+    UnloadConfigFile("::log-itemdupe");
+
+    var name	:= who.name;
+    var account	:= who.acctname;  foreach mobile in EnumerateOnlineCharacters()
+    who.title_race := "bug abuser";
+
+    if( mobile.cmdlevel )
+      SendSysMessage( mobile, name + " account: " + account + " abused a duping bug on " + item.desc, 3, 33 );
+    endif
+  endforeach
+
+
+endfunction

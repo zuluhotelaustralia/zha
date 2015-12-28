@@ -1,0 +1,7 @@
+use uo;
+
+program controldoor(door)
+	if (door.isopen)
+		door._close();
+	endif
+endprogram

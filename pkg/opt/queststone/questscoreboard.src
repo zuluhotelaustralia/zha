@@ -1,0 +1,150 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+include "include/string";
+
+var champtitle:={"Champion","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"};
+
+include "queststone";
+
+program questscoreboard( who, questscoreboard )
+	if (who.cmdlevel >=2 && !GetObjProperty (questscoreboard, "AssocQuestStoneSer"))
+		 associateQuestStone(who, questscoreboard);
+		return;
+	endif
+	
+	playerScoreGump(who, questscoreboard);
+
+endprogram
+
+function associateQuestStone(who, questscoreboard)
+	SendSysMessage( who, "Select Queststone." );
+	var qstone := Target( who );
+	
+   if( !qstone || qstone.objtype != 41762) // queststone objtype
+   	SendSysMessage( who, "canceled." );
+     	return;
+   endif
+
+	SetObjProperty (questscoreboard, "AssocQuestStoneSer", qstone.serial);
+	SendSysMessage( who, "Quest Score Board associated with queststone." );
+
+endfunction
+
+
+function playerScoreGump(who, questscoreboard)
+	var questser:=CInt(GetObjProperty (questscoreboard, "AssocQuestStoneSer"));
+	if (!questser||questser==error)
+		return;
+	endif
+	
+	var quest:= SystemFindObjectBySerial(questser);
+	if (!quest||quest==error)
+		return;
+	endif
+	
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SILVERTRIM, 550, 550);
+	GFTextMid(100, 10, 200, 70, "Top Ten Ranked Players for " + GetAssociatedQuestName(questscoreboard) );
+		
+	var toptenplayers := GetTopTenPlayers(questscoreboard);
+	var i;
+	var y := 40;
+	
+	var hButton:=array;	var tempstr;
+	for(i:=1;i<=len(toptenplayers);i:=i+1)	
+		GFTextLine(50, y, 53,  PadString(""+champtitle[i] +" - " +toptenplayers[i].qps, 20) + "    " + toptenplayers[i].name );
+		y:=y+30;
+	endfor
+		
+	var exitButton := GFButtonID( 60, 515, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(90, 510, 70, "EXIT");
+
+	var choice := GFSendGump(who);
+	
+	if(choice[exitButton.keyid])
+		return;
+	endif
+endfunction
+
+function GetAssociatedQuestName(questscoreboard)
+	var qname:=GetQuestTitle(CInt(GetObjProperty (questscoreboard, "AssocQuestStoneSer")));
+	if (!qname || qname==error ||  qname == "To be named")
+		return 0;
+	endif
+	return qname;
+endfunction
+
+function makeplayerstruct(name, serial, qps)
+	var pstr:=struct;
+	pstr.+name:=name;
+	pstr.+serial:=serial;
+	pstr.+qps:=qps;
+	return pstr;
+endfunction
+
+function GetTopTenPlayers(questscoreboard)
+	var assocqser:=GetObjProperty (questscoreboard, "AssocQuestStoneSer");
+	if (!assocqser || assocqser==error)
+		return 0;
+	endif
+	
+	var stone:=SystemFindObjectBySerial(assocqser);
+	if (!stone || stone==error)
+		return 0;
+	endif
+
+ 	var sortQpoints:=GetObjProperty(stone, "playerquestpoints");
+	sortQpoints.sort();
+	sortQpoints.reverse();
+	var pserials:=GetObjProperty(stone, "playerserials");
+	var pQpoints:=GetObjProperty(stone, "playerquestpoints");
+	var structarray := array;
+	
+	var pser;
+	var player; 	
+
+	foreach sq in sortQpoints
+		pser:=FindUniqueSerialWithQPs(sq, structarray, stone);
+		if (pser)
+			player:=SystemFindObjectBySerial(pser, SYSFIND_SEARCH_OFFLINE_MOBILES);
+			if (player)
+				structarray.append(makeplayerstruct(player.name, pser, sq));
+			endif
+		endif
+		if (len(structarray)>=10)
+			break;
+		endif
+	endforeach
+	return structarray;
+endfunction
+
+function FindUniqueSerialWithQPs(pqp, structarray, stone)
+ var pQpoints:=GetObjProperty(stone, "playerquestpoints");
+ var pserials:=GetObjProperty(stone, "playerserials");
+ var index := 1;
+	foreach qp in pQpoints
+		if (qp==pqp && !InStructArray(pserials[index], structarray))
+			return pserials[index];
+		endif
+		index:=index+1;
+	endforeach
+	return 0;
+endfunction
+
+function InStructArray(pserial, myarraystruct)
+	foreach st in myarraystruct
+		if (st.serial == pserial)
+			return 1;
+		endif
+	endforeach
+	return 0;
+	
+endfunction
+
+

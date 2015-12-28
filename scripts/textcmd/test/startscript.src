@@ -1,0 +1,10 @@
+use os;
+include "include/cmdlevel_check";
+
+
+program textcmd_start( who, scriptname )
+	if (!checkStaff(who, "startscript", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    start_script( scriptname );
+endprogram

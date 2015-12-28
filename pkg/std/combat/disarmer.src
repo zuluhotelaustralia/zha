@@ -1,0 +1,23 @@
+use uo;
+use os;
+
+include "include/classes";
+program disarmer (params)
+
+	var attacker:= params[1];
+	var defender:= params[2];
+	Detach();
+
+	MoveItemToContainer(defender.weapon, defender.backpack);
+	set_critical(1);
+	SetObjProperty(defender, "disarmed", 1);
+	PrintTextAbove(defender, "*Disarmed*");
+	sleep(GetObjProperty(attacker, CLASSEID_MONK));
+	EraseObjProperty(defender, "disarmed");
+	set_critical(0);
+	
+endprogram
+
+
+	
+	

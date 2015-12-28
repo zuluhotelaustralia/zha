@@ -1,0 +1,25 @@
+use uo;
+use os;
+include "dungeon";
+
+const SECS_SINCE_LOGOUT := 3600; //determine when a player is moved to dungeon start point
+//const SECS_SINCE_LOGOUT := 1;
+program logon( who )
+	//print("running dungeon logon " + who.name);
+	var dparams := GetObjProperty(who, "LoggedOffInDungeon");
+	//print("LoggedOffInDungeon " + GetObjProperty(who, "LoggedOffInDungeon"));
+	if (!dparams)
+		return;
+	endif	
+	
+	if (ReadGameClock()>CInt(dparams[2]+SECS_SINCE_LOGOUT))
+		//print("sending...");
+		var sendpoints := ListSendPoints();
+		var myspoint := sendpoints[CInt(dparams[1])];
+		myspoint := SplitWords(myspoint);
+		MoveCharacterToLocation( who, Cint(myspoint[1]), Cint(myspoint[2]), Cint(myspoint[3]), MOVECHAR_FORCELOCATION  );
+		SendSysMessage (who, "The Gamemasters have recovered you from " + GetDungeonName(Cint(dparams[1])) +"!", 3, 53);
+	endif
+	
+	EraseObjProperty(who, "LoggedOffInDungeon");
+endprogram

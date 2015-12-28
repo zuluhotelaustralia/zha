@@ -1,0 +1,21 @@
+use uo;
+use os;
+
+include "include/listex";
+include "include/cmdlevel_check";
+
+
+program listnear( character )
+	if (!checkStaff(character, "listhidden", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    var coords := TargetCoordinates( character );
+   
+    if (coords)
+        foreach mobile in ListMobilesNearLocationEx( coords.x, coords.y, coords.z, 4, LIST_HIDDEN )
+            SendSysMessage( character, mobile.name + " (" + mobile.serial + ")" );
+            print(mobile.name);
+        endforeach
+    endif
+endprogram

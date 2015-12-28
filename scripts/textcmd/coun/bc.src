@@ -1,0 +1,15 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_bcast( who )
+	if (!checkStaff(who, "bc", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+    var wtext := CStr(RequestInput( who, who.backpack, "Message:" ));
+    var wfont := CInt(RequestInput( who, who.backpack, "Font:" ));
+    var wcolor := CInt(RequestInput( who, who.backpack, "Color:" ));
+
+    Broadcast( who.name + ": " + wtext, wfont, wcolor );
+endprogram

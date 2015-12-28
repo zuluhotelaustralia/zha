@@ -1,0 +1,105 @@
+use uo;
+use cfgfile;
+include "include/constants/objtypes";
+include "include/constants";
+include "include/managers";
+include "include/yesno";
+
+
+program textcmd_createworldspawnpoints(who,text)
+	if (!YesNo(who, "REALLY CREATE SPAWNPOINTS ALL OVER WORLD? This should be done only once!"))
+		return;
+	endif
+	//Broadcast(text);
+	var sp_cfg := ReadConfigFile(":worldspawner:spawnpoints");
+	//Broadcast(sp_cfg);
+	var elem;
+	var spawnpoint;
+	var sp_struct;
+	var count:=0;
+	foreach str in GetConfigStringKeys(sp_cfg)
+		elem:=FindConfigElem( sp_cfg, str );
+		if (elem)
+			sp_struct:=getSpawnpointStructFromElem(elem);
+			//SendSysMessage(who, "sp_struct:  x: " +sp_struct.x + "  y: " + sp_struct.y + "  z: " + sp_struct.z + "  range: " + sp_struct.range + "  delay: " + sp_struct.delay + "  maxcount: " + sp_struct.maxcount+ "  wander: " + sp_struct.wander+ "  monster: " + sp_struct.monster + "  type: " + sp_struct.type);
+			spawnpoint:=CreateSpawnpoint(getSpawnpointStructFromElem(elem));
+			SendSysMessage(who, spawnpoint.x + ", " + spawnpoint.y + ", " + spawnpoint.z);
+			
+			SendSpawnPointEvent( EVID_SPAWNPOINT_CHECK_POINT, spawnpoint );
+		endif
+		count:=count+1;
+	endforeach
+	SendSysMessage(who, count + " spawnpoints created.", 3,53);
+	//SpawnAllPoints();EVID_SPAWNPOINT_SPAWN_ALL
+	//SendSpawnPointEvent( EVID_SPAWNPOINT_SPAWN_ALL );
+endprogram
+
+function getSpawnpointStructFromElem(elem)
+	var spawn:=struct;
+	spawn.+x:=Cint(GetConfigString(elem, "x"));
+	spawn.+y:=Cint(GetConfigString(elem, "y"));
+	spawn.+z:=GetMapInfo(spawn.x, spawn.y).z+1;
+	spawn.+range:=Cint(GetConfigString(elem, "range"));
+	spawn.+delay:=Cint(GetConfigString(elem, "delay"));
+	spawn.+maxcount:=Cint(GetConfigString(elem, "maxcount"));
+	spawn.+monster:=GetConfigStringArray( elem, "monster" );
+	spawn.+wander:=4;
+	spawn.+type;
+	spawn.+monster:=TranslateMonsters(spawn);
+	return spawn;
+endfunction
+
+function CreateSpawnpoint(sp_struct)
+	var spawn:= CreateItemAtLocation( sp_struct.x, sp_struct.y, sp_struct.z, UOBJ_SPAWNPOINT, 1 );
+	sleepms(300);
+	var pt_data	    := array;
+	pt_data[1]  := sp_struct.type;	// Type
+	pt_data[2]  := sp_struct.monster;	// Template
+	pt_data[3]  := sp_struct.maxcount;	// Max appear
+	pt_data[4]  := sp_struct.range;	// Appear Range
+	pt_data[5]  := sp_struct.wander;	// Wander Range
+	pt_data[6]  := sp_struct.delay;	// Frequency
+	pt_data[7]  := 0;	// Disabled
+	pt_data[8]  := 0;	// Spawn in group.
+	pt_data[9]  := 0;	// Despawn on destroy
+	pt_data[10] := 0;	// Expire time
+	pt_data[11] := 0;	// Expire number
+	pt_data[12] := 0;	// Start spawning hours
+	pt_data[13] := 0;	// End spawning hours
+	pt_data[14] := "Created by world spawner";	// Notes
+	SetObjProperty( spawn, PROPID_SPAWNPOINT_SETTING, pt_data );
+	//Broadcast(pt_data);
+	spawn.name := "SpawnPoint [" + pt_data[3] + " " + pt_data[2] + "] ";
+	spawn.movable := 0;
+	spawn.invisible:=1;
+	return spawn;
+endfunction
+
+function TranslateMonsters(byref sp_struct)
+	var t_cfg := ReadConfigFile(":worldspawner:uniquencptemplatelist");
+	var translated_array:=array;
+	var t_elem;
+	var trans_temp;
+	foreach m in (sp_struct.monster)
+		t_elem:=FindConfigElem( t_cfg, m );
+		if (t_elem)
+			trans_temp:=GetConfigString(t_elem, "Translation");
+			if (trans_temp!="NONE")
+				translated_array.append(GetConfigString(t_elem, "Translation"));
+			endif
+			if (m=="treasurechestlevel1"||m=="treasurechestlevel2"||m=="treasurechestlevel3"||m=="treasurechestlevel4")
+				sp_struct.type:="Container";
+				case(m)
+					"treasurechestlevel1": sp_struct.wander:=5;break;
+					"treasurechestlevel2": sp_struct.wander:=6;break;
+					"treasurechestlevel3": sp_struct.wander:=7;break;
+					"treasurechestlevel4": sp_struct.wander:=8;break;
+				endcase
+			else
+				sp_struct.type:="NPC";
+			endif
+		endif
+	endforeach
+	sp_struct.maxcount:=translated_array.size();
+	sp_struct.monster:=translated_array;
+endfunction

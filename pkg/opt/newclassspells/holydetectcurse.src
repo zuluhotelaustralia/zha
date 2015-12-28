@@ -1,0 +1,32 @@
+/* Holy Spell - Detect Curse           **
+** See's if an item is cursed or not.  **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_DETECTCURSE;
+
+program cast_detectcurse( caster )
+  var cast_on;
+  SendSysMessage(caster, "Select the item you wish to detect for a Curse");
+  cast_on := CanTargetThing(caster);
+ 
+  if (!cast_on)
+    SendSysMessage(caster, "Canceled.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+  PlaySoundEffect( caster, SFX_SPELL_DETECTCURSE );
+  if(GetObjProperty(cast_on, "Cursed") == 3)
+    SendSysMessage(caster, "You know this item was once cursed, but is now safe..");
+  elseif(GetObjProperty(cast_on, "Cursed"))
+    SendSysMessage(caster, "You get a feeling the item is cursed.");
+  else
+    SendSysMessage(caster, "You cannot feel any curses on this item.");
+  endif    
+  EraseObjProperty( caster, "#Casting");
+endprogram

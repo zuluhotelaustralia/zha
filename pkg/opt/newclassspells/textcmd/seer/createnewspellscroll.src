@@ -1,0 +1,19 @@
+use uo;
+
+include "include/cmdlevel_check";
+include "../../newclassbook";
+
+program createnewspellscroll(who, text)
+	if (!checkStaff(who, "createnewspellscroll", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+	var spellid := Cint(text);
+	
+	if (spellid)
+		var myscroll:=CreateItemAtLocation( who.x, who.y, who.z, "newbookspellscroll");
+		if (!AssignThisSpellID(spellid, myscroll))
+			DestroyItem(myscroll);
+		endif
+	endif
+endprogram

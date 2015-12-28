@@ -1,0 +1,271 @@
+use uo;
+use os;
+
+include "include/time";
+
+const X := 210;
+const Y := 175;
+const JAIL_MID_X     := 5280;
+const JAIL_MID_Y     := 1175;
+const JAIL_MID_Z     := 0;
+const JAIL_RADIUS    := 30;
+
+//const PROPID_MOBILE_PAGING				:= "#Paging";
+//const CMDLEVEL_COUNSELOR	:= 1;
+//const CMDLEVEL_GAME_MASTER	:= 3;
+//const PROPID_GLOBAL_STAFF_PAGES				:= "gmpages";
+//const GUMPID_BKGND_FANCY			:= 2600;	// Fancy corner gray background
+//const GUMPID_CHECKBOX_GRAY_0			:= 210;
+//const GUMPID_CHECKBOX_GRAY_1			:= 211;
+//const SCRIPT_GLOBAL_OBJECT := ":shillhooks:skillsdef:attributecore";
+
+program help( who2 )
+	var who := who2[1];
+
+	if( GetObjProperty( who, PROPID_MOBILE_PAGING) )
+		SendSysMessage( who, "You're already paging." );
+		return 0;
+	else
+		SetObjProperty( who, PROPID_MOBILE_PAGING, 1 );
+	endif
+
+	var layout := array(
+		"page 0",
+		"nodispose",
+		"resizepic " + (X+0) + " " + (Y+0) + " " + GUMPID_BKGND_FANCY + " 350 245",
+		"text " + (X+115) + " " + (Y+20)  + " 683 0",
+		"text " + (X+55)  + " " + (Y+55)  + " 995 1",
+		"text " + (X+55)  + " " + (Y+80)  + " 995 2",
+		"text " + (X+55)  + " " + (Y+105) + " 995 3",
+		"text " + (X+55)  + " " + (Y+130) + " 33 4",
+		"text " + (X+50)  + " " + (Y+160) + " 995 5",
+		"text " + (X+75)  + " " + (Y+190) + " 683 6",
+		"text " + (X+100)  + " " + (Y+210) + " 683 7",
+		"button " + (X+30) + " " + (Y+57)  + " "  + GUMPID_CHECKBOX_GRAY_0 + " " + GUMPID_CHECKBOX_GRAY_1 + " 1 0 1",
+		"button " + (X+30) + " " + (Y+82)  + " "  + GUMPID_CHECKBOX_GRAY_0 + " " + GUMPID_CHECKBOX_GRAY_1 + " 1 0 2",
+		"button " + (X+30) + " " + (Y+107) + " "  + GUMPID_CHECKBOX_GRAY_0 + " " + GUMPID_CHECKBOX_GRAY_1 + " 1 0 3",
+		"button " + (X+30) + " " + (Y+132) + " "  + GUMPID_CHECKBOX_GRAY_0 + " " + GUMPID_CHECKBOX_GRAY_1 + " 1 0 4",
+		"button " + (X+30) + " " + (Y+157) + " "  + GUMPID_CHECKBOX_GRAY_0 + " " + GUMPID_CHECKBOX_GRAY_1 + " 1 0 0"
+		);
+	
+	var data := array(
+		"HELP MENU",
+		"General questions about Zulu Hotel.",
+		"My character is physically stuck.",
+		"I wish to page a Game Master.",
+		"Notes from Admin on AOS Clients",
+		"Return to the game.",
+		"For more info, visit our webpage at",
+		"http://www.gamiix.com/ultima"
+		);
+
+	var res := SendDialogGump( who, layout, data );
+	if( !res[0] )
+		EraseObjProperty( who, PROPID_MOBILE_PAGING );
+		return 0;
+	else
+		res := res[0];
+	endif
+
+	var min_level;
+	var staffs	:= array;
+	case( res )
+		1:
+		2:	min_level := CMDLEVEL_COUNSELOR;
+		3:	min_level := CMDLEVEL_GAME_MASTER;
+	endcase
+
+	foreach player in EnumerateOnlineCharacters()
+		if( player.cmdlevel >= min_level )
+			staffs.append( player );
+		endif
+	endforeach
+
+	/* Shouldn't let em know if we're on or not - makes bug catching harder!
+	if( !staffs.size() )
+		case( res )
+			1:
+			2:	SendSysMessage( who, "There's no staff online at the moment, please try again later.");
+			3:	SendSysMessage( who, "There's no game master online at the moment, please try again later.");
+		endcase
+		EraseObjProperty( who, PROPID_MOBILE_PAGING );
+		return 0;
+	endif
+	*/
+
+	SendSysMessage(who, "Pay attention, please.",3,33);//Red	
+
+	var page_msg;
+	case( res )
+		1:	page_msg := RequestInput( who, who.backpack, "Type in your question:" );
+		2: DoStuckHelp(who);
+		//2:	page_msg := "I'm stuck and cannot move, please help.";
+		3:	page_msg := RequestInput( who, who.backpack, "Type in your problem:" );
+		4:	DisplayAOSClientNotes(who);
+	endcase
+
+	if( !page_msg )
+		SendSysMessage( who, "Canceled." );
+		EraseObjProperty( who, PROPID_MOBILE_PAGING );
+		return 0;
+	else
+		page_msg := getPageTimeStamp() + " " + page_msg;
+	endif
+
+	set_critical(1);
+	var pages := GetGlobalProperty( PROPID_GLOBAL_STAFF_PAGES );
+	if( !pages )
+		pages := {};
+	endif
+
+	var i;
+	var num_pages := pages.size();
+
+	for( i := 1; i <= num_pages; i := i + 2 )
+		if( pages[i] == who.serial )
+			pages[i+1] := page_msg;
+			break;
+		endif
+	endfor
+
+
+	if( i > num_pages )
+		SendSysMessage(who, "Available staff members have been notified of your request.",3,10);
+		SendSysMessage(who, "There is " + CInt(num_pages/2) + " pages queued ahead of you." );
+		pages[num_pages+1] := who.serial;
+		pages[num_pages+2] := page_msg;
+
+	else
+		SendSysMessage( who, "You had an existing page. It has been updated.",3,33 );
+	endif
+
+	SetGlobalProperty( PROPID_GLOBAL_STAFF_PAGES, pages );
+	set_critical(0);
+
+	foreach staff in staffs
+		SendSysMessage( staff, "Page from " + who.name + ":" );
+		SendSysMessage( staff, page_msg );
+	endforeach
+
+	EraseObjProperty( who, PROPID_MOBILE_PAGING );
+
+
+endprogram
+
+function getPageTimeStamp()
+	var time_data := GetCurrentTimeData();
+	var day, month, hour, minutes;
+	
+	if (time_data.day < 10)
+		day := "0" + CStr(time_data.day);
+	else
+		day := CStr(time_data.day);
+	endif
+	
+	if (time_data.month < 10)
+		month := "0" + CStr(time_data.month);
+	else
+		month := CStr(time_data.month);
+	endif
+
+	
+	if (time_data.hour < 10)
+		hour := "0" + CStr(time_data.hour);
+	else
+		hour := CStr(time_data.hour);
+	endif
+	
+	if (time_data.minutes < 10)
+		minutes := "0" + CStr(time_data.minutes);
+	else
+		minutes := CStr(time_data.minutes);
+	endif
+	
+	var time_string := day + "/" + month + "_" + hour + ":" + minutes;
+	
+	return time_string;
+endfunction
+
+function DoStuckHelp(who)
+	EraseObjProperty( who, PROPID_MOBILE_PAGING );
+	if (PlayerInJail(who))
+		SendSysMessage(who, "You have paged about being physically stuck.", 3, 70);
+		SendSysMessage(who, "However this service is not available to players in jail.", 3, 70);
+		return;
+	endif
+	if (! HasSlaveTimeElapsed(who))
+		SendSysMessage(who, "You have paged about being physically stuck.", 3, 70);
+		SendSysMessage(who, "However this service is not available to players who are enslaved.", 3, 70);
+		return;	
+	endif
+	if (!who.title_race)
+		SendSysMessage(who, "You have paged about being physically stuck.", 3, 70);
+		SendSysMessage(who, "However you do not yet have a race, and may not use this function.", 3, 70);
+		return;	
+	endif
+	if (who.multi && !who.dead)
+		SendSysMessage(who, "You have paged about being physically stuck.", 3, 70);
+		SendSysMessage(who, "However you are in a house or boat and are alive.", 3, 70);
+		SendSysMessage(who, "To prevent people from exploiting this service you must be dead before transport.", 3, 70);
+		SendSysMessage(who, "Use .suicide and page again.", 3, 70);
+		return;
+	endif
+
+	SendSysMessage(who, "You have paged about being physically stuck.", 3, 70);
+	if (GetObjProperty(who, "newbie")==1)
+		SendSysMessage(who, "If you do not move for 5 minutes you will be automatically transported to the Haven starting area.", 3, 70);
+	else
+		SendSysMessage(who, "If you do not move for 5 minutes you will be automatically transported to the Britain starting area.", 3, 70);
+	endif
+	var i:=30;
+	var px:=who.x;
+	var py:=who.y;
+	while (i>0)
+		if (CInt(i%6)==0)
+			SendSysMessage(who, CStr(i/6) + " minute(s) remaining until transport", 3, 72);
+		endif
+		sleep(10);
+		if (who.x!=px || who.y!=py)
+			SendSysMessage(who, "You moved... transport cancelled.", 3, 70);
+			return;
+		endif
+		i:=i-1;
+	endwhile
+	
+	if (GetObjProperty(who, "newbie")==1)
+		MoveCharacterToLocation(who, 5149, 59, 25, MOVECHAR_FORCELOCATION); //newbie starting area
+		SendSysMessage(who, "You have been transported to the Haven starting point!", 3, 70);
+	else
+		MoveCharacterToLocation( who, 1475, 1645, 20, MOVECHAR_FORCELOCATION); //brit starting area
+		SendSysMessage(who, "You have been transported to the Britain starting point!", 3, 70);
+	endif
+endfunction
+
+function PlayerInJail(player)
+	var flags := LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN+LISTEX_FLAG_GHOST;
+	foreach mob in ListMobilesNearLocationEx(JAIL_MID_X, JAIL_MID_Y, JAIL_MID_Z, JAIL_RADIUS, flags)
+		if (mob==player)
+			return 1;
+		endif
+	endforeach
+	return 0;
+endfunction
+
+function HasSlaveTimeElapsed(who)
+	//returns true if time elapsed
+	var slavetime := CInt(GetObjProperty(who, "#cantLeaveSlaversBefore"));
+	if (!slavetime)
+		return 1;
+	endif
+	if (ReadGameClock()>slavetime) //that is current time is greater than reserved time
+		return 1;
+	endif
+	return 0;
+endfunction
+
+function DisplayAOSClientNotes(who)
+	SendSysMessage(who, "Note from Admin on AOS Clients:", 3, 70);
+	SendSysMessage(who, "Please disregard max stat cap, luck, followers, and resistances on status gump of AOS clients.", 3, 70);
+	SendSysMessage(who, "ZHA has no max stat cap, no follower number restriction, and does not use luck.", 3, 70);
+endfunction
+

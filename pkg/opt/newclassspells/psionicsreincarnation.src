@@ -1,0 +1,42 @@
+/* Psionics Spell - Reincarnation                        **
+** When caster dies, after x seconds will be resurected. ** 
+** Seravy - seravy@gmail.com                             */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_REINCARNATION;
+
+program cast_reincarnation(parms)
+  var circle := GetCircle( SPELL_ID );
+  var caster;
+  var cast_loc;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_loc := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+  endif
+
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_POWERPLAYER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_MONK)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_PSIONICS);
+  var duration := calcLongDuration(skill, level);
+  SendSysMessage(caster, "You have a feeling that the enchantment will last around "+CInt(duration/60)+" Minutes");
+
+  PlaySoundEffect(caster, SFX_SPELL_REINCARNATION);
+  PlayObjectCenteredEffect(caster, FX_SPELL_REINCARNATION, SPEED_SPELL_REINCARNATION, LOOP_SPELL_REINCARNATION);
+  SetObjProperty(caster, "PSIONIC_Reincarnation", CInt(ReadGameClock()+duration));
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

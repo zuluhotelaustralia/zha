@@ -1,0 +1,42 @@
+use uo;
+use os;
+
+include "include/attributes";
+include "include/skillpoints";
+include "../../pkg/opt/karmafame/karmafame"; //for fame exp system see FameExperiencePointModifier function
+
+
+program shilcombat()
+
+	print( "Using ShilcombatAdvancement..." );
+	return 1;
+
+endprogram
+
+
+exported function ShilCombatAdvancement( attacker, weapon, defender )
+
+	if( weapon )
+		var skillid := FindSkillidByIdentifier(weapon.attribute);
+		AwardSkillPoints( attacker,skillid, FameExperiencePointModifier(attacker, skillid, 20));
+	else
+		AwardSkillPoints( attacker, SKILLID_WRESTLING, FameExperiencePointModifier(attacker, SKILLID_WRESTLING, 20));
+	endif
+
+	AwardSkillPoints( attacker, SKILLID_TACTICS, FameExperiencePointModifier(attacker, SKILLID_TACTICS, 20) );
+
+endfunction
+
+function FindSkillidByIdentifier(skid)
+  var retval;
+  case(skid)
+    "Wrestling":	retval := SKILLID_WRESTLING;
+    "Fencing":		retval := SKILLID_FENCING;
+    "Swords":		retval := SKILLID_SWORDSMANSHIP;
+    "Swordsmanship":	retval := SKILLID_SWORDSMANSHIP;
+    "Mace":		retval := SKILLID_MACEFIGHTING;
+    "Macefighting":	retval := SKILLID_MACEFIGHTING;
+    "Archery":		retval := SKILLID_ARCHERY;
+  endcase 
+  return retval;
+endfunction

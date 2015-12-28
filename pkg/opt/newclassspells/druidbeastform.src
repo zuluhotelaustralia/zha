@@ -1,0 +1,119 @@
+/* Druid Spell - Beastform               **
+** Transmute target into selected animal **
+** Seravy - seravy@gmail.com             */
+
+use uo;
+use os;
+use cfgfile;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_BEASTFORM;
+
+program cast_beastform( parms )
+
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+  endif
+
+  var cfg := ReadConfigFile("druidbeastform");
+  var i	 := 1;
+  var tmenu := CreateMenu( "What form would you like?" );
+  var texit := 0;
+  var natureslore := ModifyWithMagicEfficiency( caster, GetEffectiveSkill( caster, SKILLID_NATURELORE) );
+
+  var menuSelections := {};
+  while( !texit )
+    var elem := cfg[i];
+    if (!elem)
+      texit := 1;
+    elseif ( natureslore >= elem.Difficulty )
+      AddMenuItem( tmenu, elem.Menu, elem.Name );
+      menuSelections.append(elem);
+    endif
+    i := i + 1;
+  endwhile
+
+  var sel := SelectMenuItem2( caster, tmenu );
+
+  if (!sel)
+    EraseObjProperty( caster, "#Casting" );
+    return;
+  endif
+ 
+  var elem := menuSelections[sel.index];
+  if (!elem)
+    EraseObjProperty( caster, "#Casting" );
+    return;
+  endif
+
+  if (!elem.Mod)
+    elem.Mod := 0;
+  endif
+
+  SendSysMessage( caster, "Select the creature to Change.");
+  if (elem.Mod < 0) // Negative mod so is harmful.
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+
+    var immunity := IsProtected( caster, cast_on, circle );
+    if( immunity == IMMUNED )
+      EraseObjProperty( caster, "#Casting" );
+      return;
+    endif
+  else // Positve mod, helpful
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  if(!CanMod(cast_on, "poly"))
+    EraseObjProperty( caster, "#Casting" );
+    SendSysMessage( caster, "They are already polymorphed into something." );
+    return;
+  endif
+
+  if (cast_on.dead)
+    EraseObjProperty( caster, "#Casting" );
+    SendSysMessage( caster, "They are dead...");
+    return;
+  endif
+
+  PlaySoundEffect(cast_on, SFX_SPELL_BEASTFORM);
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_BEASTFORM, SPEED_SPELL_BEASTFORM, LOOP_SPELL_BEASTFORM);
+
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_RANGER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_DRUID)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_NATURELORE);
+  var duration := calcLongDuration(skill, level);
+
+  PolymorphMobile( cast_on, elem.graphic, 0, duration, elem.Mod );
+  EraseObjProperty( caster, "#Casting");
+endprogram
+

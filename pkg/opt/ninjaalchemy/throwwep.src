@@ -1,0 +1,60 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/dotempmods";
+include "include/classes";
+include "include/hitscriptinc";
+include "include/random";
+
+program throwit(attacker, used)
+
+	If(!IsNinja(attacker))
+		SendSysMessage(attacker, "You see the weapon has a use, but you can't comprehend it.");
+		return;
+	endif
+	var lastthrow := GetObjProperty(attacker, "lastthrow");
+	If(!lastthrow)
+	ElseIf(ReadGameClock() - lastthrow < 10)
+		SendSysMessage(attacker, "You must gather your strength before throwing another item.");
+		return;
+	endif
+
+
+	SetObjProperty(attacker, "lastthrow", ReadGameClock() );
+
+	SendSysMessage(attacker, "Select a Target.");
+	var defender := Target(attacker);
+
+	if (!defender)
+		SendSysMessage(attacker, "canceled.");
+		return;
+	endif
+
+	
+
+	PlayMovingEffect(attacker, defender, used.graphic, 6, 1);
+
+	sleepms(500);
+
+	var power := GetObjProperty(used, "SkillPoisoned");
+	if(power)
+		var plvl := CInt( power / 3 );
+		SetPoison( defender, plvl, "You have been poisoned by " + attacker.name + "." );
+	endif
+
+	var dambonus := IsNinja(attacker)+1;
+	var modbonus := used.dmg_mod;
+	if(!modbonus)
+	modbonus := 0;
+	endif
+	var damdealt := CInt( RandomDiceRoll( CStr(used.objtype.damage) ) ) + CInt(modbonus);
+
+	ApplyDamage( defender, damdealt*(dambonus*0.05) );
+
+	Broadcast("Damage done = "+ damdealt);
+
+	Destroyitem( used );
+
+endprogram

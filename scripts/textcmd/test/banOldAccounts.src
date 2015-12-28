@@ -1,0 +1,73 @@
+//Barnabus 5/3/3
+use uo;
+use os;
+use basic;
+
+include "include/yesno";
+//include "include/time";
+include "deleteUtil";
+include "include/cmdlevel_check";
+//include "include/datestring";
+
+const MONTHS_TIL_ACCOUNT_DELETION := 3; 
+//this determines how many months an account can not be logged into //before it is deletd.
+
+program textcmd_oldaccountdeleter( who )
+	if (!checkStaff(who, "account", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+	if (!YesNo(who, "Ban Old Accounts?"))
+		return;
+	endif	
+
+	var now := NowString();
+  	SendSysMessage(who, "Searching accounts for not logged in since  " + takeMonthsFromDateString(now, MONTHS_TIL_ACCOUNT_DELETION));
+  	BanOldAccounts(who, MONTHS_TIL_ACCOUNT_DELETION);
+  	
+endprogram
+
+
+
+function BanOldAccounts(who, monthsTilOld)
+	//bans accounts not logged in to since
+	//now date - time til old
+        var accobj;
+	//var oldAccounts := array;
+	var lastAccessed;
+	var accName;
+	
+	var i := 0;
+	
+	//calculate now date	
+	var now := NowString();
+
+	var cutoffDate:= takeMonthsFromDateString(now, monthsTilOld); 
+	//accounts that have not been accessed since this date will be banned
+
+	var formatDate;
+	var scrollstring;
+
+	SendSysMessage(who, "The following accounts have been BANNED for inactivity as they have not logged in since " + cutoffDate + " (yyyy-mm-dd) :");
+	
+
+        foreach accName in ListAccounts()
+       	accobj := FindAccount(accName);
+
+        	lastAccessed := accobj.getprop("Login");
+
+        	if (compareDateTimeStrings(cutoffDate, lastAccessed)==1)
+				accobj.ban();
+				formatDate:=SplitWords(lastAccessed);				
+				SendSysMessage(who, accName + ", last logged in : " + formatDate[1]);
+					
+				i := i+1;
+			endif
+
+        endforeach
+        
+  	
+	SendSysMessage(who, "Total number of old accounts: " + i);
+
+endfunction
+
+

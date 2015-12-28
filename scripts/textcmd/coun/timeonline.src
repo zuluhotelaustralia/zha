@@ -1,0 +1,20 @@
+//Barnabus 2/2/2003
+//Lets staff know how long a targetted player has been online in days and hours.
+
+use uo;
+
+program textcmd_timeonline( who )
+	var player := Target(who);
+	SendSysMessage( who, player.name + " has been online a total of " + TimeToDaysHoursMinsString(GetObjProperty(player, "onlinetimer")));
+    
+endprogram
+
+
+function TimeToDaysHoursMinsString (longTime);
+	var days := longTime/86400;
+	longtime := longtime - (days * 86400);
+	var hours := longTime/3600;
+	longtime := longTime - ((hours) * 3600);
+	
+	return CStr(days) + " days, " + CStr(hours) + " hours.";
+endfunction	

@@ -1,0 +1,20 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  ".refreshme" - Restore Hits, Mana, Stamina
+//
+//  Thanks to The Writer, from our Dev Board, for this one.
+//
+/////////////////////////////////////////////////////////////////////////////
+
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_refreshme( who )
+	if (!checkStaff(who, "refreshme", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+    SetHp(who, GetMaxHp(who));
+    SetMana(who, GetMaxMana(who));
+    SetStamina(who, GetMaxStamina(who));
+endprogram

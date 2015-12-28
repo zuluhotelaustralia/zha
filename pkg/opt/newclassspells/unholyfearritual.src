@@ -1,0 +1,103 @@
+/* Unholy Spell - Fear Ritual       **
+** Pentigram that causes paralize.  **
+** Seravy - seravy@gmail.com        */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_FEARRITUAL;
+
+program cast_fearritual( parms )
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetArea( caster, circle);
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+
+  var paganCircleTemplate := {
+  {0x1D0D, 2, 0},
+  {0x1D03, 3, 2},
+  {0x1D04, 2, 2},
+  {0x1D05, 1, 2},
+  {0x1D06, 0, 2},
+  {0x1D07, -1, 2},
+  {0x1D09, -1, 0},
+  {0x1D02, 3, 1},
+  {0x1D0C, 2, -1},
+  {0x1D08, -1, 1},
+  {0x1D0E, 2, 1},
+  {0x1D0F, 1, 1},
+  {0x1D10, 0, 1},
+  {0x1D11, 0, 0},
+  {0x1D12, 1, 0},
+  {0x1D0B, 1, -1},
+  {0x1CF3, 0, 3},
+  {0x1D0A, 0, -1},
+  {0x1CF2, 1, 3},
+  {0x1D01, 3, 0},
+  {0x1CF4, -1, 3},
+  {0x1CF5, -2, 3},
+  {0x1CF6, -2, 2},
+  {0x1CF7, -2, 1},
+  {0x1CF8, -2, 0},
+  {0x1CFA, -1, -1},
+  {0x1D00, 3, -1},
+  {0x1CFB, -1, -2},
+  {0x1CFC, 0, -2},
+  {0x1CFD, 1, -2},
+  {0x1CFE, 2, -2},
+  {0x1CFF, 3, -2},
+  {0x1CF9, -2, -1},
+  {0x1CF1, 2, 3}
+};
+
+  var tempItem;
+  var is_necromancer := GetObjProperty( caster, CLASSEID_NECROMANCER );
+  var PaganCircleMade := {};
+  foreach template in paganCircleTemplate
+    tempItem := CreateItemAtLocation( cast_on.x+template[2], cast_on.y+template[3], cast_on.z, "parafield1", 1 );
+    if (tempItem)
+      PaganCircleMade.append(tempItem);
+      tempItem.graphic := template[1];
+      tempItem.color := 1400;
+      tempItem.movable := 0;
+      tempItem.name := "Pentagram";
+      tempItem.walkonscript := "walkon_parafield";
+      SetObjProperty(tempItem, "Creator", caster.serial);
+      SetObjProperty(tempItem, "f", 1);
+      if( is_necromancer )
+        SetObjProperty(tempItem, "ByTrueMage", 1);
+      endif
+    endif
+  endforeach
+
+  EraseObjProperty( caster, "#Casting");
+
+  var duration := ModifyWithMagicEfficiency( caster, 20 + ( CInt(GetEffectiveSkill( caster, SKILLID_NECROMANCY ) ) / 5 ) );
+
+  sleep(duration);
+
+foreach item in PaganCircleMade
+  destroyItem(item);
+endforeach
+
+
+endprogram
+

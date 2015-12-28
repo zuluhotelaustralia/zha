@@ -1,0 +1,84 @@
+//Barnabus 6/3/3
+use uo;
+use os;
+use basic;
+
+include "include/yesno";
+include "include/time";
+include "deleteUtil";
+include "include/cmdlevel_check";
+
+program textcmd_removeBannedAccounts (who)
+	if (!checkStaff(who, "account", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+	
+	
+  	set_critical(1);
+
+  	if (!YesNo(who, "Delete banned accounts?"))
+		return;
+	endif
+
+	UpdateBannedAccountNames();
+
+  	var bannedaccs := GetGlobalProperty("bannedAccountNames");
+  	var acc; //acc name
+	var accobj; //account object
+
+  	//var scrollstring;
+  	
+  	//Broadcast ("The following accounts are banned:");
+  	//foreach acc in bannedaccs
+	//	Broadcast("" + acc);
+  	//endforeach
+  	Broadcast("Total number of banned accounts: " + bannedaccs.size());
+  	
+
+  	
+  	var mynull; //null var to remove boats
+  	
+  	//foreach acc in bannedaccs
+  	//	Broadcast("Deleting account: " + acc);
+	//	accobj := FindAccount(acc);
+	//	
+  	//	if (accobj)		
+			//
+  			//DeleteBoats(accobj);
+  		
+  		//	Broadcast("Deleting houses");
+  		//	DeleteHouses(accobj); 
+  		
+  		//	Broadcast("Deleting characters");
+  		//	DeleteAccountChars(accobj); //deletes the characters of an account
+ 		//else
+	 	//	Broadcast("Error, could not find account: " + acc);
+		//endif
+  	//endforeach
+	Broadcast("Deleting boats");
+	DeleteBoatsOfAccounts(bannedaccs);
+	Broadcast("Deleting houses");
+	DeleteHousesOfAccounts(bannedaccs);
+  	
+	Broadcast("Deleting characters");
+	foreach acc in bannedaccs
+		accobj := FindAccount(acc);
+		
+ 		if (accobj)		
+  			DeleteAccountChars(accobj); //deletes the characters of an account
+ 		else
+	 		Broadcast("Error, could not find account: " + acc);
+		endif
+  	endforeach
+
+
+	DeleteBoats(mynull); //clean up boats which have no account
+  	
+	Broadcast("ALL BANNED ACCOUNTS HAVE BEEN CLEANED!");
+  	set_critical(0);
+endprogram
+
+
+
+

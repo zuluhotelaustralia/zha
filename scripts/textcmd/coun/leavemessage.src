@@ -1,0 +1,54 @@
+/* Leave Message Script                      **
+** Leaves a message to the person via a gump **
+** Seravy - seravy@gmail.com                 */
+
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+include "include/gumps";
+
+
+program textcmd_leavemessage(who, text)
+
+  if (!checkStaff(who, "account", CMDLEVEL_COUNSELOR))
+    return 0;
+  endif
+
+  var person := Target( who );
+
+  var layoutyn := array(
+                        "page 0",
+			"nodispose",
+                        "gumppic 0 0 1140",
+                        "text 55 45 59 0",
+                        "text 55 65 54 1",
+                        "text 55 85 54 2",
+                        "text 55 105 54 3",
+                        "text 55 125 54 4",
+                        "text 55 145 54 5",
+                        "text 55 165 54 6"
+	               );
+
+
+  var theArray := array;
+  var theString := text;
+  var i;
+
+  theArray[1] := "Message left by "+ who.name;
+
+  for (i:=2; i<=7; i:=i+1)
+    theArray[i] := " ";
+  endfor
+  
+  i := 1;
+  while ((len(theString) > 0) && (i <= 7))
+    i := i + 1;
+    theArray[i] := StripSubstring(theString, 35);
+  endwhile
+
+  SendDialogGump( person, layoutyn, theArray );
+
+return 0;
+
+endprogram

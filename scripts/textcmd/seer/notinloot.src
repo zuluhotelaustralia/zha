@@ -1,0 +1,14 @@
+use uo;
+include "include/cmdlevel_check";
+
+program NotInLoot( who )
+	if (!checkStaff(who, "notinloot", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+      var item := Target( who );
+	SetObjProperty( item, "noloot", 1 );
+
+endprogram
+
+ 

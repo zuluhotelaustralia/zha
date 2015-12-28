@@ -1,0 +1,8 @@
+use uo;
+use os;
+
+include "possessedgenerator";
+
+program possessedgeneratordestroy(possessedgenerator)
+	CleanupPossession(possessedgenerator);
+endprogram

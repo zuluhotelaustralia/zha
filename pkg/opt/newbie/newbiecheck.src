@@ -1,0 +1,16 @@
+use uo;
+use os;
+include "include/newbieprotection";
+
+program checknewbie(who)
+
+	Detach();
+	if (DetermineNewbie(who) && !who.cmdlevel)
+		sleep(60);
+		SendSysMessage(who, "You are no longer newbie!");
+		sleep(3);
+		MoveCharacterToLocation(who,1475,1645,20); //brit starting area	
+	endif
+	return;
+	
+endprogram

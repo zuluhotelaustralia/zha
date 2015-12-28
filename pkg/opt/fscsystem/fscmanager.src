@@ -1,0 +1,56 @@
+include "fscsystem";
+
+const SLEEP_TIME := 600;
+
+program FSCManager()
+
+	while( 1 )
+
+		// Log System Vars
+		LogSystemVars();
+
+		sleep( SLEEP_TIME );
+
+	endwhile
+
+endprogram
+
+// Log System important variables
+function LogSystemVars()
+
+	var core := polcore();
+
+	if( !core )
+		syslog( "ERROR: No core found???!!!!" );
+		return;
+	endif
+
+	var players := EnumerateOnlineCharacters();
+
+	if( !players )
+		syslog( "ERROR in FSC MANAGER!!!!" );
+		return;
+	endif
+
+	var totalplayers := len(players);
+
+	var staff := 0;
+
+	foreach player in EnumerateOnlineCharacters()
+		if( player.cmdlevel > 0 )
+			staff := staff + 1;
+		endif
+		sleepms(2);
+	endforeach
+
+	var fsc_staff := FSCStaff();
+
+	// Log Info in system.txt log file
+	SystemFSC( "", 0 );
+	SystemFSC( "Players Online: " + totalplayers, 0 );
+	SystemFSC( "Staff Online: " + staff, 0 );
+	SystemFSC( "Staff FSC Online: " + fsc_staff, 0 );
+	SystemFSC( "Sysload: " + core.sysload, 0 );
+	SystemFSC( "Core Severity: " + core.sysload_severity, 1 );
+
+endfunction

@@ -1,0 +1,68 @@
+use uo;
+use cfgfile;
+
+include "include/namingbyenchant";
+include "include/cmdlevel_check";
+
+program textcmd_setonhit( who, text )
+	if (!checkStaff(who, "setonhit", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	var params;
+	var script;
+	var cfg := ReadConfigFile( ":combat:onhitscriptdesc" );
+	if (text)
+        	params := SplitWords( text );
+        	script := CInt( params[1] );
+	endif
+
+	var item := Target( who, TGTOPT_NOCHECK_LOS + TGTOPT_NEUTRAL );
+	if( script <= cfg["data"].NbSpell )
+		var spell := cfg[script].script;
+		SetObjProperty( item, "HitWithSpell", spell );
+
+		SendSysMessage( who, "What is the % chance of the effect to be launched? Integer only" );
+        	var chance := CInt(RequestInput( who, who.backpack, "Enter the chance value."));
+		if( !chance )
+			SendSysMessage( who, "Aborted" );
+			return;
+		endif
+		SetObjProperty( item, "ChanceOfEffect", chance );
+
+		SendSysMessage( who, "Use the effect as which circle? Integer only" );
+        	var circle := CInt(RequestInput( who, who.backpack, "Enter the circle value."));
+		if( !circle )
+			SendSysMessage( who, "Aborted" );
+			return;
+		endif
+		SetObjProperty( item, "EffectCircle", circle );
+	endif
+
+	SetObjProperty( item, "OnHitScript", cfg[script].OnHitscript );
+	SetObjProperty( item, "OnHitscriptNumber", script );
+
+	var type := cfg[script].Type;
+	if( type )
+		SetObjProperty( item, "ProtectedType", type );
+	endif
+
+	var cprop := cfg[script].CProp;
+	if( cprop )
+		var cpropval := cfg[script].CPropVal;
+		if( !cpropval )
+			SendSysMessage( who, "What is the value of " + cprop + "? Integer only." );
+        		cpropval := CInt(RequestInput( who, who.backpack, "Enter the CProp value."));
+			if( !cpropval )
+				cpropval := 1;
+			endif
+		endif
+		SetObjProperty( item, cprop, cpropval );
+	endif
+
+	var conf := ReadConfigFile("::itemdesc");
+	var newname := conf[item.objtype].desc;
+	SetName( item, newname );
+	SetNameByEnchant( item );
+
+endprogram

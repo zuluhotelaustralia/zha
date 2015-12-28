@@ -1,0 +1,24 @@
+use os;
+use uo;
+
+program textcmd_getstanding( who )
+
+	var where := TargetCoordinates(who);
+	if( !where )
+		return 0;
+	endif
+
+	var x := where.x;
+	var y := where.y;
+	var z := GetWorldHeight( x, y );
+	var standing1 := GetStandingHeight( x, y, z );
+	var standing2 := GetStandingHeight( x, y, 0 );
+
+	SendSysMessage( who, "Standing at (" + x + ", " + y + ", " + z + ") is " + standing1 );
+	SendSysMessage( who, "Standing at (" + x + ", " + y + ", " + 0 + ") is " + standing2 );
+
+	var info := GetMapInfo( x, y );
+	SendSysMessage( who, "Map info at (" + x + ", " + y  + ") is " + info );
+
+
+endprogram

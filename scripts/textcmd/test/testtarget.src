@@ -1,0 +1,19 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_testtarget( who )
+	if (!checkStaff(who, "testtarget", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    SendSysMessage( who, "Target something." );
+
+    var what := TargetCoordinates( who );
+    if (what)
+        if (what.item)
+            SendSysMessage( who, "You targetted an item: " + what.item.desc );
+        elseif (what.mobile)
+            SendSysMessage( who, "You targetted a mobile: " + what.mobile.name );
+        endif
+    endif
+endprogram

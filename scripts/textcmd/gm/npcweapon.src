@@ -1,0 +1,15 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_account( who, text )
+	if (!checkStaff(who, "npcweapon", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	SendSysMessage(who, , "Select mobile to find weapon name");
+	var targ := Target(who);
+	if (!targ.isA(POLCLASS_MOBILE))
+		return;
+	endif
+   	SendSysMessage(who, targ.name + " is weilding a " + targ.weapon.desc);
+endprogram

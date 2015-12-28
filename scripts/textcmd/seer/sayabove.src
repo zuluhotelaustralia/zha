@@ -1,0 +1,16 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_sayabove( who, text )
+	if (!checkStaff(who, "sayabove", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "Say above what or whom?" );
+
+    var what := Target( who );
+    if (what)
+        PrintTextAbove( what, text );
+    endif
+endprogram

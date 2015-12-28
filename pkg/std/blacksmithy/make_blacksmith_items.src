@@ -1,0 +1,407 @@
+/////////////////
+// make_blacksmith_items.src
+//
+// Use a smithy hammer to either repair arms & armor or
+// to work with metal to create new items. You need to be
+// skillful to work with the rarer metals.
+//
+// TODO: remove hardcoding of skill pointvalue
+//
+// Author: DreamWeaver:
+//	      original
+//	 Racalac:
+//	      colored items
+// Updates: Dream Weaver 6/3/99 handled item quality an HP to new specs
+//	  Ignatius     99/06/10 added name of maker to exceptional items.
+//
+// More Mods: DarkFyre 11/16/99 Added support for colored ores to be better/worse than normal
+//		     also added name of maker to normal items so people can laugh at the
+//		     really bad smiths ;)
+////////////////
+
+use uo;
+use cfgfile;
+use os;
+use math;
+use basicio;
+
+include "util/repair";
+include "include/attributes";
+include "include/yesno";
+include "include/client";
+include "include/objtype";
+include "include/classes";
+include "include/random";
+include "include/itemutil";
+include "include/autoloop";
+
+const DIVIDER		:= 3;
+const APPEAR_AT		:= -10;
+const POINTS_MULTIPLIER	:= 8;
+const GOLD_COLOR	:= 0x0033;
+const FAME_BONUS	:= 200;
+
+var itemcfg   := ReadConfigFile(":combat:itemdesc");
+var smith_cfg := ReadConfigFile( "blacksmithy" );
+
+// called when a player double-clicks a hammer or other blacksmith tool
+program use_hammer( character, hammer )
+
+	if( !ReserveItem( hammer ) )
+		return;
+	endif
+
+	SendSysMessage( character, "What would you like to use that on?" );
+	var use_on := Target( character, TGTOPT_CHECK_LOS );
+
+	if( !use_on )
+		return;
+	endif
+
+	if( !Accessible( character, use_on ) )
+		SendSysMessage( character, "You can't reach that." );
+		return;
+	endif
+
+	if( !ReserveItem(use_on) )
+		return;
+	endif
+
+	if( !IsInContainer( character.backpack, use_on ) )
+		SendSysMessage( character, "That item has to be in your backpack." );
+		return;
+	endif
+
+	if( itemcfg[use_on.objtype] )
+		var near := ListItemsNearLocation( character.x, character.y, character.z, 1 );
+ 		foreach thing in near
+	  		if ((thing.objtype == UOBJ_ANVIL1) || (thing.objtype == UOBJ_ANVIL2))
+	   			repair_item( character, use_on, SKILLID_BLACKSMITHY );
+	   			return;
+	  		endif
+ 		endforeach
+		SendSysMessage( character, "You must be near an anvil to repair items!" );
+		return;
+
+	elseif( !IsIngot(use_on) )
+		SendSysMessage( character, "You can only use that on ingots!" );
+		return;
+	endif
+
+	//   **Anvil finding snippet.  Inserted by Ingot Head
+ 	var near_items := ListItemsNearLocation( character.x, character.y, character.z, 1 );
+ 	foreach item in near_items
+	  	if ((item.objtype == UOBJ_ANVIL1) || (item.objtype == UOBJ_ANVIL2))
+	   		MakeBlacksmithItems( character, use_on );
+	   		return;
+	  	endif
+ 	endforeach
+
+	SendSysMessage( character, "You must be near an anvil to smith items!" );
+
+endprogram
+
+
+
+function MakeBlacksmithItems( character, ingots )
+
+	if( !smith_cfg )
+		SendSysMessage(character, "Could not open blacksmith.cfg");
+		return;
+	endif
+
+	var orediff := smith_cfg[ingots.objtype].Difficulty;
+	var orename := smith_cfg[ingots.objtype].Name;
+	if( GetEffectiveSkill( character, SKILLID_BLACKSMITHY ) < orediff )
+		SendSysMessage( character, "You aren't skilled enough to craft anything from " + orename + " ingots yet." );
+		return;
+	endif
+
+	if( !ReserveItem( ingots ) )
+		return;
+	endif
+
+	var skill;	  //skill needed to create the item
+	var element;	// entry in smith_config
+	var material;       //amount of material needed to create the item
+	var points;
+	var itemname;
+
+	var what := MakeAndProcessMenu( character, ingots, orediff );
+	if ( !what )
+	  	return;
+	endif
+
+	what := what.objtype;
+	element := FindConfigElem( smith_cfg, what );
+
+	if( element )
+		material := element.Material;
+	else
+		return;
+	endif
+
+	AutoLoop_init( character );
+	while( AutoLoop_more() && ingots.amount >= material && not character.dead)
+
+		skill := element.Skill;
+		skill := skill + CInt( orediff / DIVIDER );
+
+		if( skill < 1 )
+			skill := 1;
+		elseif( skill > 140 )
+			skill := 140;
+		endif
+
+		points	:= CInt( (skill + material) * POINTS_MULTIPLIER );
+
+		itemname := element.Name;
+
+		PlaySoundEffect(character, SFX_ANVIL);
+		sleep(2);
+		PlaySoundEffect(character, SFX_ANVIL);
+		sleep(2);
+		PlaySoundEffect(character, SFX_ANVIL);
+		sleep(2);
+
+		if( CheckSkill( character, SKILLID_BLACKSMITHY, skill, points ) )
+
+			var theitem := CreateItemInBackpack( character, what );
+			if( theitem )
+
+				var quality 	:= smith_cfg[ingots.objtype].quality;
+				var cprops	:= GetConfigStringArray( smith_cfg[ingots.objtype], "CProp" );
+				var excep_ch	:= 10;
+				var excep_diff := skill;
+				var item_cfg	:= ReadConfigFile( ":*:itemdesc" );
+				var sell_price := CInt( item_cfg[what].VendorBuysFor );
+
+				var tempcprops:=cprops;
+				if( theitem.isA(POLCLASS_WEAPON) )
+					cprops:={};
+					for i:= 1 to len(tempcprops)
+						if (tempcprops[i]["OreES"])
+							cprops.append(tempcprops[i]);
+						endif
+					endfor
+				endif
+
+				theitem.quality := quality;
+				itemname := orename + " " + itemname;
+
+				if( GetObjProperty( character, CLASSEID_CRAFTER ) )
+					excep_ch	:= CInt( excep_ch * ClasseBonus( character, CLASSEID_CRAFTER ) );
+					excep_diff	:= excep_diff + 20;
+				else
+					excep_diff	:= excep_diff + 40;
+				endif
+
+				if( excep_diff < 90 )
+					excep_diff := 90;
+				endif
+
+				if ( (Random(100) < excep_ch) && CheckSkill( character, SKILLID_BLACKSMITHY, excep_diff, 0 ) )
+
+					var armslore := GetEffectiveSkill( character, SKILLID_ARMSLORE );
+					var multiplier := 5 + CInt( armslore / 10 );
+
+					if( GetObjProperty( character, CLASSEID_CRAFTER ) )
+						multiplier := CInt( multiplier * ClasseBonus( character, CLASSEID_CRAFTER ) );
+					endif
+
+					multiplier	:= 100 + multiplier;
+					var newquality := CInt(quality * multiplier);
+					newquality := CDbl(newquality);
+					newquality := newquality / 100;
+					theitem.quality := newquality;
+					itemname := "Exceptional " + itemname;
+
+					if (GetObjProperty(character, "BuilderMark") == 1)
+						itemname := itemname + " [Crafted by " + character.name + "]";
+					elseif( YesNo( character, "Add Builder Mark?" ) )
+						itemname := itemname + " [Crafted by " + character.name + "]";
+					endif
+
+					if( sell_price )
+						theitem.buyprice := CInt( sell_price * 2 );
+						sell_price := CInt( sell_price * 2 );
+					endif
+
+					SendSysMessage( character, "You make an exceptional item and put it in your pack." );
+					SetObjProperty( theitem, "IsExceptional", 1 );
+
+					if( excep_diff >= 130 )
+						SendSysMessage( character, "This masterpiece will make you famous around the world." );
+						AwardFame( character, FAME_BONUS );
+					elseif( GetObjProperty( character, CLASSEID_CRAFTER ) && excep_diff >= 110 )
+						SendSysMessage( character, "This masterpiece will make you famous around the world." );
+						AwardFame( character, FAME_BONUS );
+					endif
+				else
+
+					//Made a normal item
+					SendSysMessage( character, "You create the item and place it in your pack." );
+				endif
+
+				if( len( cprops ) )
+					foreach cprop in cprops
+						var splited := SplitWords( cprop );
+						var prop_name := splited[1];
+						var prop_mod  := CInt(splited[2]);
+						if( prop_name && prop_mod )
+							var presently := GetObjProperty( theitem, prop_name );
+							if( !presently )
+								presently := 0;
+							endif
+
+							if( presently && Abs(prop_mod) > Abs(presently) )
+								prop_mod := 0 - presently;
+							endif
+
+							var resulting := presently + prop_mod;
+							if( resulting > 0 && prop_name == "DefaultDex" )
+								resulting := 0;
+							endif
+
+							if( resulting  )
+								SetObjProperty( theitem, prop_name, resulting );
+							elseif( presently )
+								EraseObjProperty( theitem, prop_name );
+							endif
+						endif
+					endforeach
+				endif
+
+				if( ingots.objtype == UOBJ_GOLD_INGOT )
+					theitem.color := GOLD_COLOR;
+				else
+					theitem.color := ingots.color;
+				endif
+				/*
+				if( sell_price )
+					theitem.buyprice := Cint( Pow( sell_price , theitem.quality ) );
+				endif
+				*/
+				theitem.hp := theitem.maxhp;
+				SetObjProperty( theitem, "ForgedWith", ingots.objtype );
+				SetObjProperty( theitem, "BaseName", itemname );
+				SetName( theitem, itemname );
+			endif
+			SubtractAmount( ingots, material );
+
+		else
+			var bs 	:= GetEffectiveSkill( character, SKILLID_BLACKSMITHY );
+			var destroy	:= 75 - CInt( bs / 2 );
+			if( GetObjProperty( character, CLASSEID_CRAFTER ) )
+				destroy := CInt( destroy / ClasseBonus( character, CLASSEID_CRAFTER ) );
+			endif
+
+			if( destroy > 50 )
+				destroy	:= 50;
+			endif
+
+			destroy	:= CInt( material * destroy / 100 );
+			if( destroy < 1 )
+				destroy	:= 1;
+			endif
+
+			SubtractAmount( ingots, destroy );
+			SendSysMessage( character, "You destroyed " + destroy + " " + orename + " ingots." );
+		endif
+	endwhile
+	AutoLoop_finish();
+
+endfunction
+
+
+function MakeAndProcessMenu( who, ingots, orediff )
+
+	var elemkeys := GetConfigStringKeys( smith_cfg );
+	var can_make;
+	var menu;
+	var choice;
+
+	menu := CreateMenu( "What would you like to make?" );
+	AddMenuItem( menu, 0x1415, "Armors" );
+	AddMenuItem( menu, 0x1b75, "Shields" );
+	AddMenuItem( menu, 0x0f4b, "Weapons" );
+	AddMenuItem( menu, 0x151a, "Decorations" );
+
+	choice := SelectMenuItem2( who, menu ).index;
+	if( !choice )
+		return 0;
+	endif
+
+
+	case( choice )
+
+		1:	choice := choice * 10;
+			menu := CreateMenu( "What kind of armor?" );
+			AddMenuItem( menu, 0x1415, "Platemail" );
+			AddMenuItem( menu, 0x13c4, "Chainmail" );
+			AddMenuItem( menu, 0x13ec, "Ringmail" );
+			AddMenuItem( menu, 0x1412, "Helmets" );
+			break;
+
+		2:	break;
+
+		3:	choice := choice * 10;
+			menu := CreateMenu( "What kind of weapon?" );
+			AddMenuItem( menu, 0x13b7, "Swords" );
+			AddMenuItem( menu, 0x1442, "Axes" );
+			AddMenuItem( menu, 0x0f5c, "Maces" );
+			AddMenuItem( menu, 0x0f4e, "Polearms" );
+			AddMenuItem( menu, 0x1402, "Other weapons" );
+			break;
+
+		4:	break;
+
+	endcase
+
+
+	if( choice >= 10 )
+		choice := choice + SelectMenuItem2( who, menu ).index;
+		if( !choice % 10 )
+			return 0;
+		endif
+	endif
+
+	menu := CreateMenu( "What would you like to make?" );
+
+	foreach key in elemkeys
+		if( smith_cfg[key].Type == choice )
+			if( CanMake( who, key, ingots, orediff ) )
+				AddMenuItem( menu, CInt(key), smith_cfg[key].Name );
+				can_make := 1;
+			endif
+		endif
+	endforeach
+
+	if( can_make )
+		return SelectMenuItem2( who, menu );
+	else
+		SendSysMessage( who, "You can't make anything of this category." );
+		return 0;
+	endif
+
+endfunction
+
+
+function CanMake( who, key, ingots, orediff )
+
+	var diff := smith_cfg[key].Skill + CInt( orediff / DIVIDER );
+	if( diff < 1 )
+		diff := 1;
+	elseif( diff > 140 )
+		diff := 140;
+	endif
+
+	if( GetEffectiveSkill( who, SKILLID_BLACKSMITHY ) >= ( diff + APPEAR_AT ) )
+		if( ingots.amount >= smith_cfg[key].Material )
+			return 1;
+		endif
+	endif
+
+	return 0;
+
+endfunction

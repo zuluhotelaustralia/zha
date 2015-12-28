@@ -1,0 +1,86 @@
+/* Holy Spell - Life Stream           **
+** Creates gate of life for duration  **
+** Seravy - seravy@gmail.com          */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/areas";
+include "../pkg/std/housing/utility";
+
+const SPELL_ID := SPELL_ID_LIFESTREAM;
+
+program cast_lifestream(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+  endif
+
+  // Check to make sure in valid place.
+  if (caster.dead)
+    SendSysMessage(caster, "You can't cast this while dead!" );
+    EraseObjProperty(caster, "#Casting");
+    return 0;
+  endif
+
+  if(caster.multi)
+    if(!IsOwner(caster, caster.multi))
+      if(!IsFriend(caster, caster.multi))
+        EraseObjProperty(caster, "#Casting");
+        SendSysMessage(caster, "You can't gate from this house.");
+        return;
+      endif
+    endif
+  endif
+
+  if(IsForbiddenAreaToGateFrom(caster))
+    SendSysMessage(caster, "You can't gate from there." );
+    EraseObjProperty(caster, "#Casting");
+    return 0;
+  endif
+
+  // Passed Checking, Make the gate
+  set_critical(1);
+  var gateOfLife := CreateItemAtLocation( caster.x, caster.y, caster.z, "moongatea", 1);
+  if (!gateOfLife)
+    SendSysMessage(caster, "The Gate cannot manafest itself here.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  gateOfLife.graphic := 8158;
+  gateOfLife.movable := 0;
+  SetObjProperty(gateOfLife, "f", 1);
+  set_critical(0);
+  PlaySoundEffect(gateOfLife, SFX_LIFESTREAM);
+
+  var i;
+  for( i := 8158; i <= 8166; i := i+1 )
+    gateOfLife.graphic := i;
+    sleepms( 150 );
+  endfor
+  gateOfLife.graphic := 8168;
+
+  EraseObjProperty( caster, "#Casting");
+  detach();
+  var clevel:=GetClasseLevel(caster);
+  var duration := (300+(clevel*20));
+  SendSysMessage(caster, "You have a feeling the gate will last around "+CInt(duration/60)+" Minutes");
+  sleep(duration);
+
+  for( i := 8166; i >= 8158; i := i-1 )
+    gateOfLife.graphic := i;
+    sleepms( 150 );
+  endfor
+
+  set_critical(1);
+  DestroyItem(gateOfLife);
+  set_critical(0);
+
+endprogram

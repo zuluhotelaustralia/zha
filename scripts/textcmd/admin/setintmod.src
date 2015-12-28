@@ -1,0 +1,9 @@
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setintmod( who,  intmod )
+	if (!checkStaff(who, "setintmod", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SetIntelligenceMod(who, CInt(intmod));
+endprogram

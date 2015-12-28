@@ -1,0 +1,53 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+
+program slidetile( who, item )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, item);
+
+endprogram
+
+function configGump(who, tile)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 440, 530);
+	
+	GFTextMid(10, 10, 440, 70, "Select Move Direction");
+	GFTextLine(90, 80, 53, "North");
+	GFTextLine(90, 110, 53, "East");
+	GFTextLine(90, 140, 53, "West");
+	GFTextLine(90, 170, 53, "South");
+	GFTextLine(90, 430, 53, "Exit");
+
+	var north:= GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var east:= GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var west:= GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var south:= GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[north.keyid])
+		tile.graphic:=6119;
+	elseif(choice[east.keyid])
+		tile.graphic:=6114;
+	elseif(choice[west.keyid])
+		tile.graphic:=6120;
+	elseif(choice[south.keyid])
+		tile.graphic:=6115;
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+endfunction
+
+
+

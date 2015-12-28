@@ -1,0 +1,19 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program textcmd_sayabove( who, text )
+	if (!checkStaff(who, "sayabovetest", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "What would you like that person or object to say?" );
+
+    var what := Target( who );
+    if (what.character)
+        PrintTextAbove( what, text );
+    else
+	SendSysMessage( who, "This may only be done on players.");   
+    endif
+endprogram
+

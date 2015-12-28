@@ -1,0 +1,43 @@
+//Barnabus 30/10/3
+use uo;
+use os;
+use basic;
+
+include "include/cmdlevel_check";
+
+const MONTHS_TIL_ACCOUNT_DELETION := 3; 
+//this determines how many months an account can not be logged into //before it is deletd.
+
+program textcmd_liststaffcharacters( who )
+	if (!checkStaff(who, "account", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	
+  	SendSysMessage(who, "Searching accounts for staff characters i.e. cmdlevel >=1. Displays only unbanned staff.", 3,70);
+	var accobj;
+	
+   foreach accName in ListAccounts()
+     	accobj := FindAccount(accName);
+		if (! accobj.banned)
+ 	  		findCmdLevelCharacters(who, accobj, accName);
+		endif
+	endforeach
+	
+	SendSysMessage(who, "Search for staff characters completed ",3,70);
+        
+endprogram
+
+function findCmdLevelCharacters(who, account, accName)
+	var charNum;
+	var player;
+	for (charNum:=1; charNum <=5; charNum := charNum+1)
+		player:=account.GetCharacter(charNum);
+		
+		if (player != error && player.cmdlevel)
+			SendSysMessage(who, "name: " + player.name + " | serial: " + Hex(player.serial) + "| account: " + accName ,3,53);
+		endif
+	endfor
+endfunction
+
+
+

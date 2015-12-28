@@ -1,0 +1,68 @@
+
+use uo;
+use os;
+
+program textcmd_online( character)
+
+	MakeAndProcessGump( character);
+
+endprogram
+
+
+function MakeAndProcessGump( who)
+
+	var layout	:= array( "page 0",
+				  "resizepic 50  0   2600 300 525",
+				  "resizepic 100 480 5100 200  25",
+				  "text 135 30 5 0");
+			
+	var data	:= array( "Online players:");
+
+	var playername;
+	var lastindex:=0;
+
+	var players	:= EnumerateOnlineCharacters();
+
+	var start	:= 1;
+	var count	:= 0;
+	var done	:= 0;
+	var page	:= 1;
+	var perpage	:= 20;
+	var y 	:= 70;
+	var i;
+	var j;
+	var uhunter;
+
+	layout.append( "page 1" );
+
+	for( i := start; i <= len(players); i := i + 1 )
+		playername:=upper(players[i].name);
+		if( done == perpage )
+			done 	:= 0;
+			page 	:= page + 1;
+			y 	:= 70;
+			layout.append( "button 250 481 5540 5541 0 " + (page ) ); // Next button for prev page
+			layout.append( "page " + page );
+			layout.append( "button 125 481 5537 5538 0 " + (page - 1) ); // Prev button for current page
+		endif
+		if(!players[i].cmdlevel)
+			layout.append( "text 85 " + y + " 0 " + len(data) );
+			//layout.append( "button 300 " + (y+5) + " 2118 2117 1 0 " + i );
+			data.append( players[i].name );
+			y := y + 20;
+			done := done + 1;
+			count := count + 1;
+			lastindex:=i;
+		endif
+	endfor
+	data[1]:= count+ " Players online";
+	
+	if (count>0)
+		SendDialogGump( who, layout, data );
+	else
+		SendSysMessage(who, "No players found.");
+		return;
+	endif
+endfunction
+
+

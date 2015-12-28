@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program checkDestroy_controlBardItem(item)
+
+	if (GetGlobalProperty("destroyBardItems"))
+		print( "destroying bard item");
+		DestroyItem(item);
+	endif
+	if (!GetObjProperty(item, "newbie"))
+		SetObjProperty(item, "newbie", 1);
+	endif
+endprogram

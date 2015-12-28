@@ -1,0 +1,39 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+program textcmd_tele( who )
+	if (!checkStaff(who, "tele", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "Where do you want to teleport?" );
+
+    var where := TargetCoordinates( who );
+    if (where)
+        var result := MoveCharacterToLocation( who, where.x, where.y,where.z);
+
+        if (!result)
+            result := MoveCharacterToLocation( who, where.x, where.y,where.z, MOVECHAR_FORCELOCATION);
+        endif
+
+	//showflame(who);
+        if (!result)
+            SendSysMessage( who, result.errortext );
+        endif
+    endif
+endprogram
+
+
+function showflame(who)
+  var coolflame;
+
+  if ((who.cmdlevel>3) && (!who.concealed))
+    coolflame := CreateItemAtLocation( who.x, who.y, who.z, 0x3709, 1 );
+    PlaySoundEffect(who, 0x208);
+    sleep(3);
+    DestroyItem(coolflame);
+  endif
+
+endfunction

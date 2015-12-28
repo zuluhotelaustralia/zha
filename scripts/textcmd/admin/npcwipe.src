@@ -1,0 +1,50 @@
+use uo;
+use os;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+var number := 0;
+program npcwipe( character, npctemplatetext )
+	if (!checkStaff(character, "npcwipe", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+set_critical(0);
+
+var x, y, z;
+for( x := 6144; x > 16; x := x  - 32)
+   Broadcast( "Wiping NPCs, X=" + x );
+    
+
+   if (!npctemplatetext)
+	   for( y := 16; y < 4096; y := y + 32 )
+       		 for( z := -60; z <= 60; z := z + 30 )
+        	    foreach npc in ListMobilesNearLocation( x, y, z, 32 )
+            		if( npc.isA(POLCLASS_NPC) )
+            			RevokePrivilege(npc, "invul");
+            			SetObjProperty(npc, "guardkill", 1);
+                		ApplyRawDamage( npc, GetMaxHp(npc) );
+		       	  	number := number + 1;
+			endif
+        	    endforeach
+        	endfor
+	    endfor
+	    Broadcast("Total NPCs killed: " + number);
+   else
+	   for( y := 16; y < 4096; y := y + 32 )
+       		 for( z := -60; z <= 60; z := z + 30 )
+        	    foreach npc in ListMobilesNearLocation( x, y, z, 32 )
+            		if( npc.isA(POLCLASS_NPC) && npc.npctemplate==npctemplatetext)
+            			RevokePrivilege(npc, "invul");
+            			SetObjProperty(npc, "guardkill", 1);
+                		ApplyRawDamage( npc, GetMaxHp(npc) );
+		       	  	number := number + 1;
+			endif
+        	    endforeach
+        	endfor
+	    endfor
+	    Broadcast("Total NPCs killed: " + number);
+   endif
+endfor
+
+endprogram

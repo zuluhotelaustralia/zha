@@ -1,0 +1,81 @@
+/* Druid Spell - Ferocious Wind        **
+** Earth area damage around the caster **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_FEROCIOUSWIND;
+
+program cast_ferociouswind(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var element := AIR;
+  var cast_on;
+  var i;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetArea(caster, circle);
+
+    if (!cast_on)
+      EraseObjProperty(caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_RANGER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_DRUID)
+    level := CInt(level/5);
+  endif
+  var range := calcDmgRange(caster, SKILLID_NATURELORE);
+  var times := 3 + (level/2);
+  var dmg;
+
+  EraseObjProperty( caster, "#Casting");
+
+
+  for (i := 0; i <= times; i := i + 1)
+    PlayMovingEffectXYZ( cast_on.x-range, cast_on.y+(RandomInt(3)-1), cast_on.z+10, cast_on.x+range, cast_on.y+(RandomInt(4)-1), cast_on.z+15, FX_SPELL_FEROCIOUSWIND2+RandomInt(8), SPEED_SPELL_FEROCIOUSWIND2, LOOP_SPELL_FEROCIOUSWIND2);
+    PlayMovingEffectXYZ( cast_on.x-range+2+(RandomInt(3)-1), cast_on.y+(range/2)+(RandomInt(3)-1), cast_on.z+10, cast_on.x+range-2+(RandomInt(3)-1), cast_on.y+(range/2)+(RandomInt(3)-1), cast_on.z+15, FX_SPELL_FEROCIOUSWIND2+RandomInt(8), SPEED_SPELL_FEROCIOUSWIND2, LOOP_SPELL_FEROCIOUSWIND2);
+    PlayMovingEffectXYZ( cast_on.x-range+2+(RandomInt(3)-1), cast_on.y-(range/2)+(RandomInt(3)-1), cast_on.z+10, cast_on.x+range-2+(RandomInt(3)-1), cast_on.y-(range/2)+(RandomInt(3)-1), cast_on.z+15, FX_SPELL_FEROCIOUSWIND2+RandomInt(8), SPEED_SPELL_FEROCIOUSWIND2, LOOP_SPELL_FEROCIOUSWIND2);
+
+    var victims := ListMobilesNearLocation(CInt(cast_on.x), CInt(cast_on.y), CInt(cast_on.z), range);
+
+    foreach mobile in victims
+      if( CheckLosAt( mobile, CInt(cast_on.x), CInt(cast_on.y), CInt(cast_on.z)))
+        var immunity := IsProtected( caster, mobile, circle );
+        var circ := circle;
+        if( immunity != IMMUNED )
+          if( immunity == CURSED )
+            circ := circ * 2;
+          endif
+          if (AutoCallGuardCheck(caster, mobile))
+            EraseObjProperty( caster, "#Casting");
+            return;
+          endif
+
+          dmg := (CalcSpellDamage( caster, mobile, circ, AREA_EFFECT_SPELL)/(times*0.7));
+          send_attack(mobile, caster, SPELL_ID);
+          PlayStationaryEffect( CInt(mobile.x), CInt(mobile.y), CInt(mobile.z), FX_SPELL_FEROCIOUSWIND, SPEED_SPELL_FEROCIOUSWIND, LOOP_SPELL_FEROCIOUSWIND);
+          PlaySoundEffect(mobile, SFX_SPELL_FEROCIOUSWIND);
+
+          ApplyElementalDamage(caster, mobile, circ, dmg, element);
+        endif
+      endif
+    endforeach
+
+    sleepms(500);
+  endfor
+
+endprogram

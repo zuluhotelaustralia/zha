@@ -1,0 +1,18 @@
+use uo;
+use os;
+include "include/aoslbr";
+
+include "include/jail";
+include "include/classes";
+
+program reconnect( who )
+	enableAosLBRClient(who);
+	JailCheck(who);
+	SendSysMessage( who, "Reconnected." );
+	if (who.acct.getprop("EmailPassword")!=error)
+		return;
+	else
+		start_script(":email:message", who);
+	endif
+	SetClasse(who);
+endprogram

@@ -1,0 +1,63 @@
+use uo;
+use cfgfile;
+include "include/cmdlevel_check";
+
+
+var setcfg := ReadConfigFile("sets");
+
+program makeset( who, thesetname )
+	if (!checkStaff(who, "makeset", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+var startloc := TargetCoordinates(who);
+
+if (!startloc)
+        return;
+endif
+
+
+var elem := setcfg[thesetname];
+
+if (!elem)
+        SendSysMessage(who, "Unknown set name " + thesetname);
+        return;
+endif
+
+var stuff := GetConfigStringArray( elem, "item" );
+
+foreach item in stuff
+        var stuffelem := setcfg[item];
+        if (!stuffelem)
+                SendSysMessage(who, "Could not find entry for " + item);
+        endif
+       
+        var this := CreateItemAtLocation(
+
+                stuffelem.x + startloc.x,
+                stuffelem.y + startloc.y,
+                stuffelem.z + startloc.z,
+                stuffelem.objtype,
+                1);
+               
+     
+        
+endforeach
+
+
+stuff := GetConfigStringArray( elem, "setmobile" );
+
+foreach item in stuff
+        var stuffelem := setcfg[item];
+        var this := CreateNpcFromTemplate(
+                  stuffelem.objtype,
+                stuffelem.x + startloc.x,
+                stuffelem.y + startloc.y,
+                stuffelem.z + startloc.z);
+               
+     
+        
+endforeach
+
+endprogram

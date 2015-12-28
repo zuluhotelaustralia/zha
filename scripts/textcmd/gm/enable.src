@@ -1,0 +1,41 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//  .enable [priv]        - enable a privilege
+//
+//  example:
+//      ".enable invul"   - enable invulnerability, if you have that privilege
+//
+//  see also disable.src
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+use uo;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program txtcmd_enable( who, priv )
+	if (!checkStaff(who, "enable", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	SendSysMessage( who, "Enabling '" + priv + "' on who?" );
+	var mobile := Target( who );
+	if( !mobile )
+		return 0;
+	elseif( !GetIntelligence(mobile) )
+		SendSysMessage( who, "You must target a mobile." );
+		return 0;
+	elseif( mobile.npctemplate )
+		SendSysMessage( who, "You must target a player." );
+		return 0;
+	elseif( mobile.enable( priv ) )
+		SendSysMessage( who, "Privilege '" + priv + "' is now enabled on " + mobile.name + "." );
+		return 1;
+	else
+		SendSysMessage( who, mobile.name + " don't have that privilege." );
+		return 0;
+	endif
+
+endprogram

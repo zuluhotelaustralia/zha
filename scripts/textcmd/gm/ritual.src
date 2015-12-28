@@ -1,0 +1,18 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+
+program ritual(who)
+	if (!checkStaff(who, "ritual", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var staff:= CreateItemInBackpack(who, 0xba28, 1);
+	SetObjProperty(staff, "Consecrated", who.serial );
+
+	var robe:=CreateItemInBackpack(who, 0xba29, 1);
+	SetObjProperty(robe, "Consecrated", who.serial );
+
+endprogram

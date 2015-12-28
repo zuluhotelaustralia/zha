@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+include "securechests";
+
+program securechest_create(chest)
+	var schest := FindSecureChest( chest.serial );
+	
+	foreach cprop_name in GetObjPropertyNames(chest)
+			SetObjProperty(schest, cprop_name, GetObjProperty(chest, cprop_name) );
+	endforeach
+	
+endprogram
+

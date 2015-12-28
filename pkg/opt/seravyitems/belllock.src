@@ -1,0 +1,48 @@
+/* Bell Lock Script                 **
+** Unlocks all doors in radius      **
+** with correct CPROP               **
+** Seravy - seravy@gmail.com        */
+
+use uo;
+use os;
+
+const BELLLOCK_DEFAULT_RADIUS := 5;
+const BELLLOCK_SFX_BELL := 0x101;
+const BELLLOCK_SFX_UNLOCK := 0x200;
+program belllock( who, bell )
+
+  var range := GetObjProperty(bell, "range");
+  var bellkey := GetObjProperty(bell, "bellkey");
+  var doorkey;
+
+  if (!range)
+    range := BELLLOCK_DEFAULT_RADIUS;
+  endif
+  if (!bellkey)
+    bellkey := 1;
+  endif
+
+  
+  SendSysMessage( who, "You ring the bell");
+  PlaySoundEffect( who, BELLLOCK_SFX_BELL );
+  sleep(1);
+  PlaySoundEffect( who, BELLLOCK_SFX_BELL );
+  sleep(1);
+
+  var doors := ListItemsNearLocation( who.x, who.y, who.z, range );
+  foreach item in doors
+    if(item.isA(POLCLASS_DOOR))
+      doorkey :=  GetObjProperty(item, "bellkey");
+      if (doorkey && doorkey == bellkey)
+        PlaySoundEffect( item, BELLLOCK_SFX_UNLOCK );
+        PrintTextAbove( item, "The lock breaks off", 3, 54 );
+        item.locked := 0;
+
+        SendSysMessage( who, "The bell breaks in your hand.");
+        DestroyItem( bell );
+        return 1;
+      endif
+    endif
+  endforeach
+endprogram
+

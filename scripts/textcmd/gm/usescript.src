@@ -1,0 +1,25 @@
+//
+// Destroy an item
+//
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_destroy( who, text )
+	if (!checkStaff(who, "usescript", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var item := Target( who );
+
+	if (item)
+		if (len(text))
+            		item.usescript := text;
+		else
+			item.usescript := "";
+		endif
+    	endif
+
+endprogram

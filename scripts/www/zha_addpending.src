@@ -1,0 +1,213 @@
+// Zulu Australia Adduser Script
+//
+// Last Updated: 26/06/01
+//
+// Adapted by Andrew Wilkins (Sno)
+//
+// Author: Paul Wyers <crazzykid>
+// Description: Adduser to POL Server 
+//              need I say anymore?
+// [Seravy]
+// Removed Account pending. Was causing problems.
+//
+// [Arthus]
+// modified link for official irc server
+//
+// [Sno]
+// 3.0 - Adapted for PHP based account creation. Restriction of conection, 
+//       batch creation.
+//
+// 2.1 - Bug fixes for illegal characters (new-lines, etc.) which enabled users to
+//       create staff accounts
+//
+// [crazzykid]
+// 2.0 - total rewrite pretty much!.
+//     - huge bug fix. this fixes a bug with ppl hacking into other accounts.
+//     - removed varibles zhozauthor and zhozversion.. no need.. i just hardcoded it. ;)
+//
+// 1.1 - Update to writehtml
+//     - added varible zhozauthor
+//     - added varible zhozversion
+//
+// 1.0 - initial release
+
+use uo;
+use os;
+use http;
+
+const localIP := "203.30.19.144";
+
+program zha_addpending()
+
+	if (GetGlobalProperty("accountCreatorDisabled"))
+		writehtml( "<html>" );
+		writehtml( "<body>" );
+		writehtml( "Account creation is currently disabled." );
+		writehtml( "</body>" );
+		writehtml( "</html>" );
+		return;
+	endif
+
+	// Grab the acct-name and password from the URL-query 
+	var name := QueryParam( "account" );
+	var pass := QueryParam( "password" );
+	var email := QueryParam( "email" );
+	var ipaddr := QueryParam( "ip" );
+	var connectingIP := QueryIP();
+
+	if (connectingIP != localIP)
+		writehtml( "<html>" );
+		writehtml( "<body>" );
+		writehtml( "Illegal connection (" + connectingIP + ")" );
+		writehtml( "</body>" );
+		writehtml( "</html>" );
+		print("Illegal account-creation connection (" + connectingIP + ")" );
+		return;
+	endif
+
+	if ( !name || !pass || !email || !checkCharacters({name, pass, email}))
+		writehtml( "<html>" );
+		writehtml( "<body>" );
+		writehtml("Account username, password or email was empty or invalid. Please try again.");
+		writehtml( "</body>" );
+		writehtml( "</html>" );
+		return;
+	endif
+
+	// Parse out anything other than upper- and lower-case A-Z chars 
+	// 
+	var i, ch, temp := ""; 
+	var ca := CAsc("a"), cz := CAsc("z");
+
+	for( i := 1; i <= len(name); i := i + 1 )
+		ch := CAsc(lower(name[i]));
+		if ( (ch >= ca) && (ch <= cz) )
+			temp := temp + name[i];
+		endif
+	endfor
+
+	if ( len(temp) < 3 )
+		writehtml( "<html>" );
+		writehtml( "<body>" );
+		writehtml("Invalid username. Please try again.");
+		writehtml( "</body>" );
+		writehtml( "</html>" );
+		return;
+	else 
+		// It's ok  
+		name := temp;
+	endif 
+
+	// Check for an existing account (case-insensitive) 
+	temp := lower(name);
+	foreach acctname in ListAccounts()
+		if ( temp == lower(acctname) )
+			writehtml( "<html>" );
+			writehtml( "<body>" );
+			writehtml( "Error: unable to create account <b>" + name + "</b><br> Account name already exists." );
+			writehtml( "</body>" );
+			writehtml( "</html>" );
+			return;
+		endif
+	endforeach
+
+	/* Account pennding Removed by Seravy 	
+	var pendingAccounts := GetGlobalProperty( "pendingAccounts" );
+	if (!pendingAccounts)
+		pendingAccounts := array;
+	else
+		pendingAccounts := Unpack(pendingAccounts);
+	endif
+	
+	foreach pendingAccount in pendingAccounts
+		pendingAccount := Unpack(pendingAccount);
+		if (lower(email) == lower(pendingAccount.email) || ipaddr == pendingAccount.IP)
+			writehtml( "<html>" );
+			writehtml( "<body>" );
+			writehtml( "Sorry, you may only create one account at a time." );
+			writehtml( "</body>" );
+			writehtml( "</html>" );
+			return;
+		endif
+	endforeach
+	*/
+
+	writehtml( "<html>" );
+	writehtml( "<body>" );
+
+	// Everything looks cool...
+	var newaccount := CreateAccount(name, pass, 1);
+	if ( !newaccount )
+		writehtml("Error: Account creation failed.<br>Please try again at a later date.");
+	else
+		/* Account pennding removed by seravy
+		// Add it to the pending accounts global
+		var pendingAccount := struct;
+		pendingAccount .+ username;
+		pendingAccount .+ email;
+		pendingAccount .+ IP;
+		pendingAccount.username := name;
+		pendingAccount.email := email;
+		pendingAccount.IP := ipaddr;
+		pendingAccounts.append( Pack(pendingAccount) );
+		SetGlobalProperty("pendingAccounts", Pack(pendingAccounts));
+		*/
+
+		newaccount.setprop("Email", email);
+		newaccount.setprop("IP", ipaddr);
+		newaccount.setprop("Notes", "<none>");
+		
+		writehtml( "Welcome " + name + ", your account has been sucessfully created!<br>" );
+		writehtml( "To start your journey into <b>Zulu Hotel Australia</b>, please follow the instructions below.<br><br>" );
+		
+		//writehtml( "<b>*</b> If you are new to this shard, vist the <a href=\"http://uo.gamiix.com/\">ZHA website</a> and download the <a href=\"http://members.westnet.com.au/seravy/files/zha.exe\">ZHA Installer</a> <br>" );
+		writehtml( "<b>*</b> Read and understand the <a href=\"http://uo.gamiix.com/rules/\">rules</a><br>" );
+		writehtml( "<b>*</b> The official IRC server is <b>ai.gamiix.com:6667   #zha</b><br><br>" );
+
+		writehtml( "<font color=\"red\"><b>Your account is ready to be logged on right now.</b></font><br><br>");
+		//writehtml( "<font color=\"red\"><b>Please allow up to 1 hour for your account to become active on the server. Up until that time, the account will be blocked.</b></font><br><br>");
+
+  		writehtml( "<font size=1>Zulu Hotel Australia AddUser version: 3.0<br>" );
+  		writehtml( "Original code by: <a href=\"mailto:crazzykid@gamiix.com\">crazzykid</a><br>" );
+  		writehtml( "Bug-fixes and PHP adaption (version 3.0) by: Sno</font>" );
+	endif
+	
+	writehtml( "</body>" );
+	writehtml( "</html>" );
+endprogram
+
+function checkCharacters(words)
+	var i, validstr:={"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+	var j := 1;
+
+	foreach word in words
+		word := lower(word);
+		if (len(word)<1)
+			return 0;
+		endif
+		
+		for(i:=1;i<=len(word);i:=i+1)
+			if (j==3) // Add some more characters for email addresses.
+				validstr.append("@");
+				validstr.append("_");
+				validstr.append(".");
+				validstr.append("-");
+			endif
+			
+			if(!(word[i] in validstr))
+				foreach person in EnumerateOnlineCharacters()
+					if (person.cmdlevel)
+						SendSysMessage(person, "Someone attempted to create an illegal account.", 3, 38);
+						SendSysMessage(person, "Exact string: " + word, 3, 38);
+					endif
+				endforeach
+				
+				return 0;
+			endif
+		endfor
+		
+		j := j + 1;
+	endforeach
+	
+	return 1;
+endfunction

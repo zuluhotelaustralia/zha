@@ -1,0 +1,21 @@
+use uo;
+
+program changeacct( character, acctname )
+
+	if( (acctname=="") || (!acctname) ) return; endif
+
+	SendSysMessage(character, "Select player to change their account.");
+
+	var who := Target(character, TGTOPT_NOCHECK_LOS);
+
+	if (!who) return; endif
+	if (who.isA(POLCLASS_NPC)) return; endif
+	if( who.cmdlevel >= character.cmdlevel && character.cmdlevel < 5 )
+		SendSysMessage( who, character.name + " tried to change your account name." );
+	else
+		who.acct.accountname := acctname;
+	endif
+
+	SendSysMessage(character, "done");
+
+endprogram

@@ -1,0 +1,38 @@
+use uo;
+
+include "include/objtype";
+include "include/spelldata";
+include "include/areas";
+include "include/client";
+include "../pkg/std/housing/utility";
+include "include/classes";
+
+program cast_mark( caster )
+
+	if (!(GetObjProperty(caster, CLASSEID_NINJA) == 8))
+		return;
+	endif
+	if(caster.dead)
+	return;
+	endif
+
+	if( IsForbiddenAreaToRecallTo( caster, caster.x, caster.y ) )
+		SendSysMessage( caster, "You can't escape to this point." );
+		return 0;
+	endif
+
+	var multi := caster.multi;
+	if( multi )
+		if( !IsOwner( caster, multi ) )
+			if( !IsFriend( caster, multi ) )
+				SendSysMessage( caster, "You can't escape to this point." );
+				return;
+			endif
+		endif
+	endif
+	
+	var escapelocationarray := { CInt(caster.x), CInt(caster.y), CInt(caster.z)};
+	SendSysMessage( caster, "You memorise the location to escape to." );
+	SetObjProperty(caster, "escapelocation", escapelocationarray);
+   
+endprogram

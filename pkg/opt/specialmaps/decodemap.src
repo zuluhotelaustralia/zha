@@ -1,0 +1,116 @@
+use uo;
+use cfgfile;
+use util;
+
+include "include/client";
+include "include/attributes";
+include "include/objtype";
+include "unleashmap";
+include "include/time";
+
+function PunishForBugAbusing(who)
+    var desc := who.name + " / " + who.acctname;
+	
+    var elemkey := who.acctname;
+    var props := array;
+    var prop := array;
+    prop .+ pname;
+    prop .+ pvalue;
+	
+    prop.pname := "charname";
+    prop.pvalue := who.name;
+    props[1] := prop;
+	
+    prop.pname := "serial";
+    prop.pvalue := who.serial;
+    props[2] := prop;
+	
+    prop.pname := "coords";
+    prop.pvalue := CStr(who.x) + " " + CStr(who.y);
+    props[3] := prop;
+	
+    prop.pname := "datetime";
+    prop.pvalue := NowString();
+    props[4] := prop;
+	
+    AppendConfigFileElem( "::log-level6mapdupe", "haxor", elemkey, props );
+    UnloadConfigFile("::log-level6mapdupe");
+
+    var name	:= who.name;
+    var account	:= who.acctname;  foreach mobile in EnumerateOnlineCharacters()
+    who.title_race := "bug abuser";
+
+    if( mobile.cmdlevel )
+      SendSysMessage( mobile, name + " account: " + account + " abused the Level 6 map duping bug!", 3, 33 );
+    endif
+  endforeach
+
+
+endfunction
+
+program decode_map( who, map )  
+  if(!ReserveItem(map)) // Duping bug fixed by seravy. Used to use auctioner to reserve item.
+    PunishForBugAbusing(who);
+    return; 
+  endif
+
+  if(GetEffectiveSkill( who, SKILLID_CARTOGRAPHY )<110)
+    SendSysMessage( who, "You cannot comprehend the map." );
+  else
+    if(CheckSkill( who, SKILLID_CARTOGRAPHY, 120, 1200))
+      CreateTreasureMap( who, map );
+    else
+      SendSysMessage( who, "You understand the map, but fail to decode it." );
+    endif
+  endif
+endprogram
+
+
+
+function CreateTreasureMap( who, oldmap);
+	var difficulty := Cint(GetObjProperty(oldmap, "difficulty"));
+	DestroyItem( oldmap );
+  	
+	CreateSpecialMap(who, difficulty);
+
+	SendSysMessage( who, "You successfully decode the map!" );
+	SendSysMessage( who, "The map quivers with a strange magical power. A voice speaks in your mind -",3,53 );
+	SendSysMessage( who, "You have discovered a portal map. Casting Gate Travel on this map will conjure a temporary gate",3,70 );
+	SendSysMessage( who, "that will allow the crypt to which this map is linked to appear briefly in this world. ",3,70 );
+	SendSysMessage( who, "Once they have appeared, you must slay all the crypt's denizens in less than " +CStr(CInt(MAP_TIME/60)) +  " minutes if their treasure is to appear!",3,70 );
+	SendSysMessage( who, "Using cartography on the map again may give you further clues to the location that the crypt will appear",3,53 );
+endfunction
+
+
+function CreateSpecialMap(who, difficulty)
+//gets random map from cfg file... sets properties on map accordingly
+  var map := CreateItemInBackpack( who, UOBJ_MAP1, 1 );
+  var cfgfile := ReadConfigFile( "specialmaps" );
+  var num := GetConfigMaxIntKey( cfgfile );
+  var pick := (RandomInt( num ) + 1);
+  var elem := FindConfigElem( cfgfile, pick );
+  var x := GetConfigInt( elem, "X" );
+  var y := GetConfigInt( elem, "Y" );
+  var z := GetConfigInt( elem, "Z" );
+  
+  if(difficulty)
+	SetObjProperty( map, "difficulty", difficulty );
+  endif
+
+  var title := GetConfigString( elem, "Tomb");
+  map.name := "Map to " + title;
+  map.color := GetConfigInt( elem, "Colour");
+  //who.x - 265, who.y - 260, who.x + 265, who.y + 260, 200, 200
+  map.xwest := x-265;
+  map.ynorth := y-260;
+	
+  map.xeast := x+265;
+  map.ysouth := y+260;
+  map.gumpwidth := 200;
+  map.gumpheight := 200;
+  SetObjProperty(map, "MapNumber", pick);
+  SetObjProperty(map, "cartoNote", "specialMap");
+endfunction
+
+
+

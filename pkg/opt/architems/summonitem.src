@@ -1,0 +1,65 @@
+//  Archaean 31/5/03
+
+//  Summons an npc (not tamed). Type is determined by the
+//  cprop "template" on item. Ensure the template cprop
+//  is valid before applying this usescript.
+
+use uo;
+use os;
+
+include "include/checkcity";
+include "include/client";
+
+program summon_npc(user, item)
+
+	var template := GetObjProperty(item, "template");
+
+	if (!template)
+		return;
+	endif
+
+	if (item.container != user.backpack)
+		SendSysMessage (user, "You can only use this from your backpack");
+		return;
+	endif
+
+	if (CheckCity(user))
+		SendSysMessage (user, "You cannot use this in town");
+		return;
+	endif
+
+	var location := TargetCoordinates(user);
+	if (!CheckLosAt(user, location.x, location.y, location.z))
+		SendSysMessage(user, "Invalid location");
+	endif
+
+	DestroyItem(item);
+	var critter := CreateNpcFromTemplate(template, 5140, 1767, 0); // star room
+	SetObjProperty(critter, "guardkill", 1);
+	PerformAction(user, 17);
+	sleep(2);
+	MoveCharacterToLocation(critter, location.x, location.y, location.z);
+	PlaySoundEffect(critter, SFX_SPELL_RECALL2);
+	PrintTextAbove(critter, "Who summoned me?");
+	Detach();
+	sleep(180);
+
+	// remove critter after 3 minutes
+	if (critter)
+		PrintTextAbove(critter, "Kal Ort Por");
+		PerformAction(critter, 16);
+		sleep(3);
+		PlaySoundEffect(critter, SFX_SPELL_RECALL1);
+		MoveCharacterToLocation(critter,5275,1163,0,MOVECHAR_FORCELOCATION);  // jail
+		ApplyRawDamage(critter, GetHp(critter) + 3);
+
+		// wipe horse if summoned monster was mounted
+		sleep(1);
+		foreach mobile in ListMobilesNearLocation(5275, 1163, 0, 7)  // jail
+			if(mobile.npctemplate)
+				SetObjProperty(mobile, "guardkill", 1);
+				ApplyRawDamage(mobile, GetHp(mobile)+3);
+			endif
+		endforeach
+	endif
+endprogram

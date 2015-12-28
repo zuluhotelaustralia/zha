@@ -1,0 +1,71 @@
+
+use uo;
+use os;
+
+include "include/random";
+include "include/areas";
+
+include "include/cmdlevel_check";
+
+
+use cfgfile;
+
+program textcmd_guards( who, text )
+	if (!checkStaff(who, "guards", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif	
+
+	if( !IsInGuardedArea(who) )
+		PrintTextAbove( who, "Guards!!!" );
+		SendSysMessage( who, "This isn't a guarded area." );
+	elseif( who.murderer )
+		PrintTextAbove( who, "Guards!!!" );
+		SendSysMessage( who, "Guards won't answer to murderers' call." );
+	elseif( who.criminal )
+		PrintTextAbove( who, "Guards!!!" );
+		SendSysMessage( who, "Guards won't answer to criminals' call." );
+	elseif( who.hidden )
+		SendSysMessage( who, "You can't call the guards while hidden." );
+	elseif( who.dead )
+		SendSysMessage( who, "You can't call the guards while dead." );
+	elseif( who.concealed )
+		SendSysMessage( who, "You can't call the guards while concealed." );
+	else
+
+		var numcalls := who.acct.getprop("numcalls");
+
+		// if account has no numcalls prop, set it to 0
+		if(!numcalls && numcalls != 0)
+			who.acct.setprop("numcalls", 0);
+		endif
+
+		// if account has no timer, set it to current time
+		if (!who.acct.getprop("guardtimer"))
+			who.acct.setprop("guardtimer", ReadGameClock());
+		endif
+
+		// if time period has passed, reset timer/numcalls
+		if(who.acct.getprop("guardtimer") < ReadGameClock() - GetGlobalProperty("GuardCallPeriod"))  
+			who.acct.setprop("numcalls", 0);
+			who.acct.setprop("guardtimer", ReadGameClock());
+		endif
+
+		// if player has already called maxcalls per timeperiod, send rude message
+		if (who.acct.getprop("numcalls") >= GetGlobalProperty("MaxGuardCalls"))
+			PrintTextAbove( who, "*Guard Spammer!*" );
+			SendSysMessage(who, "The guards refuse to respond to your incessant wailing!");
+			return 0;
+		endif
+
+		// increment numcalls
+		who.acct.setprop("numcalls", who.acct.getprop("numcalls")+1);
+		
+		PrintTextAbove( who, "Guards!!!" );
+		if( text )
+			PrintTextAbove( who, text );
+		endif
+	
+		start_script( ":areas:callguards", who );
+	endif
+
+endprogram

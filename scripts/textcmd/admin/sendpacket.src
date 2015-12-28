@@ -1,0 +1,13 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_sendpacket( who, text )
+	if (!checkStaff(who, "sendpacket", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    var res := SendPacket( who, text );
+    if (!res)
+        print( "SendPacket error: " + res.errortext );
+    endif
+endprogram

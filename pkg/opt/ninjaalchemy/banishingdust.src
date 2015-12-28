@@ -1,0 +1,55 @@
+use uo;
+
+include "include/client";
+include "include/attributes";
+include "include/spelldata";
+include "include/npcbackpacks";
+
+program banishdust(who, dust)
+
+	if(!ReserveItem(dust))
+		return;
+	endif
+	
+	if(!IsNinja(who))
+		SendSysMessage(who, "Only a Ninja knows the use of this item.");
+		return;
+	endif
+
+	SendSysMessage(who, "Select a Target.");
+	var ground := TargetCoordinates(who);
+
+	if (!ground)
+		SendSysMessage(who, "canceled.");
+		return;
+	endif
+
+	PlayMovingEffectXYZ( who.x, who.y, who.z, ground.x, ground.y, ground.z, 0x1810, 15, loop := 0, explode:= 0 );
+	Detach();
+	sleep(1);
+
+	var summon := ListMobilesNearLocation( ground.x, ground.y, ground.z, 6);
+
+	var summoncheck;
+	var animcheck;
+	DestroyItem(dust);
+	Foreach mob in summon;
+
+	summoncheck := GetObjProperty(mob, "summoned");
+	animcheck := GetOBjProperty(mob, "animated");
+
+	if (!summoncheck && !animcheck)
+	
+	else
+
+	PrintTextAbove(mob, mob.name + " has been banished!");
+	PlaySoundEffect(mob, 0x202);
+	PlayObjectCenteredEffect(mob, 0x376a, 1, 0x10);
+	ApplyRawDamage(mob, GetHp(mob)+3);
+	endif
+
+	endforeach
+
+
+
+endprogram

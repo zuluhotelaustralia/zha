@@ -1,0 +1,24 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program txtcmd_getobjproperty( who, propname )
+	if (!checkStaff(who, "getobjproperty", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	SendSysMessage( who, "Get " + propname + " cprop val from what?" );
+	var object := Target( who );
+	if( !object )
+		return;
+	endif
+
+	var result := GetObjProperty( object, propname );
+	if( result )
+		SendSysMessage( who, "Property " + propname + " is : " + result );
+	else
+		SendSysMessage( who, "Property " + propname + " don't exist on this object" );
+	endif
+
+endprogram

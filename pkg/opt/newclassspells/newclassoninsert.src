@@ -1,0 +1,33 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "newclassbook";
+
+//program on_insert( who, runebook, item )
+program on_insert( who, book, movetype, INSERT_ADD_ITEM, item )
+	
+
+	if( !ReserveItem( book ) )
+		return 0;
+	endif
+
+	case( item.objtype )
+
+		0xa5b:
+				var spellid := GetObjProperty(item, "SpellID");
+				var spellsstored:=GetObjProperty(book, "storedspells");
+				if (!spellsstored || spellsstored ==error)
+					spellsstored:=array;
+				endif
+				spellsstored.append(spellid);
+				SetObjProperty(book, "storedspells", spellsstored);
+				SendSysMessage(who, GetSpellName(spellid) + " has been added to the spellbook");
+				DestroyItem(item);
+			break;
+				
+		default:		MoveItemToContainer( item, who.backpack );
+	endcase
+
+endprogram

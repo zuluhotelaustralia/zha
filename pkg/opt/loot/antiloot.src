@@ -1,0 +1,89 @@
+use uo;
+use os;
+
+include "include/areas";
+include "include/constants/propids";
+include "include/queststone";
+
+program antilooting( who, corpse, item )
+
+	//antilooting exemptions (cases where this script doesnt apply)
+	var serial := GetObjProperty( corpse, PROPID_CORPSE_CORPSE_OF );
+	
+	if( who.cmdlevel || GetObjProperty(who, "fastlooting"))
+		return 1;
+	elseif( serial == who.serial )
+		return 1;	
+	endif
+	//generic restrictions
+	if (CInt(GetObjProperty(who, "#looting")) > ReadGameClock()) // is already looting
+		SendSysMessage(who, "You must wait before looting again.");
+		return 0;
+	else
+		SetObjProperty(who, "#looting", ReadGameClock() + 1); // else set a timeout (just in case the script doesn't end)
+	endif
+
+	if( !serial) // It's an NPC
+		return 1;
+	endif
+
+	//cases where this script holds
+
+	//quest stone looting protection
+	
+	if (LootingCorpseOfFellowQuester(who, corpse))
+		SendSysMessage( who, "You aren't permitted to loot the corpse of a fellow quester.", 3, 53);
+		return 0;
+	endif
+
+	if( GetObjProperty( corpse, PROPID_MOBILE_CANT_BE_LOOTED ) )
+		return 0;
+	elseif( GetObjProperty( corpse, PROPID_MOBILE_GUARD_KILLED ) )
+		return AddLooter( who, corpse );
+	elseif( IsInAntiLootingArea(who) )
+		SendSysMessage( who, "You can't loot here." );
+		return 0;
+	else
+                var deadplayer := SystemFindObjectBySerial(serial);
+		var guild1 := GetObjProperty( who, "guild_id" );
+		if( guild1 )
+			var guild2 := GetObjProperty( deadplayer, "guild_id" );
+			if( guild2 )
+				if( guild1 == guild2 )
+					return AddLooter( who, corpse );
+				else
+					guild1 := FindGuild( guild1 );
+					guild2 := FindGuild( guild2 );
+					if( guild1.IsEnemyGuild(guild2) )
+						return AddLooter( who, corpse );
+					elseif( guild1.IsAllyGuild(guild2) )
+						return AddLooter( who, corpse );
+					endif
+				endif
+			endif
+		endif
+	
+		if( GetObjProperty( corpse, PROPID_CORPSE_IS_BLUE ) )
+			who.setCriminal(1);
+			return AddLooter( who, corpse );
+		endif
+	endif
+
+	return 1;
+
+endprogram
+
+
+function AddLooter( looter, object )
+	var looters := GetObjProperty(object, PROPID_CORPSE_LOOTED_BY);
+	if( !looters )
+		looters := dictionary;
+	endif
+
+	if( !looters.exists(looter.serial) )
+		looters[looter.serial] := looter.name;
+		return SetObjProperty(object, PROPID_CORPSE_LOOTED_BY, looters);
+	else
+		return 1;
+	endif
+endfunction

@@ -1,0 +1,38 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+program gravewalkon_lava( who, gravetile )
+	if (who.dead || !who.acct)
+		return;
+	endif
+	if (!CheckCurrentGraveTimeElapsed(gravetile))
+		return;
+	endif
+	SetCurrentGraveTime(gravetile);
+	sleep(2);
+	PrintTextAbove(gravetile, "The soil begins to move");
+	sleep(2);
+	var thecritter := CreateNpcFromTemplate( "dracula", CInt(gravetile.x), CInt(gravetile.y), CInt(gravetile.z) );
+	if (thecritter)
+		PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa );
+		SetObjProperty( thecritter, "noloot", 1 );
+		SetObjProperty( thecritter, "summoned", 1 );
+		PlaySoundEffect( thecritter, 0x280 );
+	endif
+endprogram
+
+function CheckCurrentGraveTimeElapsed(gravetile)
+	//returns true if time elapsed
+	var lastwalkedTime := CInt(GetObjProperty(gravetile, "#lastwalked"));
+	if (lastwalkedTime>ReadGameClock()) //that is current time is greater than reserved time
+		return 0;
+	endif
+	return 1;
+endfunction
+
+function SetCurrentGraveTime(gravetile)
+	SetObjProperty(gravetile, "#lastwalked", ReadGameClock()+600);
+endfunction
+

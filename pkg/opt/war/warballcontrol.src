@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "war";
+
+program warballcontrol(ball)
+
+	if (IsWar(ball))
+		start_script("AWOLmanager", ball);
+	endif
+
+endprogram

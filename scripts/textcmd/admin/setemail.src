@@ -1,0 +1,44 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+include "include/email";
+
+program set_email(who, account)
+
+	if (!checkStaff(who, "setemail", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	if (!account)
+		SendSysMessage(who, "Usage: .setemail [accountname]");
+		return;
+	endif
+	var acct:=lower(account);	
+	if (acct in administrators || acct in developers)
+		if (lower(who.acct.name) != acct)
+			SendSysMessage(who, "Admin/Developer emails can only be changed by owner");
+			return;
+		endif
+	endif	
+
+	if (!FindAccount(acct))
+		SendSysMessage(who, "Account not found!");
+		return;
+	endif
+	
+	var newemail := CStr(SendTextEntryGump(who, "Enter new email address:", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, 50));
+	if (!newemail)
+		SendSysMessage(who, "Cancelled");
+		return;
+	elseif (!find(newemail, "@", 2) || !find(newemail, ".", 4) || !ValidateCharacters(newemail))
+		SendSysMessage(who, "Invalid email address");
+		return;
+	endif
+	if (!acct.setprop("Email", newemail))
+		SendSysMessage(who, "Error");
+		return;
+	endif
+	SendSysMessage(who, "Email changed to '"+acct.getprop("Email")+"'");
+	return;
+	
+endprogram

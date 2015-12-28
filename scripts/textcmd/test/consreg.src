@@ -1,0 +1,10 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_consreg( who, parms )
+	if (!checkStaff(who, "consreg", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+	SendSysMessage( who, "ConsumeReagents: " + ConsumeReagents( who, CInt(parms) ) );
+endprogram

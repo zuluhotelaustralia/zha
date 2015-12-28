@@ -1,0 +1,120 @@
+/*
+	19/3/01
+	
+	Untile.src - ingame command by Jaleem[rMn] ZHI
+
+	This is the "inverse" command of the well known command '.tile'. You can now destroy an area filled with a specific
+	tile, leaving unarmed all the other different tiles that lie in the same area.
+	This command should be very useful for decorators.
+
+	Jaleem
+
+	IMPORTANT NOTE: The code is based on tile.src, ens's product.  
+*/
+
+
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+
+program textcmd_untile( who, input )
+	if (!checkStaff(who, "untile", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+
+    /****** Tiles selection & error cheching *************************/   
+    SendSysMessage( who, "Select tile #1" );
+    var item1 := Target( who, TGTOPT_NOCHECK_LOS  );
+
+    if (!item1)
+        SendSysMessage(who, "Invalid selection. Aborting.");
+        return;
+    endif
+
+    SendSysMessage( who, "Select tile #2" );
+    var item2 := Target( who, TGTOPT_NOCHECK_LOS  );
+
+    if (!item2)
+        SendSysMessage(who, "Invalid selection. Aborting.");
+        return;
+    endif
+
+    if (item1 == 0 || item2 == 0)
+        SendSysMessage(who, "You cannot see that tile from here.");
+        return;
+    else
+       if (item1 < 0 || item2 < 0)
+          SendSysMessage(who, "Invalid selection.");
+          return;       
+       endif
+    endif
+
+    if (item1.graphic != item2.graphic)
+          SendSysMessage(who, "You must select the same type of tile.");
+          return;       
+    endif
+
+    if (item1.z != item2.z)
+          SendSysMessage(who, "You must select tile that lie at the same z.");
+          return;       
+    endif
+
+    /*** Sorting coordinates *******************************************/
+    var startx;
+    var starty;
+    var endx;
+    var endy;
+
+    if ( item1.x <= item2.x )
+        startx  := item1.x;
+        endx    := item2.x;
+    else
+        startx  := item2.x;
+        endx    := item1.x;
+    endif
+
+
+    if ( item1.y <= item2.y )
+        starty  := item1.y;
+        endy    := item2.y;
+    else
+        starty  := item2.y;
+        endy    := item1.y;
+    endif
+
+
+    var fooy    := starty;
+    var startz  := item1.z;		//tile z
+    var startg  := item1.graphic;	//tile graphic
+    var counter := 0;			//# of tiles destroyed
+
+    while ( startx <= endx )
+        while ( starty <= endy )
+           var items := ListItemsAtLocation(startx, starty, startz);
+ 
+             foreach thing in items
+                 if (thing.graphic == startg)	//ok
+                      DestroyItem(thing);
+                      counter := counter + 1;
+                 endif
+             endforeach
+
+           starty := starty + 1;
+        endwhile
+
+        starty := fooy;
+        startx := startx + 1;
+    endwhile
+
+    
+    SendSysMessage( who, "Command completed. Untiled " + counter + " tiles.");
+
+endprogram
+
+
+
+

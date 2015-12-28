@@ -1,0 +1,27 @@
+// command .showitems  started June 19, 2000
+// Zulu (zulu@zuluhotel.com)
+// last updated June 25, 2000
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_showitems(who, trange)
+	if (!checkStaff(who, "showitems", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+var range;
+if (trange)
+	range := CInt(trange);
+else
+	SendSysMessage(who, "usage: showitems distance");
+	return;
+endif
+
+foreach item in ListItemsNearLocation( who.x,who.y,who.z, range )
+	item.invisible := 0;
+endforeach
+
+endprogram

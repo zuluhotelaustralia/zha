@@ -1,0 +1,9 @@
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setmana( who, newmana )
+	if (!checkStaff(who, "setmana", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SetMana(who, CInt(newmana));
+endprogram

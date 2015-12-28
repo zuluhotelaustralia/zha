@@ -1,0 +1,15 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+
+function textcmd_setcurse(who)
+	if (!checkStaff(who, "setc", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var item := Target(who);
+	SetObjProperty( item, "Cursed", 1);
+
+endfunction

@@ -1,0 +1,18 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_erasevar( who, propertyname )
+	if (!checkStaff(who, "eraseglobal", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    print( "Property Name: " + propertyname );
+
+    var res := EraseGlobalProperty( propertyname );
+    if (res != error)
+        SendSysMessage( who, "Property " + propertyname + " erased." );
+    else
+        SendSysMessage( who, "Error erasing property: " + res.errortext );
+    endif
+endprogram

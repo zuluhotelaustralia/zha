@@ -1,0 +1,9 @@
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setdexmod( who, dexmod )
+	if (!checkStaff(who, "setdexmod", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SetDexterityMod(who, CInt(dexmod));
+endprogram

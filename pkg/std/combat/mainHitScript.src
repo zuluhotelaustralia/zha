@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+include "include/hitscriptinc";
+
+
+program mainhit(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) != "Array");
+		rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage );
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+	else
+		//{attacker, defender, attacker.weapon, defender.armor, weaponType.damage, 0}
+		//rawdamage := RecalcDmg( attacker[1], attacker[2], attacker[3], attacker[4], attacker[5] );
+		rawdamage := RecalcDmg( attacker[1], attacker[2], attacker[3], attacker[4], attacker[5] );
+		//Broadcast("raw damage done : " + rawdamage);
+		DealDamage( attacker[1], attacker[2], attacker[3], attacker[4], attacker[5], rawdamage );
+	endif
+
+endprogram

@@ -1,0 +1,129 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/classes";
+
+program Equipment_gump (who)
+
+        var targ:=who;
+        if (who.cmdlevel>1)
+           targ:=Target(who);
+        endif
+        var equiplist:=GetValidEquip(targ);
+        if (!equiplist)
+           return;
+        endif
+        equiplist:=SortArray(equiplist);
+        var esarray:=array;
+        var totales:=0;
+        foreach item in equiplist
+                totales:=totales+item.es;
+        endforeach
+        SetObjProperty(who, "equipslots", totales);
+        var maxslots:=GetMaxEquipSlots(targ);
+        var y:=70;
+        var x:=40;
+        GFInitGump();
+        GFPage(0);
+        GFResizePic(0, 0, BKGND_GOLDTRIM, 550, 170+(len(equiplist)*20));
+        GFTextLine(x, y-30, 1000, "EQUIPMENT:");
+        for i:=1 to 4
+                GFGumpPic(x, y-8, 0x60);
+                x:=x+90;
+        endfor
+        x:=40;
+        for i:=1 to len(equiplist)
+                GFTextLine(x, y, (equiplist[i].es*5)+2, equiplist[i].ref.desc);
+                y:=y+20;
+        endfor
+        y:=70;
+        GFTextLine(450, y-30, 1000, "SLOTS");
+
+        for i:=1 to len (equiplist)
+                GFTextLine(450, y, (equiplist[i].es*5)+2, equiplist[i].es);
+                y:=y+20;
+        endfor
+        
+        for i:=1 to 4
+                GFGumpPic(x, y+3, 0x60);
+                x:=x+90;
+        endfor
+        GFTextLine(350, y+15, 1000, "SLOTS USED:");
+        GFTextLine(450, y+15, 58, CStr(totales));
+        GFTextLine(355, y+35, 1000, "MAX SLOTS:");
+        GFTextLine(450, y+35, 38, maxslots);
+        GFTextLine(318, y+55, 1000, "SLOTS REMAINING:");
+        GFTextLine(450, y+55, 58, CStr(maxslots - totales));
+        GFSendGump(who);
+        
+endprogram
+
+function SortArray(oldarray)
+
+         var newarray:=array;
+         var temp:=0;
+         var i:=1;
+         var idx:=1;
+         while (len(oldarray))
+             foreach item in oldarray
+                 if (item.es >= temp)
+                    temp:=item.es;
+                    idx:=i;
+                 endif
+                 i:=i+1;
+             endforeach
+             newarray.append(oldarray[idx]);
+             oldarray.erase(idx);
+             idx:=1;
+             i:=1;
+             temp:=0;
+         endwhile
+         return newarray;
+         
+endfunction
+                 
+function GetEquipLayers()
+
+         return {LAYER_HAND1,
+                LAYER_HAND2,
+                LAYER_SHOES,
+                LAYER_PANTS,
+                LAYER_SHIRT,
+                LAYER_HELM,
+                LAYER_GLOVES,
+                LAYER_RING,
+                LAYER_NECK,
+                LAYER_WAIST,
+                LAYER_CHEST,
+                LAYER_WRIST,
+                LAYER_TUNIC,
+                LAYER_EARS,
+                LAYER_ARMS,
+                LAYER_CAPE,
+                LAYER_ROBE,
+                LAYER_SKIRT,
+                LAYER_LEGS};
+                
+endfunction
+
+function GetValidEquip(who)
+
+         var itemarray:=array;
+         var validlayers:= GetEquipLayers();
+         var item:=struct;
+         item.+es;
+         item.+ref;
+         foreach layer in validlayers
+                item.ref := GetEquipmentByLayer (who, layer);
+                if(item.ref)
+                            item.es := CalculateEquipSlots(who, item.ref);
+                            itemarray.append(item);
+                endif
+         endforeach
+         return itemarray;
+         
+endfunction
+
+
+

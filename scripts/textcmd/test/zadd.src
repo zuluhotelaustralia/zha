@@ -1,0 +1,12 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_zadd( who, zdiff )
+	if (!checkStaff(who, "zadd", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    zdiff := CInt( zdiff );
+
+    MoveCharacterToLocation( who, who.x, who.y, who.z + zdiff );
+endprogram

@@ -1,0 +1,35 @@
+use uo;
+
+include "../../karmafame";
+include "include/cmdlevel_check";
+
+program textcmd_setkf( who, parm )
+	if (!checkStaff(who, "setkf", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	var tgt := TargetCoordinates( who );
+
+	if( tgt.mobile )
+		var mob := tgt.mobile;
+		var p:=SplitWords(parm);
+
+		var karma:=CInt(p[1]);
+		if(!karma)
+			SendSysMessage( who, "Usage: .setkf karmavalue famevalue");
+		endif
+
+		var fame:=CInt(p[2]);
+		if(!fame)
+			SendSysMessage( who, "Usage: .setkf karmavalue famevalue");
+		endif
+
+		SetKarma(mob, karma);
+		SetFame(mob, fame);
+
+		SetNewNotoName( mob );
+
+		SendSysMessage( who, "Setting " + mob.name + " right title: " + mob.title_prefix + " K:"+ GetKarma( mob ) +" F:" + GetFame( mob ) );
+	endif
+
+endprogram

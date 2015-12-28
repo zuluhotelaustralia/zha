@@ -1,0 +1,25 @@
+use os;
+use uo;
+
+include "include/cmdlevel_check";
+
+program setthekarma(who, amt)
+	if (!checkStaff(who, "karma", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+	if (amt=="") return; endif
+
+	SendSysMessage( who, "Target player." );
+
+    	var chr := Target( who );
+
+	if (chr)
+	  if (chr.acct)
+	  	SendSysMessage( who, "Old Karma: " + GetObjProperty(chr,"Karma") );
+	  	SendSysMessage( who, "New Karma: " + amt );
+	  	SetObjProperty(chr,"Karma",CInt(amt));
+	  endif
+	endif
+
+endprogram

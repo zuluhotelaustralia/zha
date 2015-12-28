@@ -1,0 +1,30 @@
+/* Champion Spawn Start Script          **
+** Used for Champion Spawn point system **
+** Seravy - seravy@gmail.com            */
+
+use uo;
+use os;
+
+
+program start_championspawn()
+  
+  syslog( "Starting Champion Spawnpoint System Refresh.");
+  var spawnRefresh := GetGlobalProperty("championSpawnRefresh");
+  if (spawnRefresh)
+    EraseGlobalProperty("championSpawnRefresh");
+  endif
+
+  var spawns := GetGlobalProperty("championSpawns");
+  if (!spawns)
+    spawns := {};
+  endif
+  var spawnObject;
+  foreach spawn in spawns
+    spawnObject := SystemFindObjectBySerial(spawn);
+    if (spawnObject)
+      EraseObjProperty( spawnObject, "runningscript");
+    endif
+  endforeach
+
+  start_script(":championspawn:refreshspawns");
+endprogram

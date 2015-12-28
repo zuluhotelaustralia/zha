@@ -1,0 +1,48 @@
+use uo;
+use os;
+include "include/random";
+include "include/cmdlevel_check";
+
+program dicerollcheck( who, text )
+	if (!checkStaff(who, "dicerollcheck", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+	set_script_option( SCRIPTOPT_NO_RUNAWAY, 1 );
+
+	var splited := SplitWords( text );
+
+	if( !RandomDiceStr( splited[1] ) )
+		SendSysMessage( who, "You must choose a dice string." );
+		SendSysMessage( who, "Structure is .dicerolltoo <dice string> <number of rolls>" );
+		return;
+	endif
+
+	var num_rolls := CInt( splited[2] );
+	if( !num_rolls )
+		SendSysMessage( who, "You must enter the number of roll." );
+		return;
+	endif
+
+
+	SendSysMessage( who, "Testing RandomDiceStr( " + splited[1] + " )..." );
+	var results := {};
+	var count;
+
+	set_priority( 50 );
+	for( count := 1; count <= num_rolls; count := count + 1 )
+		var roll	:= CInt(RandomDiceStr( splited[1] ));
+		results[roll]	:= CInt(CInt(results[roll]) + 1);
+	endfor
+	set_priority( 1 );
+
+	var i;
+	for( i := 1; i <= len(results); i := i + 1 )
+		var percent := CDbl( CInt(results[i]) * 100 / num_rolls );
+		percent := CInt( percent * 100 );
+		percent := CDbl( percent / 100 );
+		PrintTextAbovePrivate( who, "Result " + i + ", (" + percent + "%)", who );
+		sleep( 3 );
+	endfor
+
+endprogram

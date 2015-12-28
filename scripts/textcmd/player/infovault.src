@@ -1,0 +1,21 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// 
+/////////////////////////////////////////////////////////////////////////////
+
+use uo;
+use os;
+
+include "include/packets";
+
+program openinfovault( who )
+	
+	SendSysMessage( who, "Now opening Zulu Hotel Australia Archives." );
+
+	Detach();
+
+	sleep(1);
+
+	OpenWebSite(who, "http://seravy.autodeist.com/infovault/");
+
+endprogram

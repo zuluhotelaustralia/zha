@@ -1,0 +1,9 @@
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setdex( who, newdex )
+	if (!checkStaff(who, "setdex", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SetBaseDexterity(who, CInt(newdex) );
+endprogram

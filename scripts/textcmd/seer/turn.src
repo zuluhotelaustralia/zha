@@ -1,0 +1,13 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_turn( who, newfacing )
+	if (!checkStaff(who, "turn", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+    newfacing := CInt( newfacing );
+    var what := Target( who );
+    what.facing := newfacing;
+endprogram

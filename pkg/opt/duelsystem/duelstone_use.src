@@ -1,0 +1,342 @@
+use uo;
+use os;
+
+include "include/dotempmods";
+include "include/eventid";
+include "duelstone";
+
+var battleArea, arenaArea, teamOneArea, teamTwoArea, exitArea, linkedBoard;
+var gameserial, gamename, gametype, GOlooting, GOdispel;
+var teamOneArray := {}, teamTwoArray := {};
+
+const SETUPTARGETSLEEP := 5;
+const SLEEPMSDURATION := 100;
+const EVENTDISTANCE := 100;
+const TIMELIMITTOSETUP := 60; // Seconds
+var TIMELIMIT := (60 * 10);
+
+program duelstone_use(who, stone)
+  detach();
+
+  if(!GetObjProperty(stone, "setup")) // Stone Setup
+    if (who.cmdlevel > 2)
+      SetupStone(who, stone);
+      return;
+    else
+      SendSysMessage(who, "This stone has yet to be set up. Please contact a GM.");
+      return;
+    endif
+  endif
+
+  if(!GetObjProperty(stone, "#controlready")) // Control Script Ready?
+    SendSysMessage(who, "The duel system is still setting up.");
+    return;
+  endif
+
+  if(!GetObjProperty(stone, "#GameInProgress") && ((GetObjProperty(stone, "#startSetupTime") + TIMELIMITTOSETUP) < ReadGameClock()))
+    EraseObjProperty(stone, "#inuse");
+    eraseGame(stone);
+  endif
+
+  if(GetObjProperty(stone, "#GameInProgress")) // Observe whats going on with the match
+    var stopLoop := 0;
+    var thisGameSerial;
+    loadgame(stone);
+    thisGameSerial := gameserial;
+    while(!stopLoop && who && GetObjProperty(stone, "#GameInProgress"))
+      stopLoop := GameDetails(who, stone, DUELSYS_GUMP_OBSERVE);
+      loadgame(stone);
+      if(gameserial != thisGameSerial)
+        SendMsg(who, "This game has finished.", DUELSYS_MSG_INFO);
+        return 0;
+      endif
+    endwhile
+    return 0;
+  endif
+
+  if(GetObjProperty(stone, "#inuse"))  // If its in use, Tell them it is.
+    SendSysMessage(who, "The duel is currently activated by "+getNameFromSerial(GetObjProperty(stone, "#inuse"))+"!");
+    return;
+  endif
+
+  SetObjProperty(stone, "#inuse", who.serial);
+  SetObjProperty(stone, "#pid", Getpid());
+  SetObjProperty(stone, "#bcColor", GetRandomColor());
+  var startSetupTime := ReadGameClock();
+  SetObjProperty(stone, "#startSetupTime", startSetupTime);
+
+  eraseGame(stone);
+  loadAreas(stone);
+  var validSetup := setUpNewGame(who);
+  if (checkSetupTimeExpired(who, startSetupTime));
+    return 0;
+  endif
+
+  if(validSetup)
+    var thisGameSerial;
+    teamOneArray.append({who.serial, 1}); // Add creater to Game.
+    gameserial := RandomInt(1000000000); // Create random serial.
+    thisGameSerial := gameserial;
+    savegame(stone);
+    SetObjProperty(stone, "#PreGameInProgress", 1);
+    broadcastDuelArea(who.name+" has created a "+getGameTypeString(gametype)+" duel '"+gamename+"'", stone);
+
+    var validpregame := 0;
+    while(!validpregame && who)
+      loadgame(stone);
+      validpregame := GameDetails(who, stone);
+      validpregame := CheckPlayersLeftArena(getPerson(GetObjProperty(stone, "#inuse")), validpregame);
+      if (checkSetupTimeExpired(who, startSetupTime));
+        return 0;
+      endif
+    endwhile
+
+    if (validpregame == 1)
+      RegisterForSpeechEvents(stone, EVENTDISTANCE);
+      EnableEvents(SYSEVENT_SPEECH, EVENTDISTANCE);
+      EnableEvents(SYSEVENT_DAMAGED, EVENTDISTANCE);
+      var ev;
+      var gameValid := StartGame(stone);
+      EraseObjProperty(stone, "#startSetupTime");
+      EraseObjProperty(stone, "#PreGameInProgress");
+      SetObjProperty(stone, "#startTime", ReadGameClock());
+      while(gameValid)
+        ev := os::wait_for_event(1);
+        if(ev)
+          case(ev.type)
+            SYSEVENT_SPEECH:
+              ProcessSpeech(ev, stone);
+            SYSEVENT_PLAYERDUELDEATH:
+              playerExitsBattle(ev.source, stone);
+          endcase
+        endif
+        gameValid := checkGameStatus(stone);
+        saveGame(stone);
+        sleepms(SLEEPMSDURATION);
+      endwhile
+      endTheGame(stone);
+    endif
+  endif
+
+  EraseObjProperty(stone, "#inuse");
+  eraseGame(stone);
+endprogram
+
+
+
+
+
+
+
+
+
+
+
+
+//**************************** Game related functions ********************************//
+function startGame(stone)
+  var newTeamOne := {};
+  foreach person in teamOneArray
+    if (person[2] == 1)
+      newTeamOne.append(person);
+    endif
+  endforeach
+  teamOneArray := newTeamOne;
+  var newTeamTwo := {};
+  foreach person in teamTwoArray
+    if (person[2] == 1)
+      newTeamTwo.append(person);
+    endif
+  endforeach
+  teamTwoArray := newTeamTwo;
+
+  savegame(stone);
+  SetObjProperty(stone, "#GameInProgress", 1);
+
+  broadcastDuelArea("A "+getGameTypeString(gametype)+" Duel has started by "+getNameFromSerial(GetObjProperty(stone, "#inuse"))+"!", stone);
+  broadcastDuelArea("Team One: "+getNameListOfTeam(teamOneArray), stone);
+  broadcastDuelArea("Team Two: "+getNameListOfTeam(teamTwoArray), stone);
+
+  var spot;
+  foreach player in getTeamAsObjects(teamOneArray)
+    spot := pickRandomSpotInArea(teamOneArea);
+    MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+    SetObjProperty(player, "#duel", stone.serial);
+    if (GOdispel)
+      WipeMods(player);
+      RefreshPlayer(player);
+    endif
+    player.paralyzed := 0;
+    player.frozen := 1;
+
+    if (player.criminal)
+      SetObjProperty(player, "#WasCriminal", 1);
+    endif
+    if (player.murderer)
+      SetObjProperty(player, "#WasMurderer", 1);
+    endif
+    player.setcriminal(1);
+    player.setmurderer(0);
+  endforeach
+
+  foreach player in getTeamAsObjects(teamTwoArray)
+    spot := pickRandomSpotInArea(teamTwoArea);
+    MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+    SetObjProperty(player, "#duel", stone.serial);
+    if (GOdispel)
+      WipeMods(player);
+    endif
+    RefreshPlayer(player);
+    player.paralyzed := 0;
+    player.frozen := 1;
+
+    if (player.criminal)
+      SetObjProperty(player, "#WasCriminal", 1);
+    endif
+    if (player.murderer)
+      SetObjProperty(player, "#WasMurderer", 1);
+    endif
+    player.setmurderer(1);
+    player.setcriminal(0);
+  endforeach
+
+  msgPlayers("Ready?");
+  sleep(1);
+  var i;
+  for (i := 3; i > 0; i := i - 1)
+    msgPlayers(i+"...");
+    sleep(1);
+  endfor
+  msgPlayers("GO!");
+
+  foreach player in getPlayersObjects(teamOneArray, teamTwoArray)
+    player.frozen := 0;
+  endforeach
+
+  return 1;
+endfunction
+
+function checkGameStatus(stone)
+  if (!GetObjProperty(stone, "#GameInProgress"))
+    broadcastDuelArea("Oh no! The game has been interupted!", stone);
+    return 0;
+  endif
+
+  if ((GetObjProperty(stone, "#startTime")+TIMELIMIT) < ReadGameClock())
+    broadcastDuelArea("The Game limit of "+(TIMELIMIT/60)+"min has exceeded!", stone);
+    return 0;
+  endif
+
+  foreach player in getAliveObjects(teamOneArray, teamTwoArray)
+    if(!(player in EnumerateOnlineCharacters()))
+      if (GOlooting)
+        ApplyRawDamage(player, GetHp(player)+3);
+      else
+        playerExitsBattle(player, stone);
+      endif
+      Commentation(stone, 2, player.name);
+    elseif(!IsPersonInArea(player, BattleArea))
+      var spot := pickRandomSpotInArea(teamTwoArea);
+      if(getPlayersTeam(player.serial, teamOneArray, teamTwoArray) == 1)
+        spot := pickRandomSpotInArea(teamOneArea);
+      endif
+      MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+      if (GOlooting)
+        ApplyRawDamage(player, GetHp(player)+3);
+      else
+        playerExitsBattle(player, stone);
+      endif
+      Commentation(stone, 3, player.name);
+    endif
+  endforeach
+
+  if (getAlivePlayersOnTeam(teamOneArray).size() < 1)
+    broadcastDuelArea("Team Two ("+getNameListOfTeam(teamTwoArray)+") is victorious!", stone);
+    return 0;
+  elseif (getAlivePlayersOnTeam(teamTwoArray).size() < 1)
+    broadcastDuelArea("Team One ("+getNameListOfTeam(teamOneArray)+") is victorious!", stone);
+    return 0;
+  endif
+  return 1;
+endfunction
+
+function endTheGame(stone)
+  foreach player in getAliveObjects(teamOneArray, teamTwoArray)
+    var spot := pickRandomSpotInArea(exitArea);
+    MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+    EraseObjProperty(player, "#duel");
+    RecordStat(player.serial, 1);
+
+    player.setmurderer(0);
+    player.setcriminal(0);
+    if (GetObjProperty(stone, "#WasCriminal"))
+      player.setcriminal(1);
+    endif
+    if (GetObjProperty(stone, "#WasMurderer"))
+      player.setmurderer(1);
+    endif
+    endforeach
+
+  EraseObjProperty(stone, "#GameInProgress");
+  EraseObjProperty(stone, "#PreGameInProperties");
+  EraseObjProperty(stone, "#bcColor");
+  EraseObjProperty(stone, "#pid");
+  EraseObjProperty(stone, "#startTime");
+  EraseObjProperty(stone, "#startSetupTime");
+  return 0;
+endfunction
+
+function playerExitsBattle(player, stone)
+  stone := 0;
+  var spot := pickRandomSpotInArea(exitArea);
+  MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+  setMemberStatus(player.serial, -1, teamOneArray, teamTwoArray);
+  EraseObjProperty(player, "#duel");
+  if (player.posioned)
+    CurePoison(player, SFX_SPELL_CURE, "*Cured*" );
+  endif
+  RefreshPlayer(player);
+  player.warmode:= 0;
+  RecordStat(player.serial, 0);
+
+  player.setmurderer(0);
+  player.setcriminal(0);
+  if (GetObjProperty(stone, "#WasCriminal"))
+    player.setcriminal(1);
+  endif
+  if (GetObjProperty(stone, "#WasMurderer"))
+    player.setmurderer(1);
+  endif
+endfunction
+//**************************************************************************************//
+
+
+
+
+//**************************** Processing Functions ****************************//
+function ProcessSpeech(event, stone)
+  var text := lower(event.text); 
+  var person := event.source; 
+  if(text)
+  if(text == "i wish to exit")
+      if (IsPersonInArea(person, battleArea))
+        if (GOlooting)
+          ApplyRawDamage(person, GetHp(person)+3);
+        else
+          playerExitsBattle(person, stone);
+        endif
+      endif
+    endif
+  endif
+endfunction 
+//******************************************************************************//
+
+//****************************** Checking Functions *****************************//
+function checkSetupTimeExpired(who, startSetupTime)
+  if((startSetupTime + TIMELIMITTOSETUP) < ReadGameClock())
+    SendMsg(who, "The time given to set up a game has expired. Please recreate it.", DUELSYS_MSG_ERROR);
+    return 1;
+  endif
+  return 0;
+endfunction
+//******************************************************************************//

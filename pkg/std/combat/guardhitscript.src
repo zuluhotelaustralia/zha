@@ -1,0 +1,23 @@
+use uo;
+use os;
+include "include/attributes";
+
+
+program guardhitscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+
+	ApplyRawDamage( defender, CInt(GetHp(defender) + 3) );
+	SetObjProperty( defender, "guardkill", 1 );
+
+endprogram

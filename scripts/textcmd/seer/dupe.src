@@ -1,0 +1,23 @@
+use uo;
+
+include "include/itemutil";
+include "include/cmdlevel_check";
+
+program textcmd_dupe( who )
+	if (!checkStaff(who, "dupe", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+	SendSysMessage( who, "What item do you want to make a copy of?" );
+	var item := Target( who );
+	if (item.objtype)
+    		var dupe := CreateItemInBackpack( who, item.objtype, item.amount );
+		DupeItem( item, dupe );
+		if( item.usescript )
+			dupe.usescript := item.usescript;
+		endif
+		SetObjProperty(dupe,"LFucker",who.serial + " - " + who.name);
+
+	endif
+
+endprogram

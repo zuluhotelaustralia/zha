@@ -1,0 +1,9 @@
+use uo; 
+use os; 
+
+include "include/packets";
+
+
+program webopen( who, text) 
+    OpenWebSite(who, text); 
+endprogram 

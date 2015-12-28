@@ -1,0 +1,69 @@
+/* Psionics Spell - Mind Set **
+** Mark.                     **
+** Seravy - seravy@gmail.com */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/objtype";
+include "include/areas";
+include "include/client";
+include "../pkg/std/housing/utility";
+
+const SPELL_ID := SPELL_ID_MINDSET;
+
+program cast_mindset( caster )
+  var circle := GetCircle( SPELL_ID);
+
+  if( IsForbiddenAreaToRecallTo( caster, caster.x, caster.y ) )
+    SendSysMessage( caster, "You can't seem to project your images here." );
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  endif
+
+  var multi := caster.multi;
+  if( multi )
+    if( !IsOwner( caster, multi ) )
+      if( !IsFriend( caster, multi ) )
+        SendSysMessage( caster, "You can't seem to remember this house!" );
+        EraseObjProperty( caster, "#Casting");
+        return;
+      endif
+    endif
+  endif
+
+  SendSysMessage( caster, "Select a rune or yourself to project this image on." );
+  var cast_on := CanTargetThing(caster, circle, TGTOPT_CHECK_LOS );
+
+  if( !cast_on )
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif(cast_on == caster)
+    SendSysMessage(caster, "You save the location in your mind!");
+  elseif( !Accessible( caster, cast_on ) )
+    SendSysMessage( caster, "You can't reach that." );
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif( cast_on.objtype != UOBJ_RUNE)
+    SendSysMessage(caster, "You can only project images on recall runes and yourself!");
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif(!ReserveItem( cast_on ))
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  endif
+
+  PlayObjectCenteredEffect(caster, FX_SPELL_MINDSET, SPEED_SPELL_MINDSET, LOOP_SPELL_MINDSET);
+  PlaySoundEffect(caster, SFX_SPELL_MINDSET);
+
+  if (cast_on == caster)
+    SetObjProperty(caster, "mindsetlocation", {caster.x, caster.y, caster.z});
+  else
+    SetObjProperty(cast_on, "x", caster.x);
+    SetObjProperty(cast_on, "y", caster.y);
+    SetObjProperty(cast_on, "z", caster.z);
+    SetName(cast_on, "a marked recall rune");
+  endif
+  EraseObjProperty( caster, "#Casting");
+endprogram

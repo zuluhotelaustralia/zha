@@ -1,0 +1,31 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/random";
+include "include/cmdlevel_check";
+
+program textcmd_makerand( who, howmany )
+	if (!checkStaff(who, "makerand", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    howmany := CInt( howmany );
+    SendSysMessage( who, "Creating " + howmany + " items" );
+   
+    set_priority( 50 );
+   
+    var x, y, z, item;
+
+    while (howmany > 0)
+        x := Random( 6144 );
+        y := Random( 4096 );
+        z := GetMapInfo( x, y ).z;
+        item := CreateItemAtLocation( x, y, z, 0xf7b, 1 );
+        if (item)
+            item.decayAt := 0;
+            howmany := howmany - 1;
+        endif
+        DestroyItem( item );
+    endwhile // FIXME if 'endfor' here, prints an incorrect error!
+    SendSysMessage( who, "Done creating items!" );
+endprogram

@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+program start_fscmanager()
+	var pid := start_script("fscmanager").pid;
+	if( pid )
+		SetGlobalProperty( "#FSCManagerPID", pid );
+		syslog( "FSC Manager started. PID = " + pid );
+	else
+		syslog( "COULDN'T START FSC MANAGER!!!" );
+	endif
+endprogram

@@ -1,0 +1,556 @@
+use uo;
+use os;
+
+include "include/gumps";
+include "include/yesno";
+include "war";
+
+program use_war_ball(who, ball)
+	
+	if (who.cmdlevel>=2)
+		GMGump(who, ball);
+	endif
+	
+endprogram
+
+
+
+function GMGump(who, ball)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 360, 330);
+		
+		
+	GFTextMid(10, 20, 280, 53, "War: " + GetWarTitle(ball));
+
+	GFTextLine(90, 50, 5, "Help");
+	GFTextLine(90, 80, 5, "Set-up");
+	GFTextLine(90, 110, 5, "Player Management");
+	GFTextLine(90, 140, 5, "War status");
+	GFTextLine(90, 170, 5, "Send War message");
+	GFTextLine(90, 230, 5, "Exit");
+
+	
+	var helpBtn := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setupBtn := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var pmBtn := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var warstatBtn := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var warmessagebtn := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	
+	var choice := GFSendGump(who);
+
+	
+	if (choice[helpBtn.keyid])
+		ShowGMHelp(who);
+	elseif (choice[setupBtn.keyid])
+		SetupGump(who, ball);
+	elseif(choice[pmBtn.keyid])
+		PlayerManagement(who, ball);
+	elseif(choice[warstatBtn.keyid])
+		WarSummary(who, ball);
+	elseif(choice[warmessagebtn.keyid])
+		SendWarMessage(who, ball);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+
+endfunction
+
+function SetupGump(who, ball)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 660, 660);
+		
+	GFTextMid(10, 20, 280, 53, "War ball setup menu");
+	var regString, warString;
+	
+	if (IsWarRegistrationOpen(ball))
+		regString := "Open";
+	else
+		regString := "Closed";
+	endif
+	
+	if (IsWar(ball))
+		warString := "War is underway!";
+	else
+		warString := "At peace";
+	endif
+	
+	GFTextLine(90, 80, 53,  "* War General");
+	GFTextLine(90, 110, 5, "Set War Title - currently: " + GetWarTitle(ball));
+	GFTextLine(90, 140, 5, "Set War Introduction - click here to see current: ");
+	GFTextLine(90, 180, 53, "* War Teams/Stones ");
+	GFTextLine(90, 210, 5, "Place War Team 1 Stone");
+	GFTextLine(90, 240, 5, "Place War Team 2 Stone");	
+	GFTextLine(90, 270, 5, "Set War Team 1 Name - currently: " + GetWarTeamName(ball, 1));
+	GFTextLine(90, 300, 5, "Set War Team 2 Name - currently: " + GetWarTeamName(ball, 2));
+	GFTextLine(90, 330, 5, "Set War Team 1 Registration condition - currently: " + GetWarRegistrationConditionString(ball, 1));
+	GFTextLine(90, 360, 5, "Set War Team 2 Registration condition - currently: " + GetWarRegistrationConditionString(ball, 2));
+	GFTextLine(90, 390, 53, "* Registration - currently: " + regString);
+	GFTextLine(90, 420, 5, "Open Registration");
+	GFTextLine(90, 450, 5, "Close Registration");
+	GFTextLine(90, 480, 5, "Set AWOL Time - currently: " + GetAWOLTime(ball)/3600 + " hours");	
+	GFTextLine(90, 510, 53, "* War Happening? - currently: " + warString);
+	GFTextLine(90, 540, 5, "Start War");
+	GFTextLine(90, 570, 5, "End War");
+	GFTextLine(90, 620, 5, "Exit");
+
+	var setWarTitleBtn := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setWarIntroBtn := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var seeWarIntroBtn := GFButtonID( 450, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var plcTeam1 := GFButtonID( 60, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var plcTeam2 := GFButtonID( 60, 245, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setWTName1 := GFButtonID( 60, 275, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setWTName2 := GFButtonID( 60, 305, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setWTReg1 := GFButtonID( 60, 335, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setWTReg2 := GFButtonID( 60, 365, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var openReg := GFButtonID( 60, 425, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var closeReg := GFButtonID( 60, 455, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var setawol := GFButtonID( 60, 485, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var startWarBtn := GFButtonID( 60, 545, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var endWarBtn := GFButtonID( 60, 575, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 625, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	
+	var choice := GFSendGump(who);
+	
+	if (choice[setWarTitleBtn.keyid])
+		setWarBallTitle(ball, who);
+	elseif(choice[setWarIntroBtn.keyid])
+		changeintrogump(who, ball)	;
+	elseif(choice[seeWarIntroBtn.keyid])
+		WarIntroGump(ball, who);
+	elseif(choice[plcTeam1.keyid])
+		PlaceWarTeamStone(ball, who, 1);
+	elseif(choice[plcTeam2.keyid])
+		PlaceWarTeamStone(ball, who, 2);
+	elseif(choice[setWTName1.keyid])
+		SetAWarTeamName(ball, who, 1);
+	elseif(choice[setWTName2.keyid])
+		SetAWarTeamName(ball, who, 2);
+	elseif(choice[setWTReg1.keyid])
+		WarRegistrationConditionGump(who, ball, 1);
+	elseif(choice[setWTReg2.keyid])
+		WarRegistrationConditionGump(who, ball, 2)	;
+	elseif(choice[openReg.keyid])
+		OpenTheReg(ball, who);
+	elseif(choice[closeReg.keyid])
+		CloseTheReg(ball, who);
+	elseif(choice[setawol.keyid])
+		setAWOLTimeout(ball, who);
+	elseif(choice[startWarBtn.keyid])
+		StartTheWar(ball, who);
+	elseif(choice[endWarBtn.keyid])
+		EndTheWar(ball, who);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+
+endfunction
+
+function OpenTheReg(ball, who)
+	SendSysMessage(who, "Registration has been opened" , 3, 53);
+	OpenWarRegistration(ball);
+endfunction
+
+function CloseTheReg(ball, who)
+	SendSysMessage(who, "Registration is now closed" , 3, 53);
+	CloseWarRegistration(ball);
+endfunction
+
+function StartTheWar(ball, who)
+	if (IsWar(ball))
+		SendSysMessage(who, "This war is already in progress!" , 3, 53);
+		return;
+	endif
+	if (GetObjProperty(ball, "startedOnce"))
+		SendSysMessage(who, "This war has already been started and ended before. You will need to clear all player data and ask all players to reregister to start this war again." , 3, 53);
+		return;
+	endif
+	SendSysMessage(who, "The war has been started" , 3, 53);
+	StartWar(ball);
+	SetObjProperty(ball, "startedOnce", 1);
+endfunction
+
+function EndTheWar(ball, who)
+	If (! YesNo(who, "Really end the war?"))
+		return;
+	endif
+	EndWar(ball);
+endfunction
+
+
+function setWarBallTitle(ball, who)
+	var title := SendTextEntryGump( who, "Enter War Title. e.g. War of Darkess, Battle of Archmagi...");
+	if (title)
+		SetWarTitle(title, ball);
+	endif
+endfunction
+
+function setAWOLTimeout(ball, who)
+	var awoltime := SendTextEntryGump( who, "Enter the number of hours within which a player has to kill an enemy before AWOLed");
+	if (CInt(awoltime))
+		SetAWOLTime(CInt(awoltime), ball);
+		SendSysMessage(who, "AWOL time now : " + awoltime + " hours");
+	endif
+endfunction
+
+
+
+
+function SetAWarTeamName(ball, who, warnumber)
+	var tname := SendTextEntryGump( who, "Enter a SHORT name for war team " + warnumber);
+	if (tname)
+		SetWarTeamName(ball, warnumber, tname);
+	endif
+	var thatWarStone := GetWarStone(ball, warnumber);
+	if (thatWarStone)
+		thatWarStone.name := thatWarStone.name + "War Stone - " + GetWarTeamName(ball, warnumber);
+	endif
+endfunction
+
+function PlaceWarTeamStone(ball, who, warTeamNumber)
+	var oldstone := GetWarStone(ball, warTeamNumber);
+	if (oldstone)
+		SendSysMessage(who, "A war stone for team " + warTeamNumber + " already exists. Delete that one?" , 3, 53);
+		if (!YesNo(who, "Delete Stone " + warTeamNumber))
+			return;		
+		endif
+		EraseObjProperty(ball, "warStoneSerial"+warTeamNumber);
+		DestroyItem( oldstone );
+	endif
+
+	SendSysMessage(who, "Select a location for the warstone", 3, 53);
+	var loc := TargetCoordinates(who);
+	if (!loc)
+		return;
+	endif
+	var stone := CreateItemAtLocation( loc.x, loc.y, loc.z, 0x9);
+	//set stone props
+	SetWarBallSer(stone, ball.serial);
+	SetStoneTeamNumber(stone, warTeamNumber);
+	//set ball props
+	SetWarStoneSer(ball, stone.serial, warTeamNumber);
+	if (GetWarTeamName(ball, warTeamNumber))
+		stone.name := stone.name + "War Stone - " + GetWarTeamName(ball, warTeamNumber);
+	endif
+endfunction
+
+function PlayerManagement(who, ball)
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 230, 360);
+		
+	GFTextMid(10, 20, 230, 10, "Player Management");
+
+	
+	GFTextLine(30, 100, 5, "Manage Registered Players");
+	GFTextLine(30, 130, 5, "Clear all registered players");
+	GFTextLine(30, 340, 5, "Exit Player Management Gump");
+	
+
+	var manPlayersbutton  := GFButtonID( 10, 105, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var clearPlayersButton  := GFButtonID( 10, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitPlAdminButton  := GFButtonID( 10, 345, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+
+	var choice := GFSendGump(who);
+
+	if (choice[manPlayersbutton.keyid])
+		DisplayGMPlayersGump(who, ball);
+	elseif (choice[clearPlayersButton.keyid])
+		ClearPlayerWData(ball);
+	elseif (choice[exitPlAdminButton.keyid])
+		return;
+	endif
+endfunction
+
+function DisplayGMPlayersGump(who, ball)
+	var page:=0;
+	var start:=1;
+	var retrieve:=21;//retrieves 21 max.. displays 20
+	//if 21 available it will allow next to be available
+	//for retrieval of next 20 records
+	
+	var players:=GetRegisteredWarPlayers(ball, start, retrieve);
+
+	var gumpresult := GMplayersInfoGump(who, players, page, "Registered Players");
+	while (gumpresult)
+		if (gumpresult<=20)
+		//show character changing gump
+			GMPlayerChangesGump(who, ball, players[gumpresult]);
+			return;
+			//gumpresult := GMplayersInfoGump(who, players, page , "Registered Players");
+		endif
+		if (gumpresult==21)//prev
+			if (page>0)
+				page:=page-1;
+				start:=start-(retrieve-1);
+				players:=GetRegisteredWarPlayers(ball, start, retrieve);
+				gumpresult := GMplayersInfoGump(who, players, page , "Registered Players");
+			endif
+		elseif(gumpresult==22)//next
+			if (players.size()>20) 
+				page:=page+1;
+				start:=start+(retrieve-1);
+				players:=GetRegisteredWarPlayers(ball, start, retrieve);
+				gumpresult := GMplayersInfoGump(who, players, page , "Registered Players");
+			endif
+		endif
+	endwhile
+endfunction
+
+function GMplayersInfoGump(who, players, page, title)
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SCROLL, 400, 500);
+	GFTextMid(100, 10, 200, 10, title);
+	
+	var i;
+	var y := 40;
+	
+	//because 21 max are taken but 20 only are to be displayed
+	//21st indicates more available for next gump
+	//so:
+	var sSize;
+	if (players.size()>20)
+		sSize:=20;
+	else
+		sSize:=players.size();
+	endif
+	
+	//Broadcast ("size of player array: " + sSize);
+	
+	var hButton:=array;
+	var tempstr;
+	for(i:=1;i<=sSize;i:=i+1)
+		
+		tempstr:= players[i].name;
+		
+		GFTextLine(50, y, 5, tempstr);
+		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		y:=y+20;
+	endfor
+	
+	//prev and next page buttons
+	var prevButton, nextButton;
+	
+	if (page>0)
+		GFTextLine(20, 480, 4, "PREVIOUS" );
+		prevButton := GFButtonID(10, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+	
+	if (players.size()>20)
+		GFTextLine(280, 480, 4, "NEXT" );
+		nextButton := GFButtonID(270, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+	
+	var choice := GFSendGump(who);
+	
+	//return values
+	if (choice[prevButton.keyid])
+		return 21;
+	endif
+	
+	if (choice[nextButton.keyid])
+		return 22;
+	endif
+	
+	var counter:=0;
+	
+	foreach b in hButton
+		counter:=counter+1;
+   	if (choice[b.keyid])
+			return counter;
+		endif
+	endforeach
+	return 0;
+endfunction
+
+
+function GMPlayerChangesGump(who, ball, player)
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 230, 400);
+		
+	GFTextMid(10, 20, 230, 53, "Player: " + player.name);
+	
+	var playerdata := GetPlayerWData(ball, player.serial);	
+	
+	GFTextLine(30, 40, 5, "War team: " + playerdata.team);
+	GFTextLine(30, 60, 5, "Kills: " + playerdata.kills);
+	GFTextLine(30, 80, 5, "Battlepoints: " + playerdata.battlepoints);
+	GFTextLine(30, 100, 5, "Killed Status: " + playerdata.killed);
+	GFTextLine(30, 120, 5, "AWOL Time: " + playerdata.AWOLTime);
+	GFTextLine(30, 140, 5, "Players killed: ");
+	var y:=160;
+	var tempKilledPNames:=array;
+	tempKilledPNames:=playerdata.playersKilled;
+	foreach p in tempKilledPNames
+		GFTextLine(30, y, 5, "   " + p);
+		y:=y+20;
+	endforeach
+
+	GFTextLine(30, y+30, 5, "Exit Player Changes");
+
+		
+	var exitPlayerGumpbutton  := GFButtonID( 10,  y+30, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if (choice[exitPlayerGumpbutton.keyid])
+		return;
+	endif
+	
+endfunction
+
+function WarRegistrationConditionGump(who, ball, teamnum)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 600, 600);
+	GFTextMid(10, 15, 280, 10, "Registration conditions");	
+	GFTextLine(10, 30, 53, "Current registration condition for teamnumber : " + teamnum + " is " + GetWarRegistrationConditionString(ball, teamnum));
+
+	GFTextLine(90, 50, 5, "No Registration Condition - everyone can join");
+	GFTextLine(90, 110, 5, "Bards only");
+	GFTextLine(90, 170, 5, "Mages only");
+	GFTextLine(90, 200, 5, "Rangers only");
+	GFTextLine(90, 230, 5, "Thieves only");
+	GFTextLine(90, 260, 5, "Warriors only");
+	GFTextLine(90, 290, 5, "Humans only");
+	GFTextLine(90, 320, 5, "Elves only");
+	GFTextLine(90, 350, 5, "Dark-Elves only");
+	GFTextLine(90, 380, 5, "Goblins only");
+	GFTextLine(90, 410, 5, "Barbarians only");
+	GFTextLine(90, 440, 5, "Dwarves only");
+
+	GFTextLine(90, 570, 5, "Exit");
+	
+	var noregButton := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var bardsButton := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var magesButton := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var rangersButton := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var thievesButton := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var warriorsButton := GFButtonID( 60, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var humansButton := GFButtonID( 60, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var elvesButton := GFButtonID( 60, 325, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var delvesButton := GFButtonID( 60, 355, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var goblinsButton := GFButtonID( 60, 385, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var barbsButton := GFButtonID( 60, 415, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var dwarvesButton := GFButtonID( 60, 445, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var exitButton := GFButtonID( 60, 575, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if (choice[noregButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_NONE, teamnum);
+	elseif(choice[bardsButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_BARD, teamnum);
+	elseif(choice[magesButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_MAGE, teamnum);
+	elseif(choice[rangersButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RANGER, teamnum);
+	elseif(choice[thievesButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_THIEF, teamnum);
+	elseif(choice[warriorsButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_WARRIOR, teamnum);
+	elseif(choice[humansButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RACE, teamnum);
+		SetWarRaceRegistrationCondition("human", ball, teamnum);
+	elseif(choice[elvesButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RACE, teamnum);
+		SetWarRaceRegistrationCondition("Elf", ball, teamnum);
+	elseif(choice[delvesButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RACE, teamnum);
+		SetWarRaceRegistrationCondition("Dark-Elf", ball, teamnum);
+	elseif(choice[goblinsButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RACE, teamnum);
+		SetWarRaceRegistrationCondition("Goblin", ball, teamnum);
+	elseif(choice[barbsButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RACE, teamnum);
+		SetWarRaceRegistrationCondition("Barbarian", ball, teamnum);
+	elseif(choice[dwarvesButton.keyid])
+		SetWarRegistrationCondition(ball, WAR_REG_RACE, teamnum);
+		SetWarRaceRegistrationCondition("Dwarf", ball, teamnum);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+endfunction
+
+function changeintrogump(who, ball)	
+	var intro:=EnterBigMessage(who, "Enter an intro for the war");
+	SetWarIntro(ball, intro);
+endfunction
+
+function SendWarMessage(who, ball)
+	var mtext := SendTextEntryGump(who, "War message:");
+	BroadcastToWarParticipants(ball, "War broadcast: " + mtext);
+	SendSysMessage(who, "War broadcast: " + mtext, 3 ,53);
+endfunction
+
+function EnterBigMessage(who, title)
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 350, 350);
+		
+	GFTextMid(30, 5, 230, 10, title);
+	GFTextMid(30, 30, 230, 10, "Enter War Introduction:");
+
+	var textbox:=array;
+	textbox.append(GFTextEntry(30, 50, 300, 20, 0, ""));
+	textbox.append(GFTextEntry(30, 70, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 90, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 110, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 130, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 150, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 170, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 190, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 210, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 230, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 250, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 270, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 290, 300, 20, 0, "" ));
+
+	//GFResizePic( 10, 30, BKGND_GOLDTRIM, 250, 250);
+
+	
+	
+	GFTextLine(50, 300, 5, "OK");
+	GFTextLine(110, 300, 5, "Cancel");
+
+	var OKbutton  := GFButtonID( 40, 305, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var cancelbutton  := GFButtonID( 100, 305, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	var mystring :="";
+	var tempstr;
+	if (choice[OKbutton.keyid])
+		foreach m in textbox
+			//Broadcast(GFExtractData(m.keyid, choice));
+			var tempstr:=GFExtractData(m.keyid, choice);
+			if (tempstr)
+				mystring:=mystring + " " + tempstr;
+			endif
+		endforeach
+		return mystring;
+	endif
+	return 0;	
+endfunction
+
+
+function ShowGMHelp(who)
+	var helpstring:= "TO MAKE A NEW WAR:- Go to Setup. Enter a War Title, Titles for both War Teams, select Team" +
+	"registration conditions (optional), enter an introduction (dont forget to tell players when you intend on closing registration) "+ 
+	"place the war stones for each team. Open registration. When players have registered hit Start War (automatically closes registration) "+
+	"The war will automatically end when all players on one team have been eliminated. You can end it manually by hitting End War (not recommended). "+
+	" - TO RESTART AN EXISTING PREVIOUSLY RUN WAR:- Go to Player Management. Hit Clear Player Data. Go to Set up. Hit Open Registration... "+
+	"";
+	
+	SendStringAsTipWindow( who, helpstring );
+endfunction

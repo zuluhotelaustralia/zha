@@ -1,0 +1,23 @@
+use uo;
+
+include "include/client";
+include "include/zhacolors";
+include "include/cmdlevel_check";
+include "../pkg/opt/guildstone/guilduniform";
+
+
+program checkGuildUnis( who )
+	if (!checkStaff(who, "CheckGuildUnis", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	var gcolor;
+	
+	foreach g in ListGuilds()
+		gcolor:=CInt(g.getprop("guildunicolour"));
+		if (gcolor && isIllegalColour(gcolor))
+			SendSysMessage(who, g.getprop("name") + " using an illegal colour. set to 0");
+			g.setprop("guildunicolour", 0);
+			UpdateGuildUniformColours(g);
+		endif
+	endforeach
+endprogram

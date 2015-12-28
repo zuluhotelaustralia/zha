@@ -1,0 +1,29 @@
+use uo;
+use os;
+
+include "include/hitscriptinc";
+include "include/spelldata";
+
+program bomberhitscript (attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+	var spellparms := { };
+	spellparms[1] := "#MOB";
+	spellparms[2] := attacker;
+	spellparms[3] := defender;
+	spellparms[4] := 200;
+	spellparms[5] := 1;
+	
+	start_script( GetScript( 43 ), spellparms );
+	start_script( GetScript( 43 ), spellparms );
+	ApplyRawDamage( attacker, CInt(GetHp(attacker)+3) ); //kills the bomber
+endprogram

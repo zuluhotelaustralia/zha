@@ -1,0 +1,101 @@
+/* UnHoly Spell - Call the Dead        **
+** Summons an undead creature          **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/random";
+include "include/npcbackpacks";
+
+const SPELL_ID := SPELL_ID_CALLTHEDEAD;
+
+program cast_callthedead( parms )
+  var circle := GetCircle( SPELL_ID );
+  var caster;
+  var cast_loc;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_loc := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    if(GetObjProperty(caster, "#CallTheDeadDone"))
+      SendSysMessage(caster, "You cannot cast this yet.");
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    cast_loc := TargetCoordinates( caster);
+    if(!cast_loc)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (PreventedCastInGuardedArea(caster))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  SetObjProperty(caster, "#CallTheDeadDone", 1);
+
+  var sumcreaturetype;
+  case (random(2))
+    0: sumcreaturetype := "skeleton";
+    1: sumcreaturetype := "zombie";
+  endcase
+
+  var clevel:=GetClasseLevel(caster);
+  var sumcreature;
+  if(clevel == 8)
+    sumcreaturetype := "liche";
+  endif
+
+  set_critical( 1 );
+  sumcreature := CreateNpcFromTemplate( sumcreaturetype, cast_loc.x, cast_loc.y, cast_loc.z);
+  sumcreature.setmaster(caster);
+  sumcreature.setcriminal( 1);
+  SetObjProperty(sumcreature, "master",caster.serial);
+  SetObjProperty(sumcreature, "summoned",1);
+  SetObjProperty(sumcreature, "script", sumcreature.script );
+  SetObjProperty(sumcreature, "noloot", 1 );
+  sumcreature.script := "tamed";
+  
+
+ // SetBaseStrength( sumcreature, (GetBaseStrength( sumcreature ) + (clevel*10)));
+ // SetBaseDexterity( sumcreature, (GetBaseDexterity( sumcreature ) + (clevel*20)));
+ // SetBaseSkillBaseValue( sumcreature, SKILLID_WRESTLING, 1300 );
+  RestartScript(sumcreature);
+  set_critical( 0 );
+
+  PlaySoundEffect(caster, SFX_SPELL_CALLTHEDEAD);
+  EraseObjProperty( caster, "#Casting");
+
+  detach();
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_DEATHKNIGHT)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_NECROMANCER)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_NECROMANCY);
+  var duration := calcSummonDuration(skill, level);
+  sleep(duration );
+
+  PlaySoundEffect( sumcreature, 0x01fa );
+  PlayStationaryEffect( CInt(sumcreature.x), CInt(sumcreature.y), CInt(sumcreature.z), 0x3728, 0xa, 0xa );
+  var backpack := FindExistingPack( sumcreature.serial );
+  if( backpack )
+    foreach item in EnumerateItemsInContainer( backpack );
+      MoveItemToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, MOVEITEM_FORCELOCATION );
+    endforeach
+  endif
+
+  MoveCharacterToLocation( sumcreature, 0, 0, 0, MOVECHAR_FORCELOCATION );
+  ApplyRawDamage(sumcreature, GetHp(sumcreature) + 3);
+  EraseObjProperty( caster, "#CallTheDeadDone" );
+
+endprogram

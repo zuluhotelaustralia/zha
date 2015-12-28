@@ -1,0 +1,7 @@
+include "userlist";
+
+program LogOn( who )
+
+	UserList(EVID_USERLIST_ADD, who);
+
+endprogram

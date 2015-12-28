@@ -1,0 +1,7 @@
+include "userlist";
+
+program LogOff( who )
+
+	UserList(EVID_USERLIST_DEL, who);
+
+endprogram

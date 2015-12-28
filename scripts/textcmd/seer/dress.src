@@ -1,0 +1,751 @@
+use uo;
+use npc;
+
+include "include/client";
+include "include/attributes";
+include "include/random";
+
+include "include/cmdlevel_check";
+
+program Dress (mstr, text)
+	if (!checkStaff(mstr, "dress", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+
+	if (!text)
+		SendSysMessage(mstr,"Usage is: DRESS [CLASS]");
+		return;
+	endif
+
+	var me := Target( mstr, TGTOPT_NOCHECK_LOS );
+	if (!me)
+		return;
+	endif
+
+	if ((me.graphic != 400) && (me.graphic != 401))
+		return;
+	endif
+
+	text := lower(text);
+
+	var beard := GetEquipmentByLayer( me, LAYER_BEARD );
+	DestroyItem( beard );
+	var hair := GetEquipmentByLayer( me, LAYER_HAIR );
+	DestroyItem( hair );
+	foreach thing in ListEquippedItems(me)
+		if (thing.objtype != 0x0e75)
+			if (me.npctemplate)
+				DestroyItem(thing);
+			else
+				MoveItemToContainer(thing, me.backpack);
+			endif
+		endif
+	endforeach
+
+	var gender := 0;
+	if (me.graphic == 400)
+		gender := 1;
+	endif
+
+	PlaceHair(me,gender);
+
+	if (text=="poor")
+		DressPoor(me,gender);
+		return;
+	elseif (text=="rich")
+		DressRich(me,gender);
+		return;
+	elseif (text=="warrior")
+		DressWar(me,gender);
+		return;
+	elseif (text=="weakwarrior")
+		DressLeather(me,gender);
+		return;
+	elseif (text=="mage")
+		DressMage(me,gender);
+		return;
+	elseif (text=="funky")
+		DressFunky(me,gender);
+		return;
+	endif
+
+	SendSysMessage(mstr,"Current Classes are:");
+	SendSysMessage(mstr,"Poor, Rich, Warrior, weakwarrior, Mage, funky");
+
+endprogram
+
+function CreateAndEquip(me,item,color)
+
+	if (item)
+		var theitem := CreateItemAtLocation(me.x,me.y,me.z,item,1);
+		if (theitem)
+			if (EquipItem(me,theitem))
+				theitem.color := color;
+			else
+				DestroyItem(theitem);
+			endif
+		endif
+	endif
+
+endfunction
+
+function PlaceHair(me,gender)
+
+	var haircolor := MakeHairColor();
+	var hair := 0;
+	if (gender)
+		PlaceBeard(me, haircolor);
+		case (Random(11))
+			0:	hair := 0x203b;
+			1:	hair := 0x203b;
+			2:	hair := 0x203c;
+			3:	hair := 0x203d;
+			4:	hair := 0x2044;
+			5:	hair := 0x2045;
+			6:	hair := 0x2047;
+			7:	hair := 0x2048;
+			8:	hair := 0x204a;
+			9:	hair := 0x203b;
+			10:	hair := 0;
+		endcase
+	else
+		case (Random(10))
+			0:	hair := 0x203b;
+			1:	hair := 0x203c;
+			2:	hair := 0x203c;
+			3:	hair := 0x203d;
+			4:	hair := 0x2045;
+			5:	hair := 0x2046;
+			6:	hair := 0x2047;
+			7:	hair := 0x2049;
+			8:	hair := 0x204a;
+			9:	Hair := 0x203c;
+		endcase
+	endif
+
+	var thehair;
+	CreateAndEquip(me,hair,haircolor);
+
+endfunction
+
+function PlaceBeard(me,haircolor)
+
+	var hair;
+	var beard := 0;
+	case (Random(18))
+	0:	beard := 0x203e;//longbeard
+	1:	beard := 0x203f;//shorbeard
+	2:	beard := 0x2040;//goatee
+	3:	beard := 0x2041;//mustache
+	4:	beard := 0x204b;//shortbeardnstache
+	5:	beard := 0x204c;//longbeardnstache
+	6:	beard := 0x204d;//vandyke
+	7:	beard := 0x2041;//mustache
+	8:	beard := 0x204b;//shortbeardnstache
+	9:	Beard := 0x204d;//vandyke
+	endcase
+
+	CreateAndEquip(me,Beard,haircolor);
+	
+endfunction
+
+function MakeHairColor()
+
+	return Random(46)+1102;
+
+endfunction
+
+function MakeClothColor();
+
+	case (Random(4))
+	0:	return Random(54)+1301;//blue
+	1:	return Random(54)+1601;//red
+	2:	return Random(47)+1401;//green
+	3:	return Random(47)+1701;//yellow
+	endcase
+
+endfunction
+
+function DressPoor(me,gender)
+
+	var theitem;
+
+	var item := 0;
+	case (Random(5))
+	0:	item := 0x0f64;//Torch
+	1:	item := 0x0a0f;//candle
+	endcase
+
+	if (item)
+		theitem := CreateItemAtLocation(me.x,me.y,me.z,item,1);
+		theitem.facing := 1;
+		if( theitem.graphic == 0x0f64 )
+			theitem.graphic := 0xa12;
+		endif
+		EquipItem(me,theitem);
+	endif
+
+	item := 0;
+	case (Random(5))
+	0:	item := 0x170d;//Sandals
+	1:	item := 0x170d;//Sandals
+	2:	item := 0x170f;//Shoes
+	3:	item := 0x170f;//Shoes
+	endcase
+
+	CreateAndEquip(me,item,MakeClothColor());
+
+	item := 0;
+	if (gender)
+		case (Random(3))
+			0:	item := 0x153a;		//LongPants
+			1:	item := 0x152e;		//Short Pants
+			2:	item := 0x152e;		//Short Pants
+		endcase
+		CreateAndEquip(me,item,MakeClothColor());
+
+		case (Random(3))
+			0:	item := 0x1517;		//Shirt
+			1:	item := 0x1517;		//Shirt
+			2:	item := 0x1f7b;		//Doublet
+		endcase
+		CreateAndEquip(me,item,MakeClothColor());
+	else
+		case (Random(2))
+		0:
+			//shirt and skirt or kilt
+			CreateAndEquip(me,0x1517,MakeClothColor());
+			if (Random(2))
+				item := 0x1537;
+			else
+				item := 0x1516;
+			endif
+			CreateAndEquip(me,item,MakeClothColor());
+		1:
+			//plaindress
+			CreateAndEquip(me,0x1f01,MakeClothColor());
+		endcase
+	endif
+
+	item := 0;
+	case (Random(6))
+	0:	item := 0x153b;//apron
+	1:	item := 0x153d;//fullapron
+	endcase
+
+	CreateAndEquip(me,item,MakeClothColor());
+
+	item := 0;
+	case (Random(6))
+	0:	item := 0x153f;		//Bandana
+	1:	item := 0x1543;		//Skullcap
+	2:	item := 0x1713;		//Floppy Hat
+	endcase
+
+	CreateAndEquip(me,item,MakeClothColor());
+
+endfunction
+
+function DressRich(me,gender)
+
+	var theitem;
+
+	var item := 0;
+	case (Random(5))
+	1:	item := 0x0a0f;//candle
+	2:	item := 0x0a15;//lantern
+	endcase
+
+	if (item)
+		theitem := CreateItemAtLocation(me.x,me.y,me.z,item,1);
+		theitem.facing := 1;
+		EquipItem(me,theitem);
+	endif
+
+	item := 0;
+	case (Random(3))
+	0:	item := 0x170f;//Shoes
+	1:	item := 0x170b;//LeatherBoots
+	2:	item := 0x1711;//Thighboots
+	endcase
+	CreateAndEquip(me,item,MakeClothColor());
+
+	item := 0;
+	if (gender)
+		//longpants
+		CreateAndEquip(me,0x153a,MakeClothColor());
+
+		//fancy shirt
+		CreateAndEquip(me,0x1efd,MakeClothColor());
+
+		item := 0;
+		case (Random(6))
+			0:	item := 0x1f7b;		//Doublet
+			1:	item := 0x1fa1;		//Tunic
+			2:	item := 0x1ffd;		//Surcoat
+			3:	item := 0x1541;		//Body Sash
+		endcase
+		CreateAndEquip(me,item,MakeClothColor());
+	else
+		case (Random(2))
+		0:
+			//plaindress
+			CreateAndEquip(me,0x1f01,MakeClothColor());
+		1:
+			//fancydress
+			CreateAndEquip(me,0x1eff,MakeClothColor());
+		endcase
+
+		if (Random(4)==1)
+			//fancy shirt
+			CreateAndEquip(me,0x1efd,MakeClothColor());
+		endif
+	endif
+
+	if (Random(3)==1)
+		CreateAndEquip(me,0x1515,MakeClothColor());
+	endif
+
+	item := 0;
+	case (Random(6))
+	0:	item := 0x1713;		//Floppy Hat
+	1:	item := 0x1715;		//Cap
+	2:	item := 0x1719;		//Bonnet
+	3:	item := 0x171a;		//Feathered Hat
+	endcase
+	CreateAndEquip(me,item,MakeClothColor());
+
+endfunction
+
+function DressWar(me,gender)
+
+	var item;
+	var shield := Random(3);
+
+	case Random(2)
+	0:	item := 0x170b;		//LeatherBoots
+	1:	item := 0x1711;		//ThighBoots
+	endcase
+	CreateAndEquip(me,item,0);
+
+	case (Random(5))
+	0:
+		//leather
+		if (GetStrength(me) < 60)
+			SetBaseStrength(me,60);
+		endif
+		item := 0x13c7;		//LeatherGorget
+		CreateAndEquip(me,item,0);
+		item := 0x13c5;		//LeatherSleeves
+		CreateAndEquip(me,item,0);
+		item := 0x13c6;		//LeatherGloves
+		CreateAndEquip(me,item,0);
+		if (Random(4)==1)
+			item := 0x1db9;		//LeatherCap
+			CreateAndEquip(me,item,0);
+		endif
+		if (gender)
+			item := 0x13cb;		//LeatherLeggings
+			CreateAndEquip(me,item,0);
+			item := 0x13cc;		//LeatherTunic
+			CreateAndEquip(me,item,0);
+		else
+			case (Random(2))
+			0:
+				item := 0x13cb;		//LeatherLeggings
+			1:
+				item := 0x1c08;		//LeatherSkirt
+			endcase
+			CreateAndEquip(me,item,0);
+
+			case (Random(2))
+			0:
+				item := 0x13cc;		//LeatherTunic
+			1:
+				item := 0x1c06;		//FemaleLeather
+			endcase
+			CreateAndEquip(me,item,0);
+		endif
+	1:
+		//studded
+		if (GetStrength(me) < 70)
+			SetBaseStrength(me,70);
+		endif
+		item := 0x13d6;		//StuddedGorget
+		CreateAndEquip(me,item,0);
+		item := 0x13d5;		//StuddedGloves
+		CreateAndEquip(me,item,0);
+		item := 0x13d4;		//StuddedSleeves
+		CreateAndEquip(me,item,0);
+
+		if (gender)
+			item := 0x13da;		//StuddedLeggings
+			CreateAndEquip(me,item,0);
+			item := 0x13db;		//StuddedTunic
+			CreateAndEquip(me,item,0);
+		else
+			case (Random(2))
+			0:
+				item := 0x13da;		//StuddedLeggings
+			1:
+				item := 0x1c00;		//LeatherShorts
+			endcase
+			CreateAndEquip(me,item,0);
+
+			case (Random(2))
+			0:
+				item := 0x13db;		//StuddedTunic
+			1:
+				item := 0x1c0c;		//StuddedBustier
+			endcase
+			CreateAndEquip(me,item,0);
+		endif
+		if (shield != 0)
+		case (Random(3))
+			0:	item := 0x1b78;		//KiteShieldB1
+			1:	item := 0x1b73;		//Buckler
+			2:	item := 0x1b7a;		//WoodenShield
+		endcase
+		CreateAndEquip(me,item,0);
+		endif
+	2:
+		//ring
+		if (GetStrength(me) < 80)
+			SetBaseStrength(me,80);
+		endif
+		item := 0x13ec;		//RingmailTunic
+		CreateAndEquip(me,item,0);
+		item := 0x13ee;		//RingmailSleeves
+		CreateAndEquip(me,item,0);
+		item := 0x13f0;		//RingmailLeggings
+		CreateAndEquip(me,item,0);
+		item := 0x13f2;		//RingmailGloves
+		CreateAndEquip(me,item,0);
+
+		if (shield != 0)
+		case (Random(3))
+			0:	item := 0x1b72;		//BronzeShield
+			1:	item := 0x1b74;		//KiteShield
+			2:	item := 0x1b7b;		//MetalShield
+		endcase
+		CreateAndEquip(me,item,0);
+		endif
+
+		case (Random(5))
+			0:	item := 0x140a;		//Helmet
+			1:	item := 0x140c;		//Bascinet
+			default: item := 0;
+		endcase
+		CreateAndEquip(me,item,0);
+
+	3:
+		//chain
+		if (GetStrength(me) < 90)
+			SetBaseStrength(me,90);
+		endif
+		item := 0x13bb;		//ChainmailCoif
+		CreateAndEquip(me,item,0);
+		item := 0x13be;		//ChainmailLeggings
+		CreateAndEquip(me,item,0);
+		item := 0x13bf;		//ChainmailTunic
+		CreateAndEquip(me,item,0);
+
+		if (shield != 0)
+		case (Random(3))
+			0:	item := 0x1b72;		//BronzeShield
+			1:	item := 0x1b74;		//KiteShield
+			2:	item := 0x1b7b;		//MetalShield
+		endcase
+		CreateAndEquip(me,item,0);
+		endif
+
+	4:
+		//plate
+		SetBaseStrength(me,100);
+		item := 0x1410;		//PlatemailArms
+		CreateAndEquip(me,item,0);
+		item := 0x1411;		//PlatemailLegs
+		CreateAndEquip(me,item,0);
+		item := 0x1414;		//PlatemailGloves
+		CreateAndEquip(me,item,0);
+		item := 0x1413;		//PlatemailGorget
+		CreateAndEquip(me,item,0);
+		if (gender)
+			item := 0x1415;		//PlatemailBreastplate
+		else
+			item := 0x1c04;		//FemalePlate
+		endif
+		CreateAndEquip(me,item,0);
+
+		if (shield != 0)
+		case (Random(3))
+			0:	item := 0x1b76;		//Heater
+			1:	item := 0x1b74;		//KiteShield
+			2:	item := 0x1b7b;		//MetalShield
+		endcase
+		CreateAndEquip(me,item,0);
+		endif
+
+		case (Random(5))
+			0:	item := 0x140a;		//Helmet
+			1:	item := 0x1408;		//CloseHelm
+			2:	item := 0x140e;		//NoseHelm
+			3:	item := 0x1412;		//PlateHelm
+			4:	item := 0x1412;		//PlateHelm
+			default: item := 0;
+		endcase
+		CreateAndEquip(me,item,0);
+	endcase
+
+	if (shield == 0)
+		case (Random(22))
+		0:	item := 0x0f49;		//Axe
+		1:	item := 0x1406;		//WarMace
+		2:	item := 0x0f47;		//BattleAxe
+		3:	item := 0x0f4b;		//DoubleAxe
+		4:	item := 0x0f45;		//ExecutionersAxe
+		5:	item := 0x13fa;		//LargeBattleAxe
+		6:	item := 0x1442;		//TwoHandedAxe
+		7:	item := 0x0f4e;		//Bardiche
+		8:	item := 0x143e;		//Halberd
+		9:	item := 0x1402;		//ShortSpear
+		10:	item := 0x0f63;		//Spear
+		11:	item := 0x13af;		//WarAxe
+		12:	item := 0x0f60;		//Longsword
+		13:	item := 0x0f5c;		//Mace
+		14:	item := 0x143a;		//Maul
+		15:	item := 0x1438;		//WarHammer
+		16:	item := 0x1404;		//WarFork
+		17:	item := 0x0f5e;		//BroadSword
+		18:	item := 0x1440;		//Cutlass
+		19:	item := 0x13fe;		//Katana
+		20:	item := 0x1401;		//Kryss
+		21:	item := 0x13b5;		//Scimitar
+		endcase
+	else
+		case (Random(11))
+		0:	item := 0x13af;		//WarAxe
+		1:	item := 0x0f60;		//Longsword
+		2:	item := 0x0f5c;		//Mace
+		3:	item := 0x143a;		//Maul
+		4:	item := 0x1404;		//WarFork
+		5:	item := 0x0f5e;		//BroadSword
+		6:	item := 0x1440;		//Cutlass
+		7:	item := 0x13fe;		//Katana
+		8:	item := 0x1401;		//Kryss
+		9:	item := 0x13b5;		//Scimitar
+		10:	item := 0x0f60;		//Longsword
+		endcase
+	endif
+
+	CreateAndEquip(me,item,0);
+
+endfunction
+
+function DressMage(me,gender)
+
+	var theitem;
+
+	var item := 0;
+	case (Random(3))
+	0:	item := 0x170f;//Shoes
+	1:	item := 0x170b;//LeatherBoots
+	2:	item := 0x1711;//Thighboots
+	endcase
+	CreateAndEquip(me,item,MakeClothColor());
+
+	//cloak
+	CreateAndEquip(me,0x1f03,MakeClothColor());
+
+	//wiz hat
+	if (Random(3) != 0)
+		CreateAndEquip(me,0x1718,MakeClothColor());
+	endif
+
+	//weapon
+	case (Random(5))
+		0:	item := 0x0f51;		//Dagger
+		1:	item := 0x0df0;		//BlackStaff
+		2:	item := 0x13f9;		//GnarledStaff
+		3:	item := 0x0e8a;		//Quarterstaff
+		4:	item := 0x0efa;		//spellbook
+		default: item := 0;
+	endcase
+	CreateAndEquip(me,item,0);
+
+
+
+endfunction
+
+function DressLeather(me,gender)
+
+	var item;
+	var shield := Random(3);
+
+	case Random(2)
+	0:	item := 0x170b;		//LeatherBoots
+	1:	item := 0x1711;		//ThighBoots
+	endcase
+	CreateAndEquip(me,item,0);
+
+	//leather
+	item := 0x13c7;		//LeatherGorget
+	CreateAndEquip(me,item,0);
+	item := 0x13c5;		//LeatherSleeves
+	CreateAndEquip(me,item,0);
+	item := 0x13c6;		//LeatherGloves
+	CreateAndEquip(me,item,0);
+	if (Random(4)==1)
+		item := 0x1db9;		//LeatherCap
+		CreateAndEquip(me,item,0);
+	endif
+
+	if (!gender)
+		item := 0x13cb;		//LeatherLeggings
+		CreateAndEquip(me,item,0);
+		item := 0x13cc;		//LeatherTunic
+		CreateAndEquip(me,item,0);
+	else
+		case (Random(2))
+		0:
+			item := 0x13cb;		//LeatherLeggings
+		1:
+			item := 0x1c08;		//LeatherSkirt
+		endcase
+		CreateAndEquip(me,item,0);
+
+		case (Random(2))
+		0:
+			item := 0x13cc;		//LeatherTunic
+		1:
+			item := 0x1c06;		//FemaleLeather
+		endcase
+		CreateAndEquip(me,item,0);
+	endif
+
+	case (Random(22))
+	0:	item := 0x0f49;		//Axe
+	1:	item := 0x1406;		//WarMace
+	2:	item := 0x0f47;		//BattleAxe
+	3:	item := 0x0f4b;		//DoubleAxe
+	4:	item := 0x0f45;		//ExecutionersAxe
+	5:	item := 0x13fa;		//LargeBattleAxe
+	6:	item := 0x1442;		//TwoHandedAxe
+	7:	item := 0x0f4e;		//Bardiche
+	8:	item := 0x143e;		//Halberd
+	9:	item := 0x1402;		//ShortSpear
+	10:	item := 0x0f63;		//Spear
+	11:	item := 0x13af;		//WarAxe
+	12:	item := 0x0f60;		//Longsword
+	13:	item := 0x0f5c;		//Mace
+	14:	item := 0x143a;		//Maul
+	15:	item := 0x1438;		//WarHammer
+	16:	item := 0x1404;		//WarFork
+	17:	item := 0x0f5e;		//BroadSword
+	18:	item := 0x1440;		//Cutlass
+	19:	item := 0x13fe;		//Katana
+	20:	item := 0x1401;		//Kryss
+	21:	item := 0x13b5;		//Scimitar
+	endcase
+	CreateAndEquip(me,item,0);
+
+endfunction
+
+
+
+function DressFunky(me,gender)
+
+	var theitem;
+
+	var item := 0;
+	case (Random(4))
+	1:	item := 0x0efa;// Spellbook
+	2:	item := 0x0a15;//lantern
+	endcase
+
+	if (item)
+		theitem := CreateItemAtLocation(5288, 1176, 0,item,1);
+		theitem.facing := 1;
+		EquipItem(me,theitem);
+	endif
+
+	item := 0;
+	case (Random(3))
+	0:	item := 0x170f;//Shoes
+	1:	item := 0x170b;//LeatherBoots
+	2:	item := 0x1711;//Thighboots
+	endcase
+	CreateAndEquip(me,item,MakeClothColor());
+
+	item := 0;
+	if (!gender)
+		//longpants
+		CreateAndEquip(me,0x153a,MakeFunkyColor());
+
+		//fancy shirt
+		CreateAndEquip(me,0x1efd,MakeFunkyColor());
+
+		item := 0;
+		case (Random(6))
+			0:	item := 0x1f7b;		//Doublet
+			1:	item := 0x1fa1;		//Tunic
+			2:	item := 0x1ffd;		//Surcoat
+			3:	item := 0x1541;		//Body Sash
+		endcase
+		CreateAndEquip(me,item,MakeFunkyColor());
+	else
+		case (Random(2))
+		0:
+			//plaindress
+			CreateAndEquip(me,0x1f01,MakeFunkyColor());
+		1:
+			//fancydress
+			CreateAndEquip(me,0x1eff,MakeFunkyColor());
+		endcase
+
+		if (Random(4)==1)
+			//fancy shirt
+			CreateAndEquip(me,0x1efd,MakeFunkyColor());
+		endif
+	endif
+
+	if (Random(3)==1)
+		CreateAndEquip(me,0x1515,MakeFunkyColor());
+	endif
+
+	item := 0;
+	case (Random(6))
+	0:	item := 0x1715;		//Cap
+	1:	item := 0x1719;		//Bonnet
+	2:	item := 0x171a;		//Feathered Hat
+	endcase
+	CreateAndEquip(me,item,MakeFunkyColor());
+
+endfunction
+
+function MakeFunkyColor()
+var ranges := {
+{1150, 1200},
+{1280, 1306},
+{1379, 1400},
+{1455, 1500},
+{1555, 1600},
+{1655, 1700}
+};
+  var rangeNumbers := {};
+  var totalNumbers := 0;
+  foreach range in ranges
+    rangeNumbers.append(range[2]-range[1]);
+    totalNumbers := totalNumbers + (range[2]-range[1]);
+  endforeach
+
+  var randomNumber := Random(totalNumbers)+1;
+  var i, numTally := 0;
+  for (i := 1; i <= ranges.size(); i := i + 1)
+    numTally := numTally + rangeNumbers[i];
+    if (randomNumber <= numTally)
+      return (Random(rangeNumbers[i])+1+ranges[i][1]);
+    endif
+  endfor
+endfunction

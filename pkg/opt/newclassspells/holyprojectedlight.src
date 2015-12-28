@@ -1,0 +1,52 @@
+/* Holy Spell - Projected Light  **
+** Deals some damage to target   **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/spelldata";
+
+const SPELL_ID := SPELL_ID_PROJECTEDLIGHT;
+
+program cast_projectedlight( parms )
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  PlayMovingEffect( caster, cast_on, FX_SPELL_PROJECTEDLIGHT, SPEED_SPELL_PROJECTEDLIGHT, LOOP_SPELL_PROJECTEDLIGHT, 1);
+  PlaySoundEffect( cast_on, SFX_SPELL_PROJECTEDLIGHT );
+  
+	var immunity := IsProtected( caster, cast_on, circle );
+	if( immunity == IMMUNED )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+  var dmg := CInt(CalcSpellDamage( caster, cast_on, circle, SINGLE_TARGET_SPELL, SKILLID_PIETY )/1.2);
+  ApplyPlanarDamage(caster, cast_on, circle, dmg, HOLY);
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

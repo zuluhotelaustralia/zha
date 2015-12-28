@@ -1,0 +1,55 @@
+/* Psionics Spell - Mantra       **
+** Increases Str at cost of Int. ** 
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/attributes";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_MANTRA;
+
+program cast_mantra(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+  else
+    caster := parms;
+  endif
+
+  WipeMod(caster, "int");
+  WipeMod(caster, "str");
+  WipeMod(caster, "all");
+  WipeMod(caster, "poly");
+
+  var duration := CInt(GetModDuration(caster, SKILLID_PSIONICS) * 1.2 );
+  var mod_amount_int := -CInt(getattribute(caster, ATTRIBUTEID_INTELLIGENCE)/2);
+  var mod_amount_str := CInt(getattribute(caster, ATTRIBUTEID_INTELLIGENCE)/2);
+  if (GetClass(caster) == CLASSEID_MONK)
+    mod_amount_int := -CInt(getattribute(caster, ATTRIBUTEID_INTELLIGENCE)/2.5);
+    mod_amount_str := CInt(getattribute(caster, ATTRIBUTEID_INTELLIGENCE) *1.2);
+  endif
+
+  if( CanMod( caster, "int" ) )
+    DoTempMod( caster, "int", mod_amount_int, duration );
+    if( CanMod( caster, "str" ) )
+      DoTempMod( caster, "str", mod_amount_str, duration );
+    endif    
+  endif
+
+  PlayObjectCenteredEffect(caster, FX_SPELL_MANTRA, SPEED_SPELL_MANTRA, LOOP_SPELL_MANTRA);
+  PlaySoundEffect(caster, SFX_SPELL_MANTRA);
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

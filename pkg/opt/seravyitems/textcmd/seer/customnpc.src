@@ -1,0 +1,145 @@
+/* Add Custom NPC                      **
+** Used for assigning a custom         **
+** template onto a spawn stone/tile.   **
+****************************************/
+use uo;
+
+include "include/cmdlevel_check";
+//include "include/customnpc";
+include "customnpc";
+
+program customnpc(who)
+  if (!checkStaff(who, "customnpc", CMDLEVEL_SEER))
+    return 0;
+  endif
+
+  SendSysMessage(who, "Select the spawn object.");
+  var point := Target(who);
+  if (point.objtype != 0x80af && point.objtype != 0xa61)
+    SendSysMessage(who, "Not a valid spawn point.");
+    return;
+  endif
+
+  Gump(who, point);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+  SendSysMessage(who, "Select NPC you wish to add as a temporary template.");
+  var npc := Target(who);
+  if (!npc.npctemplate)
+    SendSysMessage(who, "Not a valid NPC.");
+    return;
+  endif
+
+
+
+  SendSysMessage(who, "Enter the name you wish this template to be called.");
+  SendSysMessage(who, "Note: If you call the template 'all', it will be applied to every monster leaving the spawn point reguardless of their template.");
+  var templatename := RequestInput(who, point, "Template name?");
+  if (!templatename)
+    SendSysMessage(who, "Invalid template name.");
+    return;
+  endif
+
+  if (AddToPoint(npc, point, templatename))
+    SendSysMessage(who, "Custom Template Added.");
+    SetObjProperty(point, "LFucker", who.name+who.serial);
+  else
+    SendSysMessage(who, "Error Adding Custom Template");
+  endif
+*/
+endprogram
+
+
+
+function Gump(who, point)
+
+	var layout	:= array( "page 0",
+				  "resizepic 50 0 2600 300 525",
+				  "resizepic 100 480 5100 200  25",
+				  "text 100 20 5 0",
+				  "button 70 44 2118 2117 1 0 10000",
+				  "text 90 40 54 1",
+				  "text 270 40 0 2",
+				  "text 300 40 0 3");
+
+	var data	:= array( "Spawnpoint custom NPC templates",
+				  "Add Custom Npc",
+				  "S",
+				  "Del");
+
+	//var npctempdata	:= GetGlobalProperty("CustomNpcTemplates");
+	var npctempdata := GetObjProperty(point, "CustomNpcTemplates");
+	if (!npctempdata)
+		npctempdata := array;
+	endif
+
+	var start	:= 1;
+	var count	:= 0;
+	var done	:= 0;
+	var page	:= 1;
+	var perpage	:= 20;
+	var y 	:= 70;
+	var i;
+
+	layout.append( "page 1" );
+
+	for( i := start; i <= len(npctempdata); i := i + 1 )
+		if( done == perpage )
+			done 	:= 0;
+			page 	:= page + 1;
+			y 	:= 70;
+		
+			layout.append( "button 250 481 5540 5541 0 " + (page ) );
+			layout.append( "page " + page );
+			layout.append( "button 125 481 5537 5538 0 " + (page - 1) );
+		endif
+	
+		layout.append( "text 85 " + y + " 0 " + len(data) );
+		layout.append( "button 270 " + (y+5) + " 2118 2117 1 0 " + i );
+		layout.append( "button 300 " + (y+5) + " 2118 2117 1 0 " + (i+5000));
+		data.append(CStr(npctempdata[i]["template"]));
+		
+		y := y + 20;
+		done := done + 1;
+		count := count + 1;
+	endfor
+
+	var result;
+	result := SendDialogGump( who, layout, data );
+	// Result of dialog! 10000 = New template, 0-4999 = spawn # temp, 5000-9999 = delete #-5000 tempalte
+	if( !result[0] )
+		return -1;
+	endif
+	result := CInt( result[0] );
+
+	if (result == 10000)
+		var templateData := GetTemplateFromNpc(who);
+		npctempdata := GetObjProperty(point, "CustomNpcTemplates");
+		if (!npctempdata)
+			npctempdata := array;
+		endif
+		npctempdata.append(templateData);
+		SetObjProperty(point, "CustomNpcTemplates", npctempdata);
+	elseif (result < 5000)
+		SendSysMessage(who, "Where do you wish to spawn this npc.");
+		var tgt := TargetCoordinates(who);
+		if (tgt)
+			CreateNpcFromCustomTemplate(npctempdata[result]["template"], tgt.x, tgt.y, tgt.z, point);
+		endif
+	endif
+
+	return result;
+endfunction

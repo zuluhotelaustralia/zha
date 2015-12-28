@@ -1,0 +1,18 @@
+use uo;
+use os;
+
+include "include/classes";
+program disarmer (params)
+
+	var attacker:= params[1];
+	var defender:= params[2];
+	Detach();
+
+	set_critical(1);
+	PrintTextAbove(defender, "*Stunned*");
+	defender.paralyzed:=1;
+	sleep(GetObjProperty(attacker, CLASSEID_MONK));
+	defender.paralyzed:=0;
+	set_critical(0);
+	
+endprogram

@@ -1,0 +1,113 @@
+//look way down at the bottom and change:
+//	dolly.usescript := ":dundee:shrunknpcs";
+//to whatever package you place shrunknpcs in.
+//
+
+use uo;
+use cfgfile;
+
+include "include/npcbackpacks";
+include "include/attributes";
+include "include/myutil";
+include "include/itemutil";
+include "include/cmdlevel_check";
+
+program textcmd_shrink( who )
+	if (!checkStaff(who, "shrink", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+	SendSysMessage( who, "Shrink what?" );
+	var mobile := Target( who );
+	if (!mobile)
+		SendSysMessage( who, "Canceled" );
+		return;
+	endif
+
+	var dolly := CreateItemInContainer(who.backpack,0xba32,1);
+	if (!dolly)	SendSysMessage(who,"No dolly!"); return; endif
+
+	if (mobile.isA(POLCLASS_NPC))
+		SetObjProperty(dolly,"npctemplate",mobile.npctemplate);
+		SetObjProperty(dolly,"script",mobile.script);
+	else
+		SetObjProperty(dolly,"npctemplate","townperson");
+		SetObjProperty(dolly,"script","helppcs");
+	endif
+
+	SetObjProperty(dolly,"graphic",mobile.graphic);
+	dolly.color := mobile.color;
+	dolly.name  := mobile.name;
+
+	var trackingcfg := ReadConfigFile(":tracking:tracking");
+	var elem := FindConfigElem(trackingcfg, mobile.graphic);
+	if (elem)
+		dolly.graphic := elem.tile;
+	else
+		dolly.graphic := 0x20f8;
+	endif
+
+	var equippack := CreateItemInContainer(dolly,0xe75,1);
+	SetObjProperty(dolly,"equippack",equippack.serial);
+	foreach item in ListEquippedItems(mobile)
+		if ( item != mobile.backpack )
+			var newitem := CreateItemInContainer(equippack, item.objtype, 1 );
+			DupeItem( item, newitem );
+			if( item.usescript )
+				newitem.usescript := item.usescript;
+			endif
+		endif
+	endforeach
+
+	var lootbag := CreateItemInContainer(dolly,0xe75,1);
+	SetObjProperty(dolly,"lootbag",lootbag.serial);
+	var mypack := FindMyPack(mobile);
+
+	foreach item in ListRootItemsInContainer(mypack)
+		var newitem := CreateItemInContainer(lootbag, item.objtype, item.amount);
+		DupeItem( item, newitem );
+		if( item.usescript )
+			newitem.usescript := item.usescript;
+		endif
+	endforeach
+
+	if (mobile.backpack)
+		foreach item in ListRootItemsInContainer(mobile.backpack)
+			var newitem := CreateItemInContainer(lootbag, item.objtype, item.amount);
+			if (item.name) newitem.name := item.name; endif
+			newitem.color := item.color;
+			newitem.graphic := item.graphic;
+			newitem.newbie := item.newbie;
+			if (GetObjProperty(item,"bookcontent") )
+				SetObjProperty(newitem,"bookcontent", GetObjProperty(item,"bookcontent") );
+			endif
+		endforeach
+	endif
+
+	SetObjProperty(dolly,"str",(GetStrength(mobile) - GetStrengthMod(mobile)));
+	SetObjProperty(dolly,"int",(GetIntelligence(mobile) - GetIntelligenceMod(mobile)));
+	SetObjProperty(dolly,"dex",(GetDexterity(mobile) - GetDexterityMod(mobile)));
+	SetObjProperty(dolly,"strmod",GetStrengthMod(mobile));
+	SetObjProperty(dolly,"intmod",GetIntelligenceMod(mobile));
+	SetObjProperty(dolly,"dexmod",GetDexterityMod(mobile));
+
+	var skills := {};
+	for i := 0 to 48
+		skills[i + 1] := GetEffectiveSkill( mobile, i );
+	endfor
+
+	SetObjProperty(dolly,"skills",skills);
+	SetObjProperty(dolly,"gender",mobile.gender);
+	SetObjProperty(dolly,"graphic",mobile.graphic);
+
+	SetObjProperty( dolly, "TrueColor", mobile.truecolor );
+	dolly.usescript := ":shrunk:shrunknpcs";
+	
+	//copy cprops
+	foreach propname in GetObjPropertyNames(mobile)
+		SetObjProperty(dolly, propname, GetObjProperty(mobile, propname));
+	endforeach
+	SetObjProperty(dolly, "LFucker", who.name + who.serial);
+	SendSysMessage(who,"Done!");
+
+endprogram

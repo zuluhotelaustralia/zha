@@ -1,0 +1,91 @@
+/* Holy Spell - Last Rites               **
+** Teleports a targeted corpse's         **
+** ghost to britain healers if accepted. **
+** Seravy - seravy@gmail.com             */
+
+use uo;
+use os;
+
+include "newclassbook";
+include"include/gumps";
+
+const SPELL_ID := SPELL_ID_LASTRITES;
+const HEALER_X := 1475;
+const HEALER_Y := 1611;
+const HEALER_Z := 20;
+
+program cast_lastrites( parms )
+  var caster := parms;
+
+  var circle := GetCircle( SPELL_ID);
+  var cast_on := CanTargetThing(caster, circle, TGTOPT_CHECK_LOS );
+
+  if (!cast_on)
+    SendSysMessage( caster, "Invalid Selection.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  elseif(!cast_on.isa(POLCLASS_CORPSE))
+    SendSysMessage( caster, "You must target a corpse.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  elseif(GetObjProperty(cast_on, "lastrites"))
+    SendSysMessage( caster, "Last Rites has already been performed on this corpse.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  else
+    var cast_on_person;
+    SetObjProperty(cast_on, "lastrites", 1);
+    cast_on_person := SystemFindObjectBySerial(GetObjProperty(cast_on, "whose"));
+    if( !cast_on_person )
+      SendSysMessage( caster, "Unable to find this soul.");
+      EraseObjProperty( caster, "#Casting");
+      return;
+    else
+      EraseObjProperty( caster, "#Casting");
+      PlaySoundEffect( caster, SFX_SPELL_LASTRITES );
+      if (cast_on_person.dead)
+        var accepted := lastRitesOn( cast_on_person);
+        detach();
+        if(accepted)
+          SendSysMessage( caster, "The soul has been saved.");
+        else
+          SendSysMessage( caster, "The soul has not been saved.");
+        endif
+      else
+        SendSysMessage( caster, "The soul has already left the spiritual realm.");
+      endif
+    endif
+  endif
+endprogram
+
+
+function lastRitesOn( who)
+  if (who.dead)
+    GFInitGump();
+    GFPage(0);
+    GFResizePic(0, 0, BKGND_BLACKSLAB, 400, 200);
+    GFTextLine(40, 20, 38, "Last Rites");
+    GFTextLine(40, 50, 5, "Someone has prayed the last rites on your body.");
+    GFTextLine(40, 70, 5, "They can guide your soul to britain healers if you");
+    GFTextLine(40, 90, 5,  "choose to accept the prayer.");
+    GFTextLine(40, 110, 5, "Do you choose to accept it?");
+    GFTextLine(40, 130, 68, "Accept Last Rites");
+    var button1  := GFButtonID( 20, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+    GFTextLine(40, 150, 68, "Reject Last Rites");
+    GFButtonID( 20, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+
+    var result := GFSendGump(who);
+    if (result[button1.keyid])
+      if(who.dead)
+        SendSysMessage(who, "Your Soul has been Transported to Britain Healer");
+        MoveCharacterToLocation( who, HEALER_X, HEALER_Y, HEALER_Z );
+        PlaySoundEffectPrivate( who, SFX_SPELL_LASTRITES, who );
+        return 1;
+      else
+        SendSysMessage(who, "You are no longer dead!");
+      endif      
+    endif
+  endif
+
+return 0;
+endfunction

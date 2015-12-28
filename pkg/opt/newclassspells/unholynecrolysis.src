@@ -1,0 +1,68 @@
+/* UnHoly Spell - Necrolysis          **
+** Deals some damage if not undead/   **
+** /necro/deathknight otherise heals  **
+** Seravy - seravy@gmail.com          */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_NECROLYSIS;
+
+program cast_necrolysis( parms )
+  var caster;
+
+
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := Target( caster, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+  var clevel:=GetClasseLevel(caster);
+  var dmg := CalcSpellDamage( caster, cast_on, circle, SINGLE_TARGET_SPELL, SKILLID_NECROMANCY );
+  dmg:=CInt(dmg/1.2);
+  PlayStationaryEffect( cast_on.x, cast_on.y, cast_on.z, FX_SPELL_NECROLYSIS, SPEED_SPELL_NECROLYSIS, LOOP_SPELL_NECROLYSIS);
+  PlaySoundEffect( cast_on, SFX_SPELL_NECROLYSIS );
+  var class:= GetClass(cast_on);
+  if (class==CLASSEID_DEATHKNIGHT || class==CLASSEID_NECROMANCER || GetObjProperty(cast_on, "Type")=="Undead")
+	var basedamage:=dmg;
+	var extra:=0;
+	var mult:=GetResistanceMultiplier(cast_on, NECRO);
+	if (mult < 0)	
+		extra := (basedamage * (1 + mult)) - basedamage;
+	endif	
+	dmg:=dmg+extra;
+
+	mult:=GetResistanceMultiplier(caster, NECRO);
+	if (mult < 0)
+		extra := (basedamage / (1 + abs(mult))) - basedamage;
+	else
+		extra := (basedamage * (1 + mult)) - basedamage;
+	endif	
+	dmg:=CInt(dmg+extra);
+	HealDamage( cast_on, dmg);
+  else
+    ApplyPlanarDamage( caster, cast_on, circle, dmg, NECRO);
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

@@ -1,0 +1,74 @@
+//GM Barnabus 2/2/2003
+//Reports which accounts are in jail, for how long, whether the account is online,
+//which player of that account is online, and whether they are in jail or not.
+//I plan to extend this as a prop so that u can view the account notes from this.
+
+use uo;
+use os;
+include "include/constants/propids";
+include "include/gumputil";
+
+const JAIL_MID_X     := 5280;
+const JAIL_MID_Y     := 1175;
+const JAIL_MID_Z     := 0;
+const JAIL_RADIUS    := 30;
+
+program textcmd_whojail( who )
+  	SendStringAsTipWindow( who, GetJailString());  
+endprogram
+
+
+
+function PlayerOnline (account);
+	foreach player in EnumerateOnlineCharacters()
+		if (player.acct.name == account.name)
+			return player;
+		endif
+	endforeach
+	return 0;
+endfunction
+
+function PlayerInJail (player);
+	var flags := LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN+LISTEX_FLAG_GHOST;
+	foreach mob in ListMobilesNearLocationEx(JAIL_MID_X, JAIL_MID_Y, JAIL_MID_Z, JAIL_RADIUS, flags)
+		if (mob==player)
+			return 1;
+		endif
+	endforeach
+	return 0;
+endfunction
+
+function GetJailString();
+        var accobj;
+        var release;
+        var player;
+        var jailstr :="The following accounts are jailed:";
+        jailstr := jailstr + " ___________________________________ ";
+        foreach accName in ListAccounts()
+        	player := 0;
+        	accobj := FindAccount(accName);
+        	release := accobj.getprop("Release");
+        	if (release) 		
+        		jailstr := jailstr + "Account " + accName + " will be released in " + CStr(DaysToRelease(accobj.getprop("Release"))) + " day(s).";
+        		player := PlayerOnline(accobj);
+        		if (player)
+        			jailstr := jailstr + " Currently online as player " + player.name;
+        			if (PlayerInJail(player))
+        				jailstr := jailstr + " and in jail.";
+        			else
+        				jailstr := jailstr + " and NOT in jail.";
+        			endif
+        		else
+        			jailstr := jailstr + " Currently OFFLINE.";
+        		endif
+        		jailstr := jailstr + "          ";
+        		jailstr := jailstr + "                                   ";
+        	endif
+        endforeach
+        return jailstr;
+endfunction
+
+function DaysToRelease (longTime);
+	longtime:=longtime-ReadGameClock();
+	return (longTime/86400);
+endfunction

@@ -1,0 +1,59 @@
+//
+// stat/skill cap applier
+//
+// updates by Zulu  zuluhotel@home.com  Dec. 30 1999
+//  update Jan 21, 2000
+
+use os;
+use uo;
+
+include "include/client";
+include "include/attributes";
+
+const STATCAP  := 130;
+const SKILLCAP := 130;
+const MINS_BETWEEN_CHECKS := 180;
+
+program capper()
+
+	while (1)
+
+		foreach chr in EnumerateOnlineCharacters()
+
+			if( !chr.cmdlevel && !GetObjProperty( chr, "CapOff") )
+				set_critical(1);
+
+				if( GetBaseStrength(chr) > STATCAP )
+					SetBaseStrength(chr, STATCAP );
+				endif
+			
+				if( GetBaseDexterity(chr) > STATCAP )
+					SetBaseDexterity(chr, STATCAP );
+				endif
+			
+				if( GetBaseIntelligence(chr) > STATCAP)
+					SetBaseIntelligence(chr, STATCAP );
+				endif
+
+				var skill;
+	 			for( skill:= 0; skill <= SKILLID__HIGHEST; skill := skill + 1 )
+					//var difference := 0;
+					//foreach item in ListEquippedItems( chr )
+					//	if( GetObjProperty( item, "skilladv" ) == skill )
+					//		difference := difference + CInt(GetObjProperty( chr,"advamount" + skill + "s" + item.serial ));
+					//	endif
+					//endforeach
+
+	   				if( GetBaseSkill( chr, skill ) > SKILLCAP) // + difference) )
+						SetBaseSkill( chr, skill, SKILLCAP);
+					endif
+	 			endfor
+	 		
+	 			set_critical(0);
+			endif
+		endforeach
+
+		sleep( MINS_BETWEEN_CHECKS * 60 );
+	endwhile
+
+endprogram

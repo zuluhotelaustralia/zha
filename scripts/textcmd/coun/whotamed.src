@@ -1,0 +1,51 @@
+use boat;
+use uo;
+
+include "include/cmdlevel_check";
+
+
+program textcmd_whotamed( who )
+	if (!checkStaff(who, "whotamed", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+	SendSysMessage(who, "Select a creature to find out pet information");
+	var creature := Target(who);
+	if (!creature || ! creature.isa(POLCLASS_NPC))
+            SendSysMessage(who, "You must select an npc");
+            return; 
+	endif
+
+	var masterSer := GetObjProperty(creature ,"master");
+
+	if (masterSer)
+		var master:= SystemFindObjectBySerial( master, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		if (master)
+      	SendSysMessage(who, "This NPC is currently under the control of " + master.name);
+      endif
+  	else
+     	SendSysMessage(who, "This NPC is currently not under anyone's control");
+   endif
+	
+	
+	var numtamings := GetObjProperty( creature, "PreviouslyTamed");
+	if (numtamings)
+		SendSysMessage(who, "This NPC has been tamed " + numtamings + " time(s).");
+	endif
+	var tby := GetObjProperty( creature, "PreviouslyTamedBy");
+	if (tby)
+		SendSysMessage(who, "This NPC was last tamed by " + tby);
+	endif
+	
+	var sby := GetObjProperty( creature,"spellboundby");
+	if (sby)
+		SendSysMessage(who, "This NPC was last spellbound by " + sby);
+	endif
+	
+	var hby := GetObjProperty( creature, "hatchedBy");
+	if (hby)
+		SendSysMessage(who, "This NPC was hatched from an egg by " + hby);
+	endif
+
+
+endprogram

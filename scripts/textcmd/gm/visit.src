@@ -1,0 +1,17 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+program visit(who)
+	if (!checkStaff(who, "visit", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+foreach character in EnumerateOnlineCharacters()
+        MoveCharacterToLocation(who, character.x, character.y, character.z);
+        sleep(5);
+endforeach
+
+endprogram

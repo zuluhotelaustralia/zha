@@ -1,0 +1,9 @@
+use uo;
+use os;
+
+include "newclassbook";
+
+program newclassbookscroll(newclassbookscroll, who)
+	AssignNewSpellID(newclassbookscroll);
+endprogram
+

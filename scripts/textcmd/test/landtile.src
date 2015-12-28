@@ -1,0 +1,15 @@
+
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program show_landtile( who )
+	if (!checkStaff(who, "landtile", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    var where := TargetCoordinates( who );
+    if (where)
+        SendSysMessage( who, "LandTile: " + Hex(GetMapInfo( where.x, where.y ).landtile) );
+    endif
+endprogram

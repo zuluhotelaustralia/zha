@@ -1,0 +1,82 @@
+/* Holy Spell - Regeneration         **
+** Heals target slowly over time     **
+** Seravy - seravy@gmail.com         */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+include "include/attributes";
+
+const SPELL_ID := SPELL_ID_REGENERATION;
+
+program cast_regeneration( parms )
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  PlayObjectCenteredEffect( cast_on, FX_SPELL_REGENERATION, SPEED_SPELL_REGENERATION, LOOP_SPELL_REGENERATION);
+  PlaySoundEffect( cast_on, SFX_SPELL_REGENERATION );
+
+/* Was going to make it hurt bad classes, decided not to
+  if (class==CLASSEID_DEATHKNIGHT || class==CLASSEID_NECROMANCER || GetObjProperty(cast_on, "Type")=="Undead")
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+     return;
+    endif
+    SendSysMessage(caster, "You cannot regen evil creatures.");
+    EraseObjProperty( caster, "#Casting");
+  else
+*/
+
+/* Decided against mucking with regen rates :)
+    var regenrate := BaseRegenRate(cast_on);
+    regenrate := (regenrate + 500 + 500 * clevel);
+    if (GetClass(caster) ==  CLASSEID_PRIEST)
+      regenrate := regenrate * 2;
+    endif
+    SetHpRegenRate(cast_on , regenrate);
+*/
+
+  var level:=GetClasseLevel(caster);
+  var class:= GetClass(caster);
+
+  var duration := CInt(30 * ClasseLargeBonusByLevel(level));
+  var healrate := CInt(4 * ClasseBonusByLevel(level));
+  if (class == CLASSEID_PRIEST)
+    duration := duration * 2;
+    healrate := healrate * 2;
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+
+  duration := ReadGameClock() + duration;
+  var currentHp := GetHp(cast_on);
+  while (currentHP >= GetHp(cast_on) && ReadGameClock() < duration)
+    currentHp := GetHp(cast_on);
+    sleepms(200);
+  endwhile
+
+  while (ReadGameClock() < duration)
+    HealDamage(cast_on, healrate);
+    sleep(5);
+  endwhile
+  
+endprogram

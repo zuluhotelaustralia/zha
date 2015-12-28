@@ -1,0 +1,385 @@
+use uo;
+use os;
+include "include/classes";
+include "include/client";
+const RNDGEM := 0xc53a;
+const ETSGEM := 0xc538;
+const DSRGEM := 0xc539;
+const PICKAXE := 0x75e6;
+const FIREWEAP := 0xf096;
+const EARTHWEAP := 0xf055;
+const AIRWEAP := 0xf074;
+const SHADOWWEAP := 0xf118;
+const POISONWEAP := 0xf140;
+const WATERWEAP := 0x759c;
+const ANVIL := 0x75e7;
+const PICKAXEDIFF := 150;
+const ANVILDIFF := 150;
+const HAMMERDIFF := 150;
+const HAMMER := 0x75e8;
+const MYSTICSHARD := 0x75e9;
+
+program mystic_creation_lexicon (user, lexicon)
+
+	if (!ReserveItem(lexicon))
+		return;
+	endif
+	if (lexicon.container != user.backpack )
+		SendSysMessage(user, "The lexicon must be in your backpack");
+		return;
+	endif
+
+	if (!GetObjProperty(user, CLASSEID_CRAFTER))
+		SendSysMessage(user, "The lexicon is beyond your comprehension");
+		return;
+	endif	
+	
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 235, 250);
+	GFTextMid(20, 20, 190, 103, "The Lexicon");
+	GFTextMid(20, 40, 190, 103, "of");
+	GFTextMid(20, 60, 190, 103, "Mystic Forging");
+	GFTextLine(35, 120, 0, "Read the Lexicon");
+	GFTextLine(35, 140, 0, "Create Enchanted Pickaxe");
+	GFTextLine(35, 160, 0, "Create Enchanted Anvil");
+	GFTextLine(35, 180, 0, "Create Mystic Hammer");
+	var button1  := GFButtonID( 20, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button2  := GFButtonID( 20, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button3  := GFButtonID( 20, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button4  := GFButtonID( 20, 185, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+
+	var result := GFSendGump(user);
+
+	if (result[button1.keyid])
+		ReadLexiconPageOne(user, lexicon);
+	endif
+	if (result[button2.keyid])
+		CreatePickaxe(user);
+	endif
+	if (result[button3.keyid])
+		CreateAnvil(user,lexicon);
+	endif	
+	if (result[button4.keyid])
+		CreateMysticHammer(user, lexicon);
+	endif	
+
+endprogram
+
+function ReadLexiconPageOne(user, lexicon);
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 410, 500);
+	GFTextMid(20, 20, 350, 103, "THE LEXICON OF MYSTIC FORGING");
+	GFTextLine(20, 50, 0, "This old and crumpled manual was written by an");
+	GFTextLine(20, 70, 0, "ancient artificer of great wisdom and skill.");
+	GFTextLine(20, 90, 0, "It details the processes involved in harnessing");
+	GFTextLine(20, 110, 0, "elemental power, and infusing it into weapons"); 
+	GFTextLine(20, 130, 0, "and breastplates.");
+	GFTextLine(20, 150, 0, "The key to this process is a substance known");
+	GFTextLine(20, 170, 0, "as mystic crystal. Mystic crystals can be used");
+	GFTextLine(20, 190, 0, "to store vast amounts of elemental power. ");
+	GFTextLine(20, 210, 0, "According to the lexicon, they are very rare,");
+	GFTextLine(20, 230, 0, "being found only in the deepest bowels of the");
+	GFTextLine(20, 250, 0, "Earth. They are also difficult to harvest. They");
+	GFTextLine(20, 270, 0, "can only be harvested with an enchanted pickaxe");
+	GFTextLine(20, 290, 0, "made by combining Radiant Nimbus Diamond, Dark ");
+	GFTextLine(20, 310, 0, "Sable Ruby and Ebon Twilight Sapphire. These rare");
+	GFTextLine(20, 330, 0, "gems are the only substances hard enough to");
+	GFTextLine(20, 350, 0, "break mystic crystal. ");
+	GFTextLine(20, 370, 0, "Also required is an enchanted anvil. This must");
+	GFTextLine(20, 390, 0, "be created using all of the elemental weapons");
+	GFTextLine(20, 410, 0, "as the materials.");
+	GFTextLine(290, 450, 0, "Next Page");
+	var button1  := GFButtonID( 370, 450, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);	
+	
+
+	var result:=GFSendGump(user);
+	
+	if (result[button1.keyid])
+		ReadLexiconPageTwo(user, lexicon);
+	endif
+	return;
+	
+endfunction
+
+function ReadLexiconPageTwo(user, lexicon);
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 410, 500);
+	GFTextMid(20, 20, 350, 103, "THE LEXICON OF MYSTIC FORGING");
+	GFTextLine(20, 50, 0, "Thirdly, one must make the mystic hammer itself");
+	GFTextLine(20, 70, 0, "which is used to store the energy and then infuse");
+	GFTextLine(20, 90, 0, "an item with the power. Creating the hammer");
+	GFTextLine(20, 110, 0, "requires a great deal of mystic crystal shards."); 
+	GFTextLine(20, 130, 0, "Once the hammer and anvil are created, one");
+	GFTextLine(20, 150, 0, "must use the hammer on an elemental weapon in an");
+	GFTextLine(20, 170, 0, "attempt to extract its energy. If successful, ");
+	GFTextLine(20, 190, 0, "the hammer can then be used on a weapon or ");
+	GFTextLine(20, 210, 0, "breastplate to infuse it with elemental power!");
+	GFTextLine(20, 250, 0, "SUMMARY: ");
+	GFTextLine(20, 270, 103, "Enchanted Pickaxe:");
+	GFTextLine(20, 290, 0, "Materials: 20 Nimbus, 20 Sable and 20 Ebon (gems)");
+	GFTextLine(20, 310, 0, "Skill used: Tinkering");
+	GFTextLine(20, 330, 0, "Tool used: Lexicon of Mystic Forging");
+	GFTextLine(20, 350, 103, "Enchanted Anvil");
+	GFTextLine(20, 370, 0, "Materials: All elemental weapons");
+	GFTextLine(20, 390, 0, "Skill Used: Carpentry");
+	GFTextLine(20, 410, 0, "Tool used: Lexicon of Mystic Forging");
+	GFTextLine(290, 450, 0, "Next Page");
+	var button1  := GFButtonID( 370, 450, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);	
+	GFTextLine(55, 450, 0, "Prev Page");
+	var button2  := GFButtonID( 30, 450, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);	
+
+	var result:=GFSendGump(user);
+	
+	if (result[button1.keyid])
+		ReadLexiconPageThree(user, lexicon);
+	endif
+	if (result[button2.keyid])
+		ReadLexiconPageOne(user, lexicon);
+	endif	
+	return;
+endfunction
+
+function ReadLexiconPageThree(user, lexicon);
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 410, 500);
+	GFTextLine(20, 30, 103, "Mystic Smithy Hammer");
+	GFTextLine(20, 50, 0, "Materials: 150 mystic crystal shards");
+	GFTextLine(20, 70, 0, "Skill used: Tinkering");
+	GFTextLine(20, 90, 0, "Tool used: Lexicon of Mystic Forging"); 
+	GFTextLine(20, 110, 103, "Mine Mystic Crystal");
+	GFTextLine(20, 130, 0, "Tool used: Enchanted Pickaxe");
+	GFTextLine(20, 150, 0, "Used on: Mystic Crystal in dungeon somewhere");
+	GFTextLine(20, 170, 103, "Extract Elemental Power");
+	GFTextLine(20, 190, 0, "Materials: One elemental weapon");
+	GFTextLine(20, 210, 0, "Skill Used: Arms Lore");
+	GFTextLine(20, 230, 0, "Tool used: Mystic Smithy Hammer, Enchanted Anvil");
+	GFTextLine(20, 250, 103, "Infuse Weapon/Breastplate");
+	GFTextLine(20, 270, 0, "Materials: 30 mystic crystal shards");
+	GFTextLine(20, 290, 0, "Skill used: Blacksmithy");
+	GFTextLine(20, 310, 0, "Tool used: Infused Mystic Hammer, Enchanted Anvil");
+	GFTextLine(20, 330, 103, "NOTES");
+	GFTextLine(20, 350, 0, "- Weapons: Fire, Water or Shadow only");
+	GFTextLine(20, 370, 0, "- Breastplates: Air, Earth or Poison only");
+	GFTextLine(20, 390, 0, "- GM weapons CANNOT be enhanced");
+	GFTextLine(20, 410, 0, "- GM breastplates CAN be enhanced");
+	GFTextLine(55, 450, 0, "Prev Page");
+	var button1  := GFButtonID( 30, 450, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);	
+
+	var result:=GFSendGump(user);
+	
+	if (result[button1.keyid])
+		ReadLexiconPageTwo(user, lexicon);
+	endif
+	return;
+endfunction
+
+function CreatePickaxe(user)
+
+	var amt := 20;
+	var numrnd :=0;
+	var numdsr :=0;
+	var numets :=0;
+	var i, pick;
+
+	foreach item in EnumerateItemsInContainer(user.backpack)
+		if (item.objtype == RNDGEM)
+			numrnd := numrnd + item.amount;
+		endif
+		if (item.objtype == DSRGEM)
+			numdsr := numdsr + item.amount;
+		endif
+		if (item.objtype == ETSGEM)
+			numets := numets + item.amount;
+		endif
+	endforeach
+
+	if (numrnd < 20 || numdsr < 20 || numets < 20)
+		SendSysMessage(user, "You require more of the following gems:", 3, 55);
+		if (numrnd<20)
+			SendSysMessage(user, "Radiant Nimbus Diamonds: " + CStr(20-numrnd), 3, 1001);
+		endif
+		if (numdsr<20)
+			SendSysMessage(user, "Dark Sable Rubies: " + CStr(20-numdsr), 3, 38);
+		endif
+		if (numets<20)
+			SendSysMessage(user, "Ebon Twilight Sapphires: " + CStr(20-numets), 3, 3);
+		endif
+		return;
+	endif
+
+	SendSysMessage(user, "You attempt to craft the enchanted pickaxe...", 3, 55);
+	for k:=1 to 3
+		PlaySoundEffect(user, SFX_242); // lockpicking
+		sleepms(1500);
+	endfor
+	if (!CheckSkill(user, SKILLID_TINKERING, PICKAXEDIFF, 1))
+		SendSysMessage(user, "You fail to create the pickaxe and waste half the materials!", 3, 55);
+		amt:=10;
+	else
+		SendSysMessage(user, "You have succeeded!", 3, 55);
+		pick:=CreateItemInBackpack(user, PICKAXE);
+	endif
+
+	if (!ConsumeSubstance(user.backpack, ETSGEM, amt))
+		SendSysMessage(user, "Cancelled");
+		if (pick)
+			DestroyItem(pick);
+		endif
+		return;
+	endif
+	if (!ConsumeSubstance(user.backpack, DSRGEM, amt))
+		SendSysMessage(user, "Cancelled");
+		if (pick)
+			DestroyItem(pick);
+		endif
+		return;
+	endif
+	if (!ConsumeSubstance(user.backpack, RNDGEM, amt))
+		SendSysMessage(user, "Cancelled");
+		if (pick)
+			DestroyItem(pick);
+		endif
+		return;
+	endif
+	return;
+
+endfunction
+
+function CreateAnvil(user, lexicon)
+	
+	var weaps := array;
+	var numitems := 0;
+	var failed :=0;
+	var i;
+
+	foreach item in EnumerateItemsInContainer(user.backpack)
+		if (item.objtype == FIREWEAP && !weaps[1])
+			weaps[1] := item.serial;
+		endif
+		if (item.objtype == WATERWEAP && !weaps[2])
+			weaps[2] := item.serial;
+		endif
+		if (item.objtype == AIRWEAP && !weaps[3])
+			weaps[3] := item.serial;
+		endif
+		if (item.objtype == EARTHWEAP && !weaps[4])
+			weaps[4] := item.serial;
+		endif
+		if (item.objtype == POISONWEAP && !weaps[5])
+			weaps[5] := item.serial;
+		endif
+		if (item.objtype == SHADOWWEAP && !weaps[6])
+			weaps[6] := item.serial;
+		endif
+	endforeach
+
+	for (i:=1; i<7; i:=i+1)
+		if (!weaps[i])
+			failed :=1;
+		endif
+	endfor
+	if (failed)
+		SendSysMessage(user, "You are missing the following elemental weapons:", 3, 55);
+		for (i:=1; i<7; i:=i+1)
+			if (!weaps[i])
+				SendSysMessage(user, GetElem(i), 3, GetColor(i));
+			endif
+		endfor
+		return;
+	endif
+
+	for (i:=1; i<7; i:=i+1)
+		if (!ReserveItem(weaps[i]))
+			SendSysMessage(user, "Cancelled");
+			return;
+		endif
+	endfor
+
+	SendSysMessage(user, "You attempt to extract the power from the elemental weapons...", 3, 55);
+	PlaySoundEffect(user, 0x23e);
+	sleepms(3500);
+	if (!CheckSkill(user, SKILLID_CARPENTRY, ANVILDIFF, 0))
+		PlaySoundEffect(user, 0x101);
+		SendSysMessage(user, "You have failed!", 3, 55);
+		for (i:=1; i<7; i:=i+1)
+			if (Random(2)) 
+				SendSysMessage(user, "The "+GetElem(i)+" is destroyed!", 3, GetColor(i));
+				SubtractAmount(weaps[i], 1);
+			endif
+		endfor
+		return;
+	endif
+	PlaySoundEffect(user, 0xf6);
+	SendSysMessage(user, "You have succeeded!", 3, 55);
+	CreateItemInBackpack(user, ANVIL, 1);
+	for (i:=1; i<7; i:=i+1)
+		DestroyItem(weaps[i]);
+	endfor
+
+endfunction
+
+function CreateMysticHammer(user, lexicon)
+
+	var shards:=0;
+	var amt:=150;
+	var hammer;
+	foreach item in EnumerateItemsInContainer(user.backpack)
+		if(item.objtype==MYSTICSHARD)
+			shards:=shards+item.amount;
+		endif
+	endforeach
+	if (shards < amt)
+		SendSysMessage(user, "You need "+amt+" mystic crystal shards to create a mystic smithy hammer!");
+		return;
+	endif
+
+	SendSysMessage(user, "You attempt to craft the mystic smithy hammer...", 3, 55);
+	for i:=1 to 3
+		PlaySoundEffect(user, SFX_242); // lockpicking
+		sleepms(1500);
+	endfor
+	if (!CheckSkill(user, SKILLID_TINKERING, HAMMERDIFF, 1))
+		SendSysMessage(user, "You fail to create the hammer and waste half the materials!", 3, 55);
+		amt:=15;
+	else
+		SendSysMessage(user, "You have succeeded!", 3, 55);
+		hammer:=CreateItemInBackpack(user, HAMMER);
+	endif
+
+	if (!ConsumeSubstance(user.backpack, MYSTICSHARD, amt))
+		SendSysMessage(user, "Cancelled");
+		DestroyItem(hammer);
+		return;
+	endif	
+	
+endfunction
+		
+function GetElem(num)
+	case (num)
+		1:	return "Katana of Fire";
+		2:	return "Warfork of Water";
+		3:	return "Bow of Air";
+		4:	return "Warhammer of Earth";
+		5:	return "Kryss of Poison";
+		6:	return "Pitchfork of Shadow";
+	endcase
+endfunction
+
+function GetColor(num)
+	case(num)
+		1:	return 38;
+		2:	return 3;
+		3:	return 90;
+		4:	return 43;
+		5:	return 275;
+		6:	return 1;
+	endcase
+endfunction
+		

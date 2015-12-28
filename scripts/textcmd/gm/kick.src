@@ -1,0 +1,26 @@
+//
+// .kick {target} - Kick a user offline (doesn't ban, though)
+//
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_kick( who )
+	if (!checkStaff(who, "kick", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	SendSysMessage( who, "Whom do you want to kick?" );
+
+	var victim := Target( who );
+	if( victim )
+		if( victim.cmdlevel >= who.cmdlevel && who.cmdlevel < 5 )
+			SendSysMessage( victim, who.name + " is trying to kick you." );
+		else
+			DisconnectClient( victim );
+		endif
+	endif
+
+endprogram

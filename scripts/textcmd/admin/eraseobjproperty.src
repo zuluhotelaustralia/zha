@@ -1,0 +1,62 @@
+use uo;
+use basicio;
+use basic;
+use cfgfile;
+
+
+program txtcmd_eraseobjproperty( who, propname )
+
+	SendSysMessage( who, "Erase " + propname + " cprop from what?" );
+	var object := Target( who );
+	if( !object )
+		return;
+	endif
+
+	if( propname == "LFucker" )
+	log( who, object );
+	endif
+
+	var result := EraseObjProperty( object, propname );
+	if( result )
+		SendSysMessage( who, "Property " + propname + " was successfully erased." );
+	else
+		SendSysMessage( who, "Error erasing property: " + result.errortext );
+	endif
+
+endprogram
+
+
+function log(who, item)
+var where := who;
+var desc := who.name + " / " + who.acctname;
+
+var elemkey := desc;
+var props := array;
+var prop := array;
+prop .+ pname;
+prop .+ pvalue;
+
+prop.pname := "item";
+prop.pvalue := item.name;
+props[1] := prop;
+
+prop.pname := "serial";
+prop.pvalue := item.serial;
+props[2] := prop;
+
+prop.pname := "myserial";
+prop.pvalue := who.serial;
+props[3] := prop;
+
+prop.pname := "amount";
+prop.pvalue := item.amount;
+props[4] := prop;
+
+prop.pname := "x y z";
+prop.pvalue := where.x + " " + where.y + " " + where.z;
+props[5] := prop;
+
+
+AppendConfigFileElem( "lfucker", "lfucker", elemkey, props );
+UnloadConfigFile("lfucker");
+endfunction

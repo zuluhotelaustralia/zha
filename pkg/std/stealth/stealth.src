@@ -1,0 +1,51 @@
+/////////////////////////////////////////////////////////////////////////////
+// stealth.src											
+//														
+// TODO: just about everything.						   
+//
+// Created: Syzygy 19990429
+//														
+/////////////////////////////////////////////////////////////////////////////
+
+use uo;
+
+include "include/client";
+include "include/attributes";
+include "include/classes";
+
+const POINTS	:= 200;
+
+program skill_stealth( chr )
+
+	if( GetEffectiveSkill( chr, SKILLID_HIDING ) < 80 )
+		PrintTextAbovePrivate( chr, "You are not good enough at Hiding to do that", chr );
+		return;
+	endif
+
+	if( !chr.hidden )
+		PrintTextAbovePrivate( chr, "You must be hidden to use stealth", chr );
+		return;
+	endif
+
+	var class:=GetClass(chr);
+
+	if (class==CLASSEID_PALADIN || class==CLASSEID_DEATHKNIGHT)
+		SendSysMessage(chr, "You refuse to skulk about like a common thief!");
+		return;
+	endif
+	if( !CheckSkill( chr, SKILLID_STEALTH, -2, 200 ) )
+		chr.hidden := 0;
+		PrintTextAbovePrivate( chr, "You have revealed yourself!", chr );
+		return;
+	endif
+
+	var steps := CInt( GetEffectiveSkill( chr, SKILLID_STEALTH ) / 12 ) + 1;
+
+	if (class==CLASSEID_THIEF || class==CLASSEID_NINJA)
+		steps := CInt(steps * ClasseBonusByLevel(GetClasseLevel(chr)));
+	endif
+
+	chr.stealthsteps := steps;
+	PrintTextAbovePrivate( chr, "You are now moving stealthily", chr );
+
+endprogram

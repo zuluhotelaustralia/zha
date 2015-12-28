@@ -1,0 +1,132 @@
+////////////////////////////////////////////////////////////////
+//	usescript for Artifacts (clothes/armour)
+//	Author: Archaean
+//	email: lex@lateralsystems.net
+//	
+//	This script checks to see if the user of the artifact
+//	is powerful enough to control it (or is the correct
+//	class). Then it sets up a gump for the player to alter 
+//	the current power of the artifact.
+////////////////////////////////////////////////////////////////
+
+use uo;
+use os;
+use util;
+
+
+include "include/client";
+include "include/random";
+include "include/itemutil";
+include "include/gumps";
+include "include/attributes";
+include "include/cmdlevel_check";
+include "include/classes";
+include "artifacts";
+
+program use_artifact(user, artifact)
+
+	if (!CheckControl(user, artifact))
+		return;
+	endif	
+	// Set up Gump
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 380, 500);
+		
+	GFTextLine(30, 20, 10, "Choose a power to invoke:");
+
+	GFTextLine(90, 50, 5,  "Cancel");
+	GFTextLine(90, 80, 1170,  "Necro Attunement");
+	GFTextLine(90, 110, 343, "Earth Attunement");
+	GFTextLine(90, 140, 36, "Fire Attunement");
+	GFTextLine(90, 170, 206, "Water Attunement");
+	GFTextLine(90, 200, 88, "Air Attunement");
+	GFTextLine(90, 230, 53, "Spell Power +10%");
+	GFTextLine(90, 260, 63, "Healing Power +5");
+	GFTextLine(90, 290, 611, "Spell Reflection +5");
+	GFTextLine(90, 320, 743, "Physical Protection +5");
+	GFTextLine(90, 350, 39, "Strength +25");
+	GFTextLine(90, 380, 93, "Intelligence +25");
+	GFTextLine(90, 410, 264, "Dexterity +25");
+	GFTextLine(90, 440, 52, "Random Class Skill +8");
+	
+	var button1  := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button2  := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button3  := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button4  := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button5  := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button6  := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button7  := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button8  := GFButtonID( 60, 265, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button9  := GFButtonID( 60, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button10  := GFButtonID( 60, 325, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button11  := GFButtonID( 60, 355, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button12  := GFButtonID( 60, 385, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button13  := GFButtonID( 60, 415, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button14  := GFButtonID( 60, 445, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+
+	var result := GFSendGump(user);
+	if (result[button1.keyid])
+		SendSysMessage(user, "Cancelled");
+		artifact.movable := 1;
+		return;
+	elseif (result[button2.keyid])
+		SetPower(user, artifact, "NecroProtection", "Necro Attunement!", 5, NECRO_COLOR); 
+	elseif (result[button3.keyid])
+		SetPower(user, artifact, "EarthProtection", "Earth Attunement!", 5, EARTH_COLOR); 
+	elseif (result[button4.keyid])
+		SetPower(user, artifact, "FireProtection", "Fire Attunement!", 5, FIRE_COLOR); 
+	elseif (result[button5.keyid])
+		SetPower(user, artifact, "WaterProtection", "Water Attunement!", 5, WATER_COLOR); 
+	elseif (result[button6.keyid])
+		SetPower(user, artifact, "AirProtection", "Air Attunement!", 5, AIR_COLOR); 
+	elseif (result[button7.keyid])
+		SetPower(user, artifact, "MagicPenalty", "Spell Power +10%!", -10, SPELL_COLOR);	
+	elseif (result[button8.keyid])
+		SetPower(user, artifact, "HealingIncrease", "Healing Power +5!", 5, HEAL_COLOR);	
+	elseif (result[button9.keyid])
+		SetPower(user, artifact, "Permmr", "Spell Reflection +5!", 5, MOONSTONE_COLOR);
+	elseif (result[button10.keyid])
+		SetPower(user, artifact, "PhysicalProtection", "Physical Protection +5!", 5, PHYS_COLOR);
+	elseif (result[button11.keyid])
+		SetPower(user, artifact, "str", "Strength +25!", 25, STR_COLOR);
+	elseif (result[button12.keyid])
+		SetPower(user, artifact, "int", "Intelligence +25!", 25, INT_COLOR);
+	elseif (result[button13.keyid])
+		SetPower(user, artifact, "dex", "Dexterity +25!", 25, DEX_COLOR);
+	elseif (result[button14.keyid])
+		var randskill, skillslist, classlist, i;
+		if(GetClass(artifact))
+			// Get random skill from class skill list
+			skillslist := GetClasseSkills(GetClass(artifact));
+			randskill := skillslist[Random(7)+1];
+		else
+			// Get random skill
+			skillslist := GetSkillIds();
+			randskill := skillslist[Random(SKILLID__HIGHEST)+1];
+		endif
+		SetObjProperty(artifact, "skilladv", randskill);
+		SetObjProperty(artifact, "skilladvamount", 8);
+		EraseObjProperty(artifact, GetObjProperty(artifact, "CurrentProp"));
+		SetObjProperty(artifact, "CurrentProp", "skilladv");
+		PlaySoundEffect(user, 0xf8);
+		artifact.color := RANDSKILL_COLOR;
+		SendSysMessage(user, "Artifact now set to +8 " + CStr(GetAttributeIdBySkillId(randskill)));
+	endif
+	artifact.movable := 1;
+	return;
+
+endprogram
+
+function SetPower (user, artifact, newcprop, text, powerlvl, newcolor)
+	var oldprop := GetObjProperty(artifact, "CurrentProp");
+
+	EraseObjProperty(artifact, oldprop);
+	SetObjProperty(artifact, newcprop, powerlvl);
+	SetObjProperty(artifact, "CurrentProp", newcprop);
+	artifact.color := newcolor;
+	PlaySoundEffect(user, 0xf8);
+	SendSysMessage(user, "The artifact has now been set to provide "+text);
+	return;
+
+endfunction

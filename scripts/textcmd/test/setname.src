@@ -1,0 +1,15 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_setname( speaker, newname )
+	if (!checkStaff(speaker, "setname", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    SendSysMessage( speaker, "Select object of which to set name" );
+    var tgt := Target( speaker );
+    if (tgt)
+        tgt.name := newname;
+    endif
+endprogram

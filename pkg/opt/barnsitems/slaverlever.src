@@ -1,0 +1,18 @@
+use uo;
+use os;
+
+program slaverlever( who, lever)
+	lever.graphic:=0x108d;
+	sleepms(500);
+	lever.graphic:=0x108c;
+	sleep(1);
+	lever.graphic:=0x108e;
+	PlaySoundEffect(lever, 0xf1);
+	foreach player in ListMobilesNearLocation( lever.x, lever.y, lever.z, 30 )
+		if (GetObjProperty(player, "#cantLeaveSlaversBefore"))
+			EraseObjProperty(player, "#cantLeaveSlaversBefore");
+			PrintTextAbove(player, "You may now go free!");
+		endif
+	endforeach
+	
+endprogram

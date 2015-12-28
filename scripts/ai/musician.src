@@ -1,0 +1,401 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// Barns 24/04/04 : A serious musician who is here to teach
+////////////////////////////////////////////////////////////////////////////
+
+use basic;
+use math;
+use npc;
+use os;
+use uo;
+
+include "include/eventid";
+include "include/randname";
+include "include/client";
+include "ai/setup/modsetup";
+include "include/random";
+include "include/queststone";
+
+const SYSEVENT_UPDATEMUSIC:=0x0001234;
+const HALT_THRESHOLD := 10; // how close before he barks?
+
+var me := Self();
+var currently_playing:=0;
+
+if( me.name["<random>"] )
+   SetName( me, RandomName( me ) + " the Musician");
+   EquipFromTemplate( me, "Crier" );
+   case( Random(2) )
+      0: me.graphic := 400;
+      1: me.graphic := 401;
+   endcase
+endif
+if (GetObjProperty(me, "RandomSongMode"))
+	SetObjProperty(me, "music", RandomTune());
+endif
+
+registerMeWithQuestStone();
+
+program Musician()
+    EnableEvents( SYSEVENT_SPEECH + SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED,HALT_THRESHOLD);
+    EnableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD );
+    EnableEvents( SYSEVENT_OPPONENT_MOVED );
+	var next_wander := ReadGameClock() + 1;
+
+	if (GetObjProperty(me, "frozen"))
+		me.frozen := 0;
+	endif
+
+    SetWarMode( 0 );
+    set_priority(10);
+
+    var ev;
+    while (1)
+        ev := os::wait_for_event( 120 );
+        // print( "event type: " + ev.type );
+        case (ev.type)
+					SYSEVENT_UPDATEMUSIC:
+						//player has just played a tune to it
+						say("Hmmm");
+						CompareSongs();
+					SYSEVENT_ENTEREDAREA:
+						if (!ev.source.isA(POLCLASS_NPC))
+							if (!Random(4))
+								say ("Ask me to play if you want to hear my beautiful music!");
+     						endif				
+							playlute();
+						endif          
+					SYSEVENT_SPEECH:
+		    			if (!ev.source.isA(POLCLASS_NPC))
+		    				if (lower(ev.text) == "set quest" && ev.source.cmdlevel >=2)
+								AssociateQuest(ev.source);
+		    				endif
+		    				if (lower(ev.text) == "play")
+								playlute();	
+							endif
+		    			endif	
+            SYSEVENT_ENGAGED:
+					 say("Gaahhh! Do not hurt a simple musician!");
+                Run( ev.source );
+            SYSEVENT_DAMAGED:
+                say( "By the virtues! Why? WHY??" );
+                //print( "I just took " + ev.damage + " points of damage!" );
+                if (ev.source)
+                    Run( ev.source );
+                else
+                    say( "What evil thou art!" );
+                endif
+            SYSEVENT_ENTEREDAREA:
+					playlute();
+	    SYSEVENT_LEFTAREA:
+			endcase
+	if (ReadGameClock() >= next_wander)
+		wander();
+		next_wander := ReadGameClock() + 1;
+		if (GetObjProperty(me, "RandomSongMode"))
+			if (Random(100)==0)
+				say("Perhaps I shall play another tune");
+				SetObjProperty(me, "music", RandomTune());
+				playlute();
+			endif
+		endif
+	endif 
+        // TODO: ReturnToPost();
+    endwhile
+endprogram
+
+function Run( opponent )
+    TurnAwayFrom( opponent );
+    DisableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA );
+    //SetOpponent( opponent );
+    var waittime;
+  outer:
+    while (opponent && !opponent.dead)
+        waittime := OpenDistance( opponent ) * 15;
+        var ev := wait_for_event( waittime );
+        // print( "event type: " + ev.type );
+        case (ev.type)
+            SYSEVENT_SPEECH:
+                if (ev.text["hold"])
+                    say( "Very well then." );
+                    break outer;
+                endif
+            SYSEVENT_DISENGAGED:
+                if (ev.source.serial == opponent.serial)
+                    say( "Whew!" );
+                    break outer;
+                endif
+            SYSEVENT_ENGAGED:
+            SYSEVENT_DAMAGED:
+                if (ev.source)
+                    if (ev.source.serial != opponent.serial)
+                        say( "Ack! Leave me alone!" );
+                    else
+                        if (ev.type == "damage")
+			    say("Ouch! Heeelp!");
+                            //print( "I just took " + ev.damage + " points of damage." );
+                        endif
+                    endif
+                endif
+            SYSEVENT_OPPONENT_MOVED:               
+            SYSEVENT_ENTEREDAREA:
+            SYSEVENT_LEFTAREA:
+                // ignore both of these
+        endcase
+    endwhile
+    EnableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD );
+    SetWarMode( 0 );
+endfunction
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  OpenDistance - open the distance between self and an opponent.
+//  Returns: 1 if distance is 10 (no move necessary)
+//           0 if distance is < 10 (may still need to move)
+//
+/////////////////////////////////////////////////////////////////////////////
+function OpenDistance( opponent )
+    case Distance( me, opponent )
+        10:
+            return 1;       
+        default:
+            RunAwayFrom( opponent );
+            return 0;
+    endcase
+endfunction
+
+function ChooseSong(songnum)
+	EraseObjProperty(me, "RandomSongMode");
+	case(songnum)
+		1 :return {"E1", "P", "G1", "P", "A1", "P", "P", "P", "E1", "P", "G1", "B1", "A1", "P", "P", "P", "E1", "P", "G1", "P", "A1", "P", "P", "P", "G1", "P", "E1"};
+		2 :return {"E2", "P", "A2", "A1", "P", "D2", "B1", "P", "C2", "C1", "P", "B2", "B1"};
+		3 :return {"G1", "P", "D2", "P", "C2", "P", "G2", "P", "F2", "P", "C3", "P", "A#2", "P", "G1"};
+		4 :return {"A1", "B1", "C2", "D2", "E2", "P", "E1", "P", "A1"};
+		5 :return {"A1", "C#2", "E2", "P", "D2", "F#2", "A2", "P", "E2", "G#2", "B2", "P", "D2", "F#2", "A2"}; 
+		6 :return {"E1", "B1", "E2", "F#2", "G2", "P", "E2", "B2", "P", "B1", "P", "E2"};
+		default: return 0;
+	endcase
+
+endfunction
+
+function RandomTune()
+	SetObjProperty(me, "RandomSongMode", 1);
+	//return {"A1"};
+	var validnotes := {"P", "P", "P", "P", "P", "A1","A#1","A2","A#2","B1","B2","C1","C#1","C2","C#2","C3","D1","D#1","D2","D#2","E1","E2","F1","F2", "F#1","F#2", "G1","G2", "G#1", "G#2" };
+	var songlength := CInt(RandomInt(4)+6);
+	var i:=1;
+	var songarray:=array;
+	var note;
+	while (i<=songlength)
+		note:=validnotes[CInt(RandomInt(validnotes.size())+1)];
+		
+		if (note!="P")
+			while (AnotherNoteOfSameTypeWithin5Elements(note, songarray))
+				note:=validnotes[CInt(RandomInt(validnotes.size())+1)];
+			endwhile
+		endif
+		
+		songarray.append(note);
+		i:=i+1;
+	endwhile
+	return songarray;
+endfunction
+
+function AnotherNoteOfSameTypeWithin5Elements(note, notes)
+	var i:=1;
+	for(i:=notes.size()-5; i<=notes.size(); i:=i+1)
+		if (note==notes[i])
+			return 1;
+		endif
+	endfor
+	return 0;
+endfunction
+
+
+function playlute()
+	var notes:=GetObjProperty(me, "music");
+	var i:=1;
+	//var numtimes := CInt(RandomInt(2)+1);
+	var numtimes:=1;
+	while (numtimes>0)
+		while(i<=notes.size())
+			if (notes[i]!="P")
+				PlaySoundEffect(me, GetSFXFromNote(notes[i]));
+			endif
+			sleepms(350);
+			i:=i+1;
+		endwhile
+		sleep(1);
+		numtimes:=numtimes-1;
+		i:=1;
+	endwhile
+endfunction
+
+function GetSFXFromNote(note)
+	case (note)
+		"A1": return 1022;
+		"A#1": return 1024;
+		"A2": return 1023;
+		"A#2": return 1025;
+		"B1": return 1026;
+		"B2": return 1027;
+		"C1": return 1029;
+		"C#1": return 1032;
+		"C2": return 1030;
+		"C#2": return 1033;
+		"C3": return 1031;
+		"D1": return 1034;
+		"D#1": return 1037;
+		"D2": return 1035;
+		"D#2": return 1038;
+		"E1": return 1039;
+		"E2": return 1040;
+		"F1": return 1041;
+		"F2":return 1042;
+		"F#1": return 1043;
+		"F#2": return 1044;
+		"G1": return 1045;
+		"G2": return 1046;
+		"G#1": return 1047;
+		"G#2": return 1048;		
+	endcase
+	
+endfunction
+
+function AssociateQuest(who)
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SCROLL, 600, 530);
+	GFTextMid(100, 10, 200, 10, "Associate Song and Quest for " + me.name);
+		
+		
+	GFTextLine(50, 30, 53, "Choose song 1" );
+	var song1 := GFButtonID(40, 35, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(50, 60, 53, "Choose song 2" );
+	var song2 := GFButtonID(40, 65, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(50, 90, 53, "Choose song 3" );
+	var song3 := GFButtonID(40, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(50, 120, 53, "Choose song 4" );
+	var song4 := GFButtonID(40, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(50, 150, 53, "Choose song 5" );
+	var song5 := GFButtonID(40, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(50, 180, 53, "Choose song 6" );	
+	var song6 := GFButtonID(40, 185, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(50, 210, 53, "Compose Random Song" );	
+	var randsong := GFButtonID(40, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	//associate quest
+	GFTextLine(50, 490, 53, "ASSOCIATE QUEST STONE [DO THIS FIRST!!!]" );
+	var assocqueststone := GFButtonID(40, 495, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	
+	//return values
+	if(choice[assocqueststone.keyid])
+		associateQuestStone(who);
+	elseif(choice[randsong.keyid])
+		SetObjProperty(me, "music", RandomTune());
+	elseif(choice[song1.keyid])
+		SetObjProperty(me, "music", ChooseSong(1));
+	elseif(choice[song2.keyid])
+		SetObjProperty(me, "music", ChooseSong(2));
+	elseif(choice[song3.keyid])
+		SetObjProperty(me, "music", ChooseSong(3));
+	elseif(choice[song4.keyid])
+		SetObjProperty(me, "music", ChooseSong(4));
+	elseif(choice[song5.keyid])
+		SetObjProperty(me, "music", ChooseSong(5));
+	elseif(choice[song6.keyid])
+		SetObjProperty(me, "music", ChooseSong(6));
+	endif
+	
+	return 0;
+endfunction
+
+function associateQuestStone(who)
+	SendSysMessage( who, "Select Queststone." );
+	var qstone := Target( who );
+	
+   if( !qstone || qstone.objtype != 41762) // queststone objtype
+   	SendSysMessage( who, "canceled." );
+     	return;
+   endif
+
+	SetObjProperty (me, "AssocQuestStoneSer", qstone.serial);
+	SendSysMessage( who, "Musician associated with queststone." );
+	RestartScript(me);;
+endfunction
+
+function registerMeWithQuestStone()
+	var qstoneser:=CInt(GetObjProperty (me, "AssocQuestStoneSer"));
+	if (!qstoneser)
+		return;
+	endif
+	var qstone:=SystemFindObjectBySerial(qstoneser);
+	if (!qstone)
+		return;
+	endif
+	CleanUpDeadPersonalObjectives(qstone );
+	AddNewPersonalObjective(qstone.serial, me, me.name, 100);
+endfunction
+
+function CompareSongs()
+	sleep(1);
+	var notes:= GetObjProperty(me, "notesPlayed");
+	var mymusic:=GetObjProperty(me, "music");
+	var playerserial:=GetObjProperty(me, "playedToBy");
+	//var myplayer := SystemFindObjectBySerial(playerserial);
+	var i; var counter:=0;
+	for(i:=1; i<=mymusic.size(); i:=i+1)
+		if (mymusic[i]==notes[i])
+			counter:=counter+1;
+		endif
+	endfor
+	
+	if (counter==mymusic.size())
+		if (me.graphic==400)
+			PlaySoundEffect(me,1098); //yeh
+			sleepms(250);
+			PlaySoundEffect(me,1052); //applause
+		elseif(me.graphic==401)
+			PlaySoundEffect(me,824); //yeh
+			sleepms(250);
+			PlaySoundEffect(me,781); //applause
+		endif
+		//done it
+		say("Very well done! You can play like a true master!");
+		var questserial:=CInt(GetObjProperty (me, "AssocQuestStoneSer"));
+		if (questserial)
+			ReturnQuestLocationObjective(CInt(GetObjProperty (me, "AssocQuestStoneSer")), CInt(playerserial), me.serial, 100, "PersonalLocation");
+		endif
+		return;
+	endif
+	
+	if (counter>=(mymusic.size()/1.5))
+		//getting there
+		if (me.graphic==400)
+			PlaySoundEffect(me,1075); //no
+		elseif(me.graphic==401)
+			PlaySoundEffect(me,803); //no
+		endif
+		say("No... quite good but not quite there. Put some passion into it!");
+	elseif (counter>=(mymusic.size()/3))
+		//hmm encouraging
+		if (me.graphic==400)
+			PlaySoundEffect(me,1067); //giggle
+		elseif(me.graphic==401)
+			PlaySoundEffect(me,795); //giggle
+		endif
+		say("Hahaha! You can play that thing?");
+
+	else
+		//shit
+		if (me.graphic==400)
+			PlaySoundEffect(me,1065); //fart
+		elseif(me.graphic==401)
+			PlaySoundEffect(me,793); //fart
+		endif
+		say("Poo! An orc could do better you unrefined vulgarian!");
+	endif
+
+endfunction

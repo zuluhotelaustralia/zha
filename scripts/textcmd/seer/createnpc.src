@@ -1,0 +1,37 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_createnpc( who, template )
+	if (!checkStaff(who, "createnpc", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+
+	if( !template )
+		SendSysMessage( who, "Usage is .createnpc <template>" );
+		return;
+	endif
+
+	var forbidden := GetGlobalProperty( "ForbiddenTemplates" );
+	if( !forbidden )
+		forbidden := array;
+	endif
+
+	foreach monstername in forbidden
+	if(lower(monstername)== lower(template))
+		SendSysMessage( who, "This npc type is forbidden, you aren't allowed to create it." );
+		return;
+	endif
+	endforeach
+
+	var props array;
+	props.+facing := who.facing;
+	var loc := TargetCoordinates(who);
+
+	var result := CreateNpcFromTemplate( template, loc.x, loc.y, loc.z, props );
+	if (!result)
+		SendSysMessage( who, "NPC Creation Failed: " + result.errortext );
+	endif
+
+endprogram

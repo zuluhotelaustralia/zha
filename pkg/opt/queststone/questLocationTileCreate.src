@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+
+program questlocationcreate(tile)
+	//set default values
+	//SetObjProperty(queststone, "RegistrationOpen", 0); //registration is closed
+	/*
+	GFTextLine(90, 80, 5, "Create monsters - currently: ");
+	GFTextLine(90, 110, 5, "Create Item - currently: ");
+	GFTextLine(90, 140, 5, "Do Spell Effect - currently: ");
+	GFTextLine(90, 140, 5, "Do Sound Effect - currently: ");
+	GFTextLine(90, 200, 5, "Unhide item - currently: ");
+	GFTextLine(90, 230, 5, "SUmmon, unhide and unfreeze monster - currently: ");
+	GFTextLine(90, 260, 5, "Kill monster - currently: ");
+	*/
+	SetObjProperty(tile, "createMonsterTemplate", "");
+	SetObjProperty(tile, "createMonsterTemplateNo", 0);
+	SetObjProperty(tile, "createItemTemplate", "");
+	SetObjProperty(tile, "doSpellEffect", "");
+	SetObjProperty(tile, "doSoundEffect", "");
+	SetObjProperty(tile, "unhideItemSerial", 0);
+	SetObjProperty(tile, "summonMonsterSerial", 0);
+	SetObjProperty(tile, "KillMonsterSerial", 0);
+	SetObjProperty(tile, "TalkMonsterSerial", 0);
+	SetObjProperty(tile, "TalkMessage", "");
+	SetObjProperty(tile,"speechcolour", 0);
+	
+
+endprogram
+

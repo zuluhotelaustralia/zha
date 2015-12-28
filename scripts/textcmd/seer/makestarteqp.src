@@ -1,0 +1,13 @@
+use uo;
+
+include "include/starteqp";
+include "include/cmdlevel_check";
+
+program test_starteqp( who, skillids )
+	if (!checkStaff(who, "makestarteqp", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    skillids := SplitWords( skillids );
+    CreateStartingEquipment( who, skillids );
+endprogram

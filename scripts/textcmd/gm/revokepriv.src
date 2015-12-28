@@ -1,0 +1,22 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_grantpriv( who, priv )
+	if (!checkStaff(who, "revokepriv", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+    SendSysMessage( who, "From whom do you want to revoke the '" + priv + "' privilege?" );
+    
+    var subject := Target( who, TGTOPT_NOCHECK_LOS );
+    if( subject )
+    	if( subject.cmdlevel >= who.cmdlevel && who.cmdlevel < 5 )
+    		SendSysMessage( subject, who.name + " tried to revoke " + priv + " from you." );
+    	else
+        	RevokePrivilege( subject, priv );
+        endif
+    endif
+   
+endprogram

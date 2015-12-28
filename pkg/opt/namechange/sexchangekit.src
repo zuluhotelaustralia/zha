@@ -1,0 +1,54 @@
+use uo;
+use os;
+use cfgfile;
+const MALE:=400;  //graphicnum
+const FEMALE:=401;   // graphicnum
+include "include/client";
+ 
+program sexchangekit(who, kit)
+	if (!ReserveItem(kit))
+		PrintTextAbovePrivate(who, "That item is in use.", who);
+		return;
+	endif
+	if (!Accessible(who, kit))
+		SendSysMessage(who, "You are too far away to use that");
+		return;
+	endif
+	var time;
+	if (!GetObjProperty(who,"#nextsexchange"))
+		time := -1;
+	else
+		time:=GetObjProperty(who, "#nextsexchange")-ReadGameClock();
+	endif
+	var days:= CInt(time/86400);
+	var hours:= CInt((time % 86400)/3600);
+
+
+	if (time > 0)
+		SendSysMessage(who, "You cannot change sex for another "+days+" days and "+hours+" hours");
+		return 0;
+	endif
+	if (who.gender)
+		PlaySoundEffect(who, 0x249);
+		sleepms(1500);
+		PlaySoundEffect(who, 0x151);
+		who.gender := 0;
+		who.trueobjtype := MALE;
+		who.graphic := MALE;
+		SendSysMessage(who, "Your sex has been changed to male!");
+	else
+		PlaySoundEffect(who, 0x249);
+		sleepms(1500);
+		PlaySoundEffect(who, 0x15c);
+		who.gender := 1;
+		who.trueobjtype := FEMALE;
+		who.graphic := FEMALE;
+		var hair := GetEquipmentByLayer( who, LAYER_BEARD );
+		DestroyItem( hair );
+		SendSysMessage(who, "You sex has been changed to female!");
+	endif
+	DestroyItem(kit);
+	SetObjProperty(who, "#nextsexchange", ReadGameClock() + 604800);
+
+endprogram
+

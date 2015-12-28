@@ -1,0 +1,27 @@
+use uo;
+
+include "include/client";
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program textcmd_setallskills( who, amount )
+	if (!checkStaff(who, "setallskills", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var targ := Target( who );
+	if( !targ )
+		return;
+	endif
+
+	amount := CInt( amount );
+
+	for i := 0 to 52
+		SetBaseSkillBaseValue( targ, i, amount * 10 );
+	endfor
+
+	SendSysMessage( targ, "All yours skills are now at " + amount + "." );
+
+endprogram

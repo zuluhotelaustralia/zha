@@ -1,0 +1,23 @@
+use uo;
+use os;
+use file;
+
+program tally_search_results(who)
+
+	var file:=ReadFile("searchdata.txt");
+	var item, tally:=0;
+	foreach line in file
+		item:=SystemFindObjectBySerial(CInt(line));
+		if (!item)
+			item:=SystemFindObjectBySerial(CInt(line), SYSFIND_SEARCH_STORAGE_AREAS);
+		endif
+		if (item)
+			tally:=tally + item.amount;
+		endif
+		if (tally > 999999999)
+			SendSysMessage(who, tally+" + ");
+			tally:=0;
+		endif
+	endforeach
+	SendSysMessage(who, ""+tally);
+endprogram

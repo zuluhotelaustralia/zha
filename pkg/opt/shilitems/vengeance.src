@@ -1,0 +1,60 @@
+use uo;
+use os;
+
+include "include/attributes";
+include "include/spelldata";
+
+const DELAY_BETWEEN_USE	:= 20;
+
+program item_vengeance( who, item )
+
+	if( !ReserveItem( item ) )
+		return;
+	endif
+
+	var last_use := CInt(GetObjProperty( who, "#last_vengeance_use" ));
+	if( last_use && last_use > CInt(ReadGameClock() - DELAY_BETWEEN_USE) )
+		SendSysMessage( who, "You must wait before using it again." );
+		return;
+	endif
+	
+	SetObjProperty( who, "#last_vengeance_use", CInt(ReadGameClock()) );
+
+	if (!can_cast(who, 0)) // (who, circle 0)
+		SendSysMessage(who, "You cannot use that here!");
+		return;
+	endif
+
+	if( !GetObjProperty( item, "RequireNoCharges" ) )
+		var charges := CInt(GetObjProperty( item, "charges" ));
+		if( !charges )
+			PrintTextAbovePrivate( item, "That is out of charges", who );
+			return;
+		else
+			charges := charges - 1;
+			SetObjProperty( item, "charges", charges );
+		endif
+	endif
+
+	var victim := Target( who, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+	if( !victim )
+		return;
+	endif
+	
+	var dmg := CInt( (GetMaxHp(who) - GetHp(who) ) / 2);
+	if (dmg > 100)
+		dmg := 100;
+	endif
+	if (GetHP(victim) <= GetHP(who))
+		dmg := 0;
+	elseif ((GetHP(victim)-dmg) < GetHP(who))
+		dmg := GetHP(victim) - GetHP(who);
+	endif
+	
+	ApplyRawDamage( victim, dmg );
+
+	Detach();
+	sleep( DELAY_BETWEEN_USE );
+	EraseObjProperty( who, "#last_vengeance_use" );
+
+endprogram

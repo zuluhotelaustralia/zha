@@ -1,0 +1,173 @@
+/* Open Offline Containers               **
+** Finds the characters on account       **
+** and lists accounts, then selects      **
+** and its opens their backpack and bank **
+** Seravy - seravy@gmail.com             */
+
+use uo;
+use os;
+include "include/gumps";
+include "include/cmdlevel_check";
+include "include/npcbackpacks";
+include "util/bank";
+
+program openoffline(user, accountname)
+
+	if (!checkStaff(user, "tracker", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	if (!accountname)
+		SendSysMessage(user, "Usage: .openoffline [accountname]");
+		return;
+	endif
+	
+	var acct:= FindAccount(accountname);
+	if (!acct)
+		SendSysMessage(user, "Account not found");
+		return;
+	endif
+	
+	var playerarray:=array;
+	for charNum:=1 to 5
+		playerarray.append(acct.getcharacter(charNum));
+	endfor
+	if (len(playerarray)<1)
+		SendSysMessage(user, "No players on that account!");
+		return;
+	endif
+	
+	var y := 60, button1, button2, button3, button4, button5, result;
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 378, 270);
+	GFTextLine(40, 20, 53, "Account: " + acct.name);
+	GFTextLine(40, 40, 53,  "Players: ");
+	if (playerarray[1])	
+		GFTextLine(80, y, 68, playerarray[1].name);
+		button1:=GFButtonID(60, y+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);		
+		y:=y+20;
+	endif
+	if (playerarray[2])	
+		GFTextLine(80, y, 68, playerarray[2].name);
+		button2:=GFButtonID(60, y+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);		
+		y:=y+20;
+	endif
+	if (playerarray[3])	
+		GFTextLine(80, y, 68, playerarray[3].name);
+		button2:=GFButtonID(60, y+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);		
+		y:=y+20;
+	endif
+	if (playerarray[4])	
+		GFTextLine(80, y, 68, playerarray[4].name);
+		button4:=GFButtonID(60, y+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);		
+		y:=y+20;
+	endif
+	if (playerarray[5])	
+		GFTextLine(80, y, 68, playerarray[5].name);
+		button5:=GFButtonID(60, y+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);		
+		y:=y+20;
+	endif				
+	GFTextLine(40, y+20, 5, "Track which player?");
+	result:=GFSendGump(user);
+	var player;
+	if (result[button1.keyid])
+		player:=playerarray[1];
+	elseif (result[button2.keyid])
+		player:=playerarray[2];
+	elseif (result[button3.keyid])
+		player:=playerarray[3];
+	elseif (result[button4.keyid])
+		player:=playerarray[4];
+	elseif (result[button5.keyid])
+		player:=playerarray[5];
+	endif		
+	
+	
+	if (!player)
+		SendSysMessage(user, "Player not found: "+player.name);
+		return;
+	endif
+	
+	MoveCharacterToLocation( user, player.x, player.y, player.z, MOVECHAR_FORCELOCATION );	
+	if (!player.backpack)
+		SendSysMessage(user, "Player has no backpack!");
+		return;
+	endif
+
+	SendOpenSpecialContainer(user, player.backpack );
+
+	var bankbox := FindBankBox(player);
+	if( bankbox )
+		SendOpenSpecialContainer(user, bankbox );
+	endif
+
+endprogram	
+
+function GenerateAccountArray(acct, property)
+
+	var match:= acct.getprop(property);
+	var acctArray:=array;
+	var tempacct;
+	foreach account in ListAccounts()
+		tempacct:=FindAccount(account);
+		if (tempacct.getprop(property) == match && tempacct.name!=acct.name)
+			acctArray.append(tempacct);
+		endif
+	endforeach
+	return acctArray;
+endfunction
+
+function AccountListGump(user, acctArray, arrayNum, header)
+	
+	var Ygump:= 20;
+	var playerarray:=array;
+	var playercoords:=array;
+	var tempplayer, onoff:="OFFLINE";
+	for i:=1 to 5
+		tempplayer:=acctArray[arrayNum].GetCharacter(i);
+		if (tempplayer)
+			playerarray.append(tempplayer);
+			playercoords.append(CStr("("+tempplayer.x+", "+tempplayer.y+", "+tempplayer.z+")"));
+		endif
+	endfor
+	
+	foreach chr in EnumerateOnlineCharacters()
+		if (chr.acct.name == acctArray[arrayNum].name)
+			onoff:="ONLINE";
+		endif
+	endforeach
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 378, 250);
+	var button1;
+	var button2;	
+	GFTextLine(40, Ygump, 1000, header);	
+	Ygump := Ygump + 20;
+	GFTextLine(40, Ygump, 5, "Account: " + acctArray[arrayNum].name +" ("+onoff+")");
+	Ygump := YGump + 20;
+	GFTextLine(40, Ygump, 5,  "Player list: ");
+	Ygump := YGump + 20;
+	for i:=1 to len(playerarray)
+		GFTextLine(60, Ygump, 68, playerarray[i].name+" "+playercoords[i]);
+		Ygump:=Ygump+20;
+	endfor
+	GFTextLine(40, Ygump, 5, "Last login: "+acctArray[arrayNum].getprop("Login"));
+	Ygump := YGump + 20;
+
+	GFTextLine(150, 200, 1000, arrayNum+" of "+len(acctArray));
+
+	if (arrayNum > 1)
+		button1  := GFButtonID( 30, 200, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);
+	endif
+	if (arrayNum < len(acctArray))
+		button2  := GFButtonID( 330, 200, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);
+	endif
+	var result := GFSendGump(user);
+	if (result[button1.keyid])
+		AccountListGump(user, acctArray, arrayNum-1, header);
+	endif
+	if (result[button2.keyid])
+		AccountListGump(user, acctArray, arrayNum+1, header);
+	endif
+endfunction	

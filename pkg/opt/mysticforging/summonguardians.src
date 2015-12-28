@@ -1,0 +1,115 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/spelldata";
+
+const RANGE := 20;
+
+program summon_guardians(crystal)
+
+	if (!crystal)
+		return;
+	endif
+	SetObjProperty(crystal, "summoning", 1);
+	PrintTextAbove(crystal, "*The earth starts to rumble*");
+	PlaySoundEffect( crystal, SFX_SPELL_EARTHQUAKE2 );
+	sleepms(500);
+
+        foreach item in ListItemsNearLocationOfType(CInt(crystal.x), CInt(crystal.y), CInt(crystal.z), RANGE, UOBJ_STONEWALL_NS)
+		if( GetObjProperty(item, "f") )
+			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+                	DestroyItem(item);
+		endif
+        endforeach
+
+        foreach item in ListItemsNearLocationOfType(CInt(crystal.x), CInt(crystal.y), CInt(crystal.z), RANGE, UOBJ_STONEWALL_EW)
+		if( GetObjProperty(item, "f") )
+			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+                	DestroyItem(item);
+		endif
+        endforeach
+       
+	foreach item in ListItemsNearLocationOfType(CInt(crystal.x), CInt(crystal.y), CInt(crystal.z), RANGE, UOBJ_EFIELD_NS)
+		if( GetObjProperty(item, "f") )
+			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+                	DestroyItem(item);
+		endif
+        endforeach
+
+        foreach item in ListItemsNearLocationOfType(CInt(crystal.x), CInt(crystal.y), CInt(crystal.z), RANGE, UOBJ_EFIELD_EW)
+		if( GetObjProperty(item, "f") )
+			PlayStationaryEffect( item.x, item.y, item.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+                	DestroyItem(item);
+		endif
+        endforeach
+	sleepms(3000);
+	PrintTextAbove(crystal, "Guardians appear!");
+	var j;
+	foreach mobile in ListMobilesNearLocation(crystal.x, crystal.y, crystal.z, RANGE)
+		mobile.hidden := 0;
+	endforeach
+	for i:= 1 to Random(4)+4
+		j:=0;
+		while (!SummonGuardian(GetRandomGuardian(), crystal) && j < 8)
+			//Broadcast("Failed "+j);
+			j := j +1;
+		endwhile
+	endfor
+	j:=0;
+	while (!SummonGuardian(GetSpecialGuardian(), crystal) && j < 8)
+		j := j + 1;
+	endwhile
+	sleep(10);
+	EraseObjProperty(crystal, "summoning");
+	return;
+
+endprogram
+
+function SummonGuardian(npctemplate, crystal)
+
+	var gx := (Random(10) -5 + Random(2)) + crystal.x;
+	var gy := (Random(10) -5 + Random(2)) + crystal.y;
+	var gz := GetWorldHeight(gx, gy);
+	var critter := CreateNpcFromTemplate(npctemplate, gx, gy, gz);
+	if (!critter)
+		return 0;
+	else
+		SetObjProperty(critter, "guardkill", 1);
+		return 1;
+	endif
+	
+	return 0;
+
+endfunction
+	
+function GetRandomGuardian()
+
+	case (Random(8)+1)
+		1:	return "earthelementallord";
+		2:	return "fireelementallord";
+		3:	return "waterelementallord";
+		4:	return "airelementallord";
+		5:	return "taintedranger";
+		6:	return "taintedwarrior1";
+		7:	return "taintedwarrior2";
+		8:	return "taintedmage";
+	endcase
+
+endfunction
+
+function GetSpecialGuardian()
+
+	case (Random(8)+1)
+		1:	return "behemoth";
+		2:	return "fallenangel";
+		3:	return "mindflayer";
+		4:	return "greaterbeholder";
+		5:	return "jujuzombie";
+		6:	return "evilcodexdamnorum";
+		7:	return "evilbookoftheearth";
+		8:	return "blackwisp";
+	endcase
+
+endfunction

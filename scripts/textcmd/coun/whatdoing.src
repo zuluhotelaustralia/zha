@@ -1,0 +1,32 @@
+//GM Barnabus 2/2/2003
+//Reports which accounts are in jail, for how long, whether the account is online,
+//which player of that account is online, and whether they are in jail or not.
+//I plan to extend this as a prop so that u can view the account notes from this.
+
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+
+program textcmd_whatdoing( who )
+	if (!checkStaff(who, "whatdoing", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+	SendSysMessage(who, "Select a player to see what their current action is (based on attached script):", 3, 53);
+	var player:= Target(who);
+	if (player.acct)
+		var scriptname := who.attached.name;
+		if (!scriptname||scriptname==error)
+			SendSysMessage(who, "No script process attached", 3, 70);
+			return 0;
+		endif
+		SendSysMessage(who, "The player is attached to " + who.attached.name, 3, 53);	
+	else
+		SendSysMessage(who, "Invalid selection",3,70);
+	endif
+	
+endprogram
+
+

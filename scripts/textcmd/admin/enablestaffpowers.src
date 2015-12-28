@@ -1,0 +1,13 @@
+//Barnabus 22/06/04
+use uo;
+
+
+include "include/cmdlevel_check";
+
+program textcmd_enablestaffpowers (who,acc)
+	AddToCommandLevelArrays(who, acc);
+
+endprogram
+
+
+

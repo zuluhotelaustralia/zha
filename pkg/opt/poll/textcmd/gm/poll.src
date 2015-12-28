@@ -1,0 +1,376 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+include "include/gumps";
+var results;
+var rejected;
+
+const MAXOPTIONS := 5;
+
+program vote_system(who)
+
+	if (!checkStaff(who, "poll", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	MenuGump(who);
+	return;
+	
+endprogram
+
+function MenuGump(who)
+
+	var vStatus:= GetGlobalProperty("vStatus");
+	var vVotenum:= GetGlobalProperty("vVotenum");
+	if (!vVotenum)
+		vVotenum:=1;
+		SetGlobalProperty("vVotenum", vVotenum);
+	endif
+	var vVoteActive:=GetGlobalProperty("vVoteActive");
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "ONLINE VOTING SYSTEM");
+	GFTextLine(40, 50, 68, "Poll status: "+vStatus);
+	GFTextLine(60, 90, 5, "Set up a poll");
+	var button1  := GFButtonID( 40, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	GFTextLine(60, 110, 5,  "Get current poll results");
+	var button2  := GFButtonID( 40, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	GFTextLine(60, 130, 5, "Pause current poll");
+	var button3  := GFButtonID( 40, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 150, 5, "Resume current poll");
+	var button4 := GFButtonID(40, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 170, 5, "Stop/Clear current poll");
+	var button5 := GFButtonID(40, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	if (vVoteActive==1)
+		GFTextLine(40, 200, 68, "Poll created by: "+GetGlobalProperty("vPollBy")+" (poll ID "+vVotenum+")");
+	endif
+	var result := GFSendGump(who);
+	if (result[button1.keyid])
+		if (vStatus=="Running" || vStatus=="Paused")
+			SendSysMessage(who, "A poll is already in progress!", 3, 38);
+			return;
+		else
+			CreatePollGump(who);
+		endif
+	elseif (result[button2.keyid])
+		PollResultsGump(who);
+	elseif (result[button3.keyid])
+		if (vStatus=="Paused")
+			SendSysMessage(who, "Poll already paused!", 3, 38);
+		elseif(vStatus=="Not running")
+			SendSysMessage(who, "There is no poll running!", 3, 38);
+		else
+			SetGlobalProperty("vStatus", "Paused");
+			SetGlobalProperty("vVoteActive", 0);
+			SendSysMessage(who, "Poll paused", 3, 5);
+		endif
+	elseif (result[button4.keyid])
+		if (vStatus=="Paused")
+			SetGlobalProperty("vStatus", "Running");
+			SetGlobalProperty("vVoteActive", 1);
+			SendSysMessage(who, "Poll resumed", 3, 5);
+		elseif (vStatus=="Running")
+			SendSysMessage(who, "Poll is already running!", 3, 38);
+		else
+			SendSysMessage(who, "There is no poll running!", 3, 38);
+		endif
+	elseif (result[button5.keyid])
+		if (vStatus=="Not running")
+			SendSysMessage(who, "There is no poll running!", 3, 38);
+		else
+			SetGlobalProperty("vStatus", "Not running");
+			SetGlobalProperty("vVoteActive", 0);
+			var vVotenum:=GetGlobalProperty("vVotenum");
+			if (!vVotenum)
+				vVotenum:=1;
+			else
+				vVotenum:=vVotenum+1;
+			endif
+			SetGlobalProperty("vVotenum", vVotenum);
+			SendSysMessage(who, "Poll stopped and results cleared", 3, 5);		
+		endif
+	endif
+	return;
+	
+endfunction
+
+function CreatePollGump(who)
+
+	var vPollstring:=GetGlobalProperty("vPollstring");
+	if (!vPollstring)
+		vPollstring:= "Not set";
+		SetGlobalProperty("vPollstring", vPollstring);
+	endif
+	var vNumIPs:=GetGlobalProperty("vNumIPs");
+	if (!vNumIPs)
+		vNumIPs:= 3;
+		SetGlobalProperty("vNumIPs", vNumIPs);
+	endif
+	var vVoteper:=GetGlobalProperty("vVoteper");
+	if (!vVoteper)
+		vVoteper:= "Account";
+		SetGlobalProperty("vVoteper", vVoteper);
+	endif
+	var vNumopts :=GetGlobalProperty("vNumopts");
+	if (!vNumopts)
+		vNumopts:=2;
+		SetGlobalProperty("vNumopts", vNumopts);
+	endif
+	var vLegalvoters:=GetGlobalProperty("vLegalvoters");
+	if (!vLegalvoters)
+		vLegalvoters:="Staff";
+		SetGlobalProperty("vLegalvoters", vLegalvoters);
+	endif
+	var vHoursreq:=GetGlobalProperty("vHoursreq");
+	if (!vHoursreq)
+		vHoursreq:=100;
+		SetGlobalProperty("vHoursreq", 100);
+	endif
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "ONLINE VOTING SYSTEM");
+	GFTextLine(40, 50, 68, "Poll setup:");
+	GFTextLine(60, 90, 5, "Reset Poll details");
+	var button9:= GFButtonID(40, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 110, 5, "Set poll question (Currently '"+vPollstring+"')");
+	var button1  := GFButtonID( 40, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	GFTextLine(60, 130, 5,  "(Toggle) Legal voters: "+vLegalvoters);
+	var button2  := GFButtonID( 40, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	GFTextLine(60, 150, 5, "Set number of poll options (Currently "+vNumopts+") MAX: 5");
+	var button4  := GFButtonID( 40, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 170, 5, "Set poll options");
+	var button5  := GFButtonID( 40, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 190, 5, "Hours logged for vote eligibility: "+vHoursreq);
+	var button7  := GFButtonID( 40, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 210, 68, "Start poll!");
+	var button6  := GFButtonID( 40, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var result := GFSendGump(who);
+	if (result[button1.keyid])
+		vPollstring:=SendTextEntryGump(who, "What is the poll question?", 50);
+		if (!vPollstring)
+			SendSysMessage(who, "Cancelled");
+		else
+			SetGlobalProperty("vPollstring", CStr(vPollstring));
+		endif
+		CreatePollGump(who);
+	elseif (result[button2.keyid])
+		if (GetGlobalProperty("vLegalvoters") == "Staff")
+			SetGlobalProperty("vLegalvoters", "All");
+		else 
+			SetGlobalProperty("vLegalvoters", "Staff");
+		endif
+		CreatePollGump(who);
+	elseif (result[button4.keyid])
+		vNumopts:=CInt(SendTextEntryGump(who, "How many options to choose from?", 3));
+		if (!vNumopts || vNumopts > MAXOPTIONS || vNumopts < 2)
+			SendSysMessage(who, "Cancelled");
+		else
+			SetGlobalProperty("vNumopts", vNumopts);
+		endif
+		CreatePollGump(who);
+	elseif (result[button5.keyid])
+		SetPollOptions(who);
+		CreatePollGump(who);
+	elseif (result[button6.keyid])
+		SetGlobalProperty("vStatus", "Running");
+		SetGlobalProperty("vVoteActive", 1);
+		SetGlobalProperty("vPollBy", who.name);
+	elseif (result[button7.keyid])
+		vHoursreq := CInt(SendTextEntryGump(who, "How many hours logged before account is eligible to vote?", 3));
+		SetGlobalProperty("vHoursreq", vHoursreq);
+		CreatePollGump(who);
+	elseif (result[button9.keyid])
+		InitialisePoll(who);
+		CreatePollGump(who);
+	endif
+	MenuGump(who);
+endfunction
+
+function SetPollOptions(who)
+
+	var vNumopts:=GetGlobalProperty("vNumopts");
+	if (!vNumopts)
+		vNumopts:=3;
+	endif
+	var vOptions:=GetGlobalProperty("vOptions");
+	if (!vOptions)
+		vOptions:=array;
+	endif
+	var y;
+	var button1, button2, button3, button4, button5, button6;
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "ONLINE VOTING SYSTEM");
+	GFTextLine(40, 50, 68, "Poll options setup");
+	GFTextLine(60, 90, 5, "Option 1: "+vOptions[1]);
+	button1  := GFButtonID( 40, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	GFTextLine(60, 110, 5,  "Option 2: "+vOptions[2]);
+	button2  := GFButtonID( 40, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	if (vNumopts>2)	
+		GFTextLine(60, 130, 5,  "Option 3: "+vOptions[3]);
+		button3  := GFButtonID( 40, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	endif
+	if (vNumopts>3)
+		GFTextLine(60, 150, 5,  "Option 4: "+vOptions[4]);
+		button4  := GFButtonID( 40, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	endif
+	if (vNumopts>4)
+		GFTextLine(60, 170, 5,  "Option 5: "+vOptions[5]);
+		button5  := GFButtonID( 40, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	endif
+	
+	var result:=GFSendGump(who);
+	
+	if (result[button1.keyid])
+		SetOption(who, 1);
+		SetPollOptions(who);
+	elseif (result[button2.keyid])
+		SetOption(who, 2);
+		SetPollOptions(who);
+	elseif (result[button3.keyid])
+		SetOption(who, 3);
+		SetPollOptions(who);
+	elseif (result[button4.keyid])
+		SetOption(who, 4);
+		SetPollOptions(who);
+	elseif (result[button5.keyid])
+		SetOption(who, 5);
+		SetPollOptions(who);
+	endif
+	
+endfunction
+
+function SetOption(who, optnum)
+
+	var option:= SendTextEntryGump(who, "Enter the text for this option", 50);
+	option:=CStr(option);
+	var vOptions:=GetGlobalProperty("vOptions");
+	if (!vOptions)
+		vOptions:=array;
+	endif
+	if (!option)
+		SendSysMessage(who, "Cancelled");
+	else
+		vOptions[optnum]:= option;
+		SetGlobalProperty("vOptions", vOptions);
+	endif
+
+	
+endfunction
+		
+function PollResultsGump(who)
+
+	var votes := array;
+	var voteinfo := struct;
+	var iplist := array;
+	var pollnumber:= GetGlobalProperty("vVotenum");
+	var account;
+	results:={0,0,0,0,0};
+	rejected:={0,0,0,0,0};
+
+	foreach accountname in ListAccounts()
+		account:= FindAccount(accountname);
+		voteinfo:=account.getprop("voteinfo");
+		if (voteinfo)
+			if (voteinfo.lastpoll==pollnumber)
+				votes.append(voteinfo);
+			endif
+		endif
+	endforeach
+
+	var vNumIPs:= CInt(SendTextEntryGump(who, "How many votes allowed per IP?", 3));
+	SetGlobalProperty("vNumIPs", vNumIPs);
+	
+	foreach vote in votes
+		var numvotes:=0;
+		iplist.append(vote.ip);
+		foreach ip in iplist
+			if (vote.ip == ip)
+				numvotes:=numvotes+1;
+			endif
+		endforeach
+		if (numvotes <= vNumIPs)	
+			results[vote.vote]:= results[vote.vote]+1;
+		else
+			rejected[vote.vote]:= rejected[vote.vote]+1;
+		endif
+	endforeach	
+	
+	ResultsGump(who);
+	
+endfunction
+
+function ResultsGump(who)
+
+	var vOptions:=GetGlobalProperty("vOptions");
+	var vNumIPs:=GetGlobalProperty("vNumIPs");
+	var vNumopts := GetGlobalProperty("vNumopts");
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "ONLINE VOTING SYSTEM");
+	GFTextLine(40, 50, 68, "Accepted Poll Results (Max of "+vNumIPS+" per IP)");
+	GFTextLine(60, 90, 5, results[1]+" for "+vOptions[1]);
+	GFTextLine(60, 110, 5, results[2]+" for "+vOptions[2]);
+	if (vNumopts>2)
+		GFTextLine(60, 130, 5, results[3]+" for "+vOptions[3]);
+	endif
+	if (vNumopts>3)
+		GFTextLine(60, 150, 5, results[4]+" for "+vOptions[4]);
+	endif
+	if (vNumopts>4)
+		GFTextLine(60, 170, 5, results[5]+" for "+vOptions[5]);
+	endif
+	GFTextLine(60, 220, 68, "View Rejected Votes");
+	var button:= GFButtonID(40, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var result:=GFSendGump(who);
+	if (result[button.keyid])
+		RejectedGump(who);
+	endif
+
+	
+endfunction
+
+function RejectedGump(who)
+
+	var vOptions:=GetGlobalProperty("vOptions");
+	var vNumIPs:=GetGlobalProperty("vNumIPs");	
+	var vNumopts:=GetGlobalProperty("vNumopts");
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "ONLINE VOTING SYSTEM");
+	GFTextLine(40, 50, 68, "Rejected votes (Exceeded "+vNumIPs+" per IP)");
+	GFTextLine(60, 90, 38, rejected[1]+" for "+vOptions[1]);
+	GFTextLine(60, 110, 38, rejected[2]+" for "+vOptions[2]);
+	if (vNumopts>2)
+		GFTextLine(60, 130, 38, rejected[3]+" for "+vOptions[3]);
+	endif
+	if (vNumopts>3)
+		GFTextLine(60, 150, 38, rejected[4]+" for "+vOptions[4]);
+	endif
+	if (vNumopts>4)
+		GFTextLine(60, 170, 38, rejected[5]+" for "+vOptions[5]);
+	endif
+	GFTextLine(60, 220, 68, "View Accepted Votes");
+	var button:= GFButtonID(40, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var result:=GFSendGump(who);
+	if (result[button.keyid])
+		ResultsGump(who);
+	endif
+
+	
+endfunction
+
+function InitialisePoll(who)
+
+	SetGlobalProperty("vPollstring", "Not set");
+	SetGlobalProperty("vNumopts", 2);
+	SetGlobalProperty("vLegalvoters", "Staff");
+	SetGlobalProperty("vOptions", {"Not set", "Not set", "Not set", "Not set", "Not set"});
+
+endfunction
+

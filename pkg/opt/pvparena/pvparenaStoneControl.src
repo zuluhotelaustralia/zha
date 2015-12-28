@@ -1,0 +1,9 @@
+use uo;
+
+include "pvparena";
+
+program stoneControl(stone)
+	if (!GetObjProperty(stone, PVPARENA_NOTSETUP))
+		cleanup(stone);
+	endif
+endprogram

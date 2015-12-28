@@ -1,0 +1,278 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+
+program questLocationTile( who, item )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, item);
+
+endprogram
+
+function configGump(who, tile)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 440, 530);
+	
+	var tstat := tileStatus(tile);
+	
+	GFTextMid(10, 10, 440, 53, "Configure Quest Location Tile");
+	GFTextMid(10, 30, 440, 53, "Select any of the following options");
+	GFTextMid(10, 45, 440, 53, "done after location objective met");
+	GFTextMid(10, 60, 440, 53, "(done in the order listed:");
+	GFTextLine(90, 80, 5, "Create monsters - currently: " + tstat[2] + "  " + tstat[1]);
+	GFTextLine(90, 110, 5, "Create Item - currently: " + tstat[3]);
+	GFTextLine(90, 140, 5, "Do Spell Effect - currently: " + tstat[4]);
+	GFTextLine(90, 170, 5, "Do Sound Effect - currently: " + tstat[5]);
+	GFTextLine(90, 200, 5, "Unhide item - currently: " + tstat[6]);
+	GFTextLine(90, 230, 5, "Summon, unhide and unfreeze monster - currently: " +tstat[7]);
+	GFTextLine(90, 260, 5, "Make monster speak message - currently: " + tstat[9]);
+	GFTextLine(90, 290, 5, "Kill monster - currently: " + tstat[8]);
+	GFTextLine(90, 320, 5, "Show current talk message");
+	GFTextLine(90, 350, 5, "Add auxillary tile (extend area of location tile by tile)");
+	GFTextLine(90, 400, 5, "Reset all");
+	GFTextLine(90, 430, 5, "Exit");
+
+	var createMonsters := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var createItem := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var spellEffect := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var soundEffect := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var UnhideItem := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var UnhideThawMonster := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var killMonster := GFButtonID( 60, 295, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var talkMonster := GFButtonID( 60, 265 , G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var talkMessage := GFButtonID( 60, 325, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var tilebtn := GFButtonID( 60, 355, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var resetallbtn := GFButtonID( 60, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[createMonsters.keyid])
+		enterCreateMonsters(tile, who);
+	elseif (choice[createItem.keyid])
+		enterCreateItem(tile, who);
+	elseif(choice[spellEffect.keyid])
+		enterDoSpellEffect(tile, who);
+	elseif(choice[soundEffect.keyid])
+		enterDoSoundEffect(tile, who);
+	elseif(choice[UnhideItem.keyid])
+		enterUnhideItem(tile, who);
+	elseif(choice[UnhideThawMonster.keyid])
+		enterSummonMonster(tile, who);
+	elseif(choice[killMonster.keyid])
+		enterKillMonster(tile, who);
+	elseif(choice[talkMonster.keyid])
+		enterTalkMonster(tile, who);
+	elseif(choice[talkMessage.keyid])
+		var mystr := "";
+		var t := tstat[10];
+		foreach m in t
+			mystr:=mystr + " " + m;
+		endforeach
+		SendStringAsTipWindow( who, mystr );
+	elseif(choice[tilebtn.keyid])
+		createAuxTile(tile, who);
+	elseif(choice[resetallbtn.keyid])
+		ResetAllOpts(tile);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+	configGump(who, tile);
+endfunction
+
+function tileStatus(tile)
+//returns an array of file settings for gump above
+ 	return {GetObjProperty(tile, "createMonsterTemplate"),
+	GetObjProperty(tile, "createMonsterTemplateNo"),
+	GetObjProperty(tile, "createItemTemplate"),
+	GetObjProperty(tile, "doSpellEffect"),
+	GetObjProperty(tile, "doSoundEffect"),
+	GetObjProperty(tile, "unhideItemSerial"),
+	GetObjProperty(tile, "summonMonsterSerial"),
+	GetObjProperty(tile, "KillMonsterSerial"),
+	GetObjProperty(tile, "TalkMonsterSerial"),
+	GetObjProperty(tile, "TalkMessage")};
+endfunction
+
+function enterTalkMonster(tile, who)
+	SendSysMessage(who, "Select monster to make speak");
+	var monst := Target( who );
+	if (! monst || ! monst.isa(POLCLASS_NPC))
+		return;
+	endif
+	
+	SetObjProperty(tile, "TalkMonsterSerial", monst.serial);
+	SetObjProperty(tile, "TalkMessage", SetMessage(who));
+	
+	var val:=CInt(SendTextEntryGump( who, "Enter text colour(int)"));
+	if (val)
+		SetObjProperty(tile,"speechcolour", val);
+	endif
+endfunction
+
+
+function enterKillMonster(tile, who)
+	SendSysMessage(who, "Select monster to kill");
+	var monst := Target( who );
+	if (! monst || ! monst.isa(POLCLASS_NPC))
+		return;
+	endif
+	
+	SetObjProperty(tile, "KillMonsterSerial", monst.serial);
+endfunction
+
+
+function enterSummonMonster(tile, who)
+	SendSysMessage(who, "Select monster to thaw, unhide, and summon");
+	var monst := Target( who );
+	if (! monst || ! monst.isa(POLCLASS_NPC))
+		return;
+	endif
+	
+	SetObjProperty(tile, "summonMonsterSerial", monst.serial);
+endfunction
+
+
+function enterUnhideItem(tile, who)
+	SendSysMessage(who, "Select item to make visible");
+	var item := Target( who );
+	if (! item || ! item.isa(POLCLASS_ITEM))
+		return;
+	endif
+	
+	SetObjProperty(tile, "unhideItemSerial", item.serial);
+endfunction
+
+
+function enterDoSoundEffect(tile, who)
+	var dosound := SendTextEntryGump( who, "Enter sound ID number");
+	if (! dosound)
+		return;
+	endif
+	
+	SetObjProperty(tile, "doSoundEffect", dosound);
+endfunction
+
+
+function enterDoSpellEffect(tile, who)
+	var dospell := SendTextEntryGump( who, "Enter Spell ID number");
+	if (! dospell)
+		return;
+	endif
+	
+	SetObjProperty(tile, "doSpellEffect", dospell);
+endfunction
+
+function enterCreateItem(tile, who)
+	var itemp := SendTextEntryGump( who, "Enter Item Template. Assumes valid template");
+	if (! itemp)
+		return;
+	endif
+	
+	SetObjProperty(tile, "createItemTemplate", itemp);
+endfunction
+
+function enterCreateMonsters(tile, who)
+	var mtemp := SendTextEntryGump( who, "Enter Monster Template. Assumes valid template");
+	if (! mtemp)
+		return;
+	endif
+	var mnum := SendTextEntryGump( who, "Enter Number to create");
+	
+	SetObjProperty(tile, "createMonsterTemplate", mtemp);
+	SetObjProperty(tile, "createMonsterTemplateNo", mnum);
+endfunction
+
+function SetMessage(who)
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 350, 350);
+		
+	GFTextMid(30, 30, 230, 10, "Enter Message for monster to say after objective met");
+
+	var textbox:=array;
+	textbox.append(GFTextEntry(30, 50, 300, 20, 0, ""));
+	textbox.append(GFTextEntry(30, 70, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 90, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 110, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 130, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 150, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 170, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 190, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 210, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 230, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 250, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 270, 300, 20, 0, "" ));
+	textbox.append(GFTextEntry(30, 290, 300, 20, 0, "" ));
+
+	
+	GFTextLine(50, 300, 5, "OK");
+	GFTextLine(110, 300, 5, "Cancel");
+
+	var OKbutton  := GFButtonID( 40, 305, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var cancelbutton  := GFButtonID( 100, 305, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	var mystring := array;
+	var tempstr;
+	if (choice[OKbutton.keyid])
+		foreach m in textbox
+			var tempstr:=GFExtractData(m.keyid, choice);
+			if (tempstr)
+				mystring.append(tempstr);
+			endif
+		endforeach
+		return mystring;
+	endif
+	return "";	
+endfunction
+
+function ResetAllOpts(tile)
+	SetObjProperty(tile, "createMonsterTemplate", "");
+	SetObjProperty(tile, "createMonsterTemplateNo", 0);
+	SetObjProperty(tile, "createItemTemplate", "");
+	SetObjProperty(tile, "doSpellEffect", "");
+	SetObjProperty(tile, "doSoundEffect", "");
+	SetObjProperty(tile, "unhideItemSerial", 0);
+	SetObjProperty(tile, "summonMonsterSerial", 0);
+	SetObjProperty(tile, "KillMonsterSerial", 0);
+	SetObjProperty(tile, "TalkMonsterSerial", 0);
+	SetObjProperty(tile, "TalkMessage", "");
+	SetObjProperty(tile,"speechcolour", 0);
+endfunction
+
+function createAuxTile(tile, who)
+	SendSysMessage(who, "Select the position of the auxillary location tile");
+	var loc := TargetCoordinates(who);
+	if (!loc)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+
+	var assoctile := CreateItemAtLocation( loc.x, loc.y, loc.z, 0xa324);
+	if (!assoctile)
+		SendSysMessage(who, "Problems creating tile at that position. Cancelled");
+		return;
+	endif
+	
+	SetObjProperty(assoctile, "AssociatedLocationSer", tile.serial);
+	
+	//add to aux tile array
+	var auxtilearray := array;
+	auxtilearray := GetObjProperty(tile, "auxtilearray");
+	if (!auxtilearray[1])
+		SetObjProperty(tile, "auxtilearray",{assoctile.serial});
+	else
+		auxtilearray.append(assoctile.serial);
+		SetObjProperty(tile, "auxtilearray", auxtilearray);
+	endif
+endfunction
+

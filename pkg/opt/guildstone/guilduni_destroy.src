@@ -1,0 +1,12 @@
+use uo;
+use os;
+include "guilduniform";
+
+program guilduni_destroy(guilduni)
+	var guild := FindGuild(	GetObjProperty(guilduni, "guild_id"));
+	if (! GetObjProperty(guilduni, "guildstonedestroy"))
+		if (guild)
+			RemoveGuildUniformFromGuild(guilduni, guild);
+		endif
+	endif
+endprogram

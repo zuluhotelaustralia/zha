@@ -1,0 +1,63 @@
+use uo;
+use os;
+include "include/gumps";
+
+
+program ListOtherItemsInContainer(parameters)
+
+	var params:=SplitWords(parameters);
+	var who:= SystemFindObjectBySerial(CInt(params[1]));
+	var container:= SystemFindObjectBySerial(CInt(params[2]));
+	if (!container)
+		SendSysMessage(who, container);
+		container:= SystemFindObjectBySerial(CInt(params[2]), SYSFIND_SEARCH_STORAGE_AREAS);
+		if(!container)
+			SendSysMessage(who, container);
+		endif
+	endif	
+	var itemnum:= CInt(params[3]);
+
+	var temparray:= EnumerateItemsInContainer(container);
+	if (!temparray)
+		SendSysMessage(who, temparray);
+	endif
+	var itemarray:= array;
+	foreach item in temparray
+		if (item.container.objtype != 0xefa)  // spellbook
+			itemarray.append(item);
+		endif
+	endforeach
+	var numitemsonpage := 8;
+	var itemname;
+	if (len(itemarray) - itemnum < numitemsonpage)
+		numitemsonpage := len(itemarray) - itemnum;
+	endif
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(100, 100, BKGND_BLACKSLAB, 450, 280);
+	var button1, button2, y:=130;	
+	
+	for i:= itemnum to itemnum+numitemsonpage
+		itemname:=itemarray[i].name;
+		if (!itemname)
+			itemname:=itemarray[i].desc;
+		endif
+		GFTextLine(155, y, 68, itemname);
+		y:=y+20;
+	endfor
+	GFTextLine(275, 330, 1000, "Page "+(CInt(itemnum/8)+1)+" of "+(CInt(len(itemarray)/8)+1));	
+	if (itemNum > 1)
+		button1  := GFButtonID( 130, 330, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);
+	endif
+	if (itemNum+numitemsonpage < len(itemarray))
+		button2  := GFButtonID( 500, 330, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);
+	endif	
+	
+	var result:= GFSendGump(who);
+	
+	if (result[button1.keyid])
+		start_script("listitems", CStr(who.serial)+" "+CStr(container.serial)+" "+CStr(itemnum-8));
+	elseif (result[button2.keyid])
+		start_script("listitems", CStr(who.serial)+" "+CStr(container.serial)+" "+CStr(itemnum+8));
+	endif
+endprogram

@@ -1,0 +1,25 @@
+use uo;
+
+include "guildchat";
+
+program send_own_message (who, text)
+
+        var hear;
+	var guild_id := GetObjProperty(who,"guild_id");
+
+        if (guild_id.errortext)
+                return;
+        endif
+	if (!CheckSquelch(who))
+		return;
+	endif
+	var addon := ": ";
+	var guild := FindGuild(guild_id);
+
+	if (guild.getprop("guildabv") != "NONE" && GetObjProperty(who,"abv")  == "0")
+		addon := " ["+guild.getprop("guildabv")+"]: ";
+	endif
+
+	msgown(CStr(who.name+addon+text), guild);
+
+endprogram

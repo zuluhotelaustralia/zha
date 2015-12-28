@@ -1,0 +1,22 @@
+// updated November 4, 2000
+// zulu (zulu@zuluhotel.com)
+
+use uo;
+use os;
+
+program questlocation_destroy(tile)
+	var auxtileserials := GetObjProperty(tile, "auxtilearray");
+	if (auxtileserials[1])
+		
+		var tempaux;
+		foreach aux in auxtileserials
+			tempaux := SystemFindObjectBySerial(aux);
+			if (tempaux)
+				DestroyItem(tempaux);
+			endif
+		endforeach
+		
+	endif
+	
+	start_script("::maindestroy");
+endprogram

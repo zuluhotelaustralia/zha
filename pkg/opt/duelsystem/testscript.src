@@ -1,0 +1,8 @@
+use uo;
+use os;
+
+program duelstone_deathprocess(parms)
+	broadcast("Test script in duel system running");
+
+  
+endprogram

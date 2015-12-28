@@ -1,0 +1,13 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program thawme( gm )
+
+	if (!checkStaff(gm, "thawme", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+    gm.frozen := 0;
+    PrintTextAbovePrivate( gm, "Fly!  Be free!", gm );
+endprogram

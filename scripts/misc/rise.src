@@ -1,0 +1,38 @@
+use uo;
+use os;
+
+
+program rise(corpse)
+
+	var x := corpse.x;
+	var y := corpse.y;
+	var z := corpse.z;
+
+	var template := GetObjProperty( corpse, "rise" );
+	var waittime := CInt( GetObjProperty( corpse, "risedelay" ) );
+	var getloot := GetObjProperty( corpse, "risewithloot");
+
+	sleep( waittime );
+
+	if( corpse )
+		PrintTextAbove( corpse, "*the corpse begins to stir!*" );
+		sleepms( 1500 );
+		var the_critter := CreateNpcFromTemplate( template, x, y, z );
+		if( the_critter )
+			if (!getloot)
+				SetObjProperty( the_critter, "noloot", 1 );
+			endif
+			if ( !the_critter.backpack )
+				var newbackpack := CreateItemAtLocation(the_critter.x, the_critter.y, the_critter.z, 0xe75, 1 );
+				EquipItem( the_critter, newbackpack );
+			endif
+
+			foreach item in EnumerateItemsInContainer( corpse )
+				MoveItemToContainer( item, the_critter.backpack,1,1 );
+			endforeach
+
+			DestroyItem( corpse );
+		endif
+	endif
+
+endprogram

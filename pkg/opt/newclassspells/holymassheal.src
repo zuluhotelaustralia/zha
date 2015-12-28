@@ -1,0 +1,63 @@
+/* Holy Spell - Mass heal               **
+** Heals multiple Targets around caster **
+** Seravy - seravy@gmail.com            */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/random";
+
+const SPELL_ID := SPELL_ID_MASSHEAL;
+
+program cast_massheal(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+  else
+    caster := parms;
+  endif
+
+  var radius := calcDmgRange(caster, SKILLID_PIETY);
+  var people := ListMobilesNearLocation( CInt(caster.x), CInt(caster.y), CInt(caster.z), radius);
+  var class:=GetClass(caster);
+  var level:=GetClasseLevel(caster);
+
+  foreach person in people
+    if (CheckLineOfSight(person, caster))
+      PlayObjectCenteredEffect(caster, FX_SPELL_MASSHEAL, SPEED_SPELL_MASSHEAL, LOOP_SPELL_MASSHEAL);
+      PlaySoundEffect(caster, SFX_SPELL_MASSHEAL);
+      
+      var die_string := "3d6";
+      var healed := RandomDiceStr(die_string)*2;
+      healed := ModifyWithMagicEfficiency( caster, healed + CInt( GetEffectiveSkill(caster, SKILLID_PIETY)/3) );
+
+	var bonus := GetObjProperty( person, "HealingIncrease" );
+	if( bonus )
+		healed := healed + CInt(healed * bonus * 0.1 );
+	endif
+        case (class)
+          CLASSEID_MAGE:     healed:=CInt(healed * (1+ level*BONUS_PER_LEVEL));
+          CLASSEID_PRIEST:   healed:=CInt(healed * (1+ level*LARGE_BONUS_PER_LEVEL));
+        endcase
+	
+      if( GetObjProperty(person, "Type" ) == "Undead" )
+        ApplyTheDamage(person, caster, healed, DMGID_MAGIC );
+      else
+        HealDamage(person, CInt(healed) );
+      endif
+
+    endif
+  endforeach
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

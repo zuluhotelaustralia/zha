@@ -1,0 +1,136 @@
+use uo;
+use os;
+
+
+include "include/spelldata";
+include "include/attributes";
+include "include/dotempmods";
+
+program processtempmods( parms )
+
+	set_script_option( SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES, 1 );
+
+	var who	:= parms[1];
+	var stat	:= parms[2];
+	var amt	:= CInt(parms[3]);
+	var duration	:= CInt(parms[4]);
+
+	Detach();
+
+	if( (!who.poisoned) )
+		// this person should not be poisoned
+		if ( GetHpRegenRate(who) != BaseRegenRate(who) )
+			SetHpRegenRate(who , ( BaseRegenRate(who)) * 12);
+			who.setPoisoned(0);
+		endif
+	endif
+
+	set_critical(1);
+	var allmods	:= GetObjProperty( who, "#mods" );
+	if (!allmods)
+		allmods := {};
+	endif
+
+	var mmod := {};
+	mmod[1] := stat;
+	mmod[2] := amt;
+	mmod[3] := ReadGameClock() + duration;
+
+	var pos := AddToStatMods( allmods, mmod );
+	if( !pos )
+		return;
+	endif
+
+	// Gets the lowest effective attribute, and returns the new mod amount based on that. Will never go below 1 (0 for ar).
+	if ((mmod[1] == "call") || (mmod[1] == "all"))
+		fixMod(GetBaseStrength(who), GetStrengthMod(who), mmod[2]);
+		fixMod(GetBaseDexterity(who), GetDexterityMod(who), mmod[2]);
+		fixMod(GetBaseIntelligence(who), GetIntelligenceMod(who), mmod[2]);
+	elseif ((mmod[1] == "cpoly") || (mmod[1] == "poly"))
+		fixMod(GetBaseStrength(who), GetStrengthMod(who), mmod[2]);
+		fixMod(GetBaseDexterity(who), GetDexterityMod(who), mmod[2]);
+		fixMod(GetBaseIntelligence(who), GetIntelligenceMod(who), mmod[2]);
+		
+		// This part checks the AR (can be lowered by decaying ray)
+		var arMod := CInt(mmod[2] / 3);
+		fixMod(who.ar, who.ar_mod, arMod, 0);
+		if (CInt(arMod * 3) < mmod[2])
+			mmod[2] := CInt(arMod * 3);
+		endif
+	endif
+
+	case( mmod[1] )
+		"cstr":
+        	"str" :		SetStrengthMod(who, fixMod( GetBaseStrength(who), GetStrengthMod(who), mmod[2] ) );
+				break;
+		"cdex":
+        	"dex" : 	SetDexterityMod(who, fixMod( GetBaseDexterity(who), GetDexterityMod(who), mmod[2]) );
+				break;
+		"cint":
+        	"int" : 	SetIntelligenceMod(who, fixMod( GetBaseIntelligence(who), GetIntelligenceMod(who), mmod[2]) );
+				break;
+				
+		"car":
+        	"ar"  :		who.ar_mod := fixMod(who.ar, who.ar_mod, mmod[2], 0);
+				break;
+        
+		"p"   :		who.setParalyzed();
+				break;
+	
+		"call":
+        	"all" :		SetStrengthMod(who, GetStrengthMod(who) + mmod[2] );
+				SetDexterityMod(who, GetDexterityMod(who) + mmod[2] );
+				SetIntelligenceMod(who, GetIntelligenceMod(who) + mmod[2] );
+				break;
+		
+		"cpoly":
+		"poly":		SetStrengthMod(who, GetStrengthMod(who) + mmod[2] );
+				SetDexterityMod(who, GetDexterityMod(who) + mmod[2] );
+				SetIntelligenceMod(who, GetIntelligenceMod(who) + mmod[2] );
+				who.ar_mod := who.ar_mod + CInt(mmod[2] / 3);
+	endcase
+	allmods[pos][2] := mmod[2]; // Overwrite old mod in case it was changed while checking for minimum values.
+
+	SetObjProperty( who, "#mods", allmods );
+	set_critical(0);
+
+	sleep(duration);
+
+	if( who )
+		set_critical(1);
+		allmods := GetObjProperty( who, "#mods" );
+
+		if( !allmods )
+			set_critical( 0 );
+			return;
+		endif
+
+		var newmods := {};
+		var i;
+		for( i := 1; i <= len(allmods); i := i + 1 )
+			if( allmods[i][1] == mmod[1] && ReadGameClock() >= allmods[i][3] )
+				UndoTheMod( who, allmods[i][1], allmods[i][2] );
+			else
+				newmods.append( allmods[i] );
+			endif
+		endfor
+
+		if( len(newmods) )
+			SetObjProperty( who, "#mods", newmods );
+		else
+			EraseObjProperty( who, "#mods" );
+		endif
+
+		set_critical( 0 );
+	endif
+
+endprogram
+
+// Fixes up mods. Makes sure that attributes never go below 1, which causes problems.
+function fixMod(baseattr, originalmod, byref newmod, minimum := 1)
+	if ((baseattr + originalmod + newmod) < minimum)
+		newmod := minimum - (baseattr + originalmod);
+		return -(baseattr-minimum);
+	endif
+	return (originalmod + newmod);
+endfunction

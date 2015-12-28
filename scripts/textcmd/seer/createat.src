@@ -1,0 +1,95 @@
+//
+// .create command - create items
+// Items created with this command will not decay.
+// Two forms:
+//   ".create [objtype] [amount]" - specify object type and amount
+//       amount defaults to 1
+//   ".create" - show the item creation menu, create one of that item
+//
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_create( who, text )
+	if (!checkStaff(who, "createat", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    if (text)
+        var params := SplitWords( text );
+        var objtype := params[1];
+        var amount := CInt( params[2] );
+
+        if (CInt(objtype))
+            objtype := CInt(objtype);
+        endif
+
+        if (!amount)
+            amount := 1;
+        endif
+
+if((objtype==0xe77) || (objtype==0xfae))
+return;
+endif
+
+        // print( "objtype=" + Hex(objtype) + ", amount=" + amount );
+       
+        var i;
+        for( i := 1; i <= amount; i := i + 1 )
+            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
+            var place := TargetCoordinates( who );    
+            var item := CreateItemAtLocation( place.x, place.y, place.z, objtype, 1 );
+            item.decayAt := 0;
+            
+            log(who, item);
+	    SetObjProperty(item, "LFucker", who.name + who.serial);
+        endfor
+    else
+        var selection := SelectMenuItem2( who, "ItemCreation" );
+        if (selection)
+            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
+            var place := TargetCoordinates( who );
+            var created := CreateItemAtLocation( place.x, place.y, place.z, selection.objtype, 1 );
+            created.color := selection.color;
+            created.decayAt := 0;
+            
+            log(who, created);
+	    SetObjProperty(created, "LFucker", who.name + who.serial);
+        endif
+    endif
+endprogram
+
+function log(who, item)
+var where := who;
+var desc := who.name + " / " + who.acctname;
+
+var elemkey := desc;
+var props := array;
+var prop := array;
+prop .+ pname;
+prop .+ pvalue;
+
+prop.pname := "item";
+prop.pvalue := item.name;
+props[1] := prop;
+
+prop.pname := "serial";
+prop.pvalue := item.serial;
+props[2] := prop;
+
+prop.pname := "myserial";
+prop.pvalue := who.serial;
+props[3] := prop;
+
+prop.pname := "amount";
+prop.pvalue := item.amount;
+props[4] := prop;
+
+prop.pname := "x y z";
+prop.pvalue := where.x + " " + where.y + " " + where.z;
+props[5] := prop;
+
+
+AppendConfigFileElem( "createstack", "createstack", elemkey, props );
+UnloadConfigFile("createstack");
+endfunction

@@ -1,0 +1,29 @@
+use uo;
+use os;
+
+program gateDestroyer(args)
+	var gate1 := args[1];
+	var gate2 := args[2];
+	var duration := args[3];
+	
+	while ((gate1 || gate2) && duration > 0)
+		if (duration <= 10)
+			if (gate1)
+				PrintTextAbove(gate1, "*" + CStr(duration) + "*");
+			endif
+			if (gate2)
+				PrintTextAbove(gate2, "*" + CStr(duration) + "*");
+			endif
+		endif
+		
+		sleep(1);
+		duration := duration - 1;
+	endwhile
+	
+	if (gate1)
+		DestroyItem(gate1);
+	endif
+	if (gate2)
+		DestroyItem(gate2);
+	endif
+endprogram

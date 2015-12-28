@@ -1,0 +1,19 @@
+use uo;
+use polsys;
+include "include/client";
+include "include/cmdlevel_check";
+include "include/yesno";
+
+
+
+program shutdownserver(who)
+	if (!checkStaff(who, "reloadconfigs", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	if (YesNo(who,"Reload configs?"))
+		ReloadConfiguration();
+		SendSysMessage(who, "configs reloaded");
+	endif	
+
+endprogram

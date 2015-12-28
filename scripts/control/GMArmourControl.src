@@ -1,0 +1,29 @@
+use uo;
+use basic;
+use cfgfile;
+
+include "include/namingbyenchant";
+
+var itemcfg := ReadConfigFile(":combat:itemdesc");
+
+program fixArmourControl(item)
+	var elem := itemcfg[item.objtype];
+	var cprops;
+	var words, sepIndex, name, value;
+	if (elem)
+		cprops := GetConfigStringArray(elem, "CProp");
+		foreach cprop in cprops
+			words := SplitWords(cprop);
+			sepIndex := find(cprop, words[2], 2);
+			
+			name  := words[1];
+			value := Unpack( cprop[sepIndex, len(cprop)] );
+			
+			SetObjProperty(item, name, value);
+		endforeach
+		
+		if (GetObjProperty(item, "IDed"))
+			SetNameByEnchant(item); // Rename it
+		endif
+	endif
+endprogram

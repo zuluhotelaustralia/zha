@@ -1,0 +1,6 @@
+
+Use uo;
+Use os;
+
+
+start_script( ":auction:auctionlist");	

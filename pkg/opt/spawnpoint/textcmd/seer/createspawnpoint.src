@@ -1,0 +1,14 @@
+use uo;
+
+include "include/constants/objtypes";
+include "include/cmdlevel_check";
+
+program textcmd_createspawnpoint( who )
+	if (!checkStaff(who, "createspawnpoint", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	var spawnpoint:= CreateItemAtLocation( who.x, who.y, who.z, UOBJ_SPAWNPOINT, 1 );
+	SetObjProperty(spawnpoint, "LFucker", who.name+who.serial);
+
+endprogram

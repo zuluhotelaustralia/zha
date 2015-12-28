@@ -1,0 +1,11 @@
+// Seravy
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_disablestaffpowers(who, acc)
+  RemoveFromCommandLevelArrays(who, acc);
+endprogram
+
+
+

@@ -1,0 +1,14 @@
+use os;
+use uo;
+
+program fiveminutetimer(player)
+
+sleep(5*60);
+
+if (GetObjProperty(player,"starttime"))
+EraseObjProperty(player,"starttime");
+SendSysMessage(player,"You took too long to answer!");
+DisconnectClient( player );
+endif
+
+endprogram

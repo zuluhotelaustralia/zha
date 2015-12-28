@@ -1,0 +1,56 @@
+//GM Barnabus 1/2/2003
+//This script deletes the ship the gm is standing on while preserving ship's items.
+//Staff chooses target that they are to be teled to.
+//Staff is teled to target
+//Offline mobiles teled to target
+//Items on deck and in hold of ship are teled to target
+//Note: items on deck which cannot be stacked will be required to be moved individually or
+//destroyed. However this command could be called several times for it to work in this case.
+
+use boat;
+use uo;
+include "include/yesno";
+include "../pkg/std/boat/setup";
+
+include "include/cmdlevel_check";
+
+program textcmd_destroyShip( who )
+	if (!checkStaff(who, "account", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	var boat := SystemFindBoatBySerial(who.multi.serial);
+	var newloc;
+	
+	if (!boat || !boat.isa(POLCLASS_BOAT))
+		SendSysMessage( who, "You must stand on the ship you want to destroy." );
+		return 0;
+	else
+		//checks multi if ship
+		//if (! boat.isa(POLCLASS_BOAT))
+		//	SendSysMessage( who, "You must stand on the ship you want to destroy." );
+		//	return 0;
+		//endif
+		//checks user really wants to delete ship
+		if (!YesNo(who, "Delete ship?"))
+			return;
+		endif
+	
+	endif
+	
+	SendSysMessage( who, "Where do you wish onboard items and characters to be moved?" );
+       	newloc := TargetCoordinates( who );
+	if (newloc)
+		var flags := LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN+LISTEX_FLAG_GHOST;
+		foreach mob in ListMobilesNearLocationEx(who.x, who.y, who.z, 3, flags)
+			MoveCharacterToLocation(mob, newloc.x,newloc.y, newloc.z, MOVECHAR_FORCELOCATION);
+		endforeach
+		
+		MoveCharacterToLocation(who, newloc.x,newloc.y, newloc.z);
+	else
+		return;
+	endif
+	
+	deleteboat(boat, newloc.x, newloc.y, newloc.z, DELBOAT_MOVEITEMS);
+	
+endprogram

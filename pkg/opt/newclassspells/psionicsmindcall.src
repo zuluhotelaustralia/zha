@@ -1,0 +1,109 @@
+/* Psionics Spell - Mind Call **
+** Recall.                    **
+** Seravy - seravy@gmail.com  */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "../pkg/std/housing/utility";
+include "include/areas";
+
+const SPELL_ID := SPELL_ID_MINDCALL;
+
+program cast_mindcall( caster )
+  var circle := GetCircle( SPELL_ID);
+
+  if( IsForbiddenAreaToRecallFrom( caster ) )
+    SendSysMessage( caster, "You can't gate from there." );
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  endif
+
+  SendSysMessage( caster, "Select a rune or yourself to mindcall from." );
+
+  var cast_on := CanTargetThing(caster, circle, TGTOPT_CHECK_LOS );
+
+  if(!cast_on)
+    EraseObjProperty( caster, "#Casting");
+    return;
+  elseif(cast_on == caster)
+    SendSysMessage(caster, "You mind call off the location in your mind!");
+  elseif( !Accessible( caster, cast_on ) )
+    SendSysMessage( caster, "You can't reach that." );
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif (cast_on == caster)
+    SendSysMessage( caster, "You cannot remember any location." );
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif( cast_on.objtype != UOBJ_RUNE && cast_on.objtype != 0x6100)
+    SendSysMessage( caster, "You can only cast that on a recall rune, yourself or a runebook!" );
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif( !ReserveItem( cast_on ) )
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  endif
+
+  var tox;
+  var toy;
+  var toz;
+  if (cast_on == caster)
+    var mindsetlocation := GetObjProperty(cast_on, "mindsetlocation");
+    if (!mindsetlocation)
+      mindsetlocation := {0,0,0};
+    endif
+    tox := CInt(mindsetlocation[1]);
+    toy := CInt(mindsetlocation[2]);
+    toz := CInt(mindsetlocation[3]);
+  else
+    tox := CInt( GetObjProperty( cast_on, "x" ) );
+    toy := CInt( GetObjProperty( cast_on, "y" ) );
+    toz := CInt( GetObjProperty( cast_on, "z" ) );
+  endif
+  var sx  := caster.x;
+  var sy  := caster.y;
+  var sz  := caster.z;
+
+  if( !tox && !toy && !toz )
+    SendSysMessage( caster, "There is no image on this!");
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  elseif( IsForbiddenAreaToRecallTo( caster, tox, toy, toz ) )
+    SendSysMessage( caster, "You can't mind call to this place." );
+    if( cast_on.objtype == UOBJ_RUNE )
+      DestroyItem(cast_on);
+    endif
+    EraseObjProperty( caster, "#Casting");
+    return 0;
+  endif
+
+  var multi := GetStandingHeight( tox, toy, toz ).multi;
+  if( multi )
+    if( !IsOwner( caster, multi )  )
+      if( !IsFriend( caster, multi ) )
+        SendSysMessage( caster, "You can't mind call to this house." );
+        EraseObjProperty( caster, "#Casting");
+        return;
+      endif
+    endif
+  endif
+
+  PlaySoundEffect( caster, SFX_SPELL_MINDCALL );
+  sleep(8);
+  if (caster.dead)
+    SendSysMessage(caster, "You are dead!");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  if (sx == caster.x && sy == caster.y && sz == caster.z)
+    PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SPELL_MINDCALL, SPEED_SPELL_MINDCALL, LOOP_SPELL_MINDCALL);
+    MoveCharacterToLocation( caster, tox, toy, toz );
+    PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SPELL_MINDCALL, SPEED_SPELL_MINDCALL, LOOP_SPELL_MINDCALL);
+    PlaySoundEffect( caster, SFX_SPELL_MINDCALL2 );
+  else
+    SendSysMessage(caster, "You moved and have lost your focus");
+  endif
+  EraseObjProperty( caster, "#Casting");
+endprogram

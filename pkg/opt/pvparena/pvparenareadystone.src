@@ -1,0 +1,16 @@
+use uo;
+
+include "pvparena";
+
+program readystone(who, stone)
+	var serials := Unpack(GetObjProperty(stone, "serials"));
+	if (!serials)
+		serials := {};
+	endif
+	
+	if (!(who.serial in serials))
+		serials.append(who.serial);
+		PrintTextAbove(stone, who.name + " is ready!");
+		SetObjProperty(stone, "serials", Pack(serials));
+	endif
+endprogram

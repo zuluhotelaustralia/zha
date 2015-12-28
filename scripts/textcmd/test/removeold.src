@@ -1,0 +1,9 @@
+use uo;
+use os;
+
+program removeold(who)
+
+EraseGlobalProperty( "orelist");
+EraseGlobalProperty( "deathpool");
+
+endprogram

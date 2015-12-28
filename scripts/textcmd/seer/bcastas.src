@@ -1,0 +1,15 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program bcastas(who, msg)
+	if (!checkStaff(who, "bcastas", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+
+if (msg)
+        Broadcast(msg);
+endif
+
+endprogram

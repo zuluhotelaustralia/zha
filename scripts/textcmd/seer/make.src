@@ -1,0 +1,34 @@
+use os;
+use uo;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program cannon(who, text)
+	if (!checkStaff(who, "make", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+if ((text=="") || (!text)) SendSysMessage( who, ".make <red> <blue> <gray>"); return; endif
+
+SendSysMessage( who, "Select a MOBILE." );
+var mobile :=  Target( who, TGTOPT_NOCHECK_LOS );
+
+if(!mobile || !GetStrength(mobile)) SendSysMessage( who, "canceled"); return; endif
+
+if (text=="red")
+mobile.setMurderer(1);
+mobile.setCriminal(0);
+
+elseif(text=="gray")
+mobile.setCriminal(1);
+mobile.setMurderer(0);
+
+elseif(text=="blue")
+mobile.setMurderer(0);
+mobile.setCriminal(0);
+
+else
+SendSysMessage( who, ".make <red> <blue> <gray>");
+endif
+
+endprogram

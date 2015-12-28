@@ -1,0 +1,62 @@
+/* Psionics Spell - Cleanse Thoughts                **
+** Dispels any Bless or Curse Placed on the caster. **
+** Seravy - seravy@gmail.com                        */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_CLEANSETHOUGHTS;
+
+program cast_cleansethoughts(parms)
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    if (!caster)
+    EraseObjProperty( caster, "#Casting");
+    return;
+    endif
+  endif
+
+  PlaySoundEffect( caster, SFX_SPELL_CLEANSETHOUGHTS );
+  PlayObjectCenteredEffect( caster, FX_SPELL_CLEANSETHOUGHTS, SPEED_SPELL_CLEANSETHOUGHTS, LOOP_SPELL_CLEANSETHOUGHTS);
+
+  set_critical(1);
+  WipeMod(caster, "all");
+  WipeMod(caster, "str");
+  WipeMod(caster, "int");
+  WipeMod(caster, "dex");
+  set_critical(0);
+
+  if( caster.poisoned )
+    var diffi := (PoisonLevel(caster) * 15)+60;
+    var increase := GetObjProperty( caster, "HealingIncrease" );
+    if( increase )
+      diffi := diffi - (increase * 10);
+      if( diffi < 0 )
+        diffi := 10;
+      endif
+    endif
+	
+    if( IsAMageryBuffer(caster) )
+      diffi := CInt( diffi / CLASSE_BONUS );
+    endif
+
+    if( CheckSkill( caster, SKILLID_PSIONICS, diffi, 0 ) )
+      CurePoison( caster, SFX_SPELL_CURE, "Your neutrul thoughts inject the posion out of your system." );
+    endif
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

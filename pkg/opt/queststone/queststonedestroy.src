@@ -1,0 +1,15 @@
+// updated November 4, 2000
+// zulu (zulu@zuluhotel.com)
+
+use uo;
+use os;
+include "queststone";
+
+program queststone_destroy(stone)
+	ClearPlayerData(stone); //gets rid of props on players
+	deleteAllQuestSpawnPointsRefs(stone); //gets rid of props on all questspawns
+	deleteAllOneOffObjectives(stone); //destroys or kills all one off objectives
+	deletePersonalObjectives(stone); //destroys all personal objectives
+	DestroyStorageArea(stone); //destroys quest storage area and all items in it
+	start_script("::maindestroy");
+endprogram

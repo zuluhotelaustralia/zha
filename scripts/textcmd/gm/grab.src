@@ -1,0 +1,96 @@
+use uo;
+use os;
+
+include "include/objtype";
+include "include/cmdlevel_check";
+
+
+
+program textcmd_loot(me)
+	if (!checkStaff(me, "grab", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+    if (CInt(GetObjProperty(me, "#looting")) > ReadGameClock())
+        SendSysMessage(me, "You are already looting!");
+        return;
+    else
+	SetObjProperty(me, "#looting",CInt(ReadGameClock()) + 60);
+    endif
+
+	var near_items := ListItemsNearLocation(me.x, me.y, me.z,2);
+        foreach item in near_items
+
+	    if (Distance(me,item) == 0)
+		SendSysMessage(me,"You're standing on the loot!");
+		EraseObjProperty(me, "#looting");
+		return;
+	    endif
+
+	    if (item.objtype == UOBJ_CORPSE)
+		foreach thingie in EnumerateItemsInContainer(item)
+		  if (me.dead)
+		    SendSysMessage(me,"Whadya know?  You really can't take it with you!");
+		    EraseObjProperty(me, "#looting");
+		    return;
+	  	  endif
+		  if (Distance(me,item) > 2 )
+		    SendSysMessage(me,"You're too far away to continue looting.");
+		    EraseObjProperty(me, "#looting");
+		    return;
+		  endif
+		  Grabit(me,thingie);
+		endforeach
+	    else
+	        if (me.dead)
+		  SendSysMessage(me,"Whadya know?  You really can't take it with you!");
+		  EraseObjProperty(me, "#looting");
+		  return;
+	        endif
+		if ( Distance( me, item ) > 2 )
+		    SendSysMessage(me,"You're too far away to continue looting.");
+		    EraseObjProperty(me, "#looting");
+		    return;
+		endif
+		Grabit(me,item);
+	     endif
+
+	endforeach
+        SendSysMessage(me,"Hmm... looks like you got it all!");
+	EraseObjProperty(me, "#looting");
+
+endprogram
+
+function Grabit(me, it)
+
+	if (! (it.movable))
+	  return;
+	endif
+
+	if (! (Accessible(me,it)))
+	  return;
+	endif
+
+	if (Distance(me,it) ==0)
+	  return;
+	endif
+
+	if (it.amount > 1 )
+	  foreach item in EnumerateItemsInContainer(me.backpack)
+		if (item.objtype == it.objtype)
+		  CreateItemInBackpack( me, it.objtype, it.amount );
+		  DestroyItem(it);
+		  PrintTextAbove(me,"*yoink*");
+	    	  sleep(1);
+		  return;
+		endif
+	  endforeach
+	endif
+
+	if (MoveItemToContainer(it,me.backpack))
+	    PrintTextAbove(me,"*yoink*");
+	    sleep(1);
+	endif
+
+endfunction

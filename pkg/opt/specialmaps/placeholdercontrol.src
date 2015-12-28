@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "unleashmap";
+
+program placeholdercontrol(placeholder)
+	//if (GetObjProperty(placeholder, "running"))
+	syslog("Level 6 map being run...");
+	//Broadcast("running the control scripts runner");
+	RunPlaceHolderMapCheck(placeholder);
+	//endif
+endprogram

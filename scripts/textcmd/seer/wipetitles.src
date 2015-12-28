@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+program wipe_titles (who)
+
+	var targ:=Target(who);
+	if (!targ)
+		return;
+	elseif (!targ.isa(POLCLASS_MOBILE))
+		return;
+	endif
+	targ.title_race:="";
+	targ.title_suffix:="";
+	targ.title_prefic:="";
+	SendSysMessage(who, "Titles removed");
+endprogram

@@ -1,0 +1,52 @@
+/* Spec Tile                      **
+** will teleport you to location  **
+** to spectate a dule.    **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+program spectile(who, item)
+  if (GetObjProperty(who, "#Duel-Spec"))
+    eraseobjproperty(who, "#Duel-Spec");
+    return 0;
+  endif
+  var duration := (10 * 60);
+  var toX := GetObjProperty(item, "DestX");
+  var toY := GetObjProperty(item, "DestY");
+  var toZ := GetObjProperty(item, "DestZ");
+  if (!toX || !toY || !toZ)
+    return 0;
+  endif
+
+  var wasLoc := {who.x, who.y, who.z};
+  who.frozen := 1;
+  who.hidden := 1;
+  who.squelch(duration);
+  SetObjProperty(who, "#Duel-Spec", 1);
+  MoveCharacterToLocation(who, toX, toY, toZ, MOVECHAR_FORCELOCATION);
+  SendGump(who);
+  MoveCharacterToLocation(who, wasLoc[1], wasLoc[2], wasLoc[3], MOVECHAR_FORCELOCATION);
+  who.hidden := 0;
+  who.frozen := 0;
+  who.squelch(0);
+endprogram
+
+
+function SendGump(who)
+  var speclayout := {
+                  "page 0",
+                  "resizepic 0 0 83 140 55",
+                  "checkertrans 0 0 140 55",
+                  "page 1",
+                  "text 10 5 52 0",
+                  "button 40 22 2130 2129 1 0 1"
+                  };
+
+
+  var specdata := {
+                "Click here to return."
+		};
+
+  SendDialogGump(who, speclayout, specdata );
+endfunction

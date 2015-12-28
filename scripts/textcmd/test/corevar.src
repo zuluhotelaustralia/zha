@@ -1,0 +1,12 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program show_corevar( who, varname )
+	if (!checkStaff(who, "corevar", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    var system := polcore();
+    var corevar := system .varname;
+    SendSysMessage( who, "polcore()." + varname + "=" + corevar );
+endprogram

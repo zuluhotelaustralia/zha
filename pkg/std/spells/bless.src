@@ -1,0 +1,94 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/client";
+include "include/dotempmods";
+include "include/traitorcheck";
+
+// NOTE: To turn off traitorcheck in game, set global var "traitors" to 0
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_BLESS;
+const SPELL_EFFECT_ID		:= FX_SPELL_BLESS;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_BLESS;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_BLESS;
+
+program cast_bless( parms )
+
+	var circle := 3;
+	var caster;
+	var cast_on;
+	var fromhit;
+
+	if (parms[1] == "#MOB")
+		caster := parms[2];
+		cast_on := parms[3];
+		if (parms[4])
+			circle := parms[4];
+		endif
+		if (parms[5])
+			fromhit := parms[5];
+		endif
+
+	else
+		caster := parms;
+		cast_on := CanTargetSpell(caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+		if (!cast_on)
+			return;
+		endif
+	endif
+
+	if( !fromhit )
+		Detach();
+		cast_on := Reflected( caster, cast_on, circle );
+	else
+		PlayObjectCenteredEffect(cast_on,
+                                         SPELL_EFFECT_ID,
+                                         SPELL_EFFECT_SPEED,
+                                         SPELL_EFFECT_LOOP);
+	endif
+
+	PlaySoundEffect(cast_on, SFX_SPELL_BLESS);
+
+	if (GetGlobalProperty("traitors"))
+		CheckTraitor(caster, cast_on);
+	endif
+		
+	var mod_amount := GetModAmount( caster );
+	var duration := GetModDuration( caster );
+	if( CanMod( cast_on, "all" ) )
+		DoTempMod( cast_on, "all", mod_amount, duration );
+	else
+		SendSysMessage( caster, "Already under the influence!" );
+		return;
+	endif	
+	var temptime := duration/60;
+	var timestr;
+	var timeleft := duration%60;	
+
+	if (temptime < 1)
+		timestr := "less than 1 minute";
+	else
+		if (timeleft<20)
+			timestr := "slightly more than " + temptime;
+		elseif(timeleft>40)
+			timestr := "almost " + (temptime+1);
+		else
+			timestr := "around " + temptime + " and a half";
+		endif
+		
+		if (temptime==1)
+			timestr := timestr + " minute";
+		else
+			timestr := timestr + " minutes";
+		endif
+	endif
+
+
+	if (caster.serial == cast_on.serial)
+	   SendSysMessage( caster, "You have blessed yourself for " + mod_amount +" points. This will last for " + timestr+".",3,53 );
+	else
+		SendSysMessage( caster, "You have blessed " + cast_on.name + " for " + mod_amount +" points. This will last for " + timestr+".",3,53 );
+		SendSysMessage( cast_on, "You were blessed by " + caster.name + " for " + mod_amount +" points. This will last for " + timestr+".",3,53 );
+	endif
+endprogram

@@ -1,0 +1,102 @@
+/* Holy Spell - Summon Angel  **
+** Summons an angel           **
+** Seravy - seravy@gmail.com  */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/npcbackpacks";
+
+const SPELL_ID := SPELL_ID_SUMMONANGEL;
+
+program cast_summonangel(parms)
+  var circle := GetCircle( SPELL_ID );
+  var caster;
+  var cast_loc;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_loc := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    if(GetObjProperty(caster, "#SummonAngel"))
+      if(SystemFindObjectBySerial(GetObjProperty(caster, "#SummonAngel")))
+        SendSysMessage(caster, "You cannot cast this until your angel is gone.");
+        EraseObjProperty( caster, "#Casting");
+        return;
+      endif
+    endif
+    cast_loc := TargetCoordinates( caster);
+    if(!cast_loc)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (PreventedCastInGuardedArea(caster))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var clevel:=GetClasseLevel(caster);
+  var sumcreature;
+
+  var sumcreaturetype := "daemon";
+  var sumcreaturegraphic := 123;
+  var sumcreaturename := caster.name+"'s Angel";
+  if(clevel == 8)
+    sumcreaturetype := "daemonlieutenant";
+    sumcreaturegraphic := 175;
+    sumcreaturename := caster.name+"'s Arch Angel";
+  endif
+
+  set_critical( 1 );
+  sumcreature := CreateNpcFromTemplate( sumcreaturetype, cast_loc.x, cast_loc.y, cast_loc.z);
+  sumcreature.setmaster(caster);
+  sumcreature.setcriminal( 1);
+  SetObjProperty(sumcreature, "master",caster.serial);
+  SetObjProperty(sumcreature, "summoned",1);
+  SetObjProperty(sumcreature, "script", sumcreature.script );
+  SetObjProperty(sumcreature, "noloot", 1 );
+  sumcreature.script := "tamed";
+  sumcreature.graphic := sumcreaturegraphic;
+  sumcreature.name := sumcreaturename;
+  sumcreature.color := 0;
+  RestartScript(sumcreature);
+  set_critical( 0 );
+
+  SetObjProperty(caster, "#SummonAngel", sumcreature.serial);
+
+
+  PlayLightningBoltEffect(sumcreature);
+  EraseObjProperty( caster, "#Casting");
+
+
+  detach();
+
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_PALADIN)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_PRIEST)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_PIETY);
+  var duration := calcSummonDuration(skill, level);
+  sleep( duration );
+
+  PlaySoundEffect( sumcreature, 0x01fa );
+  PlayStationaryEffect( CInt(sumcreature.x), CInt(sumcreature.y), CInt(sumcreature.z), 0x3728, 0xa, 0xa );
+  var backpack := FindExistingPack( sumcreature.serial );
+  if( backpack )
+    foreach item in EnumerateItemsInContainer( backpack );
+      MoveItemToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, MOVEITEM_FORCELOCATION );
+    endforeach
+  endif
+
+  MoveCharacterToLocation( sumcreature, 0, 0, 0, MOVECHAR_FORCELOCATION );
+  ApplyRawDamage(sumcreature, GetHp(sumcreature) + 3);
+  EraseObjProperty( caster, "#SummonAngel" );
+endprogram

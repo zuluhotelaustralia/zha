@@ -1,0 +1,105 @@
+//
+// oncreate.src: Runs on character creation
+//
+// Notes:
+//    runs critical (may be changed to just run to completion)
+//    parameters are (who, skillids)
+//       who: character created
+//       skillids: array of skillid integers
+//    
+
+use uo;
+
+include "include/starteqp";
+include "include/attributes";
+include "include/time";
+
+program oncreate(who,skillids)
+
+    const EXPECTED_STAT_TOTAL := 80;
+    const SINGLE_STAT_MAX := 60;
+    set_critical(1);
+
+    var serial := who.serial;
+    
+    print( "Character created: " + who.name );
+    var strength := GetStrength(who);
+    var dexterity := GetDexterity(who);
+    var intelligence := GetIntelligence(who);
+    var total := strength + dexterity + intelligence;
+
+	who := SystemFindObjectBySerial(serial);
+	//why do this?
+	if (!who)
+		who := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+	endif
+	
+	if (!NameValidation(who.name))
+		who.acct.ban();
+		log(who);
+		syslog("ALERT! Account " + who.acctname + " was banned for cheating.");
+		return;
+	endif	
+
+	if (total > EXPECTED_STAT_TOTAL)
+		who.acct.ban();
+		log(who);
+		syslog("ALERT! Account " + who.acctname + " was banned for cheating.");
+		return;
+	endif	
+		   
+	if (strength>SINGLE_STAT_MAX)
+		who.setStrength(SINGLE_STAT_MAX);
+	endif
+	
+	if (dexterity>SINGLE_STAT_MAX)
+		who.setDexterity(SINGLE_STAT_MAX);
+	endif
+
+	if (intelligence>SINGLE_STAT_MAX)
+		who.setIntelligence(SINGLE_STAT_MAX);
+	endif
+
+    CreateStartingEquipment(who,skillids);
+
+    SendSysMessage(who,"Pick the race you would like to be.");
+    SetObjProperty(who,"newbie",1);
+    SetObjProperty(who, "cors",1);
+    MoveCharacterToLocation(who,5561,1169,0,MOVECHAR_FORCELOCATION);
+
+    set_critical(0);
+endprogram
+
+function NameValidation(thestring)
+  var i, validstr:={"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", " ", "-", ".", "'"};
+  thestring:=lower(thestring);
+  for(i:=1;i<=len(thestring);i:=i+1)
+    if(!(thestring[i] in validstr)) return 0; endif
+  endfor
+  return 1;
+endfunction
+
+function log(who)
+	var desc := who.name + " / " + who.acctname;
+	
+	var elemkey := who.acctname;
+	var props := array;
+	var prop := array;
+	prop .+ pname;
+	prop .+ pvalue;
+	
+	prop.pname := "charname";
+	prop.pvalue := who.name;
+	props[1] := prop;
+	
+	prop.pname := "ip";
+	prop.pvalue := who.ip;
+	props[2] := prop;
+	
+	prop.pname := "datetime";
+	prop.pvalue := NowString();
+	props[3] := prop;
+	
+	AppendConfigFileElem( "charcreation", "haxor", elemkey, props );
+	UnloadConfigFile("charcreation");
+endfunction

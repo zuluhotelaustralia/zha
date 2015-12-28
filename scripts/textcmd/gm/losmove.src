@@ -1,0 +1,25 @@
+//
+// Cause another to perform an action by number
+//
+
+use uo;
+use os;
+
+include "include/client";
+include "include/utility";
+include "include/eventid";
+include "include/std";
+include "include/cmdlevel_check";
+
+
+var ok;
+program move_item(who)
+	if (!checkStaff(who, "losmove", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	var selecteditem := Target( who, TGTOPT_NOCHECK_LOS );
+	if (selecteditem)
+		MoveItemToForcedLocation(selecteditem, who.x,who.y,who.z);
+	endif
+endprogram

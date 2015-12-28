@@ -1,0 +1,119 @@
+/* Psionics Spell - Clone       **
+** Create clones of the caster. ** 
+** Seravy - seravy@gmail.com    */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/npcbackpacks";
+
+const SPELL_ID := SPELL_ID_CLONE;
+
+program cast_clone(parms)
+  var circle := GetCircle( SPELL_ID );
+  var caster;
+  var cast_loc;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_loc := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    if(GetObjProperty(caster, "#PsionicClone"))
+      if(SystemFindObjectBySerial(GetObjProperty(caster, "#PsionicClone")))
+        SendSysMessage(caster, "You cannot cast this until your clone is gone.");
+        EraseObjProperty( caster, "#Casting");
+        return;
+      endif
+    endif
+    cast_loc := TargetCoordinates( caster);
+    if(!cast_loc)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (PreventedCastInGuardedArea(caster))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+ // var clevel:=GetClasseLevel(caster);
+  var clone;
+
+
+
+  set_critical(1);
+  clone := CreateNpcFromTemplate("vampire2", cast_loc.x, cast_loc.y, cast_loc.z);
+  clone.setmaster(caster);
+  SetObjProperty(clone, "master",caster.serial);
+  SetObjProperty(clone, "summoned",1);
+  SetObjProperty(clone, "script", clone.script);
+  SetObjProperty(clone, "noloot", 1 );
+  clone.script := "tamed";
+  RestartScript(clone);
+  set_critical(0);
+  PlaySoundEffect(clone, 0x01fa);
+  PlayStationaryEffect( CInt(clone.x), CInt(clone.y), CInt(clone.z), 0x3728, 0xa, 0xa );
+  PlaySoundEffect(caster, 0x01fa);
+  PlayStationaryEffect( CInt(caster.x), CInt(caster.y), CInt(caster.z), 0x3728, 0xa, 0xa );
+
+  sleepms(50);
+
+  set_critical(1);
+  // Same Attributes
+  clone.color := caster.color;
+  clone.graphic := caster.graphic;
+  clone.name := caster.name;
+  foreach cloneItem in ListEquippedItems(clone)
+    DestroyItem(cloneItem);
+  endforeach
+
+
+  foreach equip in ListEquippedItems(caster)
+    var item := CreateItemInBackpack(caster, 0x103b, 1);
+    item.color := equip.color;
+    item.graphic := equip.graphic;
+    item.name := equip.desc + " (Cloned)";
+
+    if (!EquipItem(clone, item))
+      DestroyItem(item);
+    endif
+  endforeach
+  set_critical(0);
+
+  SetObjProperty(caster, "#PsionicClone", clone.serial);
+
+
+  PlaySoundEffect(clone, SFX_SPELL_CLONE);
+  PlayStationaryEffect( CInt(clone.x), CInt(clone.y), CInt(clone.z), 0x3728, 0xa, 0xa);
+  EraseObjProperty(caster, "#Casting");
+
+  detach();
+
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_POWERPLAYER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_MONK)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_PSIONICS);
+  var duration := calcSummonDuration(skill, level);
+  sleep(duration);
+
+  PlaySoundEffect(clone, 0x01fa);
+  PlayStationaryEffect( CInt(clone.x), CInt(clone.y), CInt(clone.z), 0x3728, 0xa, 0xa );
+  var backpack := FindExistingPack(clone.serial);
+  if(backpack)
+    foreach item in EnumerateItemsInContainer(backpack);
+      MoveItemToLocation(item, clone.x, clone.y, clone.z, MOVEITEM_FORCELOCATION);
+    endforeach
+  endif
+
+  MoveCharacterToLocation(clone, 0, 0, 0, MOVECHAR_FORCELOCATION );
+  ApplyRawDamage(clone, GetHp(clone) + 3);
+  EraseObjProperty( caster, "#PsionicClone");
+endprogram

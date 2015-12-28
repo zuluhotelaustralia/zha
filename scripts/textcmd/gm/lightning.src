@@ -1,0 +1,39 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+
+program lightning (person)
+	if (!checkStaff(person, "lightning", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+Broadcast("A lightning storm rages");
+
+foreach who in EnumerateOnlineCharacters()
+
+
+SetRegionLightLevel( "Background", 15 );
+MoveCharacterToLocation(person, who.x, who.y + 1, who.z);
+PlayLightningBoltEffect(person);
+sleep(1);
+SetRegionLightLevel("Background", 0);
+sleep(1);
+SetRegionLightLevel( "Background", 15 );
+MoveCharacterToLocation(person, who.x - 1, who.y + 2, who.z);
+sleep(1);
+SetRegionLightLevel( "Background", 15 );
+PlayLightningBoltEffect( person);
+sleep(1);
+SetRegionLightLevel("Background", 0);
+sleep(1);
+SetRegionLightLevel( "Background", 15 );
+MoveCharacterToLocation(person, who.x + 1, who.y - 2, who.z);
+sleep(1);
+PlayLightningBoltEffect( who );
+sleep(1);
+SetRegionLightLevel("Background", 0);
+endforeach
+endprogram

@@ -1,0 +1,266 @@
+use uo;
+use util;
+
+include "include/cmdlevel_check";
+
+program textcmd_test( who, zdiff )
+	if (!checkStaff(who, "test", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+        var hellarea := GetAreaLocation(who);
+   foreach object in ListObjectsInBox(hellarea[1], hellarea[3], -128, hellarea[2], hellarea[4], 128)
+    broadcast(object.name);
+  endforeach
+
+
+
+/*
+	data := {};
+
+	data := sendGump(who, data);
+*/
+endprogram
+
+
+function GetAreaLocation(who)
+  var tOne, tTwo;
+  SendSysMessage(who, "Select one corner of the boxed area of Hell.");  
+  tOne := TargetCoordinates(who);
+  SendSysMessage(who, "Select the oposite corner of the boxed area of Hell.");
+  tTwo := TargetCoordinates(who);
+  var area := GetAreaLocationArray(tOne.x, tTwo.x, tOne.y, tTwo.y);
+  if(!area)
+    return 0;
+  endif
+  return area;
+endfunction
+
+function GetAreaLocationArray(xOne, xTwo, yOne, yTwo)
+  var xMin, xMax, yMin, yMax;
+
+  if(xOne < xTwo)
+    xMin := xOne;
+    xMax := xTwo;
+  else
+    xMin := xTwo;
+    xMax := xOne;
+  endif
+  if(yOne < yTwo)
+    yMin := yOne;
+    yMax := yTwo;
+  else
+    yMin := yTwo;
+    yMax := yOne;
+  endif
+
+  return({xMin, xMax, yMin, yMax});
+endfunction
+
+
+
+
+
+
+/*
+   var used := Target(who);
+
+  Sendsysmessage(who, "name"+used.name);
+
+  if (!used.isA(POLCLASS_WEAPON))
+    Sendsysmessage(who, "This aint a weapon");
+    return;
+  endif
+
+   var weapfile := ReadConfigFile( ":combat:itemdesc" );
+   var ddamage := CStr(weapfile[used.objtype].Damage);
+   if(!ddamage)
+     ddamage := "0";
+   endif
+
+   var mod := used.modbonus;
+   if (!mod)
+     mod := 0;
+   endif
+
+   var damdealt := CInt(RandomDiceRoll(CStr(ddamage))) + CInt(mod);
+   Sendsysmessage(who, ddamage+"+"+mod+":"+damdealt);
+*/
+
+
+function sendGump(who)
+
+  var destroykeys := 0;
+
+  var setuplayout := {
+                  "nodispose",
+                  "page 0",
+                  "resizepic 100 100 2600 320 400",
+                  "text 145 120 52 0",
+                  "page 1",
+                  "text 130 140 5 1", // Leaver Graphic
+                  "GumpPic 225 140 2443",
+                  "TextEntry 230 140 50 20 39 0 2",
+                  "text 290 140 5 3",
+                  "GumpPic 330 140 2443",
+                  "TextEntry 335 140 50 20 39 1 4",
+
+                  "text 130 160 0 5", // Object types
+                  "GumpPic 220 170 96", // Divider Lines
+
+                  "text 130 180 10 6", // 1
+                  "GumpPic 140 180 2443",
+                  "TextEntry 145 180 50 20 39 2 7",
+
+                  "text 130 200 10 8", // 2
+                  "GumpPic 140 200 2443",
+                  "TextEntry 145 200 50 20 39 3 9",
+
+                  "text 130 220 10 10", // 3
+                  "GumpPic 140 220 2443",
+                  "TextEntry 145 220 50 20 39 4 11",
+
+                  "text 130 240 10 12", // 4
+                  "GumpPic 140 240 2443",
+                  "TextEntry 145 240 50 20 39 5 13",
+
+                  "text 130 260 10 14", // 5
+                  "GumpPic 140 260 2443",
+                  "TextEntry 145 260 50 20 39 6 15",
+
+                  "text 250 180 10 16", // 6
+                  "GumpPic 260 180 2443",
+                  "TextEntry 265 180 50 20 39 7 17",
+
+                  "text 250 200 10 18", // 7
+                  "GumpPic 260 200 2443",
+                  "TextEntry 265 200 50 20 39 8 19",
+
+                  "text 250 220 10 20", // 8
+                  "GumpPic 260 220 2443",
+                  "TextEntry 265 220 50 20 39 9 21",
+
+                  "text 250 240 10 22", // 9
+                  "GumpPic 260 240 2443",
+                  "TextEntry 265 240 50 20 39 10 23",
+
+                  "text 250 260 10 24", // 10
+                  "GumpPic 265 260 2443",
+                  "TextEntry 270 260 50 20 39 11 25",
+
+                  
+                  "checkbox 130 290 210 211 "+destroykeys+" 12", // Destroy keys
+                  "text 150 288 0 26",
+                  
+                  "text 130 310 0 27", // Events
+                  "GumpPic 180 320 96", // Divider Lines
+
+                  "text 130 330 43 28", // Gate Dest
+                  "text 180 330 5 29", // duration
+                  "GumpPic 260 330 2443",
+                  "TextEntry 265 330 50 20 39 13 30",
+                  "text 130 350 5 31", // gate1
+                  "GumpPic 195 350 2443",
+                  "TextEntry 200 350 50 20 39 14 32",
+                  "GumpPic 253 350 2443",
+                  "TextEntry 258 350 50 20 39 15 33",
+                  "GumpPic 315 350 2443",
+                  "TextEntry 320 350 50 20 39 16 34",
+                  "text 130 370 5 35", // gate2
+                  "GumpPic 195 370 2443",
+                  "TextEntry 200 370 50 20 39 17 36",
+                  "GumpPic 253 370 2443",
+                  "TextEntry 258 370 50 20 39 18 37",
+                  "GumpPic 315 370 2443",
+                  "TextEntry 320 370 50 20 39 19 38",
+                  
+                  "text 130 390 43 39", // Spawn
+                  "text 180 390 5 40", // template
+                  "GumpPic 230 390 2443",
+                  "TextEntry 235 390 50 20 39 20 41",
+                  "text 300 390 5 42", // amt
+                  "GumpPic 340 390 2443",
+                  "TextEntry 345 390 50 20 39 20 43",
+                  "text 140 410 5 44", // location
+                  "GumpPic 195 410 2443",
+                  "TextEntry 200 410 50 20 39 21 45",
+                  "GumpPic 253 410 2443",
+                  "TextEntry 258 410 50 20 39 22 46",
+                  "GumpPic 315 410 2443",
+                  "TextEntry 320 410 50 20 39 23 47",
+                  
+                  "text 130 430 43 48", // Script
+                  "GumpPic 205 430 2445",
+                  "TextEntry 210 430 95 20 39 24 49",
+
+                  "button 150 450 2130 2129 1 0 100", // Ok
+                  "button 300 450 2119 2120 1 0 101" // Cancel
+                  };
+
+  var setupdata := {
+                "Leaver Control Pannel",
+                "Graphic Before:",
+                "",
+                "After:",
+                "",
+                "Key Objtypes",
+                "1",
+                "",
+                "2",
+                "",
+                "3",
+                "",
+                "4",
+                "",
+                "5",
+                "",
+                "6",
+                "",
+                "7",
+                "",
+                "8",
+                "",
+                "9",
+                "",
+                "10",
+                "",
+                "Destroy Keys",
+                "Events",
+                "Gates:",
+                "Duration(min):",
+                0,
+                "Gate 1",
+                0,
+                0,
+                0,
+                "Gate 2",
+                0,
+                0,
+                0,
+                "Spawn:",
+                "Template",
+                "",
+                "Amount",
+                0,
+                "Location",
+                0,
+                0,
+                0,
+                "Run Script:",
+                "",
+
+                0
+                };
+  var result := SendDialogGump(who, setuplayout, setupdata);
+
+
+  if (!result[100])
+    SendSysMessage(who, "Canceled.");
+    return 0;
+  else
+    // PROCESS CHOICES
+
+  endif
+
+  return 1;
+endfunction

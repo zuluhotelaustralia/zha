@@ -1,0 +1,52 @@
+/* Psionics Spell - Flying Fists **
+** Deals small damage to target  **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/spelldata";
+
+const SPELL_ID := SPELL_ID_FLYINGFISTS;
+
+program cast_flyingfists( parms )
+  var caster;
+
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  PlayMovingEffect( caster, cast_on, FX_SPELL_FLYINGFISTS, SPEED_SPELL_FLYINGFISTS, LOOP_SPELL_FLYINGFISTS, 1);
+  PlaySoundEffect( cast_on, SFX_SPELL_FLYINGFISTS );
+	var immunity := IsProtected( caster, cast_on, circle );
+	if( immunity == IMMUNED )
+		EraseObjProperty( caster, "#Casting" );
+		return;
+	endif
+
+  var dmg := CInt(CalcSpellDamage( caster, cast_on, circle, SINGLE_TARGET_SPELL, SKILLID_PSIONICS ));
+  dmg:=dmg * ClasseBonus(caster, CLASSEID_MONK);
+  ApplyElementalDamage(caster, cast_on, circle, dmg, 0);
+  EraseObjProperty( caster, "#Casting");
+endprogram

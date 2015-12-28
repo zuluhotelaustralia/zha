@@ -1,0 +1,46 @@
+///////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////
+//  START.SRC - script that is run during startup of server.
+//
+//  Author: ???? ????/??/??
+//
+//  Recent Modifications
+//      1999/06/28 Ignatius added creation of system teleporters.
+//	2003/02/17 Barnabus added holds global property for tracking ships
+//	2003/03/21 Barnabus house manager system implemented (decay of unused houses)
+//	2003/06/27 Archaean temporarily removed housemanager
+// 	2003/06/30 Barnabus added back in :P
+//	2004/06/23 Barnabus added dynamic staff powers security system check
+//      2004/08/16 Seravy removed accountactivator, as account creation no longer activates.
+//
+////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////
+
+use uo;
+use os;
+
+include "include/utility";
+include "include/teleporters";
+include "include/cmdlevel_check";
+
+SetGlobalProperty("signs",{"NONE"});
+SetGlobalProperty("holds",{"NONE"});
+
+
+OpenWorldBank();
+
+find_or_create_storage("Merchant Storage");
+
+CreateTeleporters();
+
+checkCommandLevelArrays();
+
+start_script("EquipTemplateValidation");
+
+start_script("housemanager");
+
+start_script( "recbandwidth" );
+
+//start_script( "speedhackmanager" );
+
+//start_script( "accountactivator" );

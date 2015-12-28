@@ -1,0 +1,13 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program test_textentry( who )
+	if (!checkStaff(who, "testtextentry", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    var res := SendTextEntryGump( who, "Enter a String" );
+    if (res)
+        print( "SendTextEntryGump: " + res );
+    endif
+endprogram

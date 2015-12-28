@@ -1,0 +1,226 @@
+
+use uo;
+use cfgfile;
+
+include "include/client";
+include "include/attributes";
+include "include/objtype";
+include "include/skillpoints";
+include "include/bard";
+include "include/eventid";
+include "include/checkcity";
+
+program bard_provoke( character )
+	var greaterprovinstrument:=findGreaterPeacemakingInstrument(character);
+	
+	//name set up
+	var greaterprovinstrumentname;
+	if (greaterprovinstrument)
+		if (greaterprovinstrument.name)
+			greaterprovinstrumentname:=greaterprovinstrument.name;
+		else
+			greaterprovinstrumentname:=greaterprovinstrument.desc;
+		endif
+	endif
+	
+	var instrument;
+	var didagreaterprov:=0;
+	if(greaterprovinstrument)
+		SendSysMessage( character, "You are using the " + greaterprovinstrumentname);
+		instrument:=greaterprovinstrument;
+	else
+		instrument:= findinstrument( character );
+	endif
+
+	if( !instrument )
+		SendSysMessage( character, "You don't have an instrument to play!" );
+		return;
+	endif
+
+	SendSysMessage( character, "Who would you like to provoke" );
+
+	var thetarg := Target( character, TGTOPT_CHECK_LOS );
+	if( !thetarg )
+		return;
+	elseif( !GetIntelligence(thetarg) )
+		SendSysMessage( character, "You cannot provoke that!" );
+		return;
+	elseif( GetObjProperty(thetarg, "unprovokable") )
+		if (!greaterprovinstrument)
+			SendSysMessage( character, "You cannot provoke that!" );
+			return;
+		else
+			if (CInt(GetEffectiveSkill( character, SKILLID_PROVOCATION))<150 )
+				SendSysMessage( character, "You require 150 provocation to be able to use the " + greaterprovinstrumentname + "!" );
+				return;
+			endif
+			if (CInt(GetObjProperty( character, "IsBard"))<4 )
+				SendSysMessage( character, "You must be a level 4 bard to use the " + greaterprovinstrumentname + "!" );
+				return;
+			endif
+
+			didagreaterprov:=1;
+		endif
+	elseif( thetarg.script == "tamed" )
+		SendSysMessage( character, "You cannot provoke tamed creatures!" );
+		return;
+	elseif( thetarg == character )
+		SendSysMessage( character, "You cannot provoke yourself!" );
+		return;
+	endif
+	
+
+	var configfile := ReadConfigFile( "::npcdesc" );
+	var theobj	 := thetarg.npctemplate;
+	var elem	 := FindConfigElem( configfile, theobj );
+	var difficulty;
+
+	if( elem && !(elem.Privs == "invul") )
+		difficulty := CInt( elem.provoke );
+	
+	elseif( !thetarg.npctemplate && !thetarg.cmdlevel )
+		difficulty := CInt( GetIntelligence(thetarg) );
+	else
+		SendSysMessage( character, "You cannot provoke that!" );
+		return;
+	endif
+
+	if( !difficulty )
+		difficulty := 100;
+	elseif( difficulty > 150 )
+		difficulty := 150;
+	endif
+
+	SendSysMessage( character, "Against who would you like to provoke " + thetarg.name + "?" );
+	var newtarg := Target( character, TGTOPT_CHECK_LOS+TGTOPT_HARMFUL );
+	if( !newtarg )
+		SendSysMessage( character, "Canceled.");
+		return;
+	elseif( !GetIntelligence(newtarg) )
+		SendSysMessage( character, CStr(thetarg.name + " is now very angry against " + newtarg.desc + " but since it is inanimated he will ignore it.") );
+		return;
+	elseif( newtarg == thetarg )
+		SendSysMessage( character, "You cannot provoke something against itself." );
+		return;
+	elseif( GetObjProperty(newtarg, "unprovokable") )
+		if (!greaterprovinstrument)
+			SendSysMessage( character, "You cannot provoke that!" );
+			return;
+		else
+			if (CInt(GetEffectiveSkill( character, SKILLID_PROVOCATION))<150 )
+				SendSysMessage( character, "You require 150 provocation to be able to use the " + greaterprovinstrumentname + "!" );
+				return;
+			endif
+			if (CInt(GetObjProperty( character, "IsBard"))<4 )
+				SendSysMessage( character, "You must be a level 4 bard to use the " + greaterprovinstrumentname + "!" );
+				return;
+			endif
+
+			didagreaterprov:=1;
+		endif
+	elseif((newtarg.acct || newtarg.script == "tamed") && CheckCity(newtarg))
+		SendSysMessage( character, "You can't provoke things against players or tamed creatures in town!" );
+		return;
+	endif
+
+	if( newtarg.isA(POLCLASS_NPC) )
+		elem	 := FindConfigElem( configfile, newtarg.npctemplate );
+		if( elem.Privs == "invul" )
+			SendSysMessage( character, "You cannot provoke against an invul npc!" );
+			return;
+		endif
+	endif
+
+	var ev := struct;
+	ev.+ type;
+	ev.+ source;
+
+	var sfx_success;
+	var sfx_failure;
+	case( instrument.graphic )
+		UOBJ_HARP:	sfx_success := SFX_HARP_SUCC;
+				sfx_failure := SFX_HARP_FAIL;
+				break;
+			
+		UOBJ_LUTE:	sfx_success := SFX_LUTE_SUCC;
+				sfx_failure := SFX_LUTE_FAIL;
+				break;
+			
+		UOBJ_DRUM:	sfx_success := SFX_DRUM_SUCC;
+				sfx_failure := SFX_DRUM_FAIL;
+				break;
+			
+		UOBJ_TAMB:	sfx_success := SFX_TAMB_SUCC;
+				sfx_failure := SFX_TAMB_FAIL;
+				break;
+			
+		default:	PrintTextAbovePrivate( character, "That's not something you can play", character );
+				return;
+	endcase
+	
+	//bard bonus calc
+	//reduces the difficulty by a fifth of the level class percentage bonus. e.g. at level 1, 
+	//a prov of difficulty 100, would now be 95
+	//skill diff = 100/(1.05) = 95... at level 1
+	var skilldiff := difficulty;
+	if (IsBard(character))
+		var classbonus := ClasseBonus( character, CLASSEID_BARD );
+		classbonus := ((classbonus - 1)/5)+1; //cuts the bonus to a fifth i.e. to 5% per level
+		skilldiff:=CInt(skilldiff/classbonus); 
+	endif
+	
+	//skill checks and result	
+	if( CheckSkill( character, SKILLID_PROVOCATION, skilldiff, CInt(difficulty * 10) ) )
+		if( CheckSkill( character, SKILLID_MUSICIANSHIP, skilldiff, CInt(difficulty * 5) ) )			
+			PlaySoundEffect( character, sfx_success );
+			ev.source	:= character;
+			ev.type		:= SYSEVENT_ENGAGED;
+			SendEvent( newtarg, ev );
+			ev.source	:= thetarg;
+			ev.type		:= SYSEVENT_ENGAGED;
+			SendEvent( newtarg, ev );
+			ev.source	:= newtarg;
+			ev.type		:= EVID_PEACEMADE;
+			SendEvent( thetarg, ev );
+			ev.type		:= SYSEVENT_DAMAGED;
+			SendEvent( thetarg, ev );
+			PrintTextAbovePrivate( thetarg, "You provoke " + thetarg.name + " to attack " + newtarg.name + "!", character );
+		else
+			PlaySoundEffect( character, sfx_failure );
+			ev.source	:= character;
+			ev.type		:= EVID_PEACEMADE;
+			SendEvent( thetarg, ev );
+			ev.type		:= SYSEVENT_DAMAGED;
+			SendEvent(thetarg, ev);
+			PrintTextAbovePrivate( thetarg, "You enrage " + thetarg.name + "!", character );
+		endif
+	else
+		PlaySoundEffect( character, sfx_failure );
+		ev.source	:= character;
+		ev.type		:= EVID_PEACEMADE;
+		SendEvent( thetarg, ev );
+		ev.type		:= SYSEVENT_DAMAGED;
+		SendEvent(thetarg, ev);
+		PrintTextAbovePrivate( thetarg, "You enrage " + thetarg.name + "!", character );
+	endif
+	
+	//check to see whether greater prov item breaks after use
+	//if (greaterprovinstrument && didagreaterprov)
+	//	if (CInt(RandomDiceRoll( "1d6"))==1)
+	//		SendSysMessage( character, "Oh no! Your " + greaterprovinstrumentname + " has broken!" );
+	//		DestroyItem(greaterprovinstrument);
+	//		sleep(1);
+	//		PlaySoundEffect( character, 0x3f );
+	//		return;
+	//	endif
+	//endif
+endprogram
+
+function findGreaterPeacemakingInstrument(character)         
+	foreach item in EnumerateItemsInContainer(character.backpack)
+                if (item.objtype == 0xc55a ) //lute of greater prov
+                        return item;
+                endif
+        endforeach
+	return 0;
+endfunction

@@ -1,0 +1,88 @@
+use uo;
+
+include "include/attributes";
+include "include/objtype";
+include "include/gumps";
+
+const NUM_SKILLS_PER_PAGE := 12;
+
+var skillscfg := ReadConfigFile(":*:skills");
+var maxSkill := CInt( GetGlobalProperty("skilldropmax") );
+
+program skillDropStone(who, item)
+	var skillNum := chooseSkill(who);
+	if (skillNum == -1)
+		SendSysMessage(who, "Canceled");
+		return;
+	endif
+	
+	var skill := GetBaseSkillBaseValue(who, skillNum);
+	if (skill == 0)
+		SendSysMessage(who, "That skill is already zero!");
+	elseif (skill > maxSkill)
+		SendSysMessage(who, "Sorry, you must have " + CStr(maxSkill/10.0) + " or less to drop a skill.");
+	else
+		var cost := skill*1; // Edited by Seravy to lower cost.
+		if (subtractGold(who, cost))
+			SetBaseSkill(who, skillNum, 0);
+			SendSysMessage(who, "The skill has been dropped to zero, at the price of " + cost + "gp.");
+		else
+			SendSysMessage(who, "You do not have " + cost + "gp.");
+		endif
+	endif
+endprogram
+
+function subtractGold(who, amount)
+	foreach item in EnumerateItemsInContainer(who.backpack)
+		if ((item.objtype == UOBJ_GOLD_COIN) && (item.amount>=amount))
+			return SubtractAmount(item, amount);
+		endif
+	endforeach
+	
+	return 0;
+endfunction
+
+function chooseSkill(who)
+	GFInitGump();
+	
+	GFPage(0);
+	GFResizePic(50, 50, BKGND_STONE, 300, 380);
+	
+	var buttons := array;
+	
+	var i, page := 0;
+	for (i := 0; i <= SKILLID__HIGHEST; i := i + 1 )
+		if ((i % (NUM_SKILLS_PER_PAGE))==0)
+			if (page > 0)
+				GFButtonPage(320, 400, G_MARBLE_ARROW_DOWN_0, G_MARBLE_ARROW_DOWN_1, page + 1);
+			endif
+			
+			page := page + 1;
+			GFPage(page);
+			
+			if (page > 1)
+				GFButtonPage(320, 60, G_MARBLE_ARROW_UP_0, G_MARBLE_ARROW_UP_1, page - 1);
+			endif
+		endif
+	
+	   	buttons.append( GFButtonID(60, 75 + (30 * (i % (NUM_SKILLS_PER_PAGE))), G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1) );
+	   	GFTextLine(80, 70 + (30 * (i % (NUM_SKILLS_PER_PAGE))), 100, skillscfg[i].Name);
+	   	var skill := GetBaseSkillBaseValue(who, i);
+	   	var costText;
+	   	if (skill>maxSkill || skill==0)
+	   		costText := "-";
+	   	else
+	   		costText := CStr(skill*1) + "gp.";
+	   	endif
+	   	GFTextLine(240, 70 + (30 * (i % (NUM_SKILLS_PER_PAGE))), 150, costText);
+	endfor
+	
+	var result := GFSendGump(who);
+	for (i := 1; i <= buttons.size(); i := i + 1)
+		if (result[ buttons[i].keyid ])
+			return i - 1;
+		endif
+	endfor
+	
+	return -1;
+endfunction

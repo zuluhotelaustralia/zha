@@ -1,0 +1,60 @@
+use uo;
+use os;
+include "duelstone";
+
+var gameserial, gamename, gametype, GOlooting, GOdispel;
+var teamOneArray := {}, teamTwoArray := {};
+
+program duelstone_sendauthentication(parms)
+  var stone, person, thisGameSerial;
+  if(!parms[1] || !parms[2] || !parms[3])
+    return 0;
+  endif
+  stone := SystemFindObjectBySerial(parms[1]);
+  person := SystemFindObjectBySerial(parms[2]);
+  thisGameSerial := parms[3];
+  if(!stone || !person || !thisGameSerial)
+    return 0;
+  endif
+  var result := 2;
+  loadgame(stone);
+  while(result == 2 && person && !GetObjProperty(stone, "#GameInProgress"))
+    result := GameDetails(person, stone, 1);
+    loadgame(stone);
+    if(gameserial != thisGameSerial)
+      SendMsg(person, "This game has finished.", DUELSYS_MSG_INFO);
+      return 0;
+    endif
+  endwhile
+
+  set_critical(1);
+  var count;
+  while(GetObjProperty(stone, "#updating"))
+    count := count + 1;
+    if(count > 100)
+      return 0;
+    endif
+    sleepms(100);
+  endwhile
+
+  SetObjProperty(stone, "#updating", 1);
+  loadgame(stone);
+  if(GetObjProperty(stone, "#GameInProgress"))
+    sendMsg(person, "The game has already started.");
+  elseif(result == 1)
+    setmemberStatus(person.serial, 1,teamOneArray, teamTwoArray);
+    SendMsg(person, "You have Accepted the match.", DUELSYS_MSG_INFO );
+    SendMsg(getPerson(GetObjProperty(stone, "#inuse")), person.name+" has Accepted the match.", DUELSYS_MSG_INFO );
+  else
+    if(getmemberStatus(person.serial, teamOneArray, teamTwoArray) != 1)
+      setmemberStatus(person.serial, -1,teamOneArray, teamTwoArray);
+      SendMsg(person, "You have rejected the match.", DUELSYS_MSG_INFO );
+      SendMsg(getPerson(GetObjProperty(stone, "#inuse")), person.name+" has Declined the match.", DUELSYS_MSG_INFO );
+    else
+      SendMsg(person, "You have already accepted this match.", DUELSYS_MSG_ERROR);
+    endif
+  endif
+  savegame(stone);
+  EraseObjProperty(stone, "#updating");
+  set_critical(0);
+endprogram

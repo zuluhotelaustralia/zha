@@ -1,0 +1,128 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/spelldata";
+include "queststone";
+
+program walkon_questLocationTile( who, item )
+	
+	//done so that auxillary tiles can pass parameters in start_script
+	if (TypeOf(who) == "Array")
+		item:= who[2];
+		who := who[1];
+	endif
+	
+	if (who.dead)
+		return;
+	endif
+	
+	var queststoneserial := GetObjProperty(item, "QuestStoneSerial"); 
+	var questpoints := GetObjProperty(item, "QuestPoints"); 
+	var questobjtype := GetObjProperty(item, "QuestObjectiveType");
+	// ReturnQuestLocationObjective(stone_serial, player_serial, location_serial, questpoints, questobjtype)
+	if (ReturnQuestLocationObjective(queststoneserial, who.serial, item.serial, questpoints, questobjtype))
+		DoLocationActions(item, who);
+	endif;
+
+endprogram
+
+function DoLocationActions(tile, who)
+	var actions:= tileActions(tile);
+	//do actions
+	var i:=1;
+	var cmonst;
+	if (actions[1] && actions[2])
+		//Broadcast("creating monsters: " + actions[2] + " of " + actions[1]);
+		for (i:=1; i<=CInt(actions[2]); i:=i+1)
+			//Broadcast(""+i);
+			cmonst:=CreateNpcFromTemplate( actions[1], tile.x, tile.y, tile.z);
+			SetObjProperty(cmonst, "guardignore", 1);
+			sleep(1);
+		endfor;
+	endif
+	
+	sleep(1);
+	if (actions[3])
+		//Broadcast("creatingitem: " + actions[3]);
+		CreateItemAtLocation( tile.x, tile.y, tile.z, actions[3]);
+		sleep(1);
+	endif
+	
+	
+	if (actions[4])
+		//Broadcast("casting spell: " + actions[4]);
+		var spellid := CInt(actions[4]);
+		start_script(GetScript(spellid), tile);
+		sleep(1);
+	endif
+	
+	
+	if (actions[5])
+		//Broadcast("playing sound: " + actions[5]);	
+		PlaySoundEffect( who, CInt(actions[5]) );
+		sleep(1);
+	endif
+	
+	if (actions[6])
+		//Broadcast("unhiding item: " + actions[6]);	
+		var item := SystemFindObjectBySerial(actions[6]);
+		if (item)
+			item.invisible :=0;
+		endif
+		sleep(1);
+	endif
+	
+	if (actions[7])
+		//Broadcast("summoning monster: " + actions[7]);	
+		var monst := SystemFindObjectBySerial(actions[7]);
+		if (monst)
+			MoveCharacterToLocation( monst, tile.x, tile.y, tile.z,  MOVECHAR_FORCELOCATION);	
+			monst.frozen:=0;	
+			monst.hidden:=0;
+			sleep(1);
+		endif
+	endif
+	
+
+	if (actions[9])
+		//Broadcast("monster talking: " + actions[9]);	
+		var monst := SystemFindObjectBySerial(actions[9]);
+		if (monst)
+			var messages := actions[10];
+			foreach m in messages
+				PrintTextAbove( monst, m, 3, GetObjProperty(tile,"speechcolour"));
+				sleep(1);
+			endforeach
+		endif
+		sleep(1);
+	endif
+
+	if (actions[8])
+		//Broadcast("killing monster: " + actions[8]);	
+		var monst := SystemFindObjectBySerial(actions[8]);
+		if (monst)
+			RevokePrivilege( monst, "invul" );
+			SetObjProperty( monst, "guardkill", 1);
+			ApplyRawDamage( monst, CInt(GetHp(monst)+3) );
+		endif
+		sleep(1);
+	endif
+	
+endfunction
+
+function tileActions(tile)
+//returns an array of tile action props
+ 	return {GetObjProperty(tile, "createMonsterTemplate"),
+	GetObjProperty(tile, "createMonsterTemplateNo"),
+	GetObjProperty(tile, "createItemTemplate"),
+	GetObjProperty(tile, "doSpellEffect"),
+	GetObjProperty(tile, "doSoundEffect"),
+	GetObjProperty(tile, "unhideItemSerial"),
+	GetObjProperty(tile, "summonMonsterSerial"),
+	GetObjProperty(tile, "KillMonsterSerial"),
+	GetObjProperty(tile, "TalkMonsterSerial"),
+	GetObjProperty(tile, "TalkMessage")};
+endfunction

@@ -1,0 +1,34 @@
+use uo;
+
+include "include/client";
+include "include/objtype";
+include "include/constants/syseventids";
+include "include/bard";
+include "include/cmdlevel_check";
+
+
+program bard_provoke(character)
+	if (!checkStaff(character, "attack", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	SendSysMessage(character, "Select a creature you wish to provoke");
+
+	var thetarg := Target(character);
+
+	if (!thetarg)
+		SendSysMessage(character, "Targetting canceled.");
+		return;
+	endif
+
+	var ev := array;
+	ev.+ type;
+	ev.+ source;
+
+	ev.source := thetarg;
+	SendEvent(thetarg, ev);
+	ev.type := SYSEVENT_ENGAGED;
+	SendEvent(thetarg, ev);
+
+endprogram

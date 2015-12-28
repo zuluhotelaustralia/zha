@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "include/random";
+include "possessedgenerator";
+include "include/client";
+
+program possessedgeneratorcontrol(possessedgenerator)
+	if (!GetPersonPossessed(possessedgenerator))
+		FindPersonToPossess(possessedgenerator);
+	endif
+endprogram

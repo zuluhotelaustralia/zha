@@ -1,0 +1,26 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/spelldata";
+include "queststone";
+
+program walkon_auxquestLocationTile( who, item )
+	if (who.dead)
+		return;
+	endif
+	var associatedLocationSer := GetObjProperty(item, "AssociatedLocationSer");
+	if (!associatedLocationSer)
+		return;
+	endif
+	var assocLoc := SystemFindObjectBySerial(associatedLocationSer);
+	if (!assocLoc)
+		return;
+	endif
+	var params := {who, assocLoc};
+	start_script( "walkon_questLocationTile", params );
+	
+endprogram
+

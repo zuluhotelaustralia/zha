@@ -1,0 +1,85 @@
+// FSC command for FSC System - By Developer Omero
+
+/*
+** Full Shard Control System.
+**
+** Advanced loggin and bcast system to have major control over:
+**
+** - Potential risky events (players attacking INVUL npcs, etc...)
+** - Staff Members Actions (to track down all the improper actions)
+** - Minimal Control over Players Actions (FSCSyStem controls minimal things for every players)
+** - MAXIMUM Control over FSC FLAGGED Players Action (FSCSystem allows you to flag a player for FCS)
+**
+** !!!!!!!!!!WORK IN PROGRESS !!!!!!!!!!
+**   Any suggestion or hint welcome! ;)
+** !!!!!!!!!!WORK IN PROGRESS !!!!!!!!!!
+*/
+
+use uo;
+
+include "../../fscsystem";
+include "include/attributes";
+
+program textcmd_fsc( character, param )
+
+	if( param )
+
+		param := upper( param );
+
+		if( param == "ONLINE" )
+
+			if( !CheckFSC( character ) )
+				OnlineFSC( character );
+			else
+				SendSysMessage( character, "You are already ONLINE for FSC System!", 3, TEXT_COLOUR );
+			endif
+
+		elseif( param =="OFFLINE" )
+
+			if( CheckFSC( character ) )
+				OfflineFSC( character, 1 );
+			else
+				SendSysMessage( character, "You are already OFFLINE for FSC System!", 3, TEXT_COLOUR );
+			endif
+
+		elseif( param =="FLAG" )
+
+			SendSysMessage( character, "Who do you want to control?", 3, TEXT_COLOUR );
+
+			var player :=  Target( character, TGTOPT_NOCHECK_LOS );
+
+			// Check if valid selection
+			if( !player || !GetStrength(player))
+				SendSysMessage( character, "Invalid selection.", 3, TEXT_COLOUR );
+				return;
+			endif
+
+			// Check if not NPC
+			if( player.isA(POLCLASS_NPC) )
+				SendSysMessage( character, "You can't flag an NPC!", 3, TEXT_COLOUR );
+				return;
+			endif
+
+
+			// Check if player or staff
+			if( player.cmdlevel > 0 )
+				SendSysMessage( character, "You can't flag a Staff Member!", 3, TEXT_COLOUR );
+				return;
+			endif
+
+
+			if( !CheckFSC( player ) )
+				OnlineFSC( player );
+			else
+				SendSysMessage( character, "That player is already flagged for FSC Control!", 3, TEXT_COLOUR );
+			endif
+
+		else
+			SendSysMessage( character, "Wrong parameter! Use .fsc to get help.", 3, TEXT_COLOUR );
+		endif
+
+	else
+		SendSysMessage( character, "Usage: .fsc [online,offline,flag]", 3, TEXT_COLOUR );
+	endif
+
+endprogram

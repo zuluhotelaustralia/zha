@@ -1,0 +1,184 @@
+/*
+ *  Moongate script - fires when someone walks onto a moongate
+ *
+ *
+ *  PLEASE NOTE: THIS SCRIPT IS USED FOR 'GATE' SPELL MOONGATES
+ *			   Maybe this is misnamed, but that's what it's for.
+ *
+ *
+ *  The "JustGated" flag is to keep you from bouncing between gates.
+ *  MoveCharacterToLocation checks the destination location for gates,
+ *	  (and traps and whatever)
+ *
+ *  So, when someone steps into a moongate, the following will happen:
+ *	1.  An instance of MOONGATE.SRC is started.  It sets their JustGated,
+ *		and transports the mobile.
+ *	1a. This causes the mobile to "walk on" to the destination gate!
+ *	2.  Another instance of MOONGATE.SRC is started.  It sees JustGated is
+ *		set, and so clears it and exits.
+ *
+ *  It is assumed that gate-pairs are deleted atomically (see GATE.SRC),
+ *	  hence the test for "!gate" below, after going critical - if the gates
+ *	  were just destroyed, no transportation takes place.
+ *
+ */
+
+use os;
+use uo;
+
+include "include/recalling";
+include "include/classes";
+include "include/areas";
+include "include/yesno";
+
+program walk_on_moongate( mobile, gate )
+
+	if( mobile.npctemplate && mobile.script != "tamed" )
+		return;
+	endif
+
+	var x := GetObjProperty( gate, "GateDestX" );
+	var y := GetObjProperty( gate, "GateDestY" );
+	var z := GetObjProperty( gate, "GateDestZ" );
+
+	if( !x || !y )
+		return;
+	endif
+
+	if( !gate || GetObjProperty( mobile, "JustGated" ) )
+		EraseObjProperty( mobile, "JustGated" );
+		return;
+	endif
+
+	if( !GetObjProperty(gate, "perma") && IsForbiddenAreaToRecallTo( mobile, x, y ) )
+		return;
+	endif
+	
+	var race := GetObjProperty(gate, "RaceSpecific");
+	if (race && race!=mobile.title_race)
+		SendSysMessage(mobile, "You must be of the " + race + " race to enter this gate.");
+		return;
+	endif
+
+	var quest := GetObjProperty(gate, "QuestSpecific");
+	var qcheck :=0;
+	if (quest)
+		var questserials := GetObjProperty(mobile, "Quester");
+		if (!questserials || TypeOf(questserials) != "Array")
+			return;
+		endif
+		foreach qser in questserials
+			if (qser == quest)
+				qcheck:=1;
+				break;
+			endif
+		endforeach
+		if (!qcheck)
+			SendSysMessage(mobile, "You have a feeling that only questers on a certain quest may use this gate.");
+			return;
+		endif
+	endif
+
+	var war := GetObjProperty(gate, "WarSpecific");
+	if (war && war!=GetObjProperty(mobile, "WarSerial"))
+		SendSysMessage(mobile, "Only soldiers of a specific war may use this gate.");
+		return;
+	endif
+	
+	if( IsProhibitedClasseItem(mobile, gate) )
+		SendSysMessage(mobile, "Your class does not permit you to enter the teleporter.");
+		ReportAllowedUsers(mobile, gate);
+		return;
+	endif
+	
+	if( GetObjProperty(gate, "NoGhosts") && mobile.dead)
+		SendSysMessage(mobile, "Only the living may enter this teleporter.");
+		return;
+	endif
+
+  if(GetObjProperty(gate, "GateMessage"))
+    var currentLocation := {mobile.x, mobile.y, mobile.z};
+    if(!YesNo(mobile, GetObjProperty(gate, "GateMessage")))
+      return;
+    endif
+    if (currentLocation[1] != mobile.x || currentLocation[2] != mobile.y || currentLocation[3] != mobile.z)
+      SendSysMessage(mobile, "You have moved!");
+      return;
+    endif
+    if (!gate)
+      SendSysMessage(mobile, "The gate no longer exists!");
+      return;
+    endif
+  endif
+
+
+/***** noGateWarning 0 = All, 1 = Unguarded, 2 = Houses, 3 = All, 4 = None, 5 = Both ***/
+
+  if(GetObjProperty(gate, "gateHasWarnings") && !mobile.isA(POLCLASS_NPC))
+    var currentLocation := {mobile.x, mobile.y, mobile.z};
+    if(GetStandingHeight(x,y,z).multi)
+      if(!GetObjProperty(mobile, "GateWarnings") || GetObjProperty(mobile, "GateWarnings") == 2 || GetObjProperty(mobile, "GateWarnings") == 3 || GetObjProperty(mobile, "GateWarnings") == 5)
+        if(!YesNo(mobile,"This gate goes to a House. Do you still wish to go through it? (Use .gatewarning for options)"))
+          return;
+        endif
+      endif
+    else
+      var guarded := 0;
+      set_critical(1);
+      var item := CreateItemAtLocation( x, y, z, "bread", 1);
+      item.invisiable := 1;
+      if (item)
+        guarded := IsInGuardedArea(item);
+        destroyItem(item);
+      endif
+      set_critical(0);
+
+      if (!guarded)
+        if (!GetObjProperty(mobile, "GateWarnings") || GetObjProperty(mobile, "GateWarnings") == 1 || GetObjProperty(mobile, "GateWarnings") == 3 || GetObjProperty(mobile, "GateWarnings") == 5)
+          if(!YesNo(mobile,"This gate goes to a Unguarded Area. Do you still wish to go through it? (Use .gatewarning for options)"))
+            return;
+          endif
+        endif
+      elseif(!GetObjProperty(mobile, "GateWarnings") || GetObjProperty(mobile, "GateWarnings") == 3)
+        if(!YesNo(mobile,"You are about to go through a gate. Do you still wish to go through it? (Use .gatewarning for options)"))
+          return;
+        endif
+      endif
+    endif
+
+    if (currentLocation[1] != mobile.x || currentLocation[2] != mobile.y || currentLocation[3] != mobile.z)
+      SendSysMessage(mobile, "You have moved!");
+      return;
+    endif
+    if (!gate)
+      SendSysMessage(mobile, "The gate no longer exists!");
+      return;
+    endif
+  endif
+    
+
+	set_critical(1);
+	if( MoveCharacterToLocation( mobile, x, y, z ) )
+		SetObjProperty( mobile, "JustGated", 1 );
+		SetSpeedCheckNote(mobile);
+	endif
+endprogram
+
+function ReportAllowedUsers(mobile, gate)
+	SendSysMessage(mobile, "Allowed users are as follows:");
+	
+	var player_level, item_level;
+	
+	foreach CLASSEID in {CLASSEID_BARD, CLASSEID_CRAFTER, CLASSEID_RANGER,
+			      CLASSEID_MAGE, CLASSEID_THIEF, CLASSEID_WARRIOR}
+		item_level := CInt(GetObjProperty(gate, CLASSEID));
+		if (item_level)
+			player_level := CInt(GetObjProperty(mobile, CLASSEID));
+			if (item_level>0)	
+				SendSysMessage(mobile, CLASSEID[3,len(CLASSEID)] + "s level " + item_level + "+");
+			else
+				SendSysMessage(mobile, CLASSEID[3,len(CLASSEID)] + "s below level " + (-item_level) + " (including members of other classes)");
+			endif
+		endif
+	endforeach
+endfunction

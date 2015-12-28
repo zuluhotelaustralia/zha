@@ -1,0 +1,36 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_liststaff( speaker )
+	if (!checkStaff(speaker, "liststaff", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	SendSysMessage( speaker, "DEVELOPERS" );
+	foreach staff in GetCommandLevelArrayByIndex(5);
+		SendSysMessage(speaker, staff);
+	endforeach
+
+	SendSysMessage(speaker, "ADMINISTRATORS");
+	foreach staff in GetCommandLevelArrayByIndex(4);
+		SendSysMessage(speaker, staff);
+	endforeach
+
+	SendSysMessage(speaker, "GAMEMASTERS");
+	foreach staff in GetCommandLevelArrayByIndex(3);
+		SendSysMessage(speaker, staff);
+	endforeach
+
+	SendSysMessage(speaker, "SEERS");
+	foreach staff in GetCommandLevelArrayByIndex(2);
+		SendSysMessage(speaker, staff);
+	endforeach
+
+	SendSysMessage(speaker, "COUNSELORS");
+	foreach staff in GetCommandLevelArrayByIndex(1);
+		SendSysMessage(speaker, staff);
+	endforeach
+
+endprogram

@@ -1,0 +1,37 @@
+ Volume in drive C has no label.
+ Volume Serial Number is C412-9A80
+
+ Directory of C:\ZHASHARD\scripts\textcmd\coun
+
+06/03/2003  04:44 PM            17,403 admin.src
+06/03/2003  04:44 PM               430 bc.src
+06/03/2003  04:44 PM               211 bcast.src
+06/03/2003  05:17 PM             8,054 checkspeed.src
+06/03/2003  04:44 PM               289 concealme.src
+06/03/2003  04:44 PM             1,266 getlooters.src
+06/03/2003  04:44 PM             4,623 go.src
+03/06/2003  10:37 PM             2,595 goto.src
+06/03/2003  04:44 PM               212 home.src
+05/06/2003  05:34 PM            43,717 info.src
+17/06/2003  08:14 PM             1,614 jailtest.src
+06/03/2003  04:44 PM             2,346 killmacro.src
+17/01/2003  01:59 PM               127 light.src
+06/03/2003  05:19 PM               538 los.src
+17/06/2003  08:15 PM             5,412 macrokill.src
+17/06/2003  08:16 PM             1,588 macrotest.src
+06/03/2003  04:44 PM             1,190 mtele.src
+17/06/2003  08:17 PM             5,548 page.src
+06/03/2003  04:44 PM               584 refreshme.src
+06/03/2003  04:44 PM               543 restart.src
+18/09/2003  03:36 PM             2,526 speedhack.src
+06/03/2003  04:44 PM               959 staff.src
+17/06/2003  09:01 PM             7,219 staffnews.src
+06/03/2003  04:44 PM               913 tele.src
+06/03/2003  04:44 PM               390 teleto.src
+06/03/2003  04:44 PM               181 unconcealme.src
+06/03/2003  04:44 PM             2,507 whojail.src
+06/03/2003  04:44 PM               958 whoship.src
+30/06/2003  08:50 AM             1,413 whotamed.src
+18/09/2003  03:37 PM             1,017 whowall.src
+              30 File(s)        116,373 bytes
+               0 Dir(s)   2,819,203,072 bytes free

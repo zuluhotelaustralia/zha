@@ -1,0 +1,9 @@
+include "include/cmdlevel_check";
+
+program hideme( who )
+	if (!checkStaff(who, "hideme", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+    who.hidden := 1;
+endprogram

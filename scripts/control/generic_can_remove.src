@@ -1,0 +1,18 @@
+use uo;
+
+program canRemove(who, container, item, movetype)
+	if (who.cmdlevel)
+		return 1;
+	endif
+
+	if (movetype == MOVETYPE_PLAYER)
+		if (CInt(GetObjProperty(who, "#looting")) > ReadGameClock()) // is already looting
+			SendSysMessage(who, "You must wait before looting again.");
+			return 0;
+		else
+			SetObjProperty(who, "#looting", ReadGameClock() + 1); // else set a timeout (just in case the script doesn't end)
+		endif
+	endif
+	
+	return 1;
+endprogram

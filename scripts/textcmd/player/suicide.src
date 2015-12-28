@@ -1,0 +1,30 @@
+use uo;
+use os;
+
+include "include/dotempmods";
+include "include/attributes";
+
+program suicide( me )
+
+if ( me.dead )
+	SendSysMessage(me, "You are already dead");
+	return;
+else
+if ( !me.title_race )
+	SendSysMessage(me, "You do not have a race, and may not use this function.");
+	return;
+else
+if (CInt(GetObjProperty(me, "#suicide")) > ReadGameClock())
+	SendSysMessage(me, "You have already used this in the past thirty minutes, please wait.");
+	return;
+else
+	
+WipeMods( me );	// Sno fixed 24/1/03 - WipeMods was being called before the time check was done.
+		// thus allowing people to suicide, and then have free dispels for half an hour.
+
+SetObjProperty(me, "#suicide", ReadGameClock() + 1800);
+endif
+ApplyRawDamage(me, CInt(GetHp(me)+3) );
+endif
+endif
+endprogram

@@ -1,0 +1,31 @@
+// .unban <accountname>
+//
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_unban( who, param )
+	if (!checkStaff(who, "unban", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+    if ( !param)
+        SendSysMessage( who, ".unban <accountname>" );
+        return;
+    endif
+
+    var acct := FindAccount( param );
+    if ( !acct )
+        SendSysMessage( who, "No such account." );
+        return;
+    endif
+
+    if ( acct.banned == 0 )
+        SendSysMessage( who, "That account is not banned." );
+        return;
+    endif
+
+    acct.unban();
+    SendSysMessage( who, "Account '"+acct.name+"' unbanned." );
+    return;
+
+endprogram

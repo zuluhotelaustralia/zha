@@ -1,0 +1,21 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program wipe_objtype( who )
+	if (!checkStaff(who, "wipedecay", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	var count		:= 0;
+
+	SendSysMessage( who, "Starting movable items, please wait..." );
+
+	foreach obj in ListObjectsInBox(0, 0, -128, 6142, 4094, 128)
+			if (obj.movable != 0)
+				DestroyItem(obj);
+				count := count +1;
+			endif
+	endforeach
+	SendSysMessage( who, "count "+count );
+endprogram

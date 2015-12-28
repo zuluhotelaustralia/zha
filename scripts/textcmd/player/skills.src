@@ -1,0 +1,242 @@
+use uo;
+use os;
+use math;
+use basic;
+include "include/gumps";
+include "include/classes";
+
+program new_skills_menu (who)
+
+	start_script(":newbie:newbiecheck", who);
+        ClassInfoGump(who);
+        
+endprogram
+
+function ClassInfoGump (who)
+
+	var caller:=who;
+	if (who.cmdlevel > 1)	
+		who:=Target(who);
+		if (!who || !who.isa(POLCLASS_MOBILE))
+			return;
+		endif
+	endif
+        var classinfo:= array;
+        var info := struct;
+        info.+class:="";
+        info.+skills:=0;
+        info.+perc:=0;
+        var skilltotal:= GetSkillTotal(who);
+        var classlist:= GetClasseIds();
+        var playerclass:= SetClasse(who);
+
+        foreach class in classlist
+                if (class != CLASSEID_POWERPLAYER)
+                   info.class := class;
+                   info.skills := GetClasseSkillTotal(who, class);
+                   info.perc := GetPercentage(info.skills, skilltotal);
+                   classinfo.append(info);
+                endif
+        endforeach
+        
+        GFInitGump();
+        GFPage(0);
+        GFResizePic(0, 0, BKGND_SCROLL, 300, 150+(len(classlist)*20));
+        
+        // print class names
+        var buttonarray:=array;
+        var y:=80;
+        var newbutton;
+        GFTextLine(50, 45, 0, "CLASS");
+        GFGumpPic(35, 65, 0x82b);
+        var color:=0;
+        foreach class in classlist
+           if (class!=CLASSEID_POWERPLAYER)
+                if (class==playerclass)
+                   color :=58;
+                endif
+                GFTextline(50, y, color, GetClasseName(class));
+                newbutton:= GFButtonID( 35, y+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+                buttonarray.append(newbutton);
+                y:=y+20;
+                color:=0;
+           endif
+        endforeach
+        
+        // print percentages
+        y:=80;
+        var percent:="";
+        var newpercent:="";
+        GFTextLine(135, 45, 0, "PERCENT");
+        foreach key in classinfo
+                percent:= CStr(key.perc);
+                if (percent=="0")
+                   percent:="00.0";
+                endif
+                if (key.perc && key.perc < 10);
+                       percent:="0"+percent;
+                endif
+                if (!(percent["."]))
+                   percent:=percent+".0";
+                endif
+                for i:=1 to 4
+                    newpercent[i]:=percent[i];
+                endfor
+                if (key.perc==100)
+                   newpercent:=newpercent+"0%";
+                else
+                    newpercent:=newpercent+"%";
+                endif
+                if (key.class==playerclass)
+                   color:=58;
+                endif
+                GFTextLine(135, y, color, newpercent);
+                y:=y+20;
+                color:=0;
+                percent:="";
+                newpercent:="";
+        endforeach
+        
+        // print class skill totals
+        y:=80;
+        GFTextLine(200, 45, 0, "SKILLS");
+        foreach key in classinfo
+                if (key.class==playerclass)
+                   color:=58;
+                endif
+                var sk:=CStr(key.skills);
+                if (!(sk["."]))
+                   sk:=sk+".0";
+                endif
+                GFTextLine(200, y, color, sk);
+                y:=y+20;
+                color:=0;
+        endforeach
+        GFGumpPic(35, y+5, 0x82b);
+        if (playerclass)
+           GFTextLine(50, y+25, 58, "You are a level "+GetObjProperty(who, playerclass)+" "+GetClasseName(playerclass));
+        endif
+        var result:= GFSendGump(caller);
+        if (result[0] > 1024)
+           SendClasseSkillsGump(who, result[0]-1024, caller);
+        endif
+endfunction
+
+function SendClasseSkillsGump(who, classnum, caller)
+
+         var buttonarray:= array;
+         var color:=0;
+         var classlist:=GetClasseIds();
+         for i:= 1 to len(classlist)
+             if (classlist[i]==CLASSEID_POWERPLAYER && classnum >= i)
+                classnum:=classnum+1;
+                break;
+             endif
+         endfor
+         var cmdarray:= GetAvailableClasseCmds(who);
+         if (!len(cmdarray))
+         	cmdarray[1]:="none";
+         endif
+         var class:= classlist[classnum];
+         if (class==GetClass(who))
+            color:=58;
+         endif
+         var skilllist := GetClasseSkills(class);
+        GFInitGump();
+        GFPage(0);
+        GFResizePic(0, 0, BKGND_SCROLL, 300, 370 + (len(cmdarray) * 20));
+        GFTextLine(50, 45, color, GetClasseName(classlist[classnum])+" Skills");
+        GFGumpPic (35, 65, 0x82b);
+        var y:=80;
+        var skillname, skillamt;
+        foreach skill in skilllist
+                skillname:=GetAttributeIdBySkillId(skill);
+                skillname[1] := upper(skillname[1]);
+                GFTextLine(50, y, 0, skillname);
+                y:=y+20;
+        endforeach
+        y:=80;
+        foreach skill in skilllist
+                skillamt:= CStr((CDbl(GetEffectiveSkillBaseValue(who, skill))) / 10);
+                if (!(skillamt["."]))
+                   skillamt := skillamt + ".0";
+                endif
+                GFTextLine(200, y, 0, CStr(skillamt));
+                y:=y+20;
+        endforeach
+        var newbutton;
+        var statearray:=GetObjProperty(who, "SkillsState");
+        if (!statearray)
+           statearray:=array;
+        endif
+        var gumppic, gumppic2;
+        y:=85;
+        foreach skill in skilllist
+                case (statearray[skill+1])
+                     "r":               gumppic:=G_GOLD_ARROW_UP_0;
+                                        gumppic2:=G_GOLD_ARROW_UP_1;
+                     "d":               gumppic:=G_GOLD_ARROW_DOWN_0;
+                                        gumppic2:=G_GOLD_ARROW_DOWN_1;
+                     "l":               gumppic:=G_SKILLWIN_LOCKER;
+                                        gumppic2:=G_SKILLWIN_LOCKER;
+                     default:           gumppic:=G_GOLD_ARROW_UP_0;
+                                        gumppic2:=G_GOLD_ARROW_UP_1;
+                endcase
+                newbutton:=GFButtonID(185, y, gumppic, gumppic2, 1);
+                buttonarray.append (newbutton);
+                y:=y+20;
+        endforeach
+        GFGumpPic(35, y+5, 0x82b);
+        var total:=CStr(GetClasseSkillTotal(who, class));
+        if (!(total["."]))
+           total:=total+".0";
+        endif
+        y:=y+20;
+        GFTextLine(120, y, 0, "TOTAL: ");
+        GFTextLine(200, y, color, total);
+        var percent:=CStr(GetPercentage(total, GetSkillTotal(who)));
+        if (!(percent["."]))
+           percent:=percent+".0";
+        endif
+        y:=y+20;
+        GFTextLine(120, y, 0, "PERCENT: ");
+        GFTextLine(200, y, color, percent+"%");
+        y:=y+20;
+        if (GetObjProperty(who, class))
+           GFTextLine (120, y, 0, "LEVEL:");
+           GFTextLine (200, y, color, GetObjProperty(who, class));
+        endif
+        y:=y+20;
+        GFTextLine (120, y, 0, "COMMANDS:");
+      	for i:=1 to len(cmdarray)
+        	GFTextLine(200, y, 58, cmdarray[i]);
+        	y:=y+20;
+       	endfor
+
+      
+        var result:=GFSendGump(caller);
+        var button:=result[0]-1024;
+        if (result[0]>1024)
+           var classskills:=GetClasseSkills(class);
+           var skilltochange:= classskills[button];
+           case (statearray[skilltochange+1])
+                "r":                       statearray[skilltochange+1]:="d";
+                "d":                       statearray[skilltochange+1]:="l";
+                "l":                       statearray[skilltochange+1]:="r";
+                default:                   statearray[skilltochange+1]:="d";
+           endcase
+           SetObjProperty(who, "SkillsState", statearray);
+           for i:=1 to len(classlist)
+               if (classlist[i]==CLASSEID_POWERPLAYER && classnum >= i)
+                  classnum:=classnum-1;
+                  break;
+               endif
+           endfor
+           SendClasseSkillsGump(who, classnum, caller);
+           return;
+        endif
+        if (who==caller)
+        	ClassInfoGump(who);
+        endif
+endfunction
+

@@ -1,0 +1,6 @@
+use uo;
+
+program fix_pvparenaProps(who)
+	EraseObjProperty(who, "nocorpse");
+	EraseObjProperty(who, "dontAffectKarmaFame");
+endprogram

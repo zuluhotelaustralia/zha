@@ -1,0 +1,18 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program listnear( character )
+	if (!checkStaff(character, "listnear", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    var coords := TargetCoordinates( character );
+   
+    if (coords)
+        foreach item in ListItemsNearLocation( coords.x, coords.y, coords.z, 4 )
+            SendSysMessage( character, item.desc + "(" + Hex(item.serial) + ")" );
+            print(item.desc);
+        endforeach
+    endif
+endprogram

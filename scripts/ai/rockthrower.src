@@ -1,0 +1,258 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  archerkillpcs.src: Archer AI
+//
+//
+//  Author: DCT, stealing most from ENS's killpc.src
+//
+//  Created: 6/98
+//
+//  there are 2 things you need to have in the npcdesc tu use this AI: missileweapon, which is the template in equip.cfg that has a missile weapon. and
+//        ammotype, the objtype of the ammo used by this weapon
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventid";
+include "include/randname";
+include "include/npcutil";
+include "include/objtype";
+include "include/anchors";
+include "ai/setup/modsetup";
+include "include/random";
+
+const stone := 0x1365;
+const HALT_THRESHOLD := 5; // how close before he attacks?
+// const EVID_PEACEMADE := 0x90000000;
+var speech;
+var ammotype;
+var ammoamount;
+var theammo;
+var me := Self();
+
+if( me.name["<random>"] )
+   SetName( me, RandomName( me ) );
+endif
+
+
+program KillPlayers()
+drop_anchor();
+var next_wander := ReadGameClock() + 10;
+// var npccfg := readconfigfile("npcdesc");
+
+//Removed by Rac for optimizations
+//var speechelem := npccfg[me.npctemplate];
+//speech := getconfigstring(speechelem, "speech") ;
+////////////////
+
+
+    // equipfromtemplate(me, npccfg[me.npctemplate].equip);
+    EnableEvents( SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED );
+    EnableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD );
+    EnableEvents( SYSEVENT_OPPONENT_MOVED );
+
+
+//Added by Rac for optimizations
+    DisableEvents( SYSEVENT_SPEECH );
+//////////
+
+    SetWarMode( 0 );
+
+
+    var ev;
+    while (1)
+        ev := os::wait_for_event( 4 );
+
+        repeat
+            // print( "event type: " + ev.type );
+            case (ev.type)
+                //Removed by Rac for optimizations
+                //SYSEVENT_SPEECH:
+                //    if (speech > "") 
+                                //        say(process_text(ev.text, "default",speech));
+                //    endif
+
+                SYSEVENT_ENGAGED:
+                    Fight( ev.source );
+   
+            EVID_PEACEMADE:
+                        break;
+                SYSEVENT_DAMAGED:
+                    if (ev.source)
+                        Fight( ev.source );
+     
+                    endif
+
+                SYSEVENT_ENTEREDAREA:
+                    if (!ev.source.isA(POLCLASS_NPC))
+                        Fight( ev.source );
+                     endif
+
+		SYSEVENT_LEFTAREA:
+		break;
+
+            endcase
+        until (! (ev := os::wait_for_event(0)) );
+        if (ReadGameClock() >= next_wander)
+                wander();
+                next_wander := ReadGameClock() + 10;
+        endif
+    endwhile
+endprogram
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  These types fight singlemindedly, until the quarry is dead.
+//  There is no way out but death.
+//
+/////////////////////////////////////////////////////////////////////////////
+function Fight( opponent )
+if (opponent.cmdlevel > 0)
+        SetWarMode(0);
+        opponent := 0;
+        return;
+endif
+
+    var oldprio := set_priority(50);
+    DisableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA );
+    SetOpponent( opponent );
+
+    var waittime;
+    var loops := 0;
+  outer:
+    while (opponent && not (opponent.dead || opponent.hidden || opponent.concealed))
+       
+
+        var ev := wait_for_event( waittime );
+        if (1) //check for ammo
+                sleepms(500);
+                if (Random(10)==1)
+                        throw_stone(opponent);
+                endif
+        else
+                waittime := CloseDistance( opponent ) * 15;
+        endif
+
+        loops := loops + 1;
+        repeat
+            case (ev.type)
+                //Removed by Rac for optimizations
+                //SYSEVENT_SPEECH:
+                //    if (speech > "")
+                //        say(process_text(ev.text, "default",speech));
+                //    endif
+           
+                SYSEVENT_DISENGAGED:
+                    // too bad, we don't break off.
+                    break;
+
+                SYSEVENT_ENGAGED:
+                    if( !CheckLineOfSight( me, opponent ) )
+                         Fight(ev.source);
+                         break;
+                    endif
+
+
+                    if( !CheckLineOfSight( me, opponent ) )
+                         Fight(ev.source);
+                         break;
+                    endif
+                SYSEVENT_DAMAGED:
+                   loops := 0;
+                         // if not our opponent, we should add to our "Pity List"
+                    break;
+
+                SYSEVENT_OPPONENT_MOVED:
+                    loops := 0;
+                    break; // just waking up is enough
+                EVID_PEACEMADE:
+                        opponent := 0;
+                        break;
+                SYSEVENT_ENTEREDAREA:
+                SYSEVENT_LEFTAREA:
+                    // ignore both of these
+            endcase
+            if( (loops > 20) && !CheckLineOfSight(me,opponent))
+                    break outer;
+            endif
+        until (! (ev := wait_for_event(0)) );
+    endwhile
+
+    EnableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD );
+    SetWarMode( 0 );
+    set_priority( oldprio );
+endfunction
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  CloseDistance - close the distance between self and an opponent.
+//  Returns: 1 if distance is 0 or 1 (no move necessary)
+//           0 if distance is >= 2 (may still need to move)
+//
+//  This is a .EM-file candidate.
+//
+/////////////////////////////////////////////////////////////////////////////
+function CloseDistance( opponent )
+sleepms(250);
+    if (1)
+        if (Distance(me, opponent) <= 4)
+                if (WalkAwayFrom(opponent))
+                     return 0;
+                else
+                     return 1; // might want to consider running toward,then running forward, then running away
+                endif
+        else
+               // we're far enough away to fire, so sleep
+                 return 1;
+        endif
+    else
+        // attacking hand-to-hand (hope we unequipped the bow!)
+
+    case Distance( me, opponent )
+        1:              // the most likely, so first
+        0:
+            return 0;
+
+        2:
+            if (WalkToward( opponent ))
+                return 0;
+            else
+                return 1;
+            endif
+
+        default:
+            if (WalkToward( opponent ))
+                 return 0;
+           else
+                 return 1;
+          endif
+    endcase
+
+endif
+endfunction
+
+// Look around me for humans to fight.  
+function throw_stone(thetarg)
+
+if (Distance(me,thetarg) > 20) return; endif
+
+PlayMovingEffectXYZ(me.x, me.y, me.z, thetarg.x, thetarg.y, thetarg.z, stone, 15);
+if (Random(3) == 1)
+        var dmg := RandomDiceStr("5d8");
+        ApplyDamage(thetarg, dmg);
+        SendSysMessage(thetarg, "You are struck by the rock!");
+else
+        SendSysMessage(thetarg, "the rock misses you!");
+endif
+sleepms(500);
+var therock := CreateItemAtLocation(thetarg.x, thetarg.y, thetarg.z, stone,1);
+therock.decayAt := ReadGameClock() + 20;
+sleep( 2 );
+DestroyItem( therock );
+
+endfunction

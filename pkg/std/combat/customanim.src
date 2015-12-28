@@ -1,0 +1,25 @@
+use uo;
+use os;
+
+include "include/hitscriptinc";
+
+
+program throw(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+
+	PlayMovingEffect(attacker, defender, GetObjProperty(weapon, "anim"), 6, 1);
+	rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage );
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+
+endprogram

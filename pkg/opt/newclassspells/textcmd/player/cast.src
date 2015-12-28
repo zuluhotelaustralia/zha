@@ -1,0 +1,117 @@
+use uo;
+use os;
+
+include "../../newclassbook";
+
+program cast_spellid (who, text)
+
+	if (who.attached)
+		SendSysMessage(who, "You are already doing something else.");
+		return;
+	endif
+	if (who.hidden)
+		SendSysMessage(who, "You cannot cast this while hidden.");
+		who.hidden := 0;
+	endif
+	if (who.frozen || who.paralyzed)
+		SendSysMessage(who, "You are frozen and cannot do this.");
+		return;
+	endif
+	if (who.dead)
+		SendSysMessage(who, "You are dead and cannot do this.");
+		return;
+	endif
+	if (!text)
+		SendSysMessage(who, "Usage: .cast [spell number]");
+		return;
+	endif
+	SetScriptController(who);
+	var spellid:= CInt(text);
+	if (spellid < 129 || spellid > 208)
+		SendSysMessage(who, "Valid spell range is 129 to 208");
+		return;
+	endif
+	
+	// Get book type for spell
+	var booktype, booknum;
+	if (spellid < 145)
+		booktype:=SPELLBOOK_BARD_OBJTYPE;
+		booknum:=SPELLBOOK_TYPE_BARD;
+	elseif (spellid < 161)
+		booktype:=SPELLBOOK_DRUID_OBJTYPE;
+		booknum:=SPELLBOOK_TYPE_DRUID;
+	elseif (spellid < 177)
+		booktype:=SPELLBOOK_HOLY_OBJTYPE;
+		booknum:=SPELLBOOK_TYPE_HOLY;
+	elseif (spellid < 193)
+		booktype:=SPELLBOOK_UNHOLY_OBJTYPE;
+		booknum:=SPELLBOOK_TYPE_UNHOLY;
+	elseif (spellid < 209)
+		booktype:=SPELLBOOK_PSIONICS_OBJTYPE;
+		booknum:=SPELLBOOK_TYPE_PSIONICS;
+	endif
+	// Search helm/hand slot for book
+	var head, hand, book:=0;
+	head:=GetEquipmentByLayer(who, LAYER_HELM);
+	if (head.objtype==booktype)
+		book:=head;
+	endif
+
+	hand:=GetEquipmentByLayer(who, LAYER_HAND1);
+	if (hand.objtype==booktype)
+		book:=hand;
+	endif
+	
+	// Search backpack for book
+	if (!book)
+		if (booktype==SPELLBOOK_PSIONICS_OBJTYPE)
+			SendSysMessage(who, "You don't have a Headband of Mentalism equipped!");
+			return;
+		endif
+		foreach item in EnumerateItemsInContainer(who.backpack)
+			if (item.objtype==booktype)
+				book:=item;
+				if (spellid in GetBookSpellIDs(book))
+					break;
+				endif
+			endif
+		endforeach
+		if (!book)
+			SendSysMessage(who, "You don't have the spellbook!");
+			return;
+		endif
+	endif
+	
+	// Search for spell
+
+	if (!(spellid in GetBookSpellIDs(book)))
+		SendSysMessage(who, "You don't have that spell!");
+		return;
+	endif
+	
+	// Try to cast	
+	if (!ReserveItem(book))
+		return;
+	endif
+	if (NewClassSpellCast( who, spellid, GetBookTypeSkillID(booknum))!=SUCCESS)
+		return;
+	endif
+
+	var spell:= GetScript(spellid);
+	if (!spell)
+		return;
+	endif
+	SetObjProperty(who, "#Casting", 1);
+	start_script(spell, who);
+	while (GetObjProperty(who, "#Casting"))
+		sleepms(300);
+	endwhile
+	
+endprogram
+	
+	
+	
+	
+	
+	
+	

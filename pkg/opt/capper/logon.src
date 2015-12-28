@@ -1,0 +1,20 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/attributes";
+
+const SKILLCAP := 1300;
+
+program logon_capper(who)
+	if (who.cmdlevel)
+		return;
+	endif
+
+	var skill;
+	for( skill := 0; skill <= SKILLID__HIGHEST; skill := skill + 1 )
+	   	if( GetBaseSkillBaseValue( who, skill ) > SKILLCAP )
+			SetBaseSkillBaseValue( who, skill, SKILLCAP);
+		endif
+	endfor
+endprogram

@@ -1,0 +1,10 @@
+use uo;
+use os;
+include "include/gumps";
+
+program logon(who)
+	if(who.acct.getprop("EmailPassword")!=error)
+		return;
+	endif
+	start_script("message", who);
+endprogram	

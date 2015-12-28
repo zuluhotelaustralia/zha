@@ -1,0 +1,73 @@
+/* Druid Spell - Mother Nature                 **
+** Dispels target and may bless or curse them. **
+** Depending on karama                         **
+** Seravy - seravy@gmail.com                   */
+
+use uo;
+use os;
+use math;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_MOTHERNATURE;
+
+program cast_mothernature(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var karma := GetObjProperty(cast_on, "Karma");
+  var mod_amount := 0;
+  if (karma > 0)
+    mod_amount := CInt(Log10((karma*0.01)+1)*45);
+  elseif (karma < 0)
+    mod_amount := -CInt(Log10((-karma*0.01)+1)*45);
+  else
+    mod_amount := 0;
+  endif
+
+  if (mod_amount > 100)
+    mod_amount := 100;
+  elseif (mod_amount < -100)
+    mod_amount := -100;
+  endif
+
+  if (mod_amount == 0)
+    SendSysMessage(cast_on, "Having no Karma, the spell has no affect.");
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+
+  var duration := CInt( GetModDuration(caster, SKILLID_NATURELORE) * 1);
+
+  WipeMod(cast_on, "all");
+  if( CanMod( cast_on, "all" ) )
+    DoTempMod( cast_on, "all", mod_amount, duration );
+  endif
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_MOTHERNATURE, SPEED_SPELL_MOTHERNATURE, LOOP_SPELL_MOTHERNATURE);
+  PlaySoundEffect(cast_on, SFX_SPELL_MOTHERNATURE);
+  EraseObjProperty( caster, "#Casting");
+endprogram

@@ -1,0 +1,57 @@
+use uo;
+use os;
+include "setup";
+include "include/spelldata";
+
+program shipcannon( player, cannon )
+	//if (player.multi!=cannon.multi)
+	//	return;
+	//endif
+	
+	PlaySoundEffect( cannon, 0x11C );
+	
+	var destination:=struct;
+	destination.+x:=cannon.x;
+	destination.+y:=cannon.y;
+	destination.+z:=cannon.z+20;
+	
+	case (ShipFacingDirection( player.multi ))
+		CRMULTI_FACING_NORTH:
+			if (GetObjProperty(cannon, "starboard"))
+				destination.x:=cannon.x+7;
+			else
+				destination.x:=cannon.x-7;
+			endif
+		CRMULTI_FACING_SOUTH:
+			if (GetObjProperty(cannon, "starboard"))
+				destination.x:=cannon.x-7;
+			else
+				destination.x:=cannon.x+7;
+			endif
+
+		CRMULTI_FACING_EAST:
+			if (GetObjProperty(cannon, "starboard"))
+				destination.y:=cannon.y+7;
+			else
+				destination.y:=cannon.y-7;
+			endif
+
+		CRMULTI_FACING_WEST:
+			if (GetObjProperty(cannon, "starboard"))
+				destination.y:=cannon.y-7;
+			else
+				destination.y:=cannon.y+7;
+			endif
+		
+	endcase
+	PlayMovingEffectXYZ( cannon.x, cannon.y, cannon.z+10, destination.x, destination.y, destination.z, 0x36b0, 5, 0, 0); 
+	sleepms(100);
+	PlayMovingEffectXYZ( cannon.x, cannon.y, cannon.z, destination.x, destination.y, destination.z, 0x0e73, 20, 0, 0); 
+	var explosion := CreateItemAtLocation( CInt(destination.x), CInt(destination.y), CInt(destination.z), 0x36b0, 1 );
+	sleep(1);
+	explosion.movable := 0;
+	//PlayObjectCenteredEffect( explosion, FX_SPELL_EXPLOSION, SPEED_SPELL_EXPLOSION, LOOP_SPELL_EXPLOSION );
+	DestroyItem( explosion );
+	
+	
+endprogram

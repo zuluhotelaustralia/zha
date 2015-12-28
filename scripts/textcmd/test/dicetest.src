@@ -1,0 +1,13 @@
+use uo;
+include "include/random";
+include "include/cmdlevel_check";
+
+
+program dicetest( who )
+	if (!checkStaff(who, "dicetest", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+    SendSysMessage( who, who.name + "rolls " + RandomDiceStr( 6 ) + " and " + RandomDiceStr( 6 ) );
+
+endprogram

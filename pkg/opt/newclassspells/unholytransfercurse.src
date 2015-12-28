@@ -1,0 +1,79 @@
+/* Unholy Spell - Transfer Curse                       **
+** Removes negative effects from caster to new target. **
+** Seravy - seravy@gmail.com                           */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_TRANSFERCURSE;
+
+program cast_transfercurse(parms)
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    SendSysMessage( caster, "Who do you wish to transfer your curse to?");
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  PlayMovingEffect( caster, cast_on, FX_SPELL_TRANSFERCURSE, SPEED_SPELL_TRANSFERCURSE, LOOP_SPELL_TRANSFERCURSE, 1 );
+  PlaySoundEffect( cast_on, SFX_SPELL_TRANSFERCURSE );
+
+  set_critical(1);
+  var all := GetMod(caster, "all");
+  if (all[1] < 0)
+    WipeMod(caster, "all");
+    if (CanMod(cast_on, "all"))
+      DoTempMod(cast_on, "all", all[1], (all[2]-ReadGameClock()));
+    endif
+  endif
+
+  var str := GetMod(caster, "str");
+  if (str[1] < 0)
+    WipeMod(caster, "str");
+    if (CanMod(cast_on, "str"))
+      DoTempMod(cast_on, "str", str[1], (str[2]-ReadGameClock()));
+    endif
+  endif
+
+  var int := GetMod(caster, "int");
+  if (int[1] < 0)
+    WipeMod(caster, "int");
+    if (CanMod(cast_on, "int"))
+      DoTempMod(cast_on, "int", int[1], (int[2]-ReadGameClock()));
+    endif
+  endif
+
+  var dex := GetMod(caster, "dex");
+  if (dex[1] < 0)
+    WipeMod(caster, "dex");
+    if (CanMod(cast_on, "dex"))
+      DoTempMod(cast_on, "dex", -dex[1], (dex[2]-ReadGameClock()));
+    endif
+  endif
+
+  set_critical(0);
+
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

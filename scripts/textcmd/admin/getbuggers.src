@@ -1,0 +1,48 @@
+use basic;
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+const MIN_ABUSE_COUT := 3;
+
+program textcmd_getbuggers( who )
+	if (!checkStaff(who, "getbuggers", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	var count;
+	var found;
+	var index;
+	var serial;
+	foreach player in EnumerateOnlineCharacters()
+		count := 0;
+		foreach cprop_name in GetObjPropertyNames(player)
+			if( cprop_name["advamount"] )
+				index := find(cprop_name, "s", 10);
+				if( index )
+					serial := CInt(cprop_name[index+1, len(cprop_name)]);
+					if( serial )
+						found := 0;
+						foreach item in ListEquippedItems(player)
+							if( item.serial == serial )
+								found := 1;
+								break;
+							endif
+						endforeach
+					
+						if( !found )
+							count := count + 1;
+						endif
+					endif
+				endif
+			endif
+		endforeach
+	
+		if( count >= MIN_ABUSE_COUT )
+			SendSysMessage(who, "Character: " + player.name + ", Account: " + player.acctname + ", used the bug: " + count + " times.");
+			sleep(5);
+		endif
+	
+		sleepms(250);
+	endforeach
+	SendSysMessage(who, "Finished.");
+endprogram		

@@ -1,0 +1,10 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program tstsetobjarr( who, params )
+	if (!checkStaff(who, "tstsetobjarr", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    SetObjProperty( who, "testarr", { 3,5,7,9 } );
+endprogram

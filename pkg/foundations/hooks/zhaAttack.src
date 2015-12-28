@@ -1,0 +1,53 @@
+use cfgfile;
+use uo;
+use os;
+
+include "zhaSpecialMonsterAttacks";
+include "include/hitscriptinc";
+include "include/guardcall";
+
+
+var cfg := ReadConfigFile(":combat:itemdesc");
+
+program zhaAttack() 
+   Print( "Using zhaAttack..." );  // this is printed on startup 
+   return 1; 
+endprogram 
+
+exported function ZHAAttackfunc( attacker, defender ) 
+	if (attacker == defender)
+		return 1;
+	endif
+	
+	if (NotInSameParty(attacker, defender))
+		PartyShout(defender, "I am being attacked by " + attacker.name +"!!!", 48);
+	endif
+	
+	if (attacker.acct && defender.acct)
+		if (AutoCallGuardCheck(attacker, defender, 1))
+			return 1;
+		endif
+	endif
+
+	var weaponType := cfg[attacker.weapon.objtype];
+	
+	
+	if (attacker.npctemplate) //special attack styles.. currently in for monsters with anim probs
+		if (GetObjProperty(attacker, "SpecialAttack"))
+			DoSpecialMonsterAttack(attacker, defender, weaponType, GetObjProperty(attacker, "SpecialAttack"));
+			return 1;
+		endif
+	endif	
+	
+
+	if (weaponType.Attribute=="Archery")
+		ArcheryAttack( attacker, defender );
+		return 1;
+	endif
+	
+	return 0;	
+endfunction 
+
+
+
+

@@ -1,0 +1,20 @@
+
+use uo;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program textcmd_showstats( who, action )
+	if (!checkStaff(who, "showstats", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "Select a mobile" );
+
+    var mobile := Target( who );
+    if (mobile)
+        PrintTextAbovePrivate( mobile, "Str: " + GetStrength(mobile), who );
+        PrintTextAbovePrivate( mobile, "Dex: " + GetDexterity(mobile), who );
+        PrintTextAbovePrivate( mobile, "Int: " + GetIntelligence(mobile), who );
+    endif
+endprogram

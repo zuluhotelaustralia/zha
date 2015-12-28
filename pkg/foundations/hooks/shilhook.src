@@ -1,0 +1,141 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/random";
+include "include/attributes";
+include "include/classes";
+include "include/skillpoints";
+include "../../pkg/opt/karmafame/karmafame"; //for fame exp system see FameExperiencePointModifier function
+
+program shilhook()
+
+	print( "Using ShilCheckSkill..." );
+	return 1;
+
+endprogram
+
+exported function ShilCheckSkill( who, skillid, difficulty, points )
+
+	if( who.IsA(POLCLASS_NPC) && skillid != SKILLID_DETECTINGHIDDEN )
+		return 1;
+	elseif( who.cmdlevel )
+		return 1;
+	elseif( difficulty == 0 )
+		AwardSkillPoints(who, skillid, 0); // In case they have the skill arrow down.
+		return 1;
+	elseif( difficulty < 0 )
+		return SkillAsPercentSkillCheck( who, skillid, difficulty, points );
+	else
+		return DifficultySkillCheck( who, skillid, difficulty, points );
+	endif
+
+endfunction
+
+function DifficultySkillCheck( who, skillid, difficulty, points )
+
+	var skill := GetEffectiveSkill( who, skillid );
+	if( skill == 0 )
+		if( who.IsA(POLCLASS_NPC) )
+			return 0;
+		endif
+	endif
+
+	var chance := Cint( skill - difficulty + 20 );
+	
+	if( chance < 0 )
+		AwardSkillPoints(who, skillid, 0); // In case they have the skill arrow down.
+		return 0;
+	elseif( chance == 0 )
+		chance := 2;
+	else
+		chance := Cint( chance * 2.5 );
+		if( chance > 98 )
+			chance := 98;
+		endif
+	endif
+
+	var check := RandomInt(100);
+	if( check >= chance )
+		if( IsSpecialisedIn( who, skillid ) )
+			check := RandomInt(100);
+			if( check >= chance )
+				AwardSkillPoints(who, skillid, 0); // In case they have the skill arrow down.
+				return 0;
+			else
+				points := 0;
+			endif
+		else
+			AwardSkillPoints(who, skillid, 0); // In case they have the skill arrow down.
+			return 0;
+		endif
+	endif
+
+	if( !who.isA(POLCLASS_NPC) )
+		points := Cint( points * Cdbl(1.0 - (Cdbl(chance) / 100.0)) );
+		points:=FameExperiencePointModifier(who, skillid, points);
+		AwardSkillPoints( who, skillid, points );
+	endif
+
+	return 1;
+endfunction
+
+
+function SkillAsPercentSkillCheck( who, skillid, difficulty, points )
+
+	var skill := GetEffectiveSkill( who, skillid );
+	if( skill == 0 )
+		if( who.IsA(POLCLASS_NPC) )
+			return 0;
+		endif
+	endif
+
+	var chance := skill + CInt((difficulty+1) * 15);
+	if( chance < 2 )
+		chance := 2;
+	elseif( chance > 98 )
+		chance := 98;
+	endif
+
+	var check := RandomInt(100);
+	if( check >= chance )
+		if( IsSpecialisedIn( who, skillid ) )
+			check := RandomInt(100);
+			if( check >= chance )
+				if( chance < 10 )
+					AwardSkillPoints( who, skillid, CInt(points/2) );
+				endif
+				return 0;
+			else
+				points := 0;
+			endif
+		else
+			if( chance < 10 )
+				AwardSkillPoints( who, skillid, CInt(points/2) );
+			endif
+			return 0;
+		endif
+	endif
+
+	if( !who.isA(POLCLASS_NPC) )
+		points:=FameExperiencePointModifier(who, skillid, points);
+		AwardSkillPoints( who, skillid, points );
+	endif
+
+	return 1;
+
+endfunction
+
+
+function GetSuccessLevel( who, skillid, success_level )
+
+	success_level := CInt( success_level + IsSpecialisedIn( who, skillid ) );
+
+	if( success_level <= 0 )
+		success_level := 1; // it must be a success (just in case)
+	endif
+
+	return success_level;
+
+endfunction
+

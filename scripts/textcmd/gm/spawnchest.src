@@ -1,0 +1,61 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+
+include "include/objtype";
+include "include/starteqp";
+include "util/key";
+include "include/cmdlevel_check";
+
+
+program spawnchest(who, text)
+	if (!checkStaff(who, "spawnchest", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	var params:=SplitWords(text);
+
+	var lvl := CInt(params[1]); // loot group (1 to 10)
+	var diff := CInt(params[2]); // Lockpicking difficulty
+	if ((!lvl) || (lvl > 10) || (lvl < 1) || (!diff))
+		SendSysMessage(who,"Useage is .spawnchest [1 to 10] [Difficulty]");
+		return;
+	endif
+
+	var boxmenu := CreateMenu("Select a chest type:");
+	AddMenuItem(boxmenu,0xe40,"metalchest");
+	AddMenuItem(boxmenu,0xe41,"metalchest2");
+	AddMenuItem(boxmenu,0xe7c,"silverchest");
+	AddMenuItem(boxmenu,0xe80,"brassbox");
+	AddMenuItem(boxmenu,0xe42,"woodchest");
+	AddMenuItem(boxmenu,0xe43,"woodchest2");
+	var selection := SelectMenuItem2(who, boxmenu);
+
+	if (!selection)
+		return;
+	endif
+
+	SendSysMessage(who,"Spawn it where?");
+	var where := TargetCoordinates(who);
+	if (!where)
+		return;
+	endif
+
+	var chest := CreateItemAtLocation( where.x, where.y, where.z, selection[2], 1 );
+	if (!chest)
+		return;
+	endif
+
+	chest.movable := 0;
+	chest.locked := 1;
+
+	SetObjProperty(chest,"lockpicking", lvl ); //wath it this? 
+	SetObjProperty(chest,"LockDifficulty", diff ); //<-- fix
+	SetObjProperty(chest,"spawnchest", lvl );//<-- fix
+	var lockid := AllocLockId();
+	SetObjProperty( chest, "lockid", lockid );
+	PrintTextAbovePrivate(chest,"*Ready to be picked!*",who);
+
+endprogram

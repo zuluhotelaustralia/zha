@@ -1,0 +1,21 @@
+use uo;
+
+include "include/client";
+include "include/cmdlevel_check";
+
+
+program textcmd_changemount( who )
+	if (!checkStaff(who, "wipemount", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var mount := GetEquipmentByLayer( who, LAYER_MOUNT );
+	if( !mount )
+		SendSysMessage( who, "You must be already mounted to use this command." );
+		return;
+	endif
+
+	DestroyItem( mount );
+
+endprogram

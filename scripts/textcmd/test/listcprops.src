@@ -1,0 +1,20 @@
+use basic;
+use os;
+use uo;
+
+program textcmd_listcprops( who )
+	var object := Target(who);
+	if( object.isA(POLCLASS_UOBJECT) )
+		foreach cprop_name in GetObjPropertyNames(object)
+			if( object )
+				SendSysMessage(who, "\"" + cprop_name + "\" = " + GetObjProperty(object, cprop_name) + ".");
+				sleep(5);
+			else
+				SendSysMessage(who, "The object is no longer existing.");
+				return 0;
+			endif
+		endforeach
+	else
+		SendSysMessage(who, "This isn't a valid object.");
+	endif
+endprogram

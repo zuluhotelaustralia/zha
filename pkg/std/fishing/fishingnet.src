@@ -1,0 +1,189 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include "include/attributes";
+include "include/utility";
+include "fishing";
+include "include/checkcity";
+include "include/random";
+include "include/itemutil";
+
+program use_net( character, net )
+
+if(!ReserveItem(net)) return; endif
+
+if (CheckCity(character)==1)
+SendSysMessage(character,"You can only use nets in the deep sea.");
+return;
+endif
+
+var use_on := TargetCoordinates( character);
+
+if (!use_on) SendSysMessage(character, "Canceled."); return; endif
+
+if ( coordist(character.x,character.y,use_on.x, use_on.y) > 10 )
+        SendSysMessage(character,"That is too far away.");
+	return;
+endif
+
+if(!IsWater(use_on))
+        SendSysMessage(character,"You can't use that on this.");
+        return;
+endif
+
+SendSysMessage(character,"You throw the net out into sea.");
+
+PlaySoundEffect(character, SFX_26);
+DestroyItem(net);
+sleep(6);
+
+var it:=0, it2:=0, it3:=0, foundwhat := Random(10), magicfish;
+
+CheckSkill(character, SKILLID_FISHING, -1, 100);
+
+case (foundwhat)
+
+0:
+1:
+2: if (Random(11)>9) it  := CreateNpcFromTemplate("kraken", use_on.x, use_on.y, use_on.z); endif
+   if (Random(11)>9) it2 := CreateNpcFromTemplate("kraken", use_on.x, use_on.y, use_on.z); endif
+   if (Random(11)>9) it3 := CreateNpcFromTemplate("seaserpent", use_on.x, use_on.y, use_on.z); endif
+   if ((it) || (it2) || (it3))
+     SendSysMessage(character, "You caught something dangerous in your net.");
+     CheckSkill(character, SKILLID_FISHING, -1, 100);
+   else
+     if (Random(6)==2)
+       CreateSosBottle(character);
+       SendSysMessage(character, "You caught an old bottle.");
+     else
+	it := CreateItemAtLocation( character.x, character.y, character.z,0x0e76,1);
+        it.decay :=120;
+        CreateItemInContainer( it, 0xeed, Random(100)+250);
+        SendSysMessage(character, "You find an old pouch!");
+     endif
+   endif
+3: CreateItemInBackpack( character, RandomShell(character), 1 );
+   SendSysMessage(character,"You find something valuable!");
+4:
+5: SendSysMessage(character, "You caught some fish.");
+   magicfish:=RandomFish(character);
+   if (magicfish>=0xa368 && magicfish<=0xa36f)
+   createfish( character,magicfish,Random(2)+1,1 );
+   CheckSkill(character, SKILLID_FISHING, -1, 150);
+   else
+   var equipped :=whatequipped(character, 666);
+   createfish( character,magicfish,Random(12)+6,equipped );
+   CheckSkill(character, SKILLID_FISHING, -1, 100);
+   endif
+6: if (Random(10)>8)
+	it := CreateItemAtLocation( character.x, character.y, character.z,0x1e62,1);
+        it.decay :=120;
+	it.color :=1160;
+
+	SendSysMessage(character, "You catch a trophy.");
+   	it.desc := character.name + " fishing trophy";
+   elseif (Random(10)>8)
+	it := CreateItemAtLocation( character.x, character.y, character.z,0x1e69,1);
+        it.decay :=120;
+	it.color :=1160;
+	SendSysMessage(character, "You catch a trophy.");
+   	it.desc := character.name + " fishing trophy";
+   else
+	it := CreateItemAtLocation( character.x, character.y, character.z,0x0e76,1);
+        it.decay :=120;
+	it.color :=1160;
+        CreateItemInContainer( it, 0xeed, Random(200)+150);
+        SendSysMessage(character, "You find an old bag!");
+   endif
+7:
+8: CreateItemInBackpack( character, RandomArmor(character), 1 );
+   SendSysMessage(character,"You find human skeleton rests!");
+9: SendSysMessage(character, "You did not catch anything, except...");
+   CreateNpcFromTemplate("seaserpent", use_on.x, use_on.y, use_on.z);
+endcase
+
+endprogram
+
+function RandomShell(character)
+
+case (Random(5))
+0: return 0x80ee;
+1: return 0x81ae;
+2: return 0x81be;
+3:
+4: if (GetEffectiveSkill(character,SKILLID_FISHING)>100)
+	if (Random(3)==2)
+	return 0x81ce;
+	else
+	return 0x81de;
+	endif
+   else
+   	return 0x81be;
+   endif
+endcase
+
+endfunction
+
+function RandomArmor(character)
+
+case (Random(7))
+0: if (GetEffectiveSkill(character,SKILLID_FISHING)>100)
+	if (Random(3)==2)
+	return 0x9a00;
+	else
+	return 0x144e;
+	endif
+   else
+   	return 0x144e;
+   endif
+1: if (GetEffectiveSkill(character,SKILLID_FISHING)>110)
+	if (Random(3)==2)
+	return 0x9a02;
+	else
+	return 0x1450;
+	endif
+   else
+   	return 0x1450;
+   endif
+2: if (GetEffectiveSkill(character,SKILLID_FISHING)>125)
+	if (Random(4)==2)
+	return 0x9a04;
+	else
+	return 0x1452;
+	endif
+   else
+   	return 0x1452;
+   endif
+3:
+4: if (GetEffectiveSkill(character,SKILLID_FISHING)>135)
+	if (Random(5)==2)
+	return 0x9a01;
+	else
+	return 0x144f;
+	endif
+   else
+   	return 0x144f;
+   endif
+5: if (GetEffectiveSkill(character,SKILLID_FISHING)>130)
+	if (Random(5)==2)
+	return 0x9a03;
+	else
+	return 0x1451;
+	endif
+   else
+   	return 0x1451;
+   endif
+6: if (GetEffectiveSkill(character,SKILLID_FISHING)>140)
+	if (Random(5)==2)
+	return 0x9a0c;
+	else
+	return 0x13fd;
+	endif
+   else
+   	return 0x13fd;
+   endif
+endcase
+
+endfunction

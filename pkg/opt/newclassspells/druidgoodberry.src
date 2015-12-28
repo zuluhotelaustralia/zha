@@ -1,0 +1,28 @@
+/* Druid Spell - Good Berry  **
+** Makes a random seed.      **
+** Seravy - seravy@gmail.com */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/client";
+
+const SPELL_ID := SPELL_ID_GOODBERRY;
+const SEED_OBJTYPE := 0xda09;
+
+program cast_goodharvest(parms)
+  var caster;
+	
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+  else
+    caster := parms;
+  endif
+
+  PlaySoundEffect(caster, SFX_SPELL_GOODBERRY);
+  PlayObjectCenteredEffect( caster, FX_SPELL_GOODBERRY, SPEED_SPELL_GOODBERRY, LOOP_SPELL_GOODBERRY);
+
+  CreateItemInBackpack(caster, SEED_OBJTYPE+Random(4));
+  EraseObjProperty( caster, "#Casting");
+endprogram

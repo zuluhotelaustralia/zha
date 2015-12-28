@@ -1,0 +1,24 @@
+use uo;
+use os;
+use basic;
+
+include "include/spelldata";
+
+program crystalglobe_control(crystal);
+
+
+	while( crystal )
+		PlayStationaryEffect( crystal.x, crystal.y, crystal.z, 0x373a, 0xa, 0xa);		
+		PlaySoundEffect(crystal, 0x02a);
+		sleep(2);
+		var mobils := ListMobilesNearLocation( crystal.x, crystal.y, crystal.z, 9);
+		foreach m in mobils
+			if (m.acct || m.script=="tamed")
+					PlayLightningBoltEffect( m );
+					PlaySoundEffect(m, 0x02a);
+					ApplyElementalDamage( crystal, m, 0, 80, 0x02 );
+			endif
+		endforeach
+		sleep(9);
+	endwhile
+endprogram

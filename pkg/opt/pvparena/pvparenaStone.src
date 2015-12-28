@@ -1,0 +1,326 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/constants/cmdlevels";
+include "include/yesno";
+include "include/utility";
+include "pvparena";
+
+program pvparena_stone(who, stone)
+	if (who.cmdlevel)
+		start_script("pvparenaStaffSetup", {who, stone});
+		return;
+	endif
+
+	if (!ReserveItem(stone))
+		if (!GetObjProperty(who, PVPARENA_TEAM))
+			SendSysMessage(who, "The stone is in use.");
+			return;
+		endif
+		
+		SetObjProperty(stone, PVPARENA_ACTIVE, getpid()); // Set the active cprop to the current scripts PID.
+							      // This allows us to check if the current script was canceled.
+		SendSysMessage(who, "You reset the stone.");
+		return;
+	endif
+
+	if (GetObjProperty(stone, PVPARENA_NOTSETUP))
+		SendSysMessage(who, "Sorry, but this arena is not currently working.");
+		return;
+	endif
+
+	if (GetObjProperty(stone, PVPARENA_ACTIVE))
+		SendSysMessage(who, "Sorry, but there is already a fight in progress. Please try again later.");
+		return;
+	endif
+	
+	if (cantJoin(who, stone))
+		SendSysMessage(who, "Canceled.");
+		return;
+	endif
+	
+	var original_pid := getpid();
+	SetObjProperty(stone, PVPARENA_ACTIVE, original_pid); // Set the active cprop to the current scripts PID.
+							      // This allows us to check if the current script was canceled.
+	
+	Detach();
+	
+	var serials := {who.serial}; // Write these on the stone in case someone logs out during the fight.
+	var team1 := {who}, team2 := {}; // Team 1 now has 'who' as the leader.
+	SetObjProperty(who, PVPARENA_TEAM, 1);
+	
+	// Choose team sizes
+	var teamsizes := choose_team_sizes(who, stone);
+	if (!teamsizes || canceled(stone, original_pid))
+		SetObjProperty(stone, "serials", Pack(serials));
+		cleanup(stone, 0);
+		return;
+	endif
+	
+	var options := choose_options(who);
+	if (canceled(stone, original_pid))
+		SetObjProperty(stone, "serials", Pack(serials));
+		cleanup(stone, 0);
+		return;
+	endif
+	
+	// Choose opposing team's leader
+	var team2leader := choose_opponent(who, teamsizes, stone, options);
+	if (team2leader || canceled(stone, original_pid))
+		team2 := {team2leader};
+		SetObjProperty(team2leader, PVPARENA_TEAM, 2);
+		serials.append(team2leader.serial);
+	else
+		SetObjProperty(stone, "serials", Pack(serials));
+		cleanup(stone, 0);
+		return;
+	endif
+	
+	// Choose team mates.
+	var i := 2, j, next_teammate;
+	while (i <= max(teamsizes[1], teamsizes[2]))
+	 	// Team 1
+		if (i <= teamsizes[1])
+			// Give them 3 chances to choose a team mate, after that cancel the whole thing.
+			for (j := 1; j <= 3; j := j + 1)
+				next_teammate := choose_teammate(who, teamsizes, stone, options);
+				if (next_teammate)
+					team1.append(next_teammate);
+					serials.append(next_teammate.serial);
+					break;
+				endif
+			endfor
+			
+			if ((j == 4)  || canceled(stone, original_pid))
+				SendSysMessage(who, "Battle canceled.");
+				SendSysMessage(team2leader, "Battle canceled.");
+				SetObjProperty(stone, "serials", Pack(serials));
+				cleanup(stone, 0);
+				return;
+			endif
+		endif
+		
+		// Team 2
+		if (i <= teamsizes[2])
+			// Give them 3 chances to choose a team mate, after that cancel the whole thing.
+			for (j := 1; j <= 3; j := j + 1)
+				next_teammate := choose_teammate(team2leader, teamsizes, stone, options);
+				if (next_teammate)
+					team2.append(next_teammate);
+					serials.append(next_teammate.serial);
+					break;
+				endif
+			endfor
+			
+			if ((j == 4) || canceled(stone, original_pid))
+				SendSysMessage(who, "Battle canceled.");
+				SendSysMessage(team2leader, "Battle canceled.");
+				SetObjProperty(stone, "serials", Pack(serials));
+				cleanup(stone, 0);
+				return;
+			endif
+		endif
+		
+		i := i + 1;
+	endwhile
+	
+	SetObjProperty(stone, "serials", Pack(serials));
+	
+	// Check again if they have items.
+	var member;
+	foreach serial in serials
+		member := SystemFindObjectBySerial(serial);
+		if (!member)
+			member := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+		endif
+		
+		if (hasItems(member))
+			messagePlayers(team1, "Fight canceled - " + member.name + " tried to take an item into the arena.", 3, 38);
+			messagePlayers(team2, "Fight canceled - " + member.name + " tried to take an item into the arena.", 3, 38);
+			cleanup(stone, 0);
+			return;
+		endif
+	endforeach
+	
+	messagePlayers(team1, "You have 5 minutes to prepare for battle. When you are ready, use the stone in your base.", 3, 38);
+	messagePlayers(team2, "You have 5 minutes to prepare for battle. When you are ready, use the stone in your base.", 3, 38);
+	setup_players(team1, team2, stone);
+	var setupstone1 := SystemFindObjectBySerial(GetObjProperty(stone, "readystone1"));
+	var setupstone2 := SystemFindObjectBySerial(GetObjProperty(stone, "readystone2"));
+	var t, start, cancel;
+	for (t := 300; t > 0; t := t - 10) // Give them 5 mins to prepare
+		cancel := 0;
+	
+		if(canceled(stone, original_pid))
+			cancel := 1;
+		endif
+		
+		sleep(10);
+		
+		start := 1;
+		
+		foreach player in team1
+			if (!player || player.dead)
+				start := 0;
+				cancel := 1;
+				break;
+			elseif (!isSetup(player, setupstone1))
+				start := 0;
+				break;
+			endif
+		endforeach
+		
+		foreach player in team2
+			if (!player || player.dead)
+				start  := 0;
+				cancel := 1;
+				break;
+			elseif (start)
+				if (!isSetup(player, setupstone2))
+					start := 0;
+					break;
+				endif
+			endif
+		endforeach
+		
+		if (start)
+			start_script("pvparena_monitor", {team1, team2, stone, options});
+			return;
+		endif
+		
+		if (cancel)
+			messagePlayers(team1, "The fight was canceled.", 3, 38);
+			messagePlayers(team1, "The fight was canceled.", 3, 38);
+			cleanup(stone);
+			return;
+		endif
+	endfor
+	
+	messagePlayers(team1, "The fight was canceled - someone was too slow setting up.", 3, 38);
+	messagePlayers(team1, "The fight was canceled - someone was too slow setting up.", 3, 38);
+	cleanup(stone);
+endprogram
+
+function choose_options(who)
+	var options := 0;
+	
+	SendSysMessage(who, "Do you want to allow preblessing?", 3, COLOR_ORANGE_LIGHT);
+	var ok := YesNo(who, "Prebless?");
+	if (ok)
+		options := options + PVPARENA_OPTION_PREBLESS;
+	endif
+	
+	SendSysMessage(who, "Do you want to enable the 30sec detector?", 3, COLOR_ORANGE_LIGHT);
+	ok := YesNo(who, "Detector?");
+	if (ok)
+		options := options + PVPARENA_OPTION_DETECT;
+	endif
+	
+	return options;
+endfunction
+
+function list_options(who, options)
+	var prebless := "Disabled";
+	if (BitAnd(options, PVPARENA_OPTION_PREBLESS))
+		prebless := "Enabled";
+	endif
+	var detect := "Disabled";
+	if (BitAnd(options, PVPARENA_OPTION_DETECT))
+		detect := "Enabled";
+	endif
+	
+	SendSysMessage(who, "Prebless: " + prebless, 3, COLOR_ORANGE);
+	SendSysMessage(who, "Detect: " + detect, 3, COLOR_ORANGE);
+endfunction
+
+function choose_opponent(who, teamsizes, stone, options)
+	SendSysMessage(who, "Please select your opposing team's leader.");
+	var opponent := Target(who, TGTOPT_HELPFUL);
+	
+	if (!opponent || (opponent.serial==who.serial) || cantJoin(opponent, stone))
+		SendSysMessage(who, "Canceled.");
+		return 0;
+	endif
+	
+	SendSysMessage(opponent, who.name + " is asking you to battle (" + CStr(teamsizes[1]) + "vs" + CStr(teamsizes[2]) + "), with the following options:", 3, COLOR_ORANGE_LIGHT);
+	list_options(opponent, options);
+	var ok := YesNo(opponent, "Do you accept?");
+	
+	if (ok)
+		return opponent;
+	else
+		SendSysMessage(who, opponent.name + " declines the offer.", 3, 38);
+		return 0;
+	endif
+endfunction
+
+function choose_teammate(who, teamsizes, stone, options)
+	SendSysMessage(who, "Please select a team-mate from within the spectator area.");
+	var teammate := Target(who, TGTOPT_HELPFUL);
+	
+	if (!teammate || (teammate.serial==who.serial) || cantJoin(teammate, stone))
+		SendSysMessage(who, "Canceled.");
+		return 0;
+	endif
+	
+	SendSysMessage(teammate, who.name + " is asking you to join their team (" + CStr(teamsizes[1]) + "vs" + CStr(teamsizes[2]) + "), with the following options:", 3, COLOR_ORANGE_LIGHT);
+	list_options(teammate, options);
+	var ok := YesNo(teammate, "Do you accept?");
+	
+	if (ok)
+		SetObjProperty(teammate, PVPARENA_TEAM, GetObjProperty(who, PVPARENA_TEAM));
+		return teammate;
+	else
+		SendSysMessage(who, teammate.name + " declines the offer.", 3, 38);
+		return 0;
+	endif
+endfunction
+
+function choose_team_sizes(who, stone)
+	SendSysMessage(who, "Please select the size of the teams.");
+	
+	var maxsize := GetObjProperty(stone, "maxTeamSize");
+	
+	var team1size := CInt( SendTextEntryGump(who, "Size of team 1") );
+	if (!team1size || team1size < 1 || team1size > maxsize)
+		SendSysMessage(who, "Canceled.");
+		return 0;
+	endif
+	
+	var team2size := CInt( SendTextEntryGump(who, "Size of team 2") );
+	if (!team2size || team2size < 1 || team2size > maxsize)
+		SendSysMessage(who, "Canceled.");
+		return 0;
+	endif
+	
+	return {team1size, team2size};
+endfunction
+
+function setup_players(team1, team2, stone)
+	var i := 1;
+	while ((i <= team1.size()) && (i <= team2.size()))
+	 	// Team 1
+		if (i <= team1.size())
+			setup_player(team1[i], stone);
+		endif
+		
+		// Team 2
+		if (i <= team2.size())
+			setup_player(team2[i], stone);
+		endif
+		
+		i := i + 1;
+	endwhile
+endfunction
+
+function setup_player(who, stone)
+	if (who)
+		SetObjProperty(who, "pvparena_stone", stone.serial);
+		start_script("pvparena_playersetup", {who, stone});
+	endif
+endfunction
+
+function canceled(stone, original_pid)
+	return (GetObjProperty(stone, PVPARENA_ACTIVE) != original_pid);
+endfunction

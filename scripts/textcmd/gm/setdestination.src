@@ -1,0 +1,72 @@
+// command .destination
+// Developer Omero 
+// ZuluHotel Italia
+// Fear is your only God
+
+use uo;
+include "include/cmdlevel_check";
+
+
+// Change this if you change the objtype for WOP items
+const UOBJ_WORDGATE := 0xa402;
+const UOBJ_WORDTELE := 0xba37;
+const UOBJ_WORDTELEON := 0xba38;
+
+program textcmd_setdestination( who, coords )
+	if (!checkStaff(who, "setdestination", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var xcoord;
+	var ycoord;
+	var zcoord;
+
+	if ( !coords )
+	
+		SendSysMessage( who, "Select your marked rune or" );
+		SendSysMessage( who, ".setdestination x y z" );
+		var rune := Target(who);
+
+		xcoord  := CInt(GetObjProperty( rune, "x" ));
+		ycoord  := CInt(GetObjProperty( rune, "y" ));
+		zcoord  := CInt(GetObjProperty( rune, "z" ));
+
+	else
+	
+
+		var coordarray := SplitWords( coords );
+
+		xcoord  := CInt( coordarray[ 1 ] );
+		ycoord  := CInt( coordarray[ 2 ] );
+		zcoord  := CInt( coordarray[ 3 ] );
+
+		if(!xcoord)
+			xcoord := 0;
+		endif
+
+		if(!ycoord)
+			ycoord := 0;
+		endif
+
+		if(!zcoord)
+			zcoord := 0;
+		endif
+
+	endif
+
+	SendSysMessage( who, "Target the teleport (WOP) item." );
+	var wopitem := Target(who);
+	
+	if (wopitem.objtype != UOBJ_WORDGATE && wopitem.objtype != UOBJ_WORDTELE && wopitem.objtype != UOBJ_WORDTELEON)
+		SendSysMessage(who, "Invalid target.");
+		return;
+	endif
+
+	SetObjProperty(wopitem, "GateDestX", xcoord );
+	SetObjProperty(wopitem, "GateDestY", ycoord );
+	SetObjProperty(wopitem, "GateDestZ", zcoord );
+
+	SendSysMessage(who, "Destination set: " + xcoord + " X, " + ycoord + " Y, " + zcoord + " Z.");
+
+endprogram

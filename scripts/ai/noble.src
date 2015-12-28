@@ -1,0 +1,74 @@
+use npc;
+use basic;
+use os;
+use uo;
+
+include "include/eventid";
+include "include/randname";
+include "include/utility";
+include "include/mrcspawn";
+include "include/speech";
+include "include/client";
+include "include/vetement";
+include "include/npcbackpacks";
+include "ai/setup/modsetup";
+
+const RESPAWN_MINUTES := 30;     // In how many minutes will the NPC respawn if killed.
+const MAX_SKILLS      := 48;     // There are currently 48 Skills.
+const REACT_THRESHOLD := 2;
+
+set_priority( 50 );
+
+var storage, inv_fs, inv_pb, inv_1c;
+
+var me := Self();
+
+if( me.name["<random>"] )
+if (me.gender == 0)
+Habille( me, "noblemale" );
+else
+Habille( me, "noblefemale" );
+endif
+SetName( me, RandomName( me ) );
+endif
+
+
+storage := FindStorageArea( "Merchant Storage" );
+
+if (!storage)
+    exit;
+endif
+
+inv_fs := find_or_create_item( storage, me.serial + " FS", UOBJ_METALCHEST );
+inv_pb := find_or_create_item( storage, me.serial + " PB", UOBJ_METALCHEST );
+inv_1c := find_or_create_item( storage, me.serial + " 1C", UOBJ_METALCHEST );
+
+if (!inv_fs || !inv_pb || !inv_1c)
+    exit;
+endif
+
+var npccfg := ReadConfigFile("npcdesc");
+var speechelem := npccfg[me.npctemplate];
+var speech := GetConfigString(speechelem, "speech");
+
+EnableEvents( SYSEVENT_SPEECH, REACT_THRESHOLD );
+
+if (GetObjProperty(me, "frozen"))
+  me.frozen := 1;
+endif
+
+while (1)
+
+    var ev;
+
+    ev := os::wait_for_event( 30 );
+    if (ev)
+
+        case (ev.type)
+            SYSEVENT_SPEECH:
+                check_speech(ev.text, ev.speech);
+                say(process_text(ev.text, "default",speech));
+
+        endcase
+    endif
+endwhile

@@ -1,0 +1,47 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_spellbook( who )
+	if (!checkStaff(who, "spellbook", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+   
+	// Normal Spellbook
+	var book := CreateItemInBackpack(who,0x0efa, 1);
+	SetObjProperty(book,"LFucker",who.serial + " - " + who.name);
+
+	var i;
+	for (i := 0x1f2d; i <= 0x1f6c; i := i + 1)
+		CreateItemInContainer(book,  i, 1);
+	endfor
+
+	// Codex Damnorum
+	var necro := CreateItemInBackpack(who, 0xa100, 1);
+	SetObjProperty( necro, "LFucker",who.serial + " - " + who.name);
+	SetObjProperty( necro, "Lesser", 255 );
+	SetObjProperty( necro, "Greater", 255 );
+
+	// Book of Earth
+	var druid := CreateItemInBackpack(who, 0xb100, 1);
+	SetObjProperty( druid, "LFucker",who.serial + " - " + who.name);
+	SetObjProperty( druid, "Lesser", 255 );
+	SetObjProperty( druid, "Greater", 255 );
+	
+	var bard := CreateItemInBackpack(who, 0xa5a, 1);
+	SetObjProperty( bard, "LFucker", who.serial + " - " + who.name);
+	
+	var nature:=CreateItemInBackpack(who, 0xa5c, 1);
+	SetObjProperty( nature, "LFucker", who.serial + " - " + who.name);
+
+	var holy:=CreateItemInBackpack(who, 0xa5e, 1);
+	SetObjProperty( holy, "LFucker", who.serial + " - " + who.name);
+	
+	var unholy:=CreateItemInBackpack(who, 0xa5d, 1);
+	SetObjProperty( unholy, "LFucker", who.serial + " - " + who.name);		
+	
+	var psi:=CreateItemInBackpack(who, 0xa5f, 1);
+	SetObjProperty( psi, "LFucker", who.serial + " - " + who.name);
+	
+endprogram

@@ -1,0 +1,18 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_getvar( who, propname )
+	if (!checkStaff(who, "getglobal", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    print( "Property Name: " + propname );
+
+    var res := GetGlobalProperty( propname );
+    if (res != error)
+        SendSysMessage( who, "Property " + propname + ": " + res );
+    else
+        SendSysMessage( who, "Error getting property: " + res.errortext );
+    endif
+endprogram

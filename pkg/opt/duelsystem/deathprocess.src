@@ -1,0 +1,135 @@
+use uo;
+use os;
+include "duelstone";
+include "include/attributes"; // For setting hp etc
+include "include/myutil"; // For ListRootItemsInContainerOfObjtype
+include "include/utility";
+include "include/objtype";
+
+var gameserial, gamename, gametype, GOlooting, GOdispel;
+var teamOneArray := {}, teamTwoArray := {};
+var battleArea, arenaArea, teamOneArea, teamTwoArea, exitArea, linkedBoard;
+
+program duelstone_deathprocess(parms)
+broadcast("lawll");
+  set_critical(1);
+  var person, corpse, stone;
+  if(!parms[1] || !parms[2] || !parms[3])
+    return 0;
+  endif
+  person := SystemFindObjectBySerial(parms[1]);
+  corpse := parms[2];
+  stone := SystemFindObjectBySerial(parms[3]);
+  if(!corpse || !person || !stone)
+    return 0;
+  endif
+  var killedBy := GetPerson(GetObjProperty(corpse, "KilledBySerial"));
+
+  var areasLoaded := loadAreas(stone);
+  if (areasLoaded && IsPersonInArea(person, battleArea))
+    loadGame(stone);
+
+    Resurrect(person);
+    RefreshPlayer(person);
+    person.warmode:= 0;
+
+    foreach item in ListRootItemsInContainerOfObjtype(corpse,0xf021)
+      MoveItemToContainer(item, person.backpack );
+      EquipItem(person, item);
+    endforeach
+
+    var receiver := person;
+    var good;
+    if(!GOlooting)
+      foreach item in EnumerateItemsInContainer(corpse)
+        if(item.IsA(POLCLASS_CONTAINER) && item.container == corpse)
+          good := MoveItemToContainer( item, person.backpack );
+          if (!good) MoveItemToContainer( item, FindBankBox(person)); endif
+        endif
+      endforeach
+
+      foreach item in EnumerateItemsInContainer(corpse)
+        good := MoveItemToContainer(item, person.backpack );
+        if (!good) MoveItemToContainer( item, FindBankBox(person)); endif
+      endforeach
+    else
+      receiver := killedBy;
+      if(!receiver)
+        var team := getPlayersTeam(person.serial, teamOneArray, teamTwoArray);
+        if (team == 1)
+          receiver := getLeaderObjectOfTeam(teamTwoArray);
+        elseif (team == 2)
+          receiver := getLeaderObjectOfTeam(teamOneArray);
+        endif
+        if(!receiver)
+          receiver := person;
+        endif
+      endif
+
+      
+      var backpack := CreateItemInBackpack(person, "Backpack", 1);
+      if(backpack)
+        backpack.name := person.name+"'s Items [Duel Winnings]";
+      else
+        backpack := person.backpack;
+      endif
+
+      foreach item in EnumerateItemsInContainer(corpse)
+        if(item.IsA(POLCLASS_CONTAINER) && item.container == corpse)
+          good := MoveItemToContainer(item, backpack);
+          if (!good) MoveItemToContainer( item, FindBankBox(person)); endif
+        endif
+      endforeach
+
+      foreach item in EnumerateItemsInContainer(corpse)
+        good := MoveItemToContainer(item, backpack);
+        if (!good) MoveItemToContainer( item, FindBankBox(person)); endif
+      endforeach
+
+      if(backpack && backpack != person.backpack)
+        good := MoveItemToContainer(backpack, receiver.backpack);
+        if (!good) MoveItemToContainer( backpack, FindBankBox(receiver)); endif
+      endif
+    endif
+
+    var bones := CreateItemAtLocation(corpse.x, corpse.y, corpse.z, 0x1B0C, 1);
+    bones.movable := 0;
+    bones.name := "Bones of "+person.name;
+    Commentation(stone, 1, person.name, GetObjProperty(corpse, "KilledBy"));
+
+    if (corpseHasItems(corpse))
+      var spot := pickRandomSpotInArea(exitArea);
+      corpse.movable := 1;
+      MoveItemToLocation(corpse, spot[1], spot[2], spot[3], MOVEITEM_FORCELOCATION);
+      corpse.movable := 0;
+    else
+      destroyItem(corpse);
+    endif
+
+    var script := GetProcess(GetObjProperty(stone, "#pid"));
+    if (!script)
+      return 0;
+    endif
+
+    var packet := array;
+    packet .+ type;
+    packet.type := SYSEVENT_PLAYERDUELDEATH;
+    packet .+ source;
+    packet.source := person;
+    script.sendevent(packet);
+  endif
+  set_critical(0);
+
+
+  
+endprogram
+
+function corpseHasItems(corpse)
+  var hasItems := 0;
+  foreach item in EnumerateItemsInContainer(corpse)
+    if (!(item.objtype >= UOBJ_HAIRS_START && item.objtype <= UOBJ_HAIRS_END)) // Isn't Hair
+      hasItems := 1;
+    endif
+  endforeach
+  return hasItems;
+endfunction

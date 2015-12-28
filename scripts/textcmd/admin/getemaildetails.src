@@ -1,0 +1,42 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+program get_email_details(who, account)
+
+	if (!checkStaff(who, "getemaildetails", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	if (!account)
+		SendSysMessage(who, "Usage: .getemaildetails [accountname]");
+		return;
+	endif
+	
+	if (account in administrators || account in developers)
+		if (lower(who.acct.name) != account)
+			SendSysMessage(who, "Admin/Developer email details are restricted");
+			return;
+		endif
+	endif	
+	var acct:=FindAccount(account);
+	
+	if (!acct)
+		SendSysMessage(who, "Couldn't find account '"+account+"'");
+		return;
+	endif
+	
+	var email := acct.getprop("Email");
+	if (!email)
+		email:="Not set";
+	endif
+	var emailpassword := acct.getprop("EmailPassword");
+	if (!emailpassword)
+		emailpassword:="Not set";
+	endif
+	SendSysMessage(who, "Email: "+email);
+	SendSysMessage(who, "Email-password: "+emailpassword);
+	
+endprogram
+	
+	

@@ -1,0 +1,12 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program my_form( me )
+	if (!checkStaff(me, "myform", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+   me.graphic := 0x190;
+
+endprogram

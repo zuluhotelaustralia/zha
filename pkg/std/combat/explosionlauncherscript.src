@@ -1,0 +1,53 @@
+use uo;
+use os;
+use util;
+
+include "include/hitscriptinc";
+include "include/attributes";
+include "include/client";
+include "include/dismount";
+include "include/itemutil";
+
+program explosionlauncherscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+	
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+	
+	var defenderpos := struct;
+	defenderpos.+x:=defender.x;
+	defenderpos.+y:=defender.y;
+	defenderpos.+z:=defender.z;
+	
+	var potion;
+	var mypack := EnumerateItemsInContainer( attacker.backpack );
+	foreach item in mypack
+		if( item.objtype == 0xdc07 )
+			potion:=CreateItemInContainer(attacker.backpack, 0xdc07); //potion was used by crossbow so need to fake one... hopefully this is as good as other on
+			DupeItem( item, potion ); //uses found potions props
+			break;
+		endif
+	endforeach
+	
+	if (!potion)
+		//means that attack used it before it could get here...
+		potion:=CreateItemInContainer(attacker.backpack, 0xdc07); //last one will be pretty dud-like
+	endif
+	
+	
+	var parms := {};
+	parms[1] := attacker;
+	parms[2] := potion;
+	parms[3] := defenderpos;
+
+	start_script( ":alchemy:exploder", parms );		
+	
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+endprogram

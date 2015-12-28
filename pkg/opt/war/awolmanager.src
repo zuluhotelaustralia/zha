@@ -1,0 +1,49 @@
+//this script is run when the war is happening, and slowly checks each registered player to see when they last killed someone
+//if they havent killed someone for more than 2 days then they are declared AWOL... eliminated
+
+use uo;
+use os;
+
+include "war";
+
+program AWOLmanager(ball)
+	var qpData:=GetObjProperty(ball,  "PlayerData");
+	var player;
+	var i;
+	while (IsWar(ball)) //war is happening
+		for (i:=getAWOLCounter(ball); i<=len(qpData); i:=i+1)
+			PrintTextAbove(ball, "War is in play!");
+			if (qpData[i].killed == "alive") //alive
+				if (ReadGameClock()>qpData[i].AWOLTime) //character hasnt killed someone within time allotted...
+					//Broadcast("Player " + i + " has not killed someone within time allotted.");
+					SetPStructToAWOL(qpData[i], ball);
+				endif
+			endif
+			setAWOLCounter(i, ball);
+			sleep(300); //one check every 5 mins
+			if (! IsWar(ball))//war not happening
+				break;
+			endif
+		endfor
+		setAWOLCounter(1, ball);
+	endwhile
+endprogram
+
+//used to store counter so that if shard goes down during AWOL checking then it resumes from spot left off at
+function getAWOLCounter(ball)
+	var AWOLCounter := GetObjProperty(ball, "AWOLCounter");
+	if (!AWOLCounter)
+		SetObjProperty(ball, "AWOLCounter", 1);
+		AWOLCounter:=1;
+	endif
+	return AWOLCounter;
+endfunction
+	
+function setAWOLCounter(counter, ball)
+	if (counter)
+		SetObjProperty(ball, "AWOLCounter", counter);
+		return 1;
+	endif
+	return 0;
+endfunction
+	

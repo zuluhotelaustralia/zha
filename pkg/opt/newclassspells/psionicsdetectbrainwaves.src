@@ -1,0 +1,100 @@
+/* Psionics Spell - Detect Brainwaves                   **
+** Reveals hidden to caster by granting seehidden temp. **
+** Seravy - seravy@gmail.com                            */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+include "include/attributes";
+
+const SPELL_ID := SPELL_ID_DETECTBRAINWAVES;
+
+program cast_detectbrainwaves(parms)
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    if (!caster)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var radius := 5 + CInt(GetEffectiveSkill(caster, SKILLID_PSIONICS))/15;
+
+  var hiders := ListMobilesNearLocationEx( caster.x, caster.y, caster.z, radius, LISTEX_FLAG_HIDDEN );
+  var numfound := 0;
+  var failedDetect := 0;
+  var mobilesDiff := 0;
+  var differenceInt;
+
+  if(len(hiders) > 0)
+    foreach mobile in hiders
+      var immunity := IsProtected( caster, mobile, circle );
+      if( immunity == IMMUNED )
+        continue;
+      endif
+    
+      differenceInt := GetIntelligence(caster) - GetIntelligence(mobile);
+      if (differenceInt < 0)
+        differenceInt := -differenceInt;
+      endif
+
+/* A forumla Ill work out later :P
+      if(CInt(radius - Distance(mobile, caster)) == 0)
+        mobilesDiff := GetIntelligence(caster) + 1;
+      else
+        mobilesDiff := GetIntelligence(mobile) + differenceInt/CInt(radius - Distance(mobile, caster));
+      endif
+*/
+      mobilesDiff := GetIntelligence(mobile) + ((Distance(mobile, caster) - 5) * 2);
+
+      if(GetIntelligence(caster) > mobilesDiff)
+        numfound := 1;
+        mobile.hidden := 0;
+        PrintTextAbovePrivate( mobile, "You have been revealed!", mobile );
+        PrintTextAbovePrivate( mobile, "*Detected Brainwaves*", caster );
+        PlaySoundEffect(mobile, SFX_SPELL_DETECTBRAINWAVES );
+      else
+        failedDetect := 1;
+      endif
+    endforeach
+  endif
+
+  if (failedDetect && numfound)
+    PrintTextAbovePrivate( caster, "You can still sense a brainwave but are unable to locate them.", caster );
+  elseif (!numfound)
+    PrintTextAbovePrivate( caster, "You cannot detect any brainwaves other than what you see.", caster );
+  elseif (failedDetect)
+    PrintTextAbovePrivate( caster, "You can sense a brainwave but are unable to locate them.", caster );
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+
+
+
+
+/*  Was going to grant the see hidden prop, but decided it was too dangrous. Ill leave it here incase i find a safe way.
+  if (!CanMod(caster, "seehidden", 1))
+    SendSysMessage(caster, "You can already see hidden people.");
+    return;
+  endif
+  
+  var tempCasterLoc := {caster.x, caster.y, caster.z};
+  EraseObjProperty( caster, "#Casting");
+  MoveCharacterTolocation(caster, 1, 1, 1, MOVECHAR_FORCELOCATION);
+  MoveCharacterTolocation(caster, tempCasterLoc[1], tempCasterLoc[2], tempCasterLoc[3], MOVECHAR_FORCELOCATION );
+  SendSysMessage(caster, "Your now tracking any 'New' Ghosts that enter on your screen");
+  DoPersistedMod(caster, "seehidden", 1, caster.enabled("seehidden"), duration);
+*/
+
+endprogram

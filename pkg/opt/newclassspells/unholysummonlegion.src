@@ -1,0 +1,190 @@
+/* Unholy Spell - Summon Legion           **
+** Summons a number of undead to control. **
+** Seravy - seravy@gmail.com              */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/npcbackpacks";
+
+const SPELL_ID := SPELL_ID_SUMMONLEGION;
+
+program cast_summonlegion(parms)
+  var circle := GetCircle( SPELL_ID );
+  var caster;
+  var cast_loc;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_loc := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    if(GetObjProperty(caster, "#SummonLegion"))
+      if(SystemFindObjectBySerial(GetObjProperty(caster, "#SummonLegion")))
+        SendSysMessage(caster, "You cannot cast this until the Legion has been banished.");
+        EraseObjProperty( caster, "#Casting");
+        return;
+      endif
+    endif
+    cast_loc := TargetCoordinates( caster);
+    if(!cast_loc)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (PreventedCastInGuardedArea(caster))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var clevel:=GetClasseLevel(caster);
+  var sumcreature;
+
+  var sumcreaturetype := "daemon";
+  if(clevel == 8)
+    sumcreaturetype := "daemonlieutenant";
+  endif
+
+  set_critical(1);
+  var hellGate := CreateItemAtLocation( cast_loc.x, cast_loc.y, cast_loc.z, 0x1AE5, 1);
+  if (hellGate)
+    hellGate.graphic := 0x1AE5;
+    hellGate.movable := 0;
+    SetObjProperty(hellGate, "f", 1);
+  endif
+  set_critical(0);
+  PlaySoundEffect(hellGate, SFX_SPELL_SUMMONLEGION);
+
+  var i;
+  for( i := 0x1AE5; i <= 0x1AED; i := i+1 )
+    hellGate.graphic := i;
+    sleepms( 150 );
+  endfor
+  hellGate.graphic := 0xDDA;
+
+
+  var ev_follow := struct;
+  ev_follow.+type;
+  ev_follow.type := EVID_ALL_FOLLOW_CMD;
+  ev_follow.+target;
+  ev_follow.target := caster;
+
+
+  set_critical( 1 );
+  sumcreature := CreateNpcFromTemplate( sumcreaturetype, cast_loc.x, cast_loc.y, cast_loc.z);
+  sumcreature.setmaster(caster);
+  SetObjProperty(sumcreature, "master",caster.serial);
+  SetObjProperty(sumcreature, "summoned",1);
+  SetObjProperty(sumcreature, "script", sumcreature.script );
+  SetObjProperty(sumcreature, "noloot", 1 );
+  sumcreature.name := "Legion Leader";
+  sumcreature.script := "tamed";
+  RestartScript(sumcreature);
+  sleepms(10);
+  SendEvent(sumcreature, ev_follow);
+  set_critical( 0 );
+
+  SetObjProperty(caster, "#SummonLegion", sumcreature.serial);
+
+  var ev_guard := struct;
+  ev_guard.+type;
+  ev_guard.type := EVID_ALL_GUARD_CMD;
+  ev_guard.+target;
+  ev_guard.target := sumcreature;
+  ev_follow.target := sumcreature;
+
+
+
+  sleepms(500);
+  // Create Minions
+  var tempMinion;
+  var minions := {};
+  for( i := 0; i < clevel; i := i + 1 )
+    var MinionTemplate;
+    if (i > 6)
+      MinionTemplate := "lichelord";
+    elseif (i > 5)
+      MinionTemplate := "liche";
+    elseif (i > 4)
+      MinionTemplate := "flamingskeleton";
+    elseif (i > 3)
+      MinionTemplate := "skeletonarcher";
+    elseif (i > 2)
+      MinionTemplate := "bonewarlock";
+    else
+      MinionTemplate := "skeleton";
+    endif
+
+    tempMinion := CreateNpcFromTemplate(MinionTemplate, cast_loc.x, cast_loc.y, cast_loc.z);
+    tempMinion.setmaster(sumcreature);
+    SetObjProperty(tempMinion, "master", sumcreature.serial);
+    SetObjProperty(tempMinion, "Legion", 1);
+    SetObjProperty(tempMinion, "summoned",1);
+    SetObjProperty(tempMinion, "script", tempMinion.script );
+    SetObjProperty(tempMinion, "noloot", 1 );
+    tempMinion.name := "Legion Minion";
+    tempMinion.script := "tamed";
+    RestartScript(tempMinion);
+
+    sleepms(10);
+
+    SendEvent(tempMinion, ev_guard);
+    minions.append(tempMinion);
+  
+    sleepms(10);
+    SendEvent(tempMinion, ev_follow);
+    PlayLightningBoltEffect(tempMinion);
+  endfor
+
+  for( i := 0x1AED; i >= 0x1AE5; i := i-1 )
+    hellGate.graphic := i;
+    sleepms( 150 );
+  endfor
+  DestroyItem(hellGate);
+
+  EraseObjProperty( caster, "#Casting");
+
+
+  detach();
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_DEATHKNIGHT)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_NECROMANCER)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_NECROMANCY);
+  var duration := calcSummonDuration(skill, level);
+  sleep( duration );
+
+  PlaySoundEffect(sumcreature, 0x01fa);
+  PlayStationaryEffect( CInt(sumcreature.x), CInt(sumcreature.y), CInt(sumcreature.z), 0x3728, 0xa, 0xa );
+  var backpack := FindExistingPack( sumcreature.serial );
+  if( backpack )
+    foreach item in EnumerateItemsInContainer( backpack );
+      MoveItemToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, MOVEITEM_FORCELOCATION );
+    endforeach
+  endif
+
+  MoveCharacterToLocation( sumcreature, 0, 0, 0, MOVECHAR_FORCELOCATION );
+  ApplyRawDamage(sumcreature, GetHp(sumcreature) + 3);
+
+  foreach minion in minions
+    PlaySoundEffect(sumcreature, 0x01fa);
+    PlayStationaryEffect( CInt(sumcreature.x), CInt(sumcreature.y), CInt(sumcreature.z), 0x3728, 0xa, 0xa );
+    var backpack := FindExistingPack( sumcreature.serial );
+    if( backpack )
+      foreach item in EnumerateItemsInContainer( backpack );
+        MoveItemToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, MOVEITEM_FORCELOCATION );
+      endforeach
+    endif
+
+    MoveCharacterToLocation( sumcreature, 0, 0, 0, MOVECHAR_FORCELOCATION );
+    ApplyRawDamage(minion, GetHp(minion) + 3);
+  endforeach
+
+  EraseObjProperty( caster, "#SummonLegion");
+endprogram

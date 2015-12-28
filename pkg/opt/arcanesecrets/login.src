@@ -1,0 +1,9 @@
+use uo;
+
+program wipe_magic_bonus(who)
+
+	if (GetObjProperty(who, "MagicBonus"))
+		EraseObjProperty(who, "MagicBonus");
+	endif
+
+endprogram

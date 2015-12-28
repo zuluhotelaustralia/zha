@@ -1,0 +1,15 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_uncurse( who )
+	if (!checkStaff(who, "removec", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	SendSysMessage(who, "Target an item to uncurse.");
+	var item := Target(who);
+	EraseObjProperty( item, "Cursed" );
+
+endprogram

@@ -1,0 +1,201 @@
+/////////////////////////////////////////////////////////////////
+// OSI CLONE Banker - Rincewind.
+//
+//  25/09/2k : Added OSI function "balance" or "statement"
+//             Added OSI function "withdraw"
+//             Added something I saw on OSI today.
+//
+//  20011804 Jaleem Banker is now faster. Modified the OpenBank() function. To count the items (and weight) inside the
+//                  bankbox, use the new command 'count'
+//  20010405 Jaleem Modified some things to speed it up
+/////////////////////////////////////////////////////////////////
+
+use os;
+use uo;
+use npc;
+use util;
+
+include "util/bank";
+include "include/randname";
+include "include/eventid";
+include "ai/setup/modsetup";
+include "include/objtype";
+
+var me := Self();
+
+///const REACT_THRESHOLD := 35;
+const REACT_THRESHOLD := 4;
+
+if( me.name["<random>"] )
+	SetName( me, RandomName( me ) );
+	EquipFromTemplate( me, "banker" );
+endif
+
+///EnableEvents( REACT_THRESHOLD );
+
+program banker()
+
+	if( !me.title_suffix )
+		var names := SplitWords(me.name);
+		if ( names[2] == "the" )
+			me.name := names[1];
+		endif
+	endif
+	me.title_suffix := " the banker";
+
+	///EnableEvents( SYSEVENT_SPEECH, 12 );
+	EnableEvents( SYSEVENT_SPEECH, REACT_THRESHOLD );
+
+	var ev;
+	while (1)
+		ev := os::wait_for_event( 120 );
+		if( ev )
+			if( ev.source.z == me.z )
+				Bankfunctions( ev.source, ev.text );
+			endif
+		endif
+	endwhile
+
+endprogram
+
+function Bankfunctions( you, byref text )
+
+	// code to exit if used less than 5 seconds ago.
+	///sleepms( 100 * Distance( me, you ) + RandomInt( 100 ) );
+	if( CInt( GetObjProperty( you, "#bankused" ) ) > ReadGameClock() )
+		return;
+	else
+		SetObjProperty( you, "#bankused", ReadGameClock() + 5 );
+	endif
+
+	TurnToward(you);
+
+	// normal event
+	if ( text["bank"] )
+		OpenBank( you );
+	elseif ( text["balance"] )
+		Balance( you);
+	elseif ( text["withdraw"] )
+		Withdraw( you);
+	elseif ( text["statement"] )
+		Balance( you );
+        elseif ( text["count"] )
+                CountItems( you );
+	endif
+
+endfunction
+
+function CountItems( you )
+
+        var items   := 0;
+        var weight  := 0;
+	var bankbox := FindBankBox( you );
+        var objects := EnumerateItemsInContainer( bankbox );
+
+        if (bankbox)
+                foreach item in objects
+                  items := items + 1;
+                  weight := weight + item.weight;
+                endforeach
+
+                say( "Bank container has "+ items +" items, " + weight + " stones" );
+	else
+		say( "You don't seem to have a bank box, " + you.name);
+        endif
+
+endfunction
+
+function OpenBank( you )
+
+	var bankbox := FindBankBox( you );
+
+	if( GetObjProperty( you, "toadmode" ) )
+		say( "*ribbit*" );
+	elseif( bankbox )              
+		SendOpenSpecialContainer( you, bankbox );
+	else
+		say( "You don't seem to have a bank box, " + you.name);
+	endif
+
+endfunction
+
+function Balance( you )
+
+	var myamt := 0;
+
+	foreach item in EnumerateItemsInContainer(FindBankBox( you ))
+		if ((item.graphic == 0xeed) || (item.graphic == 0xeee)  || (item.graphic == 0xeef))
+			if (item.color != 0x083b)
+				myamt := myamt + item.amount;
+			endif
+		endif
+	endforeach
+
+  if( myamt > 0 )
+	   say( "Thy current bank balance is " + myamt + " gold." );
+  else
+  	 say( "You have no gold in thy bank box." );
+  endif
+
+endfunction
+
+
+function Withdraw( you )
+
+	var totalgold := 0;
+	var gold :=0;
+
+	var amount := CInt( RequestInput( you, you.backpack, "How much gold would you like to withdraw?" ) );
+
+	if (amount<=0 || !amount)
+		SendSysMessage( you,"The transaction has been terminated." );
+		return;
+	endif
+
+	var bankbox := FindBankBox(you);
+
+	foreach item in EnumerateItemsInContainer(bankbox)
+		if (item.objtype == UOBJ_GOLD_COIN )
+			if ( ReserveItem(item) )
+				totalgold := totalgold + item.amount;
+				gold := GetObjType( item );
+				ReleaseItem(item);
+				
+			else
+      				SendSysMessage(you, "Withdraw aborted.");
+				return;
+      			endif
+		endif
+	endforeach
+
+	if (amount > totalgold)
+		say("Im sorry, thats more gold than thy own.");
+	else
+		var amountLeft := amount;
+
+		foreach item in EnumerateItemsInContainer(bankbox)
+			if (item.objtype == UOBJ_GOLD_COIN)
+				if (item.amount <= amountLeft)
+					amountLeft := amountLeft - item.amount;
+					DestroyItem( item );
+				else
+					SubtractAmount(item, amountLeft);
+					break;
+				endif
+			endif
+		endforeach
+
+		amountLeft := amount;
+		
+		while (amountLeft >= 60000)
+			CreateItemInBackpack(you, UOBJ_GOLD_COIN, 60000);
+			amountLeft := amountLeft - 60000;
+		endwhile
+		if (amountLeft > 0)
+			CreateItemInBackpack(you, UOBJ_GOLD_COIN, amountLeft);
+		endif
+
+		say("Thou hast withdrawn "+ amount +" gold from thy account.");
+	endif
+
+endfunction

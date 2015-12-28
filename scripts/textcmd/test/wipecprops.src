@@ -1,0 +1,18 @@
+use os;
+use uo;
+
+program storagewipe(who)
+
+	SendSysMessage( who, "Erase all the CProps of what?" );
+	var targ := Target( who );
+	if( !targ )
+		return;
+	endif
+
+	foreach prop in GetObjPropertyNames( targ )
+		EraseObjProperty( targ, prop );
+	endforeach
+
+	SendSysMessage( who, "All object properties have been deleted." );
+
+endprogram

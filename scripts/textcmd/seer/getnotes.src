@@ -1,0 +1,25 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program txtcmd_getnotes( who )
+	if (!checkStaff(who, "readnotes", CMDLEVEL_SEER))
+		return 0;
+	endif
+	SendSysMessage( who, "Read which item's notes?" );
+
+	var object := Target( who );
+
+	if( !object || !object.isa(POLCLASS_ITEM) )
+		SendSysMessage( who, "You may only read notes off items." );
+		return;
+	endif
+
+	var result := GetObjProperty( object, "notes" );
+	if( result )
+		SendSysMessage( who, "The notes read : " + result );
+	else
+		SendSysMessage( who, "There are no notes on this object." );
+	endif
+
+endprogram

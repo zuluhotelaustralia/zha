@@ -1,0 +1,50 @@
+use uo;
+use os;
+use util;
+
+include "include/hitscriptinc";
+include "include/attributes";
+include "include/client";
+include "include/dismount";
+
+program unhorsingscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+	
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+	
+	//if on a horse
+	if (GetEquipmentByLayer( attacker, LAYER_MOUNT ))
+		var defmount:=GetEquipmentByLayer( defender, LAYER_MOUNT );
+		if (defmount)
+			//% of unhorsing based on dex vs dex
+			var defendersDex := GetDexterity( defender ); 
+			if (defendersDex>130 && defender.npctemplate) 
+      		defendersDex:=130; 
+			endif 
+
+			var chance := CInt(GetDexterity( attacker )/defendersDex*100/6); // e.g. 130/130*100/6=16% 
+			if (RandomInt(101)<chance) //dismounted him
+				Dismount(defender);
+			endif
+		else
+			//unhorsed ppl are winded by charge :)
+			var amount := rawdamage;
+			if( amount > GetStamina(defender))
+				SetStamina(defender, 0);
+			else
+				SetStamina(defender, GetStamina(defender) - amount);
+			endif
+		endif
+	endif
+			
+	
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+endprogram

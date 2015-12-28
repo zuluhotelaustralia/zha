@@ -1,0 +1,51 @@
+/* Refresh Champion Spawns              **
+** Used for Champion Spawn point system **
+** Seravy - seravy@gmail.com            */
+
+use uo;
+use os;
+
+program refreshspawns()
+
+  var spawnRefresh := GetGlobalProperty("noChampionSpawnRefresh");
+  if (spawnRefresh)
+    if (spawnRefresh == 1)
+      SetGlobalProperty( "noChampionSpawnRefresh", 2);
+      sleep(2);
+    else
+      return 0;
+    endif
+  endif
+  SetGlobalProperty( "noChampionSpawnRefresh", 1);
+
+  var spawns := GetGlobalProperty("championSpawns");
+  if (!spawns)
+    spawns := {};
+  endif
+
+  var spawnObject;
+  var tempspawns := {};
+  foreach spawn in spawns
+    spawnObject := SystemFindObjectBySerial(spawn);
+    if (spawnObject)
+      tempspawns.append(spawn);
+      Start_Script(":championspawn:championspawn", { 0, spawnObject });
+    endif
+  endforeach
+  if (tempspawns.size()==0)
+    EraseGlobalProperty("championSpawns");
+    return 1;
+  endif
+
+  SetGlobalProperty( "championSpawns", tempspawns );
+
+
+  sleep(1);
+
+  EraseGlobalProperty("noChampionSpawnRefresh");
+
+endprogram
+
+
+
+

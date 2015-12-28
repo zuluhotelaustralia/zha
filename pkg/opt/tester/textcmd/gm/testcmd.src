@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+
+program textcmd_testcmd(who)
+
+  if( who.cmdlevel < CMDLEVEL_GAME_MASTER )
+    SendSysMessage( who, "bad." );
+    return 0;
+  endif
+  var temp;
+  broadcast("running test command");
+  start_script(":tester:testscript",temp);
+  start_script(":duelsystem:testscript",temp);
+  start_script(":duelsystem:deathprocess",temp);
+
+endprogram
+

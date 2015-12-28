@@ -1,0 +1,44 @@
+use uo;
+use os;
+
+include "include/yesno";
+include "include/cmdlevel_check";
+
+program makeallitemsdecorations( who, objtype )
+	set_critical(1);
+	if (!checkStaff(who, "makeallitemsdecorations", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+
+	if( !YesNo( who, "You sure?" ) )
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	var count		:= 0;
+	var timer		:= 0;
+	var clock		:= ReadGameClock();
+	
+	SendSysMessage( who, "Starting lock down and decoration cprop, please wait..." );
+
+	foreach obj in ListObjectsInBox(0, 0, -128, 6142, 4094, 128)
+		//Broadcast(obj.name);
+		obj.movable:=0;
+		SetobjProperty(obj, "WORLD_DECORATION", 1);
+		count:=count+1;
+		sleepms( 5 );
+		timer := timer + 5;
+	
+		if( timer >= 30000 )
+			timer := timer - 30000;
+			SendSysMessage( who, "decoration specification is still in progress, be patient..." );
+		endif
+	endforeach
+
+	SendSysMessage( who, "decoration specification completed, took " + CStr( ReadGameClock() - clock ) + " seconds to complete." );
+	SendSysMessage( who, "A total of " + count + " item have been specified as decorations." );
+	SendSysMessage( who, "Wiping failed or no item were found to be destroyed." );
+
+	set_critical(0);
+endprogram

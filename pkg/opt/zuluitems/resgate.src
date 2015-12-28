@@ -1,0 +1,22 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// created by Zulu (zuluhotel@home.com) Dec 7, 1999
+// - This will turn on/off PVP mode for players.
+// 
+/////////////////////////////////////////////////////////////////////////////
+
+use uo;
+
+include "include/res";
+
+program pacifist(who)
+
+if (who.dead)
+
+    SendSysMessage(who, "Live again by the Virtues!");
+    ResurrectMobile( who );
+else
+   SendSysMessage(who, "Your body begins to feel warm.");
+endif
+
+endprogram

@@ -1,0 +1,31 @@
+use uo;
+include "include/npcbackpacks";
+include "include/cmdlevel_check";
+
+
+program textcmd_zapkeywords( who )
+	if (!checkStaff(who, "zapkeywords", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	SendSysMessage( who, "Zap whose keywords?" );
+	var whom := Target( who );
+	if (!whom)
+		SendSysMessage( who, "canceled" );
+		return;
+	    endif
+
+	var mykeywords := {};
+	if ( GetObjProperty(whom,"mykeywords") )
+		mykeywords := GetObjProperty(whom,"mykeywords");
+	endif
+
+	SendSysMessage(who,"keywords: ");
+	foreach word in mykeywords
+		SendSysMessage(who, word + " erase.");
+		EraseObjProperty(whom, word);
+	endforeach
+
+	EraseObjProperty(whom,"mykeywords");
+
+endprogram

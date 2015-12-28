@@ -1,0 +1,47 @@
+// coded by zulu   zulu@zuluhotel.com
+//   http://www.zuluhotel.com/uo
+
+use os;
+use uo;
+
+program cannon(who, text)
+
+if ((text=="") || (!text)) SendSysMessage( who, ".placecannon <north> <south> <east> <west>"); return; endif
+
+var item, where := TargetCoordinates( who );
+
+if (!where) SendSysMessage( who, "Canceled."); return; endif
+
+if (text=="north")
+//Cannon (facing north)
+CreateItemAtLocation( where.x, where.y,   where.z, 0x0e8b, 1);
+CreateItemAtLocation( where.x, where.y-1, where.z, 0x0e8c, 1);
+item :=CreateItemAtLocation( where.x, where.y-2, where.z, 0x0e8d, 1);
+SetObjProperty(item, "working", 1);
+
+elseif(text=="south")
+//Cannon (facing south)
+CreateItemAtLocation( where.x, where.y,   where.z, 0x0e93, 1);
+CreateItemAtLocation( where.x, where.y+1, where.z, 0x0e92, 1);
+item :=CreateItemAtLocation( where.x, where.y+2, where.z, 0x0e91, 1);
+SetObjProperty(item, "working", 1);
+
+elseif(text=="east")
+//Cannon (facing east)
+item :=CreateItemAtLocation( where.x,   where.y, where.z, 0x0e96, 1);
+SetObjProperty(item, "working", 1);
+CreateItemAtLocation( where.x-1, where.y, where.z, 0x0e95, 1);
+CreateItemAtLocation( where.x-2, where.y, where.z, 0x0e94, 1);
+
+elseif(text=="west")
+//Cannon (facing west)
+CreateItemAtLocation( where.x,   where.y, where.z, 0x0e90, 1);
+CreateItemAtLocation( where.x-1, where.y, where.z, 0x0e8f, 1);
+item :=CreateItemAtLocation( where.x-2, where.y, where.z, 0x0e8e, 1);
+SetObjProperty(item, "working", 1);
+
+else
+SendSysMessage( who, ".placecannon <north> <south> <east> <west>");
+endif
+
+endprogram

@@ -1,0 +1,157 @@
+/* Druid Spell - Binding Nature  **
+** Traps target for duration     **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_BINDINGNATURE;
+// For Resisted()
+const SPELL_EFFECT_TYPE_MOVING := FX_SPELL_BINDINGNATURE;
+const SPELL_EFFECT_ID		 := FX_SPELL_BINDINGNATURE;
+const SPELL_EFFECT_SPEED	 := SPEED_SPELL_BINDINGNATURE;
+const SPELL_EFFECT_LOOP		 := LOOP_SPELL_BINDINGNATURE;
+
+program cast_bindingnature(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  if( !fromhit )
+    cast_on := Reflected( caster, cast_on, circle);
+  endif
+
+  var natureTemplate := {
+//  {0xD34, 0, 0,1},
+  {0xCA1, -1,-1,1},
+  {0xC9F, -1,0,1},
+  {0xCA3, 1,-1,1},
+  {0xCA0, 0,-1,1},
+  {0xCA0, 1,0,1},
+  {0xCA4, -1,1,1},
+  {0xCA2, 0,1,1},
+  {0xC98, 1,1,1},
+
+  {0xCAD,-2,3,0},
+  {0xCAE,2,1,0},
+  {0xCB0,2,3,0},
+  {0xCB7,-4,-1,0},
+  {0xCC3,2,-3,0}
+
+
+//  {0xC99, -1,-1,0}, Block their walking
+//  {0xC9B, -1,0,0},
+//  {0xC9B, 1,-1,0},
+//  {0xC9D, 0,-1,0},
+//  {0xC9B, 1,0,0},
+//  {0xC9B, -1,1,0},
+//  {0xC9C, 0,1,0},
+//  {0xC9D, 1,1,0},
+}; 
+
+  var naturelore:= GetEffectiveSkill(caster, SKILLID_NATURELORE);
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_RANGER)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_DRUID)
+    level := 0;
+  endif
+
+  var prot := GetObjProperty( cast_on, "FreeAction" );
+  if( prot == 1)
+    SendSysMessage( cast_on, "You are magically protected from paralyzing effects." );
+  else
+    if( prot == -1 )
+      naturelore := naturelore * 2;
+      circle := circle * 2;
+    endif
+    var amt := calcVSmallDuration(naturelore, level);
+    amt := ModifyWithMagicEfficiency( caster, Resisted( caster, cast_on, circle, amt));
+    DoTempMod(cast_on, "p", 1, amt);
+  endif
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_BINDINGNATURE, SPEED_SPELL_BINDINGNATURE, LOOP_SPELL_BINDINGNATURE);
+  PlaySoundEffect(cast_on, SFX_SPELL_BINDINGNATURE);
+
+  set_critical(1);
+  var tempItem;
+  var MadeStuff := {};
+  foreach template in natureTemplate
+    if (template[4] == 0)
+      tempItem := CreateItemAtLocation( cast_on.x+template[2], cast_on.y+template[3], cast_on.z-10, template[1], 1 );
+      //tempItem.invisible := 1;
+    else
+      tempItem := CreateItemAtLocation( cast_on.x+template[2], cast_on.y+template[3], cast_on.z-10, 0xbf01, 1 );
+      tempItem.graphic := template[1];
+      SetObjProperty(tempItem, "BindingNature", 1);
+    endif
+    if (tempItem)
+      MadeStuff.append(tempItem);
+      tempItem.movable := 0;
+      SetObjProperty(tempItem, "Creator", caster.serial);
+      SetObjProperty(tempItem, "f", 1);
+    endif
+  endforeach
+  set_critical(0);
+
+
+  for i := 1 to 5
+  set_critical(1);
+    foreach item in MadeStuff
+      item.movable := 1;
+      MoveItemToLocation(item, item.x, item.y, item.z+2, MOVEITEM_FORCELOCATION);
+      item.movable := 0;
+    endforeach
+    set_critical(0);
+    sleepms(250);
+  endfor
+
+  EraseObjProperty( caster, "#Casting");
+
+  var duration := calcSmallDuration(naturelore, level);
+  duration := CInt(ModifyWithMagicEfficiency(caster, duration));
+  sleep(duration);
+
+  for i := 1 to 5
+  set_critical(1);
+    foreach item in MadeStuff
+      item.movable := 1;
+      MoveItemToLocation(item, item.x, item.y, item.z-2, MOVEITEM_FORCELOCATION);
+      item.movable := 0;
+    endforeach
+    sleepms(250);
+    set_critical(0);
+  endfor
+
+  foreach item in MadeStuff
+    destroyItem(item);
+  endforeach
+endprogram

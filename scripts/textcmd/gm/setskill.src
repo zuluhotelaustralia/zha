@@ -1,0 +1,28 @@
+use os;
+use uo;
+use boat;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program textcmd_setskill( who, text )
+	if (!checkStaff(who, "setskill", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    var params := SplitWords( text );
+    var targ := Target(who);
+    var skill := CInt( params[1] );
+    var basevalue := CInt( params[2] );
+    //var rawvalue := BaseSkillToRawSkill( basevalue );
+
+    if (skill != error && basevalue != error)
+        print( "Setting Base Skill " + skill + " to " + basevalue );
+        var res := SetBaseSkill( targ, skill, basevalue );
+        if (res == error)
+            SendSysMessage( who, "Unable to set raw skill: " + res.errortext );
+        else
+            SendSysMessage( who, "New Effective Skill: " + GetEffectiveSkill(who,skill) );
+        endif
+    endif
+endprogram
