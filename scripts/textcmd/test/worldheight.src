@@ -1,0 +1,14 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program worldheight( who, params )
+	if (!checkStaff(who, "worldheight", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    params := SplitWords( params );
+    var x := CInt(params[1]);
+    var y := CInt(params[2]);
+    var z := GetWorldHeight( x, y );
+    SendSysMessage( who, "(" + x + "," + y + "," + z + ")" );
+endprogram

@@ -1,0 +1,24 @@
+use os;
+use uo;
+
+program seedling(parms)
+
+	var where := parms[1];
+	var what := parms[2];
+
+	var x:= where.x;
+	var y:= where.y;
+	var z:= where.z;
+
+	sleep(600);
+
+	// Don't grow if there's items in the way
+	foreach item in ListItemsAtLocation(x, y, z)
+		if (item.isA(POLCLASS_ITEM))
+			return;
+		endif
+	endforeach
+
+	CreateItemAtLocation(x, y, z, what, 1);
+
+endprogram

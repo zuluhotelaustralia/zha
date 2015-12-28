@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+program identify( who )
+	if (!checkStaff(who, "identify", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	start_script( ":itemid:itemid", who );
+
+endprogram
+
+ 

@@ -1,0 +1,239 @@
+/* Unholy Spell - Lava Stream                         **
+** Creates a lava stream dealing fire damage to area. **
+** Seravy - seravy@gmail.com                          */
+
+use uo;
+use os;
+use util;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_LAVASTREAM;
+
+program cast_lavastream(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+  var element := FIRE;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetArea( caster, circle);
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var lavastream := 
+  {
+    {0x1A47, 0, -1, 60, 1},
+    {0x1A4C, 0, -1, 50, 3},
+    {0x1A51, 0, -1, 40, 4},
+    {0x1A56, 0, -1, 30, 5},
+    {0x1A5B, 0, -1, 20, 6},
+    {0x1A60, 0, -1, 10, 7},
+
+    {0x1A6D, -1, 0, 9, 8},
+    {0x1A69, 0, 0, 10, 8},
+    {0x1A65, 1, 0, 10, 8}
+
+  };
+
+  var rocks := 
+  {
+    4,
+    {0x134F,0x1350,0x1351},
+    {0x1352,0x1353,0x1354},
+    {0x1357,0x1358,0x1359},
+    {0x135C,0x135D,0x135E}
+  };
+
+  var lavapool := 
+  {
+    3,
+    0x12EE,
+    0x12F4,
+    0x1300
+  };
+
+
+  
+  var class:=GetClass(caster);
+  var level:=GetClasseLevel(caster);
+
+  var range := 2 + Cint(level/2.5);
+
+  case (class)
+    CLASSEID_NECROMANCER:
+    range := range + 2;
+  endcase
+
+  PlaySoundEffect(caster, SFX_SPELL_LAVASTREAM);
+  
+  set_critical(1);
+  var rocksMade := {};
+  var lavaStreamMade := {};
+  var lavaPoolMade := {};
+  var tempItem, Randtemplate;
+  var i, j;
+  for (i := (cast_on.x - range); i < (cast_on.x + range + 1); i := i + 1)
+    for (j := (cast_on.y - range); j < (cast_on.y + range + 1); j := j + 1)
+
+      // Create Rocks
+      if (abs(cast_on.x - i) == range || abs(cast_on.y - j) == range)
+        Randtemplate := rocks[Randomint(rocks[1])+2];
+        var num;
+        for (num := 1; num <= 3; num := num + 1)
+          var xNum, yNum;
+          if (num == 1)
+            xNum := i - 1;
+            yNum := j;
+          elseif (num == 3)
+            xNum := i;
+            yNum := j - 1;
+          else
+            xNum := i;
+            yNum := j;
+          endif
+          tempItem := CreateItemAtLocation( xNum, yNum, (cast_on.z), Randtemplate[num], 1);
+          if (tempItem)
+            rocksMade.append(tempItem);
+            tempItem.movable := 0;
+            SetObjProperty(tempItem, "Creator", caster.serial);
+            SetObjProperty(tempItem, "f", 1);
+          endif
+        endfor
+      endif
+      // Create Lava Pool
+      if (abs(cast_on.x - i) < range && abs(cast_on.y - j) < range)
+//        if ((cast_on.x - i + 1) == range && (cast_on.y - j + 1) == range)
+//          Randtemplate := 0x1348;
+//        else
+          Randtemplate := lavapool[Randomint(lavapool[1])+2];
+//        endif
+        tempItem := CreateItemAtLocation( i, j, (cast_on.z-15), Randtemplate, 1);
+        if (tempItem)
+          lavaPoolMade.append(tempItem);
+          tempItem.movable := 0;
+          SetObjProperty(tempItem, "Creator", caster.serial);
+          SetObjProperty(tempItem, "f", 1);
+        endif
+      endif
+
+    endfor
+  endfor
+  set_critical(0);
+
+
+  for (i := 0; i < 10; i := i + 1)
+    // Move rocks up
+ /*   set_critical(1);
+      foreach rock in rocksMade
+        rock.movable := 1;
+        MoveItemToLocation(rock, rock.x, rock.y, (rock.z+1), MOVEITEM_FORCELOCATION);
+        rock.movable := 0;
+      endforeach
+    set_critical(0);
+*/
+    // Move Lava up
+    set_critical(1);
+      foreach lava in lavaPoolMade
+        lava.movable := 1;
+        MoveItemToLocation(lava, lava.x, lava.y, (lava.z+2), MOVEITEM_FORCELOCATION);
+        lava.movable := 0;
+      endforeach
+    set_critical(0);
+
+    // Create Lava Stream
+    set_critical(1);
+    foreach template in lavastream
+      if (template[5] == i)
+        tempItem := CreateItemAtLocation( cast_on.x+template[2], cast_on.y+template[3], cast_on.z+template[4], template[1], 1);
+        if (tempItem)
+          lavaStreamMade.append(tempItem);
+          tempItem.movable := 0;
+          SetObjProperty(tempItem, "Creator", caster.serial);
+          SetObjProperty(tempItem, "f", 1);
+        endif
+      endif
+    endforeach
+    set_critical(0);
+
+    sleepms(100);
+  endfor
+
+  EraseObjProperty( caster, "#Casting");
+
+  sleepms(500);
+
+  for (i := 0; i < 20; i := i + 1)
+    foreach template in lavastream
+      foreach item in lavaStreamMade
+        if (template[5] == i && template[1] == item.objtype)
+            destroyItem(item);
+          endif
+      endforeach
+    endforeach
+    sleepms(100);
+  endfor
+
+
+  // Do the dmg
+  for (i := 0; i < 10; i := i + 1)
+    var victims := ListMobilesNearLocation(CInt(cast_on.x), CInt(cast_on.y), CInt(cast_on.z), range);
+
+    foreach mobile in victims
+      var immunity := IsProtected( caster, mobile, circle );
+      var circ := circle;
+      if( immunity != IMMUNED && mobile != caster )
+        if( immunity == CURSED )
+          circ := circ * 2;
+        endif
+        if (AutoCallGuardCheck(caster, mobile))
+          EraseObjProperty( caster, "#Casting");
+          foreach item in rocksMade
+            destroyItem(item);
+          endforeach  
+          foreach item in lavaStreamMade
+            destroyItem(item);
+          endforeach
+          foreach item in lavaPoolMade
+            destroyItem(item);
+          endforeach
+          return;
+        endif
+        if(!mobile.multi)
+          var dmg := CInt(CalcSpellDamage( caster, mobile, circ, AREA_EFFECT_SPELL)/9);
+          send_attack(mobile, caster, SPELL_ID);
+          PlayObjectCenteredEffect( mobile, FX_SPELL_LAVASTREAM, SPEED_SPELL_LAVASTREAM, LOOP_SPELL_LAVASTREAM);
+          PlaySoundEffect(mobile, SFX_SPELL_LAVASTREAM2);
+          ApplyElementalDamage(caster, mobile, circ, dmg, element);
+        endif
+      endif
+  
+    endforeach
+    sleep(1);
+  endfor
+
+
+
+  
+
+  foreach item in rocksMade
+    destroyItem(item);
+  endforeach  
+foreach item in lavaStreamMade
+    destroyItem(item);
+  endforeach
+  foreach item in lavaPoolMade
+    destroyItem(item);
+  endforeach
+endprogram

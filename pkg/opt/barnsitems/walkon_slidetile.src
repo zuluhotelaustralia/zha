@@ -1,0 +1,39 @@
+use uo;
+use os;
+include "include/attributes";
+
+program walkon_slidetile(who, tile )
+	if (who.dead)
+		return;
+	endif
+
+	who.frozen:=1;
+	sleepms(250);
+	if (who.x!=tile.x || who.y!=tile.y)
+		return;
+	endif
+	//find tile dir
+	//move in dir of tile
+	var tempgraphic := tile.graphic;
+	case tempgraphic
+		//east
+		6114:
+			MoveCharacterToLocation( who, who.x+1, who.y, tile.z, MOVECHAR_FORCELOCATION );
+			break;
+		//south
+		6115:
+			MoveCharacterToLocation( who, who.x, who.y+1, tile.z, MOVECHAR_FORCELOCATION );
+			break;
+		//north
+		6119:
+			MoveCharacterToLocation( who, who.x, who.y-1, tile.z, MOVECHAR_FORCELOCATION );
+			break;
+		//west
+		6120:	
+			MoveCharacterToLocation( who, who.x-1, who.y, tile.z, MOVECHAR_FORCELOCATION );
+			break;
+	endcase
+	who.frozen:=0;
+endprogram
+
+

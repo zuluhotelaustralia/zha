@@ -1,0 +1,30 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+program bow(who, count)
+	if (!checkStaff(who, "bow", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+var tcount;
+
+if (count)
+        tcount := CInt(count);
+else
+        tcount := 1;
+endif
+
+var i;
+for ( i := 1; i <= tcount; i := i + 1)
+foreach critter in ListMobilesNearLocation(who.x, who.y, who.z, 15)
+
+        if (critter.graphic in {0x190, 0x191} && !critter.cmdlevel)
+                PerformAction( critter, ACTION_BOW );
+        endif
+endforeach
+sleep(1);
+endfor
+
+endprogram

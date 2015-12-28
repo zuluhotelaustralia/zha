@@ -1,0 +1,205 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/areas";
+include "include/cmdlevel_check";
+include "include/constants/propids";
+include "include/gumps";
+
+program areas( who )
+	if (!checkStaff(who, "areas", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+	DisplayAreasGump(who);
+	
+endprogram
+
+function DisplayAreasGump(who)
+	var page:=0;
+	var start:=1;
+	var retrieve:=21;//retrieves 21 max.. displays 20
+	//if 21 available it will allow next to be available
+	//for retrieval of next 20 records
+	
+	var areas:=GetArrayOfAreaStructs(start, retrieve);
+
+	var gumpresult := AreasInfoGump(who, areas, page, "Select Area for property info");
+	while (gumpresult)
+		if (gumpresult<=20)		//show area viewing gump			
+			AreaViewingGump(who, areas[gumpresult]);
+			return;
+		endif
+		if (gumpresult==21)//prev
+			if (page>0)
+				page:=page-1;
+				start:=start-(retrieve-1);
+				areas:=GetArrayOfAreaStructs(start, retrieve);
+				gumpresult := AreasInfoGump(who, areas, page, "Select Area for property info");
+			endif
+		elseif(gumpresult==22)//next
+			if (areas.size()>20) 
+				page:=page+1;
+				start:=start+(retrieve-1);
+				areas:=GetArrayOfAreaStructs(start, retrieve);
+				gumpresult := AreasInfoGump(who, areas, page, "Select Area for property info");
+			endif
+		endif
+	endwhile
+endfunction
+
+function AreasInfoGump(who, areas, page, title)
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SCROLL, 400, 500);
+	GFTextMid(100, 10, 200, 10, title);
+	
+	var i;
+	var y := 40;
+	
+	//because 21 max are taken but 20 only are to be displayed
+	//21st indicates more available for next gump
+	//so:
+	var sSize;
+	if (areas.size()>20)
+		sSize:=20;
+	else
+		sSize:=areas.size();
+	endif
+
+	var hButton:=array;
+	var tempstr;
+	for(i:=1;i<=sSize;i:=i+1)
+		
+		tempstr:= areas[i].name;
+		if (IsInBox(who, CInt(areas[i].minx), CInt(areas[i].maxx), CInt(areas[i].miny), CInt(areas[i].maxy)))
+			tempstr:= tempstr + "  <-- YOU ARE HERE!"; 
+			GFTextLine(50, y, 53, tempstr);
+		else
+			GFTextLine(50, y, 5, tempstr);
+		endif
+		
+		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		y:=y+20;
+	endfor
+	
+	//prev and next page buttons
+	var prevButton, nextButton;
+		if (page>0)
+		GFTextLine(20, 480, 4, "PREVIOUS" );
+		prevButton := GFButtonID(10, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+		if (areas.size()>20)
+		GFTextLine(280, 480, 4, "NEXT" );
+		nextButton := GFButtonID(270, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+		var choice := GFSendGump(who);
+		//return values	
+	
+	if (choice[prevButton.keyid])
+		return 21;
+	endif
+		if (choice[nextButton.keyid])
+		return 22;
+	endif
+		var counter:=0;
+		foreach b in hButton
+		counter:=counter+1;
+   	if (choice[b.keyid])
+			return counter;
+		endif
+	endforeach
+	return 0;
+endfunction
+
+
+function AreaViewingGump(who, area)
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 230, 400);
+		
+	GFTextMid(10, 20, 230, 53, "Area: " + area.name);
+	
+	GFTextLine(30, 40, 5, "min x: " + area.minx);
+	GFTextLine(30, 60, 5, "min y: " + area.miny);
+	GFTextLine(30, 80, 5, "max x: " + area.maxx);
+	GFTextLine(30, 100, 5, "max y: " + area.maxy);
+	GFTextLine(30, 120, 5, "guarded: " + area.guarded);
+	GFTextLine(30, 140, 5, "antiloot: " + area.antiloot);
+	GFTextLine(30, 160, 5, "antimagic: " + area.antimagic);
+	GFTextLine(30, 180, 5, "forbidden: " + area.forbidden);
+	GFTextLine(30, 200, 5, "marking: " + area.marking);
+	GFTextLine(30, 220, 5, "norecall: " + area.norecall);
+	GFTextLine(30, 240, 5, "norecallout: " + area.norecallout);
+
+
+	GFTextLine(30, 300, 5, "Exit Area Info");
+
+		
+	var exitAreaGumpbutton  := GFButtonID( 10,  275, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if (choice[exitAreaGumpbutton.keyid])
+		return;
+	endif
+	
+endfunction
+
+function GetArrayOfAreaStructs(start, returnSize)
+
+	var cfg		:= ReadConfigFile( ":areas:areas" );
+	var areas	:= GetConfigStringArray( cfg[1], "Area" );
+	var guarded	:= GetGlobalProperty(PROPID_GLOBAL_AREAS_GUARDED);
+	var antiloot	:= GetGlobalProperty(PROPID_GLOBAL_AREAS_NOLOOTING);
+	var antimagic	:= GetGlobalProperty(PROPID_GLOBAL_AREAS_ANTIMAGIC);
+	var forbidden	:= GetGlobalProperty(PROPID_GLOBAL_AREAS_FORBIDDEN);	
+	var marking	:= GetGlobalProperty( PROPID_GLOBAL_AREAS_NOMARKING );
+	var norecall := GetGlobalProperty(PROPID_GLOBAL_AREAS_NORECALL);
+	var norecallout := GetGlobalProperty(PROPID_GLOBAL_AREAS_NORECALLOUT);
+	
+	var splited;
+	var name;
+	var j;
+	var i:=1;
+	var areastructs := array;
+	
+	var maxAreas:=areas.size();
+	
+	if (!areas[1])
+		return;
+	endif
+		
+	for(i:=start;i<=maxAreas&&areastructs.size()<returnSize;i:=i+1)
+		splited	:= SplitWords( areas[i] );
+		name	:= splited[5];
+		j :=6;
+		while( splited[j] )
+			name := name + " " + splited[j];
+			j := j + 1;
+		endwhile
+		//Broadcast (name);
+		areastructs.append(MakeAreaStruct(name, splited[1], splited[2], splited[3], splited[4], guarded[i], antiloot[i], antimagic[i], forbidden[i], marking[i], norecall[i], norecallout[i]));
+	endfor
+	return areastructs;
+endfunction
+
+function MakeAreaStruct(name, minx, maxx, miny, maxy, guarded, antiloot, antimagic, forbidden, marking, norecall, norecallout)
+	var areastruct := struct;
+	areastruct.+name:=name;
+	areastruct.+minx:=minx;
+	areastruct.+maxx:=maxx;
+	areastruct.+miny:=miny;
+	areastruct.+miny:=miny;
+	areastruct.+maxy:=maxy;
+	areastruct.+miny:=miny;
+	areastruct.+guarded:=guarded;
+	areastruct.+antiloot:=antiloot;	
+	areastruct.+antimagic:=antimagic;	
+	areastruct.+forbidden:=forbidden;	
+	areastruct.+marking:=marking;	
+	areastruct.+norecall:=norecall;	
+	areastruct.+norecallout:=norecallout;	
+	return areastruct;	
+endfunction

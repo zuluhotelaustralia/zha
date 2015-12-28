@@ -1,0 +1,23 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program openit( character )
+	if (!checkStaff(character, "openit", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var what := Target( character );
+
+	if( !what )
+		return;
+	endif
+
+	if( !what.isa( POLCLASS_CONTAINER ) )
+		SendSysMessage( character, "That isn't a container." );
+	else
+		SendOpenSpecialContainer( character, what );
+	endif
+
+endprogram

@@ -1,0 +1,25 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/spelldata";
+
+program walkon_auxquestLocationTile( who, item )
+	if (who.dead)
+		return;
+	endif
+	var associatedambushtileser := GetObjProperty(item, "AssociatedAmbushTile");
+	if (!associatedambushtileser)
+		return;
+	endif
+	var associatedambushtile := SystemFindObjectBySerial(associatedambushtileser);
+	if (!associatedambushtile)
+		return;
+	endif
+	var params := {who, associatedambushtile};
+	start_script( "ambushtilewalkon", params );
+	
+endprogram
+

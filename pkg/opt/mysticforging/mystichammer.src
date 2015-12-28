@@ -1,0 +1,478 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/classes";
+
+const FEMALEPLATE := 7172;
+const PLATE := 5141;
+const FORGEDIFF := 150;
+const FIREWEAP := 0xf096;
+const EARTHWEAP := 0xf055;
+const AIRWEAP := 0xf074;
+const SHADOWWEAP := 0xf118;
+const POISONWEAP := 0xf140;
+const WATERWEAP := 0x759c;
+const ANVIL := 0x75e7;
+const MYSTICSHARD := 0x75e9;
+
+program mystic_hammer (user, hammer)
+
+	if (!ReserveItem(hammer))
+		return;
+	elseif (!IsEquipped(user, hammer))
+		SendSysMessage(user, "You must equip that to use it");
+		return;
+	elseif (!len(ListItemsNearLocationOfType(user.x, user.y, user.z, 2, ANVIL)))
+		SendSysMessage(user, "You must be near an enchanted anvil to use that!");
+		return;
+	endif
+	var type:= GetObjProperty(hammer, "ElemStored");
+	if (type)
+		EnhanceItem(user, hammer, type);
+		return;
+	endif
+	SendSysMessage(user, "Select an Elemental Weapon to extract power from:", 3, 55);
+	var source := Target(user);
+	
+	if (!source)
+		SendSysMessage(user, "Cancelled");
+		return;
+	elseif (!(source.isa(POLCLASS_WEAPON)))
+		SendSysMessage(user, "You can't use that!");
+		return;
+	elseif (source.container != user.backpack)
+		SendSysMessage(user, "That must be in your backpack");
+		return;		
+	elseif (!(IsAnElementalWeapon(source)))
+		SendSysMessage(user, "That is not a suitable weapon!");
+		return;
+	elseif (!ReserveItem(source))
+		return;
+	endif
+
+	type:= GetType(source.objtype);	
+	SendSysMessage(user, "You attempt to extract the power from the weapon...", 3, 55);
+	PlaySoundEffect(user, GetSound(type));
+	for i:=1 to 5
+		PlaySoundEffect(user, 0x2b);
+		PerformAction(user, 9);
+		sleepms(Random(500)+1000);
+	endfor
+	if (!CheckSkill(user, SKILLID_ARMSLORE, FORGEDIFF, 1))
+		SendSysMessage(user, "You cannot control the power!", 3, 38);
+		DestroyItem(source);
+		PlayFailedEffects(user, type);
+		if (CheckHammerDestroyed(user))
+			DestroyItem(hammer);
+			SendSysMessage(user, "The hammer is destroyed by the "+type+" energy!", 3, 38);
+		endif
+		return;	
+	endif
+	SendSysMessage(user, "You successfully extract the elemental power and store it in the hammer!", 3, 4);
+	DestroyItem(source);
+	hammer.color:=GetColor(type);
+	SetObjProperty(hammer, "ElemStored", CStr(type));
+	var newname:= hammer.name;
+	hammer.name := newname+" ("+type+" stored)";	
+		
+endprogram
+
+function IsAnElementalWeapon(weapon)
+
+	var obj := weapon.objtype;
+	if (obj==FIREWEAP||obj==WATERWEAP||obj==AIRWEAP||obj==EARTHWEAP||obj==POISONWEAP||obj==SHADOWWEAP)
+		return 1;
+	endif
+	return 0;
+	
+endfunction
+
+function EnhanceItem(user, hammer, type)
+
+	var shards:=0;
+	foreach item in EnumerateItemsInContainer(user.backpack)
+		if(item.objtype==MYSTICSHARD)
+			shards:=shards+item.amount;
+		endif
+	endforeach
+	if (shards < 30)
+		SendSysMessage(user, "You need 30 mystic crystal shards to enhance an item!");
+		return;
+	endif
+
+	SendSysMessage(user, "Select an item to enhance:", 3, 55);
+	var item := Target(user);
+	if (!item)
+		SendSysMessage(user, "Cancelled");
+		return 0;
+	elseif (item.container != user.backpack)
+		SendSysMessage(user, "The item must be in your backpack");
+		return 0;	
+	elseif (GetObjProperty(item, "EnhancedBy"))
+		SendSysMessage(user, "That item has already been enhanced!");
+		return 0;	
+	elseif (GetObjProperty(item, "noenhance") || (item.isa(POLCLASS_WEAPON) && GetObjProperty(item, "IsGMItem")))
+		SendSysMessage(user, "That item cannot be enhanced!");
+		return 0;
+	elseif (IsInvalidItem(item, type))
+		SendSysMessage(user, "That item cannot be enhanced with "+type);
+		return 0;
+	elseif (!ReserveItem(item))
+		return 0;
+	endif	
+
+	if (!ConsumeSubstance(user.backpack, MYSTICSHARD, 30))
+		SendSysMessage(user, "Cancelled");
+		return;
+	endif
+		
+	SendSysMessage(user, "You attempt to infuse the item with elemental power...", 3, 55);
+	PlaySoundEffect(user, GetSound(type));
+	for i:=1 to 5
+		PlaySoundEffect(user, 0x2b);
+		PerformAction(user, 9);
+		sleepms(Random(500)+1000);
+	endfor
+	if (!CheckSkill(user, SKILLID_BLACKSMITHY, FORGEDIFF, 1))
+		SendSysMessage(user, "You cannot control the power! The item is destroyed!", 3, 38);
+		DestroyItem(item);
+		PlayFailedEffects(user, type);
+		if (CheckHammerDestroyed(user))
+			DestroyItem(hammer);
+			SendSysMessage(user, "The hammer is destroyed by the "+type+" energy!", 3, 38);
+			return;
+		endif
+		return 0;
+	endif
+	SendSysMessage(user, "You successfully infuse the elemental power!", 3, 4);
+	var bonus;
+	case (type)
+		"Fire":		var dmgmod:=item.dmg_mod;
+				bonus:=Random(4)+3;
+				item.dmg_mod := dmgmod+bonus;
+				SendSysMessage(user, "Damage bonus increased by +"+bonus+"!", 3, 38);
+		"Water":	var healbenefit:=GetObjProperty(item, "HealingIncrease");
+				bonus:=Random(4)+2;
+				if (healbenefit)
+					if (healbenefit < 5)
+						bonus:=5;
+						SendSysMessage(user, "Healing benefit increased to +5!", 3, 4);
+					elseif (healbenefit == 5)
+						bonus:=6;
+						SendSysMessage(user, "Healing benefit increased to +6!", 3, 4);
+					else
+						SendSysMessage(user, "Healing benefit already at maximum!", 3, 4);	
+						bonus:=6;
+					endif	
+				else
+					SendSysMessage(user, "Healing benefit set to +"+bonus+"!", 3, 4);
+				endif
+				SetObjProperty(item, "HealingIncrease", bonus);
+				if (GetObjProperty(item, "skilladv"))
+					SendSysMessage(user, "Weapon already has a skill modifier!");
+				else
+					bonus:=Random(2)+5;
+					SendSysMessage(user, "Healing skill bonus set to +"+bonus+"!", 3, 4);
+					SetObjProperty(item, "skilladv", 17);
+					SetObjProperty(item, "skilladvamount", bonus);
+					SetObjProperty(item, "SpecMult", 1);
+				endif
+				
+		"Air":		var dexmod:=GetObjProperty(item, "dex");
+				bonus := Random(6)+5;
+				if(dexmod)
+					SendSysMessage(user, "Dexterity modifier increased by "+bonus+"!", 3, 8);
+					bonus:=bonus+dexmod;					
+				else
+					SendSysMessage(user, "Dexterity bonus of "+bonus+" added!", 3, 8);
+				endif
+				SetObjProperty(item, "dex", bonus);
+				bonus:=Random(11)+10;
+				SetObjProperty(item, "MagicPenalty", -1*bonus);
+				SendSysMessage(user, "Magic Power set to +"+bonus+"%!", 3, 8);
+				SetObjProperty(item, "EnchantColor", GetColor(type));
+				SetObjProperty(item, "ArBonus", 1);
+		"Earth":	var arbonus:=GetObjProperty(item, "ArBonus");
+				bonus:=Random(6)+5;
+				SendSysMessage(user, "AR increased by +"+bonus+"!", 3, 43);
+				if (arbonus)
+					bonus:=bonus+arbonus;
+				endif
+				SetObjProperty(item, "ArBonus", bonus);
+				var strbonus:=GetObjProperty(item, "str");
+				bonus := Random(6)+5;
+				if(strbonus)
+					SendSysMessage(user, "Strength modifier increased by +"+bonus+"!", 3, 66);
+					bonus:=bonus+strbonus;
+				else
+					SendSysMessage(user, "Strength bonus of +"+bonus+" added!", 3, 43);
+				endif
+				SetObjProperty(item, "str", bonus);
+				SetObjProperty(item, "EnchantColor", GetColor(type));				
+		"Shadow":	var dmgmod:=item.dmg_mod;
+				bonus := (Random(5)+18)*-1;
+				SendSysMessage(user, "Damage modifier reduced by "+bonus+"!", 3, 1);
+				if (item.dmg_mod)
+					item.dmg_mod:=dmgmod+bonus;
+				else
+					item.dmg_mod:=bonus;
+				endif
+				if (!GetObjProperty(item, "HitscriptNumber"))
+					SendSysMessage(user, "Piercing effect added!", 3, 1);
+				else
+					SendSysMessage(user, "Weapon changed to Piercing!", 3, 1);
+				endif
+				item.hitscript:="piercingscript";
+				SetObjProperty(item, "HitscriptNumber", 36);
+		"Poison":	bonus := Random(3)+4;
+				var poisonprot := GetObjProperty(item, "PermPoisonProtection");
+				if (poisonprot)
+					if (poisonprot < 5)
+						bonus:=5;
+						SendSysMessage(user, "Poison protection increased to +5!", 3, 75);
+					elseif (poisonprot == 5)
+						bonus:=6;
+						SendSysMessage(user, "Poison protection increased to +6!", 3, 75);
+					else
+						bonus:=6;
+						SendSysMessage(user, "Poison protection already at maximum!", 3, 75);	
+					endif	
+				else
+					SendSysMessage(user, "Poison protection set to +"+bonus+"!", 3, 75);
+				endif
+				SetObjProperty(item, "PermPoisonImmunity", bonus);				
+				SetObjProperty(item, "EnchantColor", GetColor(type));		
+	endcase	
+	hammer.color := 1298;
+	hammer.name := "Mystic Smithy's Hammer";
+	var newname := item.name;
+	if (!newname)
+		newname:=item.desc;
+	endif
+	item.name := newname + " ("+type+")";
+	item.color:=GetColor(type);
+	SetObjProperty(item, "EnhancedBy", CStr(user.name+" ("+user.serial+")"));
+	EraseObjProperty(hammer, "ElemStored");			
+	PlaySuccessEffects(user);
+	return;		
+	
+endfunction
+
+function CheckHammerDestroyed(user)
+
+	if(!CheckSkill(user, SKILLID_BLACKSMITHY, FORGEDIFF, 1))
+		return 1;
+	endif
+	return 0;
+	
+endfunction
+
+function IsInvalidItem(item, type)
+
+	case (type)
+		"Fire":		
+		"Water":	
+		"Shadow":	if (!item.isa(POLCLASS_WEAPON))
+					return 1;
+				endif				
+		"Air":									
+		"Earth":	
+		"Poison":	if (!(item.graphic == PLATE || item.graphic == FEMALEPLATE))
+					return 1;
+				endif
+
+		default:	return 1;
+	endcase
+	return 0;
+
+endfunction
+	
+function PlaySuccessEffects(user)
+
+	PerformAction(user, 17);
+	PlaySoundEffect(user, 0x104);
+	
+endfunction
+	
+function GetType(objecttype)
+
+	case (objecttype)
+		FIREWEAP:	return "Fire";
+		WATERWEAP:	return "Water";
+		AIRWEAP:	return "Air";
+		EARTHWEAP:	return "Earth";
+		POISONWEAP:	return "Poison";
+		SHADOWWEAP:	return "Shadow";	
+	endcase	
+
+endfunction
+
+function GetColor(type)
+
+	case (type)
+		"Fire":		return 1100;
+		"Air":		return 1154;
+		"Water":	return 1099;
+		"Earth":	return 1285;
+		"Poison":	return 1162;
+		"Shadow":	return 1109;
+		default:	return 0;
+	endcase
+	
+endfunction
+
+function GetSound(type)
+
+	case (type)
+		"Fire":		return 0x1de;
+		"Air":		return 0x10c;
+		"Water":	return 0x11;
+		"Earth":	return 0x223;
+		"Poison":	return 0x21;
+		"Shadow":	return 0x217;
+		default:	return 0xf6;
+	endcase
+	
+endfunction
+
+function PlayFailedEffects(user, type)
+
+	var ex := user.x;
+	var ey := user.y;
+	var ez := user.z;
+	
+	case (type)
+		"Fire":		PlayStationaryEffect(ex, ey, ez, 0x36b0, 7, 0x10);
+				PlaySoundEffect(user, 0x0208);
+		"Air":		PlaySoundEffect(user, 0x15);
+				for i:=1 to 3
+					PlayLightningBoltEffect(user);
+					sleepms(500);
+				endfor
+		"Water":	Waterfall(user, 1000, 1167, 0x11);
+		"Earth":	PlayMovingEffectXYZ( ex+10, ey, ez, ex, ey, ez, 0x11b6, 8);
+				PlayMovingEffectXYZ( ex-10, ey, ez, ex, ey, ez, 0x11b6, 8);
+				PlayMovingEffectXYZ( ex, ey+10, ez, ex, ey, ez, 0x11b6, 8);
+				PlayMovingEffectXYZ( ex, ey-10, ez, ex, ey, ez, 0x11b6, 8);
+				PlaySoundEffect(user, 0x221);
+		"Poison":	PlayStationaryEffect(ex, ey, ez, 0x113a, 7, 0x10);
+				PlaySoundEffect(user, 0x206);
+		"Shadow":	PlayStationaryEffect(ex, ey, ez, 0x37c4, 7, 0x10);
+				PlaySoundEffect(user, 0x167);
+	endcase
+	
+endfunction
+
+function Waterfall( who, duration, color, sfx )
+
+	var x := who.x;
+	var y := who.y;
+	var z := who.z;
+
+	if( sfx )
+		PlaySoundEffect( who, sfx );
+	endif
+
+	var wavetop1	 := CreateItemAtLocation( x, y, z+110, 0x350b, 1 );
+	var wavetop2	 := CreateItemAtLocation( x, y, z+110, 0x34ed, 1 );
+	wavetop1.movable := 0;
+	wavetop2.movable := 0;
+	if( color )
+		wavetop1.color := color;
+		wavetop2.color := color;
+	endif
+
+	var i;
+
+	var waterfall_array	:= {};
+	var waterfall_base	:= {};
+
+	for(i := 10; i >= 0; i := i - 1)
+		waterfall_array.append( CreateItemAtLocation( x, y, z+i*10, 0x3517, 1 ) );
+		waterfall_array[len(waterfall_array)].movable := 0;
+		if( color )
+			waterfall_array[len(waterfall_array)].color := color;
+		endif
+		waterfall_array.append( CreateItemAtLocation( x, y, z+i*10, 0x34f9, 1 ) );
+		waterfall_array[len(waterfall_array)].movable := 0;
+		if( color )
+			waterfall_array[len(waterfall_array)].color := color;
+		endif
+		sleepms( 50 );
+	endfor
+
+	waterfall_base.append( CreateItemAtLocation(x,   y+1, z, 0x17a1, 1) );
+	waterfall_base[1].movable := 0;
+	if( color )
+		waterfall_base[1].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x+1, y,   z, 0x179d, 1) );
+	waterfall_base[2].movable := 0;
+	if( color )
+		waterfall_base[2].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x,   y-1, z, 0x179f, 1) );
+	waterfall_base[3].movable := 0;
+	if( color )
+		waterfall_base[3].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x-1, y,   z, 0x17a3, 1) );
+	waterfall_base[4].movable := 0;
+	if( color )
+		waterfall_base[4].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x+1, y+1, z, 0x17a7, 1) );
+	waterfall_base[5].movable := 0;
+	if( color )
+		waterfall_base[5].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x-1, y+1, z, 0x17a8, 1) );
+	waterfall_base[6].movable := 0;
+	if( color )
+		waterfall_base[6].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x+1, y-1, z, 0x17a5, 1) );
+	waterfall_base[7].movable := 0;
+	if( color )
+		waterfall_base[7].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x-1, y-1, z, 0x17a6, 1) );
+	waterfall_base[8].movable := 0;
+	if( color )
+		waterfall_base[8].color := color;
+	endif
+
+	waterfall_base.append( CreateItemAtLocation(x,   y,   z, 0x1797, 1) );
+	waterfall_base[9].movable := 0;
+	if( color )
+		waterfall_base[9].color := color;
+	endif
+
+
+	PlaySoundEffect( who, 0x11 );
+
+	sleepms( duration );
+
+	DestroyItem( wavetop1 );
+	DestroyItem( wavetop2 );
+
+	foreach waterfall_tile in waterfall_array
+		DestroyItem( waterfall_tile );
+		sleepms( 25 );
+	endforeach
+
+	sleep( 5 );
+
+	foreach part in waterfall_base
+		DestroyItem( part );
+	endforeach
+
+endfunction

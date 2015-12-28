@@ -1,0 +1,44 @@
+/* Unholy Spell - Create Pagan Reagent **
+** Creates a pagan reagent.            **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+use util;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_CREATEPAGANREAGENT;
+
+program cast_createpaganreagent(parms)
+  var caster;
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+  else
+    caster := parms;
+  endif
+
+  var regs := {0xf91,3964,3984,3982,3966,3970,3971,3960,3969,3977,3967,3968,3965,3979,3975,3978,3961,3983};
+  var chance := RandomInt(1000);
+  var amount := 1;
+
+  if (chance < 10)
+    amount := 4;
+  elseif (chance < 50)
+    amount := 3;
+  elseif (chance < 100)
+    amount := 2;
+  endif
+
+  PlaySoundEffect(caster, SFX_SPELL_CREATEPAGANREAGENT);
+  PlayObjectCenteredEffect( caster, FX_SPELL_CREATEPAGANREAGENT, SPEED_SPELL_CREATEPAGANREAGENT, LOOP_SPELL_CREATEPAGANREAGENT);
+
+  var item := CreateItemInBackpack(caster, regs[RandomInt(len(regs)+1)], amount);
+  var regNumber := "reagent";
+  if (amount > 1)
+    regNumber := "Reagents";
+  endif
+  SendSysMessage(caster, "You create "+amount + " " + regNumber +" and put it with "+item.desc);
+  
+  EraseObjProperty( caster, "#Casting");
+endprogram

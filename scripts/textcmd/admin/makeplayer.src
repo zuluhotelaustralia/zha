@@ -1,0 +1,15 @@
+use uo;
+
+program makeplayer( char )
+
+	var who := Target( char );
+
+	if( who.cmdlevel > char.cmdlevel && char.cmdlevel < 5 )
+		SendSysMessage( who, char.name + " is trying to decrease you to player." );
+	else
+		who.cmdlevel := 0;
+	endif
+
+	SendSysMessage( char, who.name + " is now a regular player");
+
+endprogram

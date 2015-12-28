@@ -1,0 +1,78 @@
+use uo;
+use os;
+
+var layout:={
+"page 0",
+"resizepic 30 30 83 320 280",
+"text 110 42 35 0",
+"text 50 65 35 1",
+"text 50 85 35 2",
+"text 50 105 35 3",
+"text 50 125 35 4",
+"text 50 145 35 5",
+"text 50 165 35 6",
+"text 50 185 35 7",
+"text 50 205 35 8",
+"text 50 225 35 9",
+"text 50 245 35 10",
+"button 161 275 2128 2129 1 0 1"
+};
+
+var data := {
+ "Arena Top Ten List",
+ " 1. ",
+ " 2. ",
+ " 3. ",
+ " 4. ",
+ " 5. ",
+ " 6. ",
+ " 7. ",
+ " 8. ",
+ " 9. ",
+ "10. "
+};
+
+program scoreboard(who, item)
+
+	var I;
+	var names:={};
+	var scores:={};
+
+	var arenaserial:=CInt(GetObjProperty(item, "ArenaSerial"));
+	if (!arenaserial && who.cmdlevel)
+	  SendSysMessage(who, "Select an Arena Kiosky to Attach this Board");
+	  var arenakiosky:=Target(who);
+	  if ( (!arenakiosky) || (arenakiosky.objtype!=0xa200))
+	    SendSysMessage(who, "canceled");
+	    return;	   
+	  endif
+  	  arenaserial:=arenakiosky.serial;
+	  SetObjProperty(item,"ArenaSerial",arenaserial);
+	  return;
+	endif
+
+	var arenacontrol:=SystemFindObjectBySerial(arenaserial);
+	if ((!arenacontrol) && (who.cmdlevel))
+	  SendSysMessage(who,"Arena Kiosky NOT Found");
+	  SetObjProperty(item,"ArenaSerial","");
+	  return;
+	endif
+
+
+	for (i:=1;i<=10;i:=i+1)
+	  names[i]:="";
+	  scores[i]:=0;
+	endfor
+
+	names:=GetObjProperty(arenacontrol,"Names");
+
+//	Print("Names:"+Names);
+
+
+	scores:=GetObjProperty(arenacontrol,"Scores");
+
+	for (i:=1;i<=10;i:=i+1)
+	    data[i+1]:=data[i+1]+names[i]+" - "+scores[i];
+	endfor
+	var res := SendDialogGump(who, layout, data);
+endprogram

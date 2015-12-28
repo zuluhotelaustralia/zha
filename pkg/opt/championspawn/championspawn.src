@@ -1,0 +1,706 @@
+/* Champion Spawn                       **
+** Used for Champion Spawn point system **
+** Seravy - seravy@gmail.com            */
+
+use basic;
+use uo;
+use util;
+
+include "include/cmdlevel_check";
+
+program championspawn( who, championSpawn )
+
+  if (!who)
+    return 0;
+  endif
+
+  if (TypeOf(who) == "Array")
+    championSpawn := who[2];
+    who := who[1];
+  endif
+
+  detach();
+
+  if( who.isA(POLCLASS_MOBILE) && !who.isA(POLCLASS_NPC))
+    if( who.cmdlevel >= CMDLEVEL_GAME_MASTER )
+      championSpawnControl(who, championSpawn);
+    else
+      sendsysmessage( who, "You feel warmth from the stone, reacting from your touch");
+    endif
+  endif
+
+  set_critical(1);
+  var runningscript := GetObjProperty(championSpawn, "runningscript");
+  if (runningscript)
+    return;
+  endif
+
+  var active := GetObjProperty(championSpawn, "active");
+  var monsters := GetObjProperty(championSpawn, "monsters");
+  var numbers := GetObjProperty(championSpawn, "numbers");
+  var times := GetObjProperty(championSpawn, "times");
+
+  if (!active || !monsters || !numbers || !times)
+    return;
+  endif
+
+  SetObjProperty(championSpawn, "runningscript", 1);
+  set_critical(0);
+  //Broadcast( "Script is now running"); // DEBUG MESSAGE
+
+  var resetCounter := GetObjProperty(championSpawn, "resetCounter");
+
+  var resetHours := GetObjProperty(championSpawn, "resetHours");
+  if (!resetHours)
+    resetHours := 4;
+  endif
+
+  if (!resetCounter)
+    SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+  elseif ((resetCounter + (60 * 60 * resetHours)) < ReadGameClock())
+    resetSpawn( championSpawn);
+    SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+    EraseObjProperty( championSpawn, "runningscript");
+    return 1;
+  endif
+
+  var spawned := GetObjProperty(championSpawn, "spawned");
+  var level := GetObjProperty(championSpawn, "level");
+  var waittime := GetObjProperty(championSpawn, "waittime");
+
+  if (!spawned)
+    spawned := {};
+  endif
+  if (!level)
+    level := 1;
+  endif
+  if (!waittime)
+    waittime := 0;
+  endif
+
+  if (!monstersAlive( spawned, championSpawn))
+    if (waittime < ReadGameClock())
+
+      changeSkulls(level, championSpawn);
+
+      dispelSpawn(championSpawn);
+
+      if (level == 6 && GetObjProperty(championSpawn, "nextRunWait"))
+        level := 1;
+        SetObjProperty( championSpawn, "level", level);
+        endSeq( championSpawn);
+      endif
+
+      if (setTimer(championSpawn, times, level))
+        createMonsters(level, monsters, numbers, championSpawn);
+      else
+        waittime := GetObjProperty(championSpawn, "waittime");
+        sleep( waittime - ReadGameClock() + 1);
+        Start_Script(":championspawn:championspawn", { 0, championSpawn });
+      endif
+
+    else
+      sleep( waittime - ReadGameClock() + 1);
+      Start_Script(":championspawn:championspawn", { 0, championSpawn });
+    endif
+  endif
+
+  EraseObjProperty( championSpawn, "runningscript");
+  //Broadcast( "Script is now finished");
+
+endprogram
+
+
+/* Creates the monsters depending on **
+** the level for the spawn           */
+function createMonsters( level, monsters, numbers, championSpawn)
+  var spawned := {};
+  var monsterMade := 0;
+
+  while (monsters[level] == "nothing")
+    if (level >= 5)
+      if (monsters[1] != "nothing")
+        level := 1;
+      else
+        return 0;
+      endif
+    else
+      level := level + 1;
+    endif
+  endwhile
+
+  var spawnLoc := { championSpawn.x, championSpawn.y, championSpawn.z };
+  var noLoot := GetObjProperty(championSpawn, "noLoot");
+  for i := 1 to numbers[level]
+    spawnLoc := getSpawnLocation(championSpawn);
+    monsterMade := CreateNpcFromTemplate( monsters[level], spawnLoc[1], spawnLoc[2], spawnLoc[3]);
+    if (!monsterMade)
+      monsterMade := CreateNpcFromTemplate( monsters[level], championSpawn.x, championSpawn.y, championSpawn.z);
+      if (!monsterMade)
+        foreach person in EnumerateOnlineCharacters()
+          if (person.cmdlevel > 1)
+            SendSysMessage(person, "Error making the "+i+" Champion Spawn template, '"+monsters[level]+"' at "+championSpawn.x+", "+championSpawn.y+", "+championSpawn.z+". Please Fix!", 3, 38);
+          endif
+        endforeach
+      else
+        spawned.append(monsterMade.serial);
+      endif
+    else
+      set_critical(1);
+      if (noLoot)
+        SetObjProperty(monsterMade, "noloot", 1 );
+        SetObjProperty(monsterMade, "guardkill", 1 );
+      endif
+      SetObjProperty(monsterMade, "untamable", 1 );
+      SetObjProperty( monsterMade, "AtDeathScript", ":championspawn:refreshspawns" );
+      SetObjProperty( monsterMade, "championSpawn", championspawn.serial );
+      set_critical(0);
+
+      spawned.append(monsterMade.serial);
+    endif
+
+  endfor
+
+  SetObjProperty( championSpawn, "spawned", spawned);
+  SetObjProperty( championSpawn, "nextRunWait", level);
+
+  if (level > 5)
+    level := 1;
+  else
+    level := level + 1;
+  endif
+
+  SetObjProperty( championSpawn, "level", level);
+
+  //SetObjProperty( championSpawn, "waittime", ReadGameClock()+times[level]-1);
+
+
+  return monsterMade;
+endfunction
+
+
+/* Gets a random location for the **
+** monster to spawn at.           */
+function getSpawnLocation(championSpawn)
+  var spawnLocation := { championSpawn.x, championSpawn.y, championSpawn.z };
+  var radius := GetObjProperty(championSpawn, "radius");
+  var checkLOS := GetObjProperty(championSpawn, "checkLOS");
+  var times := 0;
+
+  if (radius)
+    var yMod := RandomInt(CInt(radius*2))-radius;
+    var XMod := RandomInt(CInt(radius*2))-radius;
+    spawnLocation := { championSpawn.x+xMod, championSpawn.y+yMod, championSpawn.z };
+
+    if (checkLOS)
+      while (times < 5 || !CheckLosAt( championSpawn, spawnLocation[1], spawnLocation[2], spawnLocation[3] ))
+
+        yMod := RandomInt(CInt(radius*2))-radius;
+        XMod := RandomInt(CInt(radius*2))-radius;
+        spawnLocation := { championSpawn.x+xMod, championSpawn.y+yMod, championSpawn.z };
+        times := times + 1;
+      endwhile
+
+    endif
+
+  endif
+  
+
+
+  return spawnLocation;
+endfunction
+
+
+/* Sets the timer for next monsters **
+** to spawn.                         */
+function setTimer(championSpawn, times, level)
+  var timerLevel := GetObjProperty(championSpawn, "nextRunWait");
+  if (timerLevel)
+    SetObjProperty( championSpawn, "waittime", ReadGameClock()+times[timerLevel]);
+    SetObjProperty( championSpawn, "nextRunWait", 0);
+//    Broadcast(" Waiting for " + times[timerLevel] + " seconds."); // DEBUG MESSAGE
+
+    return 0;
+  else
+    SetObjProperty( championSpawn, "nextRunWait", level);
+    return 1;
+  endif
+  
+endfunction
+
+
+/* Changes the colour of the skulls  **
+** depending on the level            */
+function changeSkulls(level, championSpawn)
+  var skulls := GetObjProperty(championSpawn, "skulls");
+  if (!skulls)
+    return 0;
+  endif
+  if (skulls.size() < 4)
+    return 0;
+  endif
+  for i := 1 to skulls.size()
+    skulls[i] := SystemFindObjectBySerial(skulls[i]);
+  endfor
+
+//  Broadcast(" Changing skulls to level " + level + " with activemonster:"+!GetObjProperty(championSpawn, "nextRunWait")); // DEBUG MESSAGE
+
+  var colours := GetObjProperty(championSpawn, "colours");
+  if (!colours)
+    colours := { 0, 1383, 1400 };
+  endif
+
+  for i := 1 to level // Finished
+    skulls[i].color := colours[2];
+  endfor
+  if (level <= skulls.size())
+    for i := level to skulls.size() // To be done
+      skulls[i].color := colours[1];
+    endfor
+  endif
+  if (level > 0 && !GetObjProperty(championSpawn, "nextRunWait") && (level <= skulls.size())) // Active
+    PlayLightningBoltEffect(skulls[level]);
+    PlaySoundEffect( skulls[level], 0x2A );
+    skulls[level].color := colours[3];
+  endif
+return 1;
+endfunction
+
+/* Checks to see if its the end, and      **
+** if it is, it does the required trigger */
+function endSeq(championSpawn)
+  var gatedest := GetObjProperty(championSpawn, "gatedest");
+  var unlock := GetObjProperty(championSpawn, "unlock");
+  var script := GetObjProperty(championSpawn, "script");
+  var endDuration := GetObjProperty(championSpawn, "endDuration");
+
+  if (script)
+    Start_Script( script);
+  endif
+
+  if (!endDuration)
+    endDuration := 30;
+  endif
+
+  if (unlock || (gatedest[1] && gatedest[2]))
+    var unlockItem;
+    var portalGate;
+    var destGate;
+    var i;
+
+    if (unlock)
+      unlockItem := SystemFindObjectBySerial(unlock);
+      if (unlockItem)
+        PrintTextAbove( unlockItem, "*Unlocked*");
+        PlaySoundEffect( unlockItem, 0x200 );
+        unlockItem.locked := 0;
+      endif
+    endif
+
+    if (gatedest[1] && gatedest[2])
+      set_critical( 1 );
+      portalGate := CreateItemAtLocation( championSpawn.x, championSpawn.y, championSpawn.z, 0x0f6c, 1 );
+      if (!portalGate) return; endif
+      SetObjProperty( portalGate, "GateDestX", gatedest[1] );
+      SetObjProperty( portalGate, "GateDestY", gatedest[2] );
+      SetObjProperty( portalGate, "GateDestZ", gatedest[3] );
+      SetObjProperty( portalGate, "perma", 1);
+      set_critical( 0 );
+      PlaySoundEffect( portalGate,  0x020f );
+      
+      if (!GetObjProperty(championSpawn, "noReturnPortal"))
+      set_critical( 1 );
+        destGate := CreateItemAtLocation( gatedest[1], gatedest[2], gatedest[3], 0x0f6c, 1 );
+        SetObjProperty( destGate, "GateDestX", championSpawn.x );
+        SetObjProperty( destGate, "GateDestY", championSpawn.y );
+        SetObjProperty( destGate, "GateDestZ", championSpawn.z );
+        SetObjProperty( destGate, "perma", 1);
+        set_critical( 0 );
+        PlaySoundEffect( destGate,  0x020f );
+      else
+        destGate := portalGate;
+      endif
+
+      for( i := 6899; i <= 6907; i := i+1 )
+        portalGate.graphic := i;
+        destGate.graphic := i;
+        sleepms( 150 );
+      endfor
+      portalGate.graphic := 0x0f6c;
+      destGate.graphic := 0x0f6c;
+
+    endif
+
+
+    sleep( endDuration - 10);
+
+    for (i := 10; i >= 0; i := i - 2)
+      if (unlockItem)
+        PrintTextAbove( unlockItem, "*"+i+"*");
+      endif
+
+      if (portalGate)
+        PrintTextAbove( portalGate, "*"+i+"*");
+      endif
+
+      if (destGate)
+        PrintTextAbove( destGate, "*"+i+"*");
+      endif
+
+      sleep(2);
+    endfor
+
+    if (unlockItem)
+      PrintTextAbove( unlockItem, "*Locked*");
+      PlaySoundEffect( unlockItem, 0x200 );
+      unlockItem.locked := 1;
+    endif
+    if (portalGate)
+      for( i := 6907; i >= 6899; i := i-1 )
+        portalGate.graphic := i;
+        destGate.graphic := i;
+        sleepms( 150 );
+      endfor
+      DestroyItem( portalGate );
+      DestroyItem( destGate );
+    endif
+
+  endif
+  
+  SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+  return 1;
+endfunction
+
+
+/* Checks if monsters are alive at a spawn **
+** returns true if there are, else false   */
+function monstersAlive( spawned, championSpawn)
+
+  var tempspawns := {};
+  foreach spawn in spawned
+    if (SystemFindObjectBySerial(spawn))
+      tempspawns.append(spawn);
+    endif
+  endforeach
+
+  SetObjProperty( championSpawn, "spawned", spawned);
+
+  if (tempspawns.size() <= 0)
+    return 0;
+  else
+    return 1;
+  endif
+endfunction
+
+
+/* Resets all spawn parameters   */
+function dispelSpawn( championSpawn)
+  var dispel := GetObjProperty(championSpawn, "dispel");
+  if (!dispel)
+    dispel := 0;
+  endif
+
+  var items := ListItemsNearLocation(championSpawn.x, championSpawn.y, championSpawn.z, dispel);
+  foreach item in items
+    if( GetObjProperty(item, "f") )
+      PlayStationaryEffect( championSpawn.x, championSpawn.y, championSpawn.z, 0x3728, 0xa, 0xa );
+      DestroyItem(item);
+    endif
+  endforeach
+
+
+endfunction
+
+
+/* Resets all spawn parameters   */
+function resetSpawn( championSpawn)
+  SetObjProperty(championSpawn, "level", 0);
+  SetObjProperty(championSpawn, "waittime", 0);
+  SetObjProperty( championSpawn, "nextRunWait", 0);
+  changeSkulls(0, championSpawn);
+
+  var spawned := GetObjProperty(championSpawn, "spawned");
+  var tempMonster;
+  foreach spawn in spawned
+    tempMonster := SystemFindObjectBySerial(spawn);
+    if (tempMonster)
+      SetObjProperty( tempMonster, "summoned", 1);
+      RevokePrivilege( tempMonster, PRIVILEGEID_INVULNERABLE );
+      ApplyRawDamage( tempMonster, GetHp(tempMonster)+3 );
+    endif
+  endforeach
+  SetObjProperty( championSpawn, "spawned", {});
+endfunction
+
+
+/* Champion Spawn Control Gump          **
+** Used for managing the Champion Spawn **
+** point system by setting up cprops etc**
+** Seravy - seravy@gmail.com            */
+function championSpawnControl( who, championSpawn)
+  var active := GetObjProperty(championSpawn, "active");
+  var monsters := GetObjProperty(championSpawn, "monsters");
+  var numbers := GetObjProperty(championSpawn, "numbers");
+  var times := GetObjProperty(championSpawn, "times");
+  var radius := GetObjProperty(championSpawn, "radius");
+  var noLoot := GetObjProperty(championSpawn, "noLoot");
+  var checkLOS := GetObjProperty(championSpawn, "checkLOS");
+  var dispel := GetObjProperty(championSpawn, "dispel");
+
+  var gatedest := GetObjProperty(championSpawn, "gatedest");
+  var unlock := GetObjProperty(championSpawn, "unlock");
+  var script := GetObjProperty(championSpawn, "script");
+  var endDuration := GetObjProperty(championSpawn, "endDuration");
+
+
+if (!monsters || TypeOf(monsters) <> "Array" || monsters.size() < 5)
+  monsters := {};
+  for i := 1 to 5
+    monsters[i] := "nothing";
+  endfor
+endif
+if (!numbers || TypeOf(numbers) <> "Array" || numbers.size() < 5)
+  numbers := {};
+  for i := 1 to 5
+    numbers[i] := 11-(i*2);
+  endfor
+endif
+if (!times || TypeOf(times) <> "Array" || times.size() < 5)
+  times := {};
+  for i := 1 to 5
+    times[i] := CInt((i*10)/2);
+  endfor
+endif
+if (!gatedest || TypeOf(gatedest) <> "Array" || gatedest.size() < 3)
+  gatedest := {};
+  for i := 1 to 3
+    gatedest[i] := 0;
+  endfor
+endif
+if (!unlock)
+  unlock := 0;
+endif
+if (!script)
+ script := "";
+endif
+if (!endDuration)
+  endDuration := 0;
+endif
+if (!active)
+  active := 0;
+endif
+if (!noLoot)
+  noLoot := 0;
+endif
+if (!checkLOS)
+  checkLOS := 0;
+endif
+if (!radius)
+  radius := 0;
+endif
+if (!dispel)
+  dispel := 0;
+endif
+
+  var cslayout := {
+                  "nodispose",
+                  "page 0",
+                  "resizepic 100 100 2600 300 400",
+                  "text 145 123 52 0",
+                  "page 1",
+                  "checkbox 120 145 210 211 "+active+" 100",
+                  "text 140 143 0 1",
+                  "text 150 170 5 2",
+                  "text 260 170 5 3",
+                  "text 315 170 5 4",
+
+                  // 1
+                  "text 130 190 10 5",
+                  "GumpPic 145 190 2445",
+                  "TextEntry 150 190 95 20 39 0 6",
+                  "GumpPic 250 190 2443",
+                  "TextEntry 255 190 50 20 39 5 7",
+                  "GumpPic 315 190 2443",
+                  "TextEntry 320 190 50 20 39 10 8",
+
+                  // 2
+                  "text 130 210 10 9",
+                  "GumpPic 145 210 2445",
+                  "TextEntry 150 210 95 20 39 1 10",
+                  "GumpPic 250 210 2443",
+                  "TextEntry 255 210 50 20 39 6 11",
+                  "GumpPic 315 210 2443",
+                  "TextEntry 320 210 50 20 39 11 12",
+
+                  // 3
+                  "text 130 230 10 13",
+                  "GumpPic 145 230 2445",
+                  "TextEntry 150 230 95 20 39 2 14",
+                  "GumpPic 250 230 2443",
+                  "TextEntry 255 230 50 20 39 7 15",
+                  "GumpPic 315 230 2443",
+                  "TextEntry 320 230 50 20 39 12 16",
+
+                  // 4
+                  "text 130 250 10 17",
+                  "GumpPic 145 250 2445",
+                  "TextEntry 150 250 95 20 39 3 18",
+                  "GumpPic 250 250 2443",
+                  "TextEntry 255 250 50 20 39 8 19",
+                  "GumpPic 315 250 2443",
+                  "TextEntry 320 250 50 20 39 13 20",
+
+                  // 5
+                  "text 130 270 10 21",
+                  "GumpPic 145 270 2445",
+                  "TextEntry 150 270 95 20 39 4 22",
+                  "GumpPic 250 270 2443",
+                  "TextEntry 255 270 50 20 39 9 23",
+                  "GumpPic 315 270 2443",
+                  "TextEntry 320 270 50 20 39 14 24",
+
+                  "text 130 300 10 25", // Radius
+                  "GumpPic 175 300 2443",
+                  "TextEntry 180 300 50 20 39 15 26",
+                  "checkbox 260 300 210 211 "+checkLOS+" 98", // Check LOS
+                  "text 280 303 5 27",
+
+                  "checkbox 130 320 210 211 "+noLoot+" 99", // Monster loot
+                  "text 150 323 5 28",
+
+                  "text 270 325 10 29", // Dispel
+                  "GumpPic 310 325 2443",
+                  "TextEntry 315 325 50 20 39 16 30",
+
+
+                  "text 130 344 52 31", // End Seq
+                  "GumpPic 190 353 96", // Divider Lines
+
+                  "text 130 360 43 32", // Gate Dest
+                  "GumpPic 195 360 2443",
+                  "TextEntry 200 360 50 20 39 17 33",
+                  "GumpPic 253 360 2443",
+                  "TextEntry 258 360 50 20 39 18 34",
+                  "GumpPic 315 360 2443",
+                  "TextEntry 320 360 50 20 39 19 35",
+
+                  "text 140 375 43 36", // Or/And
+
+                  "text 130 390 43 37", // Unlock
+                  "GumpPic 205 390 2445",
+                  "TextEntry 210 390 95 20 39 20 38",
+
+                  "text 140 405 43 39", // Or/And
+
+                  "text 130 420 43 40", // Script
+                  "GumpPic 205 420 2445",
+                  "TextEntry 210 420 95 20 39 21 41",
+
+                  "text 220 450 43 42", // Duration
+                  "GumpPic 245 450 2443",
+                  "TextEntry 250 450 50 20 39 22 43",
+                  "text 310 450 43 44",
+
+                  "text 145 468 48 45"
+                  };
+
+  var csdata := {
+                "Champion Spawn System",
+                "Enabled",
+                "Monster Temp",
+                "Amount",
+                "Time After",
+                "1",
+                monsters[1],
+                numbers[1],
+                times[1],
+                "2",
+                monsters[2],
+                numbers[2],
+                times[2],
+                "3",
+                monsters[3],
+                numbers[3],
+                times[3],
+                "4",
+                monsters[4],
+                numbers[4],
+                times[4],
+                "5",
+                monsters[5],
+                numbers[5],
+                times[5],
+
+                "Radius",
+                radius,
+                "Check LOS",
+                "No Monster Loot",
+                "Dispel",
+                dispel,
+
+                "End Seq",
+
+                "Gate Dest",
+                gatedest[1],
+                gatedest[2],
+                gatedest[3],
+                "Or/And",
+                "Unlock serial",
+                unlock,
+                "Or/And",
+                "Run Script",
+                script,
+                "For",
+                endDuration,
+                "sec",
+
+                "Version 1, seravy@gmail.com"
+                };
+
+var result := SendDialogGump( who, cslayout, csdata );
+
+monsters := { result[0][4, len(result[0])], result[1][4, len(result[1])], result[2][4, len(result[2])], result[3][4, len(result[3])], result[4][4, len(result[4])] };
+SetObjProperty(championSpawn, "monsters", monsters);
+numbers := { CInt(result[5][4, len(result[5])]), CInt(result[6][4, len(result[6])]), CInt(result[7][4, len(result[7])]), CInt(result[8][4, len(result[8])]), CInt(result[9][4, len(result[9])]) };
+SetObjProperty(championSpawn, "numbers", numbers);
+times := { CInt(result[10][5, len(result[10])]), CInt(result[11][5, len(result[11])]), CInt(result[12][5, len(result[12])]), CInt(result[13][5, len(result[13])]), CInt(result[14][5, len(result[14])]) };
+SetObjProperty(championSpawn, "times", times);
+radius := CInt(result[15][5, len(result[15])]);
+SetObjProperty(championSpawn, "radius", radius);
+dispel := CInt(result[16][5, len(result[16])]);
+SetObjProperty(championSpawn, "dispel", dispel);
+gatedest := { CInt(result[17][5, len(result[17])]), CInt(result[18][5, len(result[18])]), CInt(result[19][5, len(result[19])]) };
+SetObjProperty(championSpawn, "gatedest", gatedest);
+unlock := CInt(result[20][5, len(result[20])]);
+SetObjProperty(championSpawn, "unlock", unlock);
+script := result[21][5, len(result[21])];
+SetObjProperty(championSpawn, "script", script);
+endDuration := CInt(result[22][5, len(result[22])]);
+SetObjProperty(championSpawn, "endDuration", endDuration);
+
+if (result[98])
+  SetObjProperty(championSpawn, "checkLOS", 1);
+else
+  SetObjProperty(championSpawn, "checkLOS", 0);
+endif  
+if (result[99])
+  SetObjProperty(championSpawn, "noLoot", 1);
+else
+  SetObjProperty(championSpawn, "noLoot", 0);
+endif  
+
+SetObjProperty( championSpawn, "LFucker", who.name+who.serial);
+
+if (result[100])
+  SetObjProperty(championSpawn, "active", 1);
+  SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+  sendsysmessage( who, "Champion Spawn is now enabled");
+  return 1;
+else
+  SetObjProperty(championSpawn, "active", 0);
+  sendsysmessage( who, "Champion Spawn is disabled");
+  resetSpawn( championSpawn);
+  return 0;
+endif
+
+endfunction

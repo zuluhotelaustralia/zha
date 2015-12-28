@@ -1,0 +1,11 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_home( who )
+	if (!checkStaff(who, "home", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+    MoveCharacterToLocation(who, 1484,1626,30);
+endprogram

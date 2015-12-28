@@ -1,0 +1,51 @@
+use uo;
+use os;
+use util;
+include "include/constants/eventids";
+
+program ghost_hunter_tile_control(tile)
+
+	var timebetweenchecks, banishtime;
+	var range;
+	var x, y, z, i:=0;
+	var ghosthunter:=0;
+	var ev:=struct;
+	ev.+type:=0;
+	ev.+source:=0;
+	ev.+x:=GetObjProperty(tile, "x");
+	ev.+y:=GetObjProperty(tile, "y");
+	ev.+z:=GetObjProperty(tile, "z");
+	while(tile)
+		timebetweenchecks := GetObjProperty(tile, "time");
+		if (!timebetweenchecks)
+			timebetweenchecks:=120;
+		endif
+		banishtime := GetObjProperty(tile, "banishtime");
+		if (!banishtime)
+			banishtime:=60;
+		endif
+		range:=GetObjProperty(tile, "range");
+		if (!range)
+			range:=100;
+		endif
+		ev.x:=GetObjProperty(tile, "x");
+		ev.y:=GetObjProperty(tile, "y");
+		foreach ghost in ListGhostsNearLocation(tile.x, tile.y, tile.z, range)
+			ghosthunter:=CreateNpcFromTemplate("ghosthunter", 5274, 1162, 0);
+			if(ghosthunter)
+				SetObjProperty(ghosthunter, "banishtime", banishtime);
+				sleepms(1000);
+				ev.type := EVID_ALL_ATTACK_CMD;
+				ev.source := ghost;
+				SendEvent(ghosthunter, ev);
+				timebetweenchecks:=banishtime;
+			endif
+			sleep(2);
+		endforeach
+		sleep(timebetweenchecks);
+	endwhile
+	
+endprogram
+			
+				
+			

@@ -1,0 +1,12 @@
+use uo;
+use os;
+include "include/attributes";
+include "include/traitorcheck";
+
+program logon(who)
+
+	if (who.title_race == "Traitor Elf" || who.title_race == "Traitor Dark-Elf")
+		start_script(":spells:settraitor", who);
+	endif
+
+endprogram

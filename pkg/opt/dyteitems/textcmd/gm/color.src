@@ -1,0 +1,13 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program textcmd_color( who )
+	if (!checkStaff(who, "color", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	var color := SelectColor( who, who.backpack );
+	SendSysMessage( who, "You choose color number " + color );
+
+endprogram

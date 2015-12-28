@@ -1,0 +1,45 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_bcast( who, text )
+	if (!checkStaff(who, "staff", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+	if( !text )
+		SendSysMessage( who, "Usage is : .staff <msg>" );
+	else
+		var color;
+		var words := SplitWords(text);
+		var min_cmdlevel := 1;
+		if( CInt(words[1][1]) )
+			if( words[1][":"] )
+				min_cmdlevel := CInt(words[1][1]);
+				text := text - (words[1]+" ");
+			endif
+		endif
+	
+		if( min_cmdlevel > 5 )
+			SendSysMessage( who, "You can't set a minimum cmdlevel above 5." );
+			return 0;
+		endif
+	
+		text := who.name + ": " + text;
+	
+		case( min_cmdlevel )
+			1: color := 130;
+			2: color := 1162;
+			3: color := 1305;
+			4: color := 1161;
+			5: color := 1180;
+		endcase
+			
+		foreach character in EnumerateOnlineCharacters()
+			if( character.cmdlevel >= min_cmdlevel )
+				SendSysMessage( character, text, 3, color );
+			endif
+		endforeach
+	endif
+
+endprogram

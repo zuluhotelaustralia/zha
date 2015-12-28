@@ -1,0 +1,70 @@
+/* Druids Spell - Angry Flock         **
+** Summons birds to attack the target */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/client";
+
+program cast_angryflock( parms )
+	var caster;
+	if (parms[1] == "#MOB") //npc cast it
+		caster := parms[2];
+	else
+		caster := parms;
+	endif
+	var nexttime:=Cint(GetObjProperty(caster, "NextAngryFlockTime"));
+	if (nexttime != 0 && nexttime>ReadGameClock())
+		SendSysMessage(caster, "You must wait " + (nexttime-ReadGameClock()) + " seconds before casting this again." );
+		EraseObjProperty( caster, "#Casting");
+		return;
+	endif
+	PlaySoundEffect(caster, SFX_SPELL_ANGRYFLOCK);
+	
+	SendSysMessage(caster, "Select the target");
+	var cast_on := Target(caster);
+	if (! cast_on||! cast_on.ISA(POLCLASS_MOBILE))
+		SendSysMessage(caster, "Invalid target");
+		EraseObjProperty( caster, "#Casting");
+		return;
+	endif
+	if (AutoCallGuardCheck(caster, cast_on))
+		EraseObjProperty( caster, "#Casting");
+		return;
+	endif
+
+	var natureloreskill := GetEffectiveSkill( caster, SKILLID_NATURELORE );
+	var clevel:=GetClasseLevel(caster);
+	var birdcount:=2 + CInt((natureloreskill/30)*ClasseBonus(caster, CLASSEID_DRUID));
+	
+	var ev := struct;
+	ev.+ type;
+	ev.+ source;
+        ev.type := SYSEVENT_ENGAGED;
+	ev.source := cast_on;
+	SetObjProperty(caster, "NextAngryFlockTime", ReadGameClock()+120);
+	var i := 0;
+	var bird;
+	while (i< birdcount)
+		bird:=CreateNpcFromTemplate( "eagle", caster.x, caster.y, caster.z);
+		bird.graphic:=6;
+		bird.color := 3 + ((RandomInt(19)+1)*5);
+		bird.name:= "a magical bird";
+		bird.setmaster(caster);
+		bird.script:="targetedkillpcs";
+		SetObjProperty(bird, "master",caster.serial);
+		SetObjProperty(bird, "summoned",1);
+		SetObjProperty(bird, "untamable",1);
+		SetObjProperty(bird, "guardkill", 1);
+		SetObjProperty(bird, "targetserial",cast_on.serial);
+		SetBaseStrength( bird, (GetBaseStrength( bird ) + (clevel*10)));
+		SetBaseDexterity( bird, (GetBaseDexterity( bird ) + (clevel*100)));
+		SetBaseSkillBaseValue( bird, SKILLID_SWORDSMANSHIP, 1300 );
+		RestartScript(bird);
+		SendEvent(bird, ev);
+		i:=i+1;
+	endwhile
+	
+	EraseObjProperty( caster, "#Casting");
+endprogram

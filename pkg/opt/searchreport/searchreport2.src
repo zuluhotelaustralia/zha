@@ -1,0 +1,197 @@
+use uo;
+use os;
+use file;
+use util;
+include "include/cmdlevel_check";
+
+program ItemReportPage(thestring)
+
+	
+	var params:= SplitWords(thestring);
+	var who:= SystemFindObjectBySerial(CInt(params[1]));
+	var itemNum := CInt(params[2]);
+	var searchstring:= params[3];
+	SendSysMessage(who, "Loading report...");
+	if (len(params)>3)	
+		for k:=4 to len(params)
+			searchstring := searchstring + " " + params[k];
+		endfor
+	endif
+	var itemArray:= ReadFile("searchdata.txt");
+	if (!itemArray)
+		SendSysMessage(who, CStr(itemArray));
+		return;
+	elseif (!len(itemArray))
+		SendSysMessage(who, "Matches found: "+len(itemarray));
+		return;
+	endif
+	var temp;
+	for i:= 1 to len(itemArray)
+		temp := itemArray[i];
+		itemArray[i]:= CInt(temp);
+	endfor
+	var Ygump:= 20;
+	var item:=SystemFindObjectBySerial(itemArray[itemNum]);
+	if (!item)
+		item:=SystemFindObjectBySerial(itemArray[itemNum], SYSFIND_SEARCH_STORAGE_AREAS);
+		if (!item)
+			SendSysMessage(who, "Couldn't find item "+itemArray[itemNum]);
+		endif
+	endif
+	var name;
+	if (item.name)
+		name := item.name;
+	else
+		name := item.desc;
+	endif
+	if (!item)
+		name:= "Can't find";
+	endif
+	var x, y, z, container:=0, words:=0, bankowner:=0, rootcontainer:=0, carriedby:=0, equipped:="Carried by", lastequip:=0;
+	
+	if (item.container)
+		rootcontainer:=FindRootContainer(item.container);
+		if (TypeOf(rootcontainer)=="MobileRef" || TypeOf(rootcontainer)=="OfflineMobileRef")  // mobileref
+			carriedby:=rootcontainer;
+			x:=carriedby.x;
+			y:=carriedby.y;
+			z:=carriedby.z;
+		elseif (rootcontainer.objtype==0xe7c)  // itemref bankbox
+			words := SplitWords(rootcontainer.desc);
+			var ownerserial:=CInt(words[3]);
+			bankowner:=SystemFindObjectBySerial(ownerserial);
+			if(!bankowner)
+				bankowner:=SystemFindObjectBySerial(ownerserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+			endif
+			x:=bankowner.x;
+			y:=bankowner.y;
+			z:=bankowner.z;
+		else
+			container:=rootcontainer;
+			x:=container.x;
+			y:=container.y;
+			z:=container.z;		
+		endif
+	elseif (item.container.serial)
+		carriedby:=SystemFindObjectBySerial(item.container.serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+		x:=carriedby.x;
+		y:=carriedby.y;
+		z:=carriedby.z;
+	else
+		x:=item.x;
+		y:=item.y;
+		z:=item.z;
+	endif
+	if (GetObjProperty(item, "EquippedAlready"))
+		equipped:="Equipped by";
+	endif
+	lastequip:=GetObjProperty(item, "LastEquippedBy");
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 280);
+	var button1, button2, button3, button4, button5;
+	
+	GFTextLine(40, Ygump, 1000, "Search String: '"+searchstring+"'");	
+	Ygump := Ygump + 20;
+	GFTextLine(40, Ygump, 68, "Item: " + name);
+	Ygump := YGump + 20;
+	GFTextLine(40, Ygump, 5, "Serial: "+itemArray[itemNum]);
+	Ygump := YGump + 20;
+	if (equipped != "Equipped by" && lastequip)
+		GFTextLine(40, Ygump, 5, "Last equipped by: "+lastequip);
+		Ygump:=Ygump+20;
+	endif	
+	if (bankowner)
+		GFTextLine(40, Ygump, 5, "Location: Bankbox of "+bankowner.name+" (Account: "+bankowner.acct.name+")");
+	elseif (carriedby)
+		GFTextLine(40, Ygump, 5, "Location: "+equipped+" "+carriedby.name+" (Account: "+carriedby.acct.name+")");	
+	elseif	(container)	
+		GFTextLine(40, Ygump, 5, "Location: In "+container.desc+" ("+container.serial+")");
+	else
+		GFTextLine(40, Ygump, 5, "Location: On Ground");
+	endif
+	Ygump := YGump + 20;
+	GFTextLine(40, Ygump, 5, "Coords: "+x+", "+y+", "+z);
+	Ygump := YGump + 40;
+	GFTextLine(55, Ygump, 5, " Go to these coordinates");
+	button3:= GFButtonID(40, YGump+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	Ygump := YGump + 20;	
+	GFTextLine(55, Ygump, 5, " Put item in your backpack");
+	button4:= GFButtonID(40, Ygump+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	Ygump:= YGump + 20;	
+	GFTextLine(200, 230, 1000, itemNum+" of "+len(itemArray));
+	var others;
+	if (bankowner)
+		others:=" List all contents of this bankbox";
+	elseif ((carriedby && equipped=="Carried by") || container)
+		others:=" List other items in this item's container";
+	endif
+	if (others)
+		GFTextLine(55, Ygump, 5, others);
+		button5:=GFButtonID(40, Ygump+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+		Ygump:=Ygump+20;
+	endif
+	if (itemNum > 1)
+		button1  := GFButtonID( 30, 230, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);
+	endif
+	if (itemNum < len(itemArray))
+		button2  := GFButtonID( 400, 230, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);
+	endif
+	var result := GFSendGump(who);
+	if (result[button1.keyid])
+		
+		start_script("searchreport2", CStr(CStr(who.serial)+" "+CStr(itemNum-1)+" "+searchstring));
+	endif
+	if (result[button2.keyid])
+		start_script("searchreport2", CStr(CStr(who.serial)+" "+CStr(itemNum+1)+" "+searchstring));
+	endif
+	if (result[button3.keyid])
+		if(bankowner)
+			MoveCharacterToLocation(who, bankowner.x, bankowner.y, bankowner.z, MOVECHAR_FORCELOCATION);
+		elseif(carriedby)
+			MoveCharacterToLocation(who, carriedby.x, carriedby.y, carriedby.z, MOVECHAR_FORCELOCATION);
+		else
+			MoveCharacterToLocation(who, x, y, z, MOVECHAR_FORCELOCATION );
+		endif
+		start_script("searchreport2", CStr(CStr(who.serial)+" "+itemNum+" "+searchstring));
+	endif
+	if (result[button4.keyid])
+		var grabitem:= SystemFindObjectBySerial(itemArray[itemNum]);
+		if (!grabitem)
+			grabitem := SystemFindObjectBySerial(itemArray[itemNum], SYSFIND_SEARCH_STORAGE_AREAS);
+		endif
+		if (grabitem)
+			MoveItemToContainer(grabitem, who.backpack);
+		else
+			SendSysMessage(who, "Couldn't get item");
+		endif
+		start_script("searchreport2", CStr(CStr(who.serial)+" "+itemNum+" "+searchstring));
+	endif
+	if (result[button5.keyid])
+		start_script("searchreport2", CStr(CStr(who.serial)+" "+itemNum+" "+searchstring));
+		start_script("listitems", CStr(who.serial)+" "+CStr(item.container.serial)+" 1");
+	endif;
+
+endprogram	
+
+function FindRootContainer(container)
+
+	var oldcontainer:=container;
+
+	while (container)
+		container:=oldcontainer.container;
+		if (container)
+			oldcontainer:=container;
+		endif
+	endwhile
+	if (oldcontainer.container.serial)  // if item's root container is a mobile
+		container:= SystemFindObjectBySerial(oldcontainer.container.serial);
+		if (!container)
+			container:= SystemFindObjectBySerial(oldcontainer.container.serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+		endif
+		return container;
+	else
+		return oldcontainer;
+	endif
+endfunction
+

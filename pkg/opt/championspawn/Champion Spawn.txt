@@ -1,0 +1,37 @@
+Champion Spawn  v1  seravy@gmail.com
+--------------
+
+Type .createchampion to make a champion spawn auto layout. This is required even if you want a modifyed layout as it must be added to the database.
+The system will work all around the Champion Moonstone. The only item need for it to work is this item, the rest is just a template lay out. You can also edit the skulls and colours of the skulls, which you will be told below.
+Double clicking on the Champion Moonstone will bring up the Modify gump if you are of privlege Gamemaster or higher.
+
+Commands
+--------
+.createchampion - Creates the default champion spawn. Is required to register the stone in array. Everything but the stone can be deleted and will still function.
+.gotochampion <number> - Very simple goto spawn command. Type it without a number and it will say how many spawns there are, then type it with the number and it will go there. They are numbered in order of placement.
+
+I will discuss the items in the gump:
+Enabled - Allows you to turn the spawner on and off. If the spawn is turned off while still in progress all alive creatures will die (no loot will be dropped) and timers reset.
+Monster Temp - The monster template for creature 1 to 5. I you do not wish to have a creature spawned in this number leave it as "nothing" or it will <try> to spawn it. As of version 1, if creature 5 is set to 'Nothing' then the Ending Sequence will not be run (Portal, Unlock chest, Run Script). Also keep in ming that the skulls may not acturatly reflect the proper status of the level of monster active and completed if some are missed out.
+Amount - This is the amount of that creature template that will be spawned.
+Time After - This will be the time waited after all the monsters of that template have been killed in <Seconds>. Note that the Ending Sequence begins as soon as the level 5 monsters are killed and the Time after level 5 counter will only begin after the ending sequence duration. (Eg, Once portals have closed the timer starts for lvl 5 monsters where once that is finished, it will respawn at level 1 again.
+
+Radius - This is the radius of which monters will spawn in from the center of the Champion Stone.
+Check LOS - This will check the line of sight for the monsters to make sure they arn't in water or something and will try place them again.
+No Monster Loot - The monsters will not drop loot when they are killed. This can use be used just to reward them by the end conditions, and not with the monster loot. (Eg, vs a balron and its minions, and it will unlock a door or portal into an armory with treasure chests.) 
+Dispel - This will dispel all walls (same as spell dispel field) in the radius given. A minimum of 0 is required (the square of the gem) so that monsters spawning at the fail safe location (the gem) it will not have a creation error and the monster is not spawned. It is highly encouraged to have a high dispel radius to discourage walling off of the spawns and making it stupidly simple.
+
+Ending Sequence:
+Gate Dest - Moongate Destination. If x and y are set to non 0 numbers, after the level 5 mosnter is killed it will last for duration time.
+Unlock serial - The serial number of the item you wish to have the prop 'locked' set. This will unlock the item for duration time and then will lock it again after the time. You may info out the info of a chest or door using '.getprop serial' and by typeing that number in (with 0x as well (hex) it will convert it to Int) this spot it will then unlock that item.
+Run Script - This script will be run after the level 5 monster is killed. (Eg :customscripts:killeveryoneinradius) This has some limitations as to what you can pass into the script, but you may ask a developer if you would wish something special to occur in particular.
+For ? sec - This is the duration in which these ending sequences will be in effect. This only applies to Gate dest and Unlock serial. After the duration the effects will be undone and the level 5 'Wait After' timer will start.
+
+Additional Features
+-------------------
+These additional features can be set using cprops on the Champion Moonstone:
+
+Changing colour of skulls - You may change the colours in which states are represented by setting a 3 element array cprop named 'colours'. The array is as follows, { int ToDoHue, int HasBeenDoneHue, int ActiveHue }. Example commands would be as follows. .setobjproperty colours array<enter> int 0<enter> int 1383<enter> int 1400<enter> Click the Champion Moonstone. The changes will take place during next change in the skulls. To undo the colours and restore it to orginal settings you can just use the '.eraseobjproperty colours' on the stone and it will return to normal on next change.
+Changing skull items - You can set your 'skull' objects to any gm placed item by setting the cprop array 'skulls' on the moongate. The array is as follows: { int skullserial1, int skullserial2, int skullserial3, int skullserial4, int skullserial5 }. The number of skull elements can be less or more, however due to 5 mosnter limitation and restraints of verison 1, can cause innacurate colouring. The items don't have to be skulls, they could be pillars or anything. If skulls cprop is erased, it wont try to colour anything at all if this is what you want.
+No return portal - Setting the cprop 'noReturnPortal' using '.setobjproperty noReturnPortal int 1' will mean that the ending seqence portal will be one way and will not make a return portal back. This can be erased with the appropriate command as above.
+resetHours - Settings cprop reset hours will set the amount of hours before it resets. The default is 4 hours.

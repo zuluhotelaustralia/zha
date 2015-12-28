@@ -1,0 +1,69 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/attributes";
+include "include/damages";
+include "include/hitscriptinc";
+include "include/dotempmods";
+
+program acidscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+	
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+	
+	   rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage);
+	   //PlayMovingEffect(attacker, defender, weapon.graphic, 6, 1);
+
+	   PrintTextAbove(attacker, "Acid sprays from " + attacker.name + " and envelopes " + defender.name);
+	   PlayMovingEffect(attacker, defender, 4411, 6, 1);
+	   var acidprot:=GetObjProperty(defender, "AcidProtection");
+	   if (acidprot)
+	   	if (acidprot >= Random(4)+1)
+	   		SendSysMessage(defender, "You are protected from the acid!");
+	   	endif
+	   else
+			var dmg := CInt(Random(rawdamage)) + 1;
+			var things := ListEquippedItems( defender );
+
+			var thing := things[ CInt(Random(len(things))+1) ];
+	
+			if ( CanEat(thing) )
+		  		PrintTextAbovePrivate(defender, "Acid damages " + defender.name + "'s " + thing.desc, defender);
+		  		if (dmg > thing.hp)
+					dmg := thing.hp;
+		  		endif
+		  		thing.hp := thing.hp - dmg;
+		  		if ( (thing.hp <= 0) || (thing.hp > thing.maxhp) )
+					PrintTextAbovePrivate(defender, thing.desc + " is destroyed!", defender);
+					DestroyTheItem( defender, thing );
+		  		endif
+		  	endif
+	  endif
+	  DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+endprogram
+
+function CanEat(item)
+
+	if ( ( item.objtype >= 0x2030 ) && (item.objtype <= 0x2060) )
+		return 0;
+	endif
+	if ( (item.objtype == 0x0e75) || (item.objtype == 0xf021 ) )
+		return 0;
+	endif
+
+	if (!item.maxhp)
+		return 0;
+	endif
+
+	return 1;
+
+endfunction

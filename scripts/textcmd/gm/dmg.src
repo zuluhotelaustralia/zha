@@ -1,0 +1,46 @@
+use uo;
+include "include/cmdlevel_check";
+include "include/spelldata";
+
+program textcmd_dmg( who, text)
+
+	if (!checkStaff(who, "dmg", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	if (!text)
+		SendSysMessage(who, "Usage: .dmg [dmgtype] [amount]");
+		return;
+	endif
+	var params:= SplitWords(text);
+	if (params[2] == error)
+		return;
+	endif
+	params[1]:= CStr(upper(params[1]));
+	params[2]:= CInt(params[2]);
+	
+	SendSysMessage(who, "Damage who with "+params[2]+" "+params[1]+"?");
+	case (params[1])
+		"FIRE":		params[1]:= FIRE;
+		"WATER":	params[1]:= WATER;
+		"AIR":		params[1]:= AIR;
+		"EARTH":	params[1]:= EARTH;
+		"NECRO":	params[1]:= NECRO;
+		"HOLY":		params[1]:= HOLY;
+		"ACID":		params[1]:= ACID;
+	endcase
+	
+
+	var targ:=Target(who);
+	
+	if (!targ)
+		SendSysMessage(who, "Cancelled");
+	endif	
+
+	if (params[1]== NECRO || params[1] == HOLY)
+		ApplyPlanarDamage(who, targ, 12, params[2], params[1], 1);
+	else
+		ApplyElementalDamage(who, targ, 12, params[2], params[1], 1);
+	endif
+
+
+endprogram

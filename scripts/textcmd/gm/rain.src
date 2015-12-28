@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+include "include/random";
+program rain(character)
+
+SetRegionWeatherLevel( "Background", 1, 15);
+
+
+var i;
+var j;
+j := Random(10) + 1;
+Detach();
+for (i:= 1; i <= j; i := i + 1)
+        sleep(300);
+endfor
+
+SetRegionWeatherLevel( "Background", 0, 15);
+
+endprogram

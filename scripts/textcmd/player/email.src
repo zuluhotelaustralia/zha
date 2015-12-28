@@ -1,0 +1,29 @@
+use uo;
+use basic;
+include "include/email";
+
+program email(who)
+
+	if (!who.acct.getprop("EmailPassword"))
+		SendSysMessage(who, "You must set an email password first (.emailpassword)");
+		return;
+	endif
+	if (!SecurityCheck(who))
+		return;
+	endif
+	var newemail := CStr(SendTextEntryGump(who, "Enter new email address:", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, 50));
+	if (!newemail)
+		SendSysMessage(who, "Cancelled");
+		return;
+	elseif (!find(newemail, "@", 2) || !find(newemail, ".", 4) || !ValidateCharacters(newemail))
+		SendSysMessage(who, "Invalid email address");
+		return;
+	endif
+	if (!who.acct.setprop("Email", newemail))
+		SendSysMessage(who, "Error");
+		return;
+	endif
+	SendSysMessage(who, "Email changed to '"+who.acct.getprop("Email")+"'");
+	return;
+
+endprogram

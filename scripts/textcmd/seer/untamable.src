@@ -1,0 +1,15 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program untamable(who)
+	if (!checkStaff(who, "untamable", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	SendSysMessage(who, "What creature do you want to make untamable?");
+	var npc := Target(who, "");
+	SetObjProperty(npc, "untamable", 1);
+	EraseObjProperty(npc, "tamableAt");
+
+endprogram

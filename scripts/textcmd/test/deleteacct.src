@@ -1,0 +1,107 @@
+use os;
+use uo;
+
+include "util/bank";
+include "include/cmdlevel_check";
+
+
+
+var banlayout := array(
+    "gumppic  20  60 2624            ",      //account note box
+    "gumppic 285  60 2624            ",      //account note box
+    "gumppic  20   5 2624            ",      //account note box
+    "gumppic 285   5 2624            ",      //account note box
+    "gumppic  20   0 2621            ",      //account note box
+    "gumppic 285   0 2621            ",      //account note box
+    "gumppic  20   0 2620            ",      //account note box
+    "gumppic 535   0 2622            ",      //account note box
+    "gumppic  20   5 2623            ",      //account note box
+    "gumppic 535   5 2625            ",      //account note box
+    "gumppic  20  45 2623            ",      //account note box
+    "gumppic 535  45 2625            ",      //account note box
+    "gumppic  20 250 2627            ",      //account note box
+    "gumppic  20 250 2626            ",      //account note box
+    "gumppic 285 250 2627            ",      //account note box
+    "gumppic 537 250 2628            ",      //account note box
+    "text     90  60   37      0     ",      //warning text          (red)
+    "text     90  75   37      1     ",      //warning text          (red)
+    "text     90  90   37      2     ",      //warning text          (red)
+    "text    150 105   37      3     ",      //warning text          (red)
+    "button  105 190  247  249 1 0  1",      //cancel button
+    "button  405 190  242  240 1 0  2"      //confirm button
+);
+
+var bandata := array(
+    "WARNING! Banning an account through this interface will",        //0
+    "delete all account characters as well as destroy their bank",    //1
+    "boxes! This is not reversable, use this feature with care!",     //2
+    "do you still wish to ban this account?"                       //3
+);
+
+program ban(who, acctname)
+	if (!checkStaff(who, "deleteacct", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+if ((acctname=="") || (!acctname))
+SendSysMessage(who,"usage .deleteacct <acct name>");
+return;
+endif
+
+  var banverify := SendDialogGump( who, banlayout, bandata);
+  var act := FindAccount(acctname);
+  case (banverify[0])
+    1: var characters := EnumerateOnlineCharacters();
+       SendSysMessage(who,"banned");
+       act.ban();
+       foreach char in characters
+         if (char.acctname == acctname)
+           SendSysMessage( char, "You were kicked by " + who.name + ".");
+           DisconnectClient(char);
+           break;
+         endif
+       endforeach
+	  var x, i;
+       WipeBankBox(act.GetCharacter(1));
+	   for (i := 1; i <= 24; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(1), i);
+	     MoveItemToContainer(x, act.GetCharacter(1).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(1).backpack);
+       act.DeleteCharacter(1);
+       i := 0;
+       WipeBankBox(act.GetCharacter(2));
+	   for (i := 1; i <= 24; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(2), i);
+	     MoveItemToContainer(x, act.GetCharacter(2).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(2).backpack);
+       act.DeleteCharacter(2);
+       i := 0;
+       WipeBankBox(act.GetCharacter(3));
+	   for (i := 1; i <= 24; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(3), i);
+	     MoveItemToContainer(x, act.GetCharacter(3).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(3).backpack);
+       act.DeleteCharacter(3);
+       i := 0;
+       WipeBankBox(act.GetCharacter(4));
+	   for (i := 1; i <= 24; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(4), i);
+	     MoveItemToContainer(x, act.GetCharacter(4).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(4).backpack);
+       act.DeleteCharacter(4);
+       i := 0;
+       WipeBankBox(act.GetCharacter(5));
+	   for (i := 1; i <= 24; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(5), i);
+	     MoveItemToContainer(x, act.GetCharacter(5).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(5).backpack);
+       act.DeleteCharacter(5);
+    2: SendSysMessage(who,"canceled");
+       return;
+  endcase
+endprogram

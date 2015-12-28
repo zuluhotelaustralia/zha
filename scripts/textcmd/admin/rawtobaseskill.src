@@ -1,0 +1,22 @@
+use uo;
+
+program raw_to_baseskill( who, text )
+
+	if( !text )
+		SendSysMessage( who, "Usage is : .rawtobaseskill <raw skill>." );
+		return;
+	endif
+
+	text := CInt( text );
+	if( !text )
+		SendSysMessage( who, "Usage is : .rawtobaseskill <raw skill>." );
+		return;
+	endif
+
+	var base_skill := RawSkillToBaseSkill( text );
+	var units	 := CInt( base_skill / 10 );
+	var decimals	 := base_skill - (units * 10);
+
+	SendSysMessage( who, text + " raw skill points represents a base skill of " + units + "." + decimals );
+
+endprogram

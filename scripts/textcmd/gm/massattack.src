@@ -1,0 +1,50 @@
+use uo;
+
+include "include/client";
+include "include/objtype";
+include "include/skillpoints";
+include "include/bard";
+include "include/eventid";
+include "include/cmdlevel_check";
+
+
+
+program bard_provoke(character, range)
+	if (!checkStaff(character, "massattack", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+if (!range)
+        SendSysMessage(character, "Usage: .mattack (range). Used to provoke many creatures on one player");
+        return;
+endif       
+SendSysMessage(character, "Select a creature you wish to provoke");
+
+var thetargs := TargetCoordinates(character);
+
+if (!thetargs)
+        SendSysMessage(character, "Targetting canceled.");
+        return;
+endif
+
+
+
+var ev := array;
+ev.+ type;
+ev.+ source;
+ev.type := EVID_PEACEMADE;
+
+SendSysMessage(character, "Select the target");
+        var newtarg := Target(character);
+        ev.source := newtarg;
+
+var thetarg;
+
+foreach thetarg in  ListMobilesNearLocation(thetargs.x, thetargs.y, thetargs.z, CInt(range))
+        SendEvent(thetarg, ev);
+        ev.type := SYSEVENT_ENGAGED;
+        SendEvent(thetarg, ev);
+endforeach       
+
+endprogram

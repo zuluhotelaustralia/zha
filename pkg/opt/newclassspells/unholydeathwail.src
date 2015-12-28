@@ -1,0 +1,53 @@
+/* UnHoly Spell - Death Wail     **
+** Paralizes raduis for a sec    **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_DEATHWAIL;
+const DEATHWAIL_DMG := 1;
+
+program cast_deathwail( parms )
+  var caster;
+  var circle;
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    circle := GetCircle( SPELL_ID );
+  endif
+  
+  var clevel:=GetClasseLevel(caster);
+  var victims := ListMobilesNearLocation( CInt(caster.x), CInt(caster.y), CInt(caster.z), CInt(clevel/2)+4);
+  
+
+
+  PlaySoundEffect( caster, SFX_SPELL_DEATHWAIL );
+  PlaySoundEffect( caster, SFX_SPELL_DEATHWAIL2 );
+  var immunity;
+  foreach mobile in victims
+    if( mobile.serial != caster.serial )
+      immunity := IsProtected( caster, mobile, circle );
+      if(!immunity)
+         if (AutoCallGuardCheck(caster, mobile))
+           EraseObjProperty( caster, "#Casting");
+           return;
+         endif
+         send_attack( mobile, caster, SPELL_ID );
+         PlayObjectCenteredEffect(mobile, FX_SPELL_DEATHWAIL, SPEED_SPELL_DEATHWAIL, LOOP_SPELL_DEATHWAIL);
+
+         ApplyPlanarDamage( caster, mobile, circle, DEATHWAIL_DMG, NECRO);
+      endif
+    endif
+  endforeach
+
+  EraseObjProperty( caster, "#Casting");
+
+endprogram

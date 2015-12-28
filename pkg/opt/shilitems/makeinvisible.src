@@ -1,0 +1,45 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+const DELAY_BETWEEN_USE	:= 10;
+
+program item_cast_spell( who, item )
+
+	if( !ReserveItem( item ) )
+		return;
+	endif
+
+	var last_use := CInt(GetObjProperty( item, "#last_use" ));
+	if( last_use && last_use > CInt(ReadGameClock() - DELAY_BETWEEN_USE) )
+		SendSysMessage( who, "You must wait before using it again." );
+		return;
+	endif
+	
+	SetObjProperty( item, "#last_use", CInt(ReadGameClock()) );
+
+	if (!can_cast(who, 0)) // (who, circle 0)
+		SendSysMessage(who, "You cannot use that here!");
+		return;
+	endif
+
+	if( !GetObjProperty( item, "RequireNoCharges" ) )
+		var charges := CInt(GetObjProperty( item, "charges" ));
+		if( !charges )
+			PrintTextAbovePrivate( item, "That is out of charges", who );
+			return;
+		else
+			charges := charges - 1;
+			SetObjProperty( item, "charges", charges );
+		endif
+	endif
+
+	who.hidden := 1;
+
+	Detach();
+
+	sleep( DELAY_BETWEEN_USE );
+	EraseObjProperty( item, "#last_use" );
+
+endprogram

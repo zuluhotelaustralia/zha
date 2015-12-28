@@ -1,0 +1,41 @@
+use boat;
+use uo;
+//include "include/multiutil";
+include "include/cmdlevel_check";
+
+
+program textcmd_whosShip( who )
+	if (!checkStaff(who, "whoship", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+	var boat := who.multi;
+	var ownerSer := GetObjProperty(boat.hold,"owner");
+	var owner := SystemFindObjectBySerial( ownerSer, SYSFIND_SEARCH_OFFLINE_MOBILES );
+	if (owner)
+		SendSysMessage(who, "The owner of this ship is: " + owner.name);
+		
+		var check := 0;
+		var aCharacter;
+		foreach aCharacter in EnumerateOnlineCharacters()
+			if (aCharacter == owner)	
+				check := 1;
+			endif
+		endforeach
+		if (check)
+			SendSysMessage(who, "And they are currently ONLINE.");
+		else
+			SendSysMessage(who, "And they are currently OFFLINE.");
+		endif
+		
+	else
+		if (! boat.isA(POLCLASS_BOAT))
+			SendSysMessage(who, "No valid owner.");
+		else
+			SendSysMessage(who, "Stand on a boat to find owner name.");
+		endif
+	endif
+	
+
+
+endprogram

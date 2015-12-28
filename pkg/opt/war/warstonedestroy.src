@@ -1,0 +1,9 @@
+
+use uo;
+use os;
+include "war";
+
+program queststone_destroy(stone)
+	//ClearPlayerData(stone); //gets rid of props on players
+	start_script("::maindestroy");
+endprogram

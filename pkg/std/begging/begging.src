@@ -1,0 +1,315 @@
+//Added monster begging... Barnabus 3/3/2003
+
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/skillpoints";
+include "include/random";
+include "include/classes";
+
+const minutes:=10; // You can beg only after this time
+
+program begging ( character )
+
+	SendSysMessage( character, "Who do you want to beg from?" );
+	var who := Target( character );
+	
+	
+	var account := who.acctname;
+	
+	var isABard := GetObjProperty( character, CLASSEID_BARD );
+	var targetIsAMonster := (!GetMaxHp(who) || (who.graphic!=0x191 && who.graphic!=0x190)) ;
+	
+	var monsterInt := GetIntelligence(who);
+	
+	if( who == character )
+		SendSysMessage(character, "If you had money to give you wouldn't be begging!");
+		return;
+	endif
+	
+	if(account)
+		SendSysMessage( character, "You can only beg from NPC's." );
+		return;
+	endif	
+	
+	if( !who.isA(POLCLASS_MOBILE) )
+		SendSysMessage( character, "You can't beg from that." );
+		return;
+	endif
+	
+	if (who.script == "playermerchant")
+		SendSysMessage( character, "You can't beg from player vendors." );
+		return;
+	endif
+	
+	if (who.warmode)
+		SendSysMessage( character, "They are too angry to be begged from." );
+		return;
+	endif
+
+	//is a bard
+	if (isABard)
+		if(who.script == "tamed" )//cant beg from tamed
+			SendSysMessage( character, "You should beg from the creature's master." );
+			return 0;			
+		endif
+		if (targetIsAMonster)//if a monster
+			if (! isAValidBeggingMonster(who))//can only beg from certain types
+				SendSysMessage( character, "The creature does not respond to your pleading." );
+				return 0;
+			endif
+			if (monsterInt<20)//and the monster must have >=20 INT
+				SendSysMessage(character, "You must target a smarter creature!");
+				return;
+			endif
+		endif		
+	//not a bard
+	elseif(targetIsAMonster)//non bards cant beg from non humans
+		SendSysMessage(character, "You must target a human!");
+		return;
+	endif
+
+
+	if (Distance( character, who )>5)
+		PrintTextAbove( character,"Hey!!... Sorry!!!");
+		SendSysMessage( character, "You need to stay near them!");
+		return 0;
+	endif
+
+	var memx:=character.x;
+	var memy:=character.y;
+	var delay1:=3;
+	var delay2:=5;
+	var delay3:=2;
+	var delay4:=1;
+
+	PerformAction( character, ANIM_BOW);
+	if (targetIsAMonster)
+		PrintTextAbove( character,"Sorry... creature!");
+	elseif (who.graphic==0x191)
+		PrintTextAbove( character,"Sorry... lady!");
+	else
+		PrintTextAbove( character,"Sorry... sir!");
+	endif
+	while( delay1 )
+		sleep( 1 );
+		delay1 := delay1 - 1;
+		if ((memx!=character.x)||(character.dead))
+			exitnow(character);
+		endif
+	endwhile
+	
+		
+	if (targetIsAMonster)
+		case (Random(5))
+			0: PrintTextAbove( character, "You are so slimy, couldst thou help me?" ); PerformAction( 				character, ANIM_BOW);
+			1: PrintTextAbove( character, "You're such a fearsome beast, have pity on me..." ); 					PerformAction( character, ANIM_BOW);
+			2: PrintTextAbove( character, "I worship your power and beg a boon from you." ); 					PerformAction(character, ANIM_BOW);
+			3: PrintTextAbove( character, "Surely you could spare a dime from your vast hoarde?" ); 				PerformAction( character, ANIM_BOW);
+			4: PrintTextAbove( character, "I am your humble servant. Pass me a coin so that I might spread the word of your greatness" ); PerformAction( character, ANIM_BOW);
+		endcase
+	else
+		case (Random(5))
+			0: PrintTextAbove( character, "Give me something please..." ); PerformAction( character, 				ANIM_BOW);
+			1: PrintTextAbove( character, "I need something to eat!" ); PerformAction( character, 					ANIM_BOW);
+			2: PrintTextAbove( character, "I've got four children, please help me!" ); PerformAction( 				character, ANIM_BOW);
+			3: PrintTextAbove( character, "Could thee spare a dime?" ); PerformAction( character, ANIM_BOW);
+			4: PrintTextAbove( character, "Some thieves stole me everything, I'm broken now..." ); 					PerformAction( character, ANIM_BOW);
+		endcase
+		
+	endif
+
+	while( delay2 )
+		sleep( 1 );
+		delay2 := delay2 - 1;
+		if ((memy!=character.y)||(character.dead))
+			exitnow(character);
+		endif
+	endwhile
+
+	PerformAction( character, ANIM_BOW);
+	PrintTextAbove( character,"Pleeeease!");
+
+	while( delay4 )
+		sleep( 1 );
+		delay4 := delay4 - 1;
+		if (CInt(GetObjProperty( who,"Lastbegged"))>ReadGameClock())
+			if (targetIsAMonster)
+				PrintTextAbove( who,"Arr! You again?");
+				var ev := {};
+				ev.+source := character;
+				ev.+type := SYSEVENT_DAMAGED;
+				SendEvent(who,ev);
+				return;
+			else	
+				PrintTextAbove( who,"Hey!! I seem a bank?");
+				return;
+			endif
+		endif
+	endwhile
+
+	while( delay3 )
+		sleep( 1 );
+		delay3 := delay3 - 1;
+		if (memy!=character.y)
+			exitnow(character);
+		endif
+	endwhile
+
+	if(!targetIsAMonster)
+		begFromHuman(character, who);
+	else
+		begFromMonster(character, who);		
+	endif
+
+
+
+endprogram
+
+
+function begFromHuman(character, who)
+	//character is person begging
+	//who is person begged from
+	var begging := GetEffectiveSkill(character, SKILLID_BEGGING);
+	var defbegging := get_default_points(SKILLID_BEGGING);
+	if (CheckSkill(character,SKILLID_BEGGING, -1, defbegging))
+		if (character.graphic==0x191)
+			PrintTextAbove(who, "Ohh! Poor woman!");
+		else
+			PrintTextAbove(who, "Ohh! Poor man!");
+		endif
+
+		sleep(2);
+		PrintTextAbove(who, "The compassion touch my heart!");
+
+		sleep(2);
+
+		case (Random(5))
+			0: PrintTextAbove( who, "Take these, poor beggar..." );
+			1: PrintTextAbove( who, "Let me help you..." );
+			2: PrintTextAbove( who, "Use these wisely!" );
+			3: PrintTextAbove( who, "Alright, but stop disturbing me!" );
+			4: PrintTextAbove( who, "I wish I could give more..." );
+		endcase
+
+		SetObjProperty( who,"Lastbegged",ReadGameClock()+(minutes*30));
+
+		if( GetKarma( character ) > KARMA_CRIMINAL_LIMIT+26 )
+		       	AwardKarma( character, -25 );
+		endif
+
+		var money:=Random(begging) + Random(10) + 3;
+			
+		if( GetObjProperty( character, CLASSEID_BARD ) )
+			money := CInt( Random(begging) + Random(10) + 10 * ClasseBonus( character, CLASSEID_BARD ) );
+		endif
+
+		CreateItemInBackpack(character, 0xeed, money);
+		SendSysMessage(character, "You receive "+money+" gold coins!");
+		money:=CInt(money/2);
+		//if (money>50)
+		//	money:=50;
+		//endif
+
+		else
+		case (Random(5))
+			0: PrintTextAbove( who, "Go away, you damn beggar!" );
+			1: PrintTextAbove( who, "Get lost!" );
+			2: PrintTextAbove( who, "Don't bug me now!" );
+			3: PrintTextAbove( who, "I've got nothing to give you, I'm sorry..." );
+			4: PrintTextAbove( who, "I'm sorry but I gotta go now..." );
+		endcase
+
+		sleep(2);
+		PrintTextAbove(who, "You won't have ANYTHING from me!");
+		SendSysMessage(character, "You receive nothing...");
+	endif
+
+endfunction
+
+function begFromMonster(character, who)
+	//character is person begging
+	//who is monster begged from
+	var begging := GetEffectiveSkill(character, SKILLID_BEGGING);
+	var defbegging := get_default_points(SKILLID_BEGGING);
+	var monsterInt := GetIntelligence(who);
+	
+	var diff 	:= (monsterInt*2 + 10) / ClasseBonus( character, CLASSEID_BARD+1);
+	var points 	:= CInt(defbegging+((monsterInt + 20)* 4));
+	
+	if (CheckSkill(character,SKILLID_BEGGING, diff, points))
+		if (character.graphic==0x191)
+			PrintTextAbove(who, "Haha!!! Nice lady!");
+		else
+			PrintTextAbove(who, "Haha!!! Nice man!");
+		endif
+
+		sleep(2);
+		PrintTextAbove(who, "You amuse me!");
+
+		sleep(2);
+
+		case (Random(5))
+			0: PrintTextAbove( who, "Take these, and begone from my sight..." );
+			1: PrintTextAbove( who, "Have a pittance of my wealth, and spread the word of my greatness..." );
+			2: PrintTextAbove( who, "I am hungry, but not hungry enough to eat you! Take these few gold and begone..." );
+			3: PrintTextAbove( who, "I give you gold, if only to halt your incessant whining!" );
+			4: PrintTextAbove( who, "Gar! Umphh! Huaarrrr!" );
+		endcase
+
+		SetObjProperty( who,"Lastbegged",ReadGameClock()+(minutes*30));
+		
+		var npc_cfg	:= ReadConfigFile( "::npcdesc" ); //find monsters lootgroup
+		var moneyModifier	:= npc_cfg[who.npctemplate].magicitemlevel;
+
+
+		var money;
+		if (!moneyModifier)
+			money := CInt( Random(begging) + Random(10) + 10 * ClasseBonus( character, CLASSEID_BARD ) );
+		else
+			money:=CInt( Random(begging) + Random(10) + (moneyModifier*20) * ClasseBonus( character, CLASSEID_BARD ) );
+		endif
+		CreateItemInBackpack(character, 0xeed, money);
+		SendSysMessage(character, "You receive "+money+" gold coins!");
+
+	else
+		sleep(2);
+		PrintTextAbove(who, "Foul beggar!");
+		SendSysMessage(character, "You receive nothing...");
+		var ev := {};
+		ev.+source := character;
+		ev.+type := SYSEVENT_DAMAGED;
+		SendEvent(who,ev);
+	endif
+
+endfunction
+
+
+
+function exitnow(character)
+
+			case (Random(6))
+				0: PrintTextAbove( character, "I have to go!" );
+				1: PrintTextAbove( character, "I must leave!!" );
+				2: PrintTextAbove( character, "no....ehm...bye!" );
+				3: PrintTextAbove( character, "Bye!!" );
+				4: PrintTextAbove( character, "I must flee!!" );
+				5: PrintTextAbove( character, "I gotta go!" );
+			endcase
+	exit;
+
+endfunction
+
+function isAValidBeggingMonster(monster)
+		//basically i have limited this to the types of monsters that might conceivably talk to a human
+		var monsterType := GetObjProperty (monster, "Type");
+		
+		if (monsterType<>"Beholder"&&monsterType<>"Daemon"&&monsterType<>"Dragonkin"&&
+		monsterType<>"Dragonkin"&&monsterType<>"Giantkin"&&monsterType<>"Ophidian"&&monsterType<>"Orc"
+		&&monsterType<>"Ratkin"&&monsterType<>"Terathan"&&monsterType<>"Troll")
+			return 0;
+		endif
+		return 1;	
+endfunction

@@ -1,0 +1,12 @@
+use uo;
+include "include/client";
+
+program pickdoor(who, door)
+	if (door.isopen)
+		PlaySoundEffect( door, SFX_CLOSE_METAL_DOOR );
+		door._close();
+	else
+		PrintTextAbove(door, "*locked*");
+		PrintTextAbovePrivate(who, "The door has a very strong looking lock on it", who, 3, 53);
+	endif
+endprogram

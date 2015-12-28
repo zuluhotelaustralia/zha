@@ -1,0 +1,63 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+program ambushtilewalkon_lava( who, tile )
+
+	//done so that auxillary tiles can pass parameters in start_script
+	if (TypeOf(who) == "Array")
+		tile:= who[2];
+		who := who[1];
+	endif
+
+
+
+	if (who.dead || !who.acct)
+		return;
+	endif
+	
+	var mtilestatus := tileStatus(tile);
+	if (! mtilestatus[1]||!mtilestatus[2] )
+		return;
+	endif
+	
+	if (!HasAmbushTimeElapsed(tile))
+		return;
+	endif
+	SetCurrentAmbushTime(tile, mtilestatus[3]);
+	sleep(1);
+	PrintTextAbove(tile, "*Ambush!!!*");
+	var i:=1;
+	var thecritter;
+	while (i<=CInt(mtilestatus[2]))
+		thecritter := CreateNpcFromTemplate( mtilestatus[1], CInt(tile.x), CInt(tile.y), CInt(tile.z) );
+		if (thecritter)
+			PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa );
+			PlaySoundEffect( thecritter, 0x280 );
+		endif
+		i:=i+1;
+	endwhile
+endprogram
+
+function HasAmbushTimeElapsed(tile)
+	//returns true if time elapsed
+	var lastwalkedTime := CInt(GetObjProperty(tile, "#lastwalked"));
+	if (ReadGameClock()>lastwalkedTime) //that is current time is greater than reserved time
+		return 1;
+	endif
+	return 0;
+endfunction
+
+function SetCurrentAmbushTime(tile, timeinterval)
+	SetObjProperty(tile, "#lastwalked", ReadGameClock()+CInt(timeinterval));
+endfunction
+
+function tileStatus(tile)
+//returns an array of file settings for gump above
+ 	return {GetObjProperty(tile, "createMonsterTemplate"),
+	GetObjProperty(tile, "createMonsterTemplateNo"),
+	GetObjProperty(tile, "TimeInterval")};
+endfunction
+
+

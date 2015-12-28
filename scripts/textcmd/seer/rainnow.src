@@ -1,0 +1,19 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program rainnow (character, dur)
+	if (!checkStaff(character, "rainnow", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+var duration := CInt(dur);
+
+var i;
+
+for (i := 1; i <= duration; i := i + 1)
+        var res := SetRegionWeatherLevel("Background",1,15);
+        sleep(1);
+endfor
+
+endprogram

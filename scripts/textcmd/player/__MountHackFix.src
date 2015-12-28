@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include "include/attributes";
+
+var CONCEALEDFIXPASSWORD := "Barns987612345"; //this must be same password as that in polhook.cfg
+//polhook will pass this to the command... this will prevent players using this as a textcmd
+//in the unlikely event that players find this out change this and the password in polhook.cfg
+
+program MountHackFix(who, password)
+	
+	if (password!=CONCEALEDFIXPASSWORD)
+		SendSysMessage(who, "Unknown command: .__MountHackFix");
+		return;
+	endif
+	
+	var mount:=GetEquipmentByLayer( who, LAYER_MOUNT );
+	if (! GetObjProperty(mount,"npctemplate"))
+		SendSysMessage(who, "WARNING: You have been detected using a mounthack. Repeat offenders will be jailed/banned.",3,38);
+		
+		foreach person in EnumerateOnlineCharacters()
+			if (person.cmdlevel)
+				SendSysMessage(person, who.name + " kicked for using MOUNTHACK!!", 3, 38);
+			endif
+		endforeach
+		sleepms(200);
+		DisconnectClient( who );
+		
+	endif
+
+endprogram

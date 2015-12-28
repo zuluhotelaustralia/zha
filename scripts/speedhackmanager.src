@@ -1,0 +1,183 @@
+//Barnabus 13/9/2003 - This is a persistent speed hack checker.. uses some code lifted from checkspeed command
+//to do checks on random online players.. 1 chosen at random for check every 30 seconds...
+
+
+use uo;
+use os;
+use math;
+include "include/client";
+include "include/random";
+include "include/time";
+
+program speedhackmanager()
+	syslog(  "Speed hack manager initiated." );
+
+	var onlineplayers := array;
+	var testplayer;
+	var randplayerno;
+	while (1) //loops continuously
+		onlineplayers:=EnumerateOnlineCharacters();
+		//Broadcast("Enumerated Online Players. " + onlineplayers.size() + " online.");
+		if (onlineplayers.size()>0)
+			randplayerno:=CInt(Random(onlineplayers.size())+1);
+			//Broadcast("RANDOM NO. " + randplayerno);
+			testplayer := onlineplayers[randplayerno];
+			if (testplayer && !testplayer.cmdlevel)
+			//if (testplayer)
+				if (CheckSpeedHack(testplayer))
+					InformAndPunish(testplayer);
+				endif
+			endif
+		endif
+		sleep(1);
+	endwhile
+endprogram
+
+function CheckSpeedHack(who)
+ //Broadcast("Checking player : " + who.name);
+ SetObjProperty(who, "CheckingSpeed", 1);
+ var charCoords:=struct; 
+ charCoords.+x:=who.x;
+ charCoords.+y:=who.y;
+ var charSpeedX;     
+ var charSpeedY;
+ var charSpeedMD;
+ var charMount;
+ var i;    
+ 
+ var maxSpeed;
+ EraseObjProperty(who, "RecalledGatedTeled"); 
+
+ sleep(1);
+ for (i:=1;i<6;i:=i+1)
+   SendPacket(who, "220000");// request resync 
+   charSpeedX:=abs(who.x-charCoords.x);   
+   charSpeedY:=abs(who.y-charCoords.y);
+
+   charSpeedMD:=maxOf( charSpeedX, charSpeedY );      
+
+   charMount:=GetEquipmentByLayer( who, LAYER_MOUNT );
+
+   if( charMount )
+     //minSpeed:= 17;//was 15
+     //maxSpeed:= 46;
+		maxSpeed:=15; //5 more than max riding
+   else
+     //minSpeed:= 10;//was 8
+     //maxSpeed:= 30;
+		//maxSpeed:=22; //allows for running and teleport spell in same direction
+ 		maxSpeed:=8; // more than max running.  
+	endif
+
+	//if( charSpeedMD>minSpeed and charSpeedMD<maxSpeed)
+	//Broadcast(who.name + " speed was " + charSpeedMD);
+	if(charSpeedMD>maxSpeed)
+		if (CheckLosAt( who, charCoords.x, charCoords.y, who.z ))
+			if (! GetObjProperty(who, "RecalledGatedTeled"))
+				EraseObjProperty(who, "CheckingSpeed");   
+				return 1;
+			else
+				EraseObjProperty(who, "RecalledGatedTeled");
+			endif
+		endif
+	endif
+   charCoords.x:=who.x;
+   charCoords.y:=who.y;
+   SendPacket(who, "220000");// request resync 
+	sleep(1);
+ endfor
+ EraseObjProperty(who, "CheckingSpeed");
+ return 0;
+endfunction
+
+function InformAndPunish(who)
+   foreach character in EnumerateOnlineCharacters()
+      if( character.cmdlevel )
+			SendSysMessage( character, who.name+" is Speed Hacking", 3, COLOR_RED );
+      endif
+   endforeach
+	var prevhacks := CInt(GetObjProperty(who, "SpeedHackWarnings"));
+	
+	PageStaff(who);
+	if (prevhacks)
+		SendSysMessage( who, "You have been jailed, 1 day for speedhacking.", 3, COLOR_RED);
+		var acc := who.acct;
+		acc.setprop("Release", (ReadGameClock() + 86400));
+		MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+		writeToNotes(acc);
+		DisconnectClient( who );
+	else
+		SendSysMessage( who, "You have been detected speedhacking. This is a warning - speedhacking is not tolerated", 3, COLOR_RED);
+		SendSysMessage( who, "If you are detected doing this again you will be jailed.", 3, COLOR_RED);
+		prevhacks:=0;
+	endif
+	SetObjProperty(who, "SpeedHackWarnings", prevhacks+1);
+endfunction
+
+function maxOf( userVal1, userVal2 )
+
+  if(userVal1>userVal2)
+    return userVal1;
+  else
+    return userVal2;  
+  endif
+
+endfunction
+
+function PageStaff(who)
+	var pages := GetGlobalProperty( "StaffPages" );
+	if( !pages )
+		pages := {};
+	endif
+	var num_pages := pages.size();
+	pages[num_pages+1] := who.serial;
+	pages[num_pages+2] := getPageTimeStamp() + "SPEED HACK WARNING!";
+	SetGlobalProperty("StaffPages", pages);
+endfunction
+
+function writeToNotes(acc)
+	var notes := UnPack(acc.GetProp("Notes"));
+	var constwarn := "  AUTODETECT Speedhack 1 day jail " + getPageTimeStamp();
+	if (!notes)
+		notes := array;
+		notes[1] := constwarn;
+	elseif (TypeOf(notes) == TypeOf("")) // Convert old notes.
+		var firstnote := notes;
+		notes := array;
+		notes[1] := firstnote + constwarn  ;
+	else
+		var curpage := notes.size();
+		notes[curpage]:=notes[curpage] + constwarn;
+	endif
+	
+	acc.setprop("Notes", Pack(notes));
+
+endfunction
+
+function getPageTimeStamp()
+	var time_data := GetCurrentTimeData();
+	var day, month, hour, minutes;
+	if (time_data.day < 10)
+		day := "0" + CStr(time_data.day);
+	else
+		day := CStr(time_data.day);
+	endif
+	if (time_data.month < 10)
+		month := "0" + CStr(time_data.month);
+	else
+		month := CStr(time_data.month);
+	endif
+	if (time_data.hour < 10)
+		hour := "0" + CStr(time_data.hour);
+	else
+		hour := CStr(time_data.hour);
+	endif
+	
+	if (time_data.minutes < 10)
+		minutes := "0" + CStr(time_data.minutes);
+	else
+		minutes := CStr(time_data.minutes);
+	endif
+	var time_string := day + "/" + month + "_" + hour + ":" + minutes;
+	return time_string;
+endfunction

@@ -1,0 +1,10 @@
+
+exported function open( door )
+    print( "thiefdoor::open(" + door.serial + ")" );
+    return door._open();
+endfunction
+
+program install()
+    print( "installing pkg:opt:barnsitems:thiefdoor" );
+    return 1;
+endprogram

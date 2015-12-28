@@ -1,0 +1,20 @@
+Element 0x13EC
+{
+	boughtSold i-2
+}
+
+Element 0x13F0
+{
+	boughtSold i-1
+}
+
+Element 0x1B73
+{
+	boughtSold i-1
+}
+
+Element 0x1B74
+{
+	boughtSold i-1
+}
+

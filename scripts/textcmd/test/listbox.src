@@ -1,0 +1,30 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program listbox( who, args )
+	if (!checkStaff(who, "listbox", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    var params := SplitWords( args );
+    var z1 := CInt(params[1]);
+    var z2 := CInt(params[2]);
+
+    var t1 := TargetCoordinates( who );
+    if (!t1)
+        return;
+    endif
+
+    var t2 := TargetCoordinates( who );
+    if (!t2)
+        return;
+    endif
+
+    foreach object in ListObjectsInBox( t1.x, t1.y, z1,  t2.x, t2.y, z2 )
+        if (object.name)
+            print( "Object: " + object.name );
+        else
+            print( "Object: " + object.desc );
+        endif
+    endforeach
+endprogram

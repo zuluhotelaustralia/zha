@@ -1,0 +1,257 @@
+use os;
+use uo;
+use util;
+use basic;
+
+include "include/client";
+include "include/eventid";
+include "include/utility";
+include "include/cmdlevel_check";
+
+
+var correctchoicenum;
+var timecheck;
+var before;
+var entered;
+var i;
+var possible;
+var slot := {0,0,0,0,0,0,0,0,0,0};
+var tries;
+function textcmd_bcast( who, text )
+var chr,i,plychat:=GetGlobalProperty("plychat"),csize:=plychat.size();
+for (i:=1;i<=csize;i:=i+1)
+chr:=SystemFindObjectBySerial(plychat[i]);
+if (chr.cmdlevel>0 && chr)
+SendSysMessage(chr,who.name+ ": "+text,3,130);
+endif
+endfor
+endfunction
+
+var text;
+var num;
+var data;
+var layout := {
+	"page 0",
+	"noclose",
+	"nomove",
+	"nodispose",
+	"gumppic 0 0 2520",   // was 2604
+	"resizepic 0 0 2520 500 375",
+	"text 90 40 1153 0",
+	"text 150 60 1153 1",
+
+	"text 90 95 1153 2",
+	"button 65 100  2104 2103 1 0 3",
+
+	"text 90 115 1153 4",
+	"button 65 120  2104 2103 1 0 5",
+
+	"text 90 135 1153 6",
+	"button 65 140  2104 2103 1 0 7",
+
+	"text 90 155 1153 8",
+	"button 65 160  2104 2103 1 0 9",
+
+	"text 90 175 1153 10",
+	"button 65 180  2104 2103 1 0 11",
+
+	"text 90 195 1153 12",
+	"button 65 200  2104 2103 1 0 13",
+
+	"text 90 215 1153 14",
+	"button 65 220  2104 2103 1 0 15",
+
+	"text 90 235 1153 16",
+	"button 65 240  2104 2103 1 0 17",
+
+	"text 90 255 1153 18",
+	"button 65 260  2104 2103 1 0 19",
+
+	"text 90 275 1153 20",
+	"button 65 280  2104 2103 1 0 21",
+	"text 90 295 33 22"
+
+};
+
+
+program code_equal_to_number( who, client )
+	if (!checkStaff(who, "macrokill", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+	var chr :=GetGlobalProperty("plychat");
+	var player := Target(who, TGTOPT_NOCHECK_LOS);
+	if( !player )
+		return 0;
+	elseif( !player.IsA(POLCLASS_MOBILE) )
+		SendSysMessage( who, "You must target a player." );
+		return 0;
+	elseif( player.IsA(POLCLASS_NPC) )
+		SendSysMessage( who, "You must target a player." );
+		return 0;
+	endif
+
+	tries := 1;
+	SetObjProperty( player, "starttime", ReadGameClock() );
+
+	before := ReadGameClock(); // DEBUG
+
+	start_script( ":zuluitems:killmacrotimer", player );
+
+	var number  := RandomInt(10000)+1;
+
+	numpos(number,player);
+
+	if( entered == number )
+		EraseObjProperty( player, "starttime" );
+		SendSysMessage( player, "You passed!" );
+		PlayLightningBoltEffect(player);
+		textcmd_bcast( player, "entered the code correct." );
+		return 0;
+	else
+		number  := RandomInt(10000)+1;
+		tries:= 2;
+		numpos(number,player);
+		if( entered == number )
+			EraseObjProperty( player, "starttime" );
+			SendSysMessage( player, "You passed!" );
+			PlayLightningBoltEffect(player);
+			textcmd_bcast( player, "entered the code correct." );
+			return 0;
+		else
+			SendSysMessage( player, "You failed the macrotest." );
+			SendSysMessage( player, "Hope you like the jail." );
+			// insert jailcode
+			JailPlayer( player );
+			return 0;
+		endif
+	endif
+
+
+	//debug
+	var after := ReadGameClock();
+	timecheck := after - before;
+	var timechecktext := "took " + (after - before) + " seconds to manage through the macrotest";
+	textcmd_bcast( player, timechecktext );
+endprogram
+
+
+function JailPlayer( player )
+
+	var tick_per_day := 86400;
+	var jail_days := 1;   
+	var jailtime := 30 * jail_days;
+	var acc := player.acct;
+	var playername := CStr( player.name );
+	acc.setprop("Release", (ReadGameClock() + jailtime ));
+	if(GetObjProperty(player,"starttime"))
+		EraseObjProperty(player,"starttime");
+		MoveCharacterToLocation( player, 5304, 1184, 0, 0);
+
+		SendSysMessage( player, "You have been jailed for one day. Reason: Breaking macro rule." );
+
+		Broadcast( playername + " HAS BEEN JAILED DUE TO MACROING!", FONT_BOLD, 33 );
+		Broadcast( playername + " HAS BEEN JAILED DUE TO MACROING!", FONT_BOLD, 33 );
+
+		sleep(5*60);
+
+		DisconnectClient( player );
+	endif
+endfunction
+		
+function numpos(number,player)
+	correctchoicenum := RandomInt(10)+1;
+	for( i := 1; i <= 10; i := i + 1 )
+		possible := RandomInt(10000)+1;
+		while(possible == number)
+		possible := RandomInt(10000)+1;
+		endwhile
+		slot[i] := possible;
+	endfor
+
+	slot[correctchoicenum] := number;
+
+	if (tries == 1)
+		data := {
+		"You have 5 minutes to press the "+number+" button",  //0
+		"to pass the macrotest.", //1
+		slot[1],  //2
+		"",      
+		slot[2],  //4
+		"",
+		slot[3],  //6
+		"",
+		slot[4],  //8
+		"",
+		slot[5],  //10
+		"",
+		slot[6],  //12
+		"",
+		slot[7],  //14
+		"",
+		slot[8],  //16
+		"",
+		slot[9],  //18
+		"",
+		slot[10],  //20
+		"",
+		""
+	};
+	else
+		data := {
+		"You have 5 minutes to press the "+number+" button",  //0
+		"to pass the macrotest.", //1
+		slot[1],  //2
+		"",      
+		slot[2],  //4
+		"",
+		slot[3],  //6
+		"",
+		slot[4],  //8
+		"",
+		slot[5],  //10
+		"",
+		slot[6],  //12
+		"",
+		slot[7],  //14
+		"",
+		slot[8],  //16
+		"",
+		slot[9],  //18
+		"",
+		slot[10],  //20
+		"",
+		"WARNING - LAST CHANCE!!!"
+	};
+	endif
+
+	var res := SendDialogGump( player, layout, data );
+	case( res[0] )
+
+		3: entered := slot[1];
+		5: entered := slot[2];
+		7: entered := slot[3];
+		9: entered := slot[4];
+		11: entered := slot[5];
+		13: entered := slot[6];
+		15: entered := slot[7];
+		17: entered := slot[8];
+		19: entered := slot[9];
+		21: entered := slot[10];
+
+	endcase
+
+
+//	entered := Cint(SendTextEntryGump( player, text, 0xdb0 ));  //was 160
+
+
+
+
+
+endfunction
+
+
+
+
+
+

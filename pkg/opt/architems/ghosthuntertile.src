@@ -1,0 +1,84 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+program ghost_hunter_usescript(who, tile)
+
+	if (!checkStaff(who, "ghosthuntertile", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	MenuGump(who, tile);
+
+endprogram
+
+function MenuGump(who, tile)
+
+	var time:=GetObjProperty(tile, "time");
+	var banishtime:= GetObjProperty(tile, "banishtime");
+	var range:=GetObjProperty(tile, "range");
+	var x:=GetObjProperty(tile, "x");
+	var y:=GetObjProperty(tile, "y");
+	var z:=GetObjProperty(tile, "z");
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "GHOSTHUNTER SETUP");
+	GFTextLine(40, 70, 68, "Tile properties:");
+
+	GFTextLine(60, 90, 5,  "Seconds between checks for ghosts: "+time);
+	var button1  := GFButtonID( 40, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 110, 5, "Seconds it takes ghosthunter to banish: "+banishtime);
+	var button2  := GFButtonID( 40, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 130, 5, "Range: Ghosts within "+range+" tiles");
+	var button3  := GFButtonID( 40, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(40, 150, 68, "Destination Coordinates:");
+	GFTextLine(60, 170, 5, "X: "+x);
+	var button4  := GFButtonID( 40, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 190, 5, "Y: "+y);
+	var button5  := GFButtonID( 40, 195, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(60, 210, 5, "Z: "+z);
+	var button6  := GFButtonID( 40, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+
+	var result := GFSendGump(who);
+	if (result[button1.keyid])
+		time:= CInt(SendTextEntryGump(who, "How many seconds between checks for ghosts?", 3));
+		if (time)
+			SetObjProperty(tile, "time", time);
+		endif
+		MenuGump(who, tile);
+	elseif (result[button2.keyid])
+		banishtime := CInt(SendTextEntryGump(who, "How many seconds should it take a ghosthunter to banish a ghost?", 3));
+		if (banishtime)
+			SetObjProperty(tile, "banishtime", banishtime);
+		endif
+		MenuGump(who, tile);
+	elseif (result[button3.keyid])
+		range := CInt(SendTextEntryGump(who, "Within how many tiles should the generater check for ghosts?", 3));
+		if (range)
+			SetObjProperty(tile, "range", range);
+		endif
+		MenuGump(who, tile);
+	elseif (result[button4.keyid])
+		x := CInt(SendTextEntryGump(who, "What X coordinate should ghosthunters send ghosts to?", 3));
+		if (x)
+			SetObjProperty(tile, "x", x);
+		endif
+		MenuGump(who, tile);
+	elseif (result[button5.keyid])
+		y := CInt(SendTextEntryGump(who, "What Y coordinate should ghosthunters send ghosts to?", 3));
+		if (y)
+			SetObjProperty(tile, "y", y);
+		endif
+		MenuGump(who, tile);
+	elseif (result[button2.keyid])
+		z := CInt(SendTextEntryGump(who, "What Z coordinate should ghosthunters send ghosts to?", 3));
+		if (z)
+			SetObjProperty(tile, "z", z);
+		endif
+		MenuGump(who, tile);
+	endif
+
+endfunction

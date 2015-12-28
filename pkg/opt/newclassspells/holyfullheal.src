@@ -1,0 +1,78 @@
+/* Holy Spell - Full Heal    **
+** Fully Heals Target        **
+** Seravy - seravy@gmail.com */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_FULLHEAL;
+
+program cast_fullheal(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    SendSysMessage( caster, "Who do you wish to fully cure?");
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_FULLHEAL, SPEED_SPELL_FULLHEAL, LOOP_SPELL_FULLHEAL);
+  PlaySoundEffect(cast_on, SFX_SPELL_FULLHEAL);
+
+  var class:=GetClass(caster);
+  var level:=GetClasseLevel(caster);
+	
+  if( GetObjProperty(cast_on, "Type" ) == "Undead" )
+    ApplyTheDamage(cast_on, caster, CInt(GetHp(cast_on) / 1.5), DMGID_MAGIC);
+  else
+    HealDamage(cast_on, CInt(GetMaxHp(cast_on)));
+    case (class)
+      CLASSEID_PRIEST:   
+        if (level > 2)
+          CurePoison(cast_on, SFX_SPELL_CURE, caster.name+ " has CURED you!" );
+        endif
+        if (level > 6)
+          set_critical(1);
+          var all := GetMod(cast_on, "all");
+          if (all[1] < 0)
+            WipeMod(cast_on, "all");
+          endif
+
+          var str := GetMod(cast_on, "str");
+          if (str[1] < 0)
+            WipeMod(cast_on, "str");
+          endif
+
+          var int := GetMod(cast_on, "int");
+          if (int[1] < 0)
+            WipeMod(cast_on, "int");
+          endif
+
+          var dex := GetMod(cast_on, "dex");
+          if (dex[1] < 0)
+            WipeMod(cast_on, "dex");
+          endif
+          set_critical(0);
+        endif
+    endcase
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

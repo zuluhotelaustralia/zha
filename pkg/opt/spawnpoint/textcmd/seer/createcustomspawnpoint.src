@@ -1,0 +1,80 @@
+use uo;
+
+include "include/constants/objtypes";
+include "include/cmdlevel_check";
+
+program textcmd_createcustomspawnpoint( who )
+	if (!checkStaff(who, "createcustomspawnpoint", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+	SendSysMessage(who, "Target a mobile for which to use as a template for a custom spawnpoint.");
+	var templatemonster := Target(who);
+	if (! templatemonster.npctemplate)
+		SendSysMessage(who, "Invalid choice.");
+		return;
+	endif
+
+	var point := CreateItemAtLocation( who.x, who.y, who.z, UOBJ_SPAWNPOINT, 1 );
+	if (!point)
+		SendSysMessage(who, "Cancelled.");
+		return;
+	endif
+	ReserveItem(point);
+	sleep(2);
+	ReleaseItem(point);
+	
+	var pt_data:= array;
+	pt_data[1]  := "NPC";	// Type
+	pt_data[2]  := templatemonster.npctemplate;	// Template
+	pt_data[3]  := 1;	// Max appear
+	pt_data[4]  := 1;	// Appear Range
+	pt_data[5]  := 1;	// Wander Range
+	pt_data[6]  := 1;	// Frequency
+	pt_data[7]  := 0;	// Disabled
+	pt_data[8]  := 0;	// Spawn in group.
+	pt_data[9]  := 0;	// Despawn on destroy
+	pt_data[10] := 0;	// Expire time
+	pt_data[11] := 0;	// Expire number
+	pt_data[12] := 0;	// Start spawning hours
+	pt_data[13] := 0;	// End spawning hours
+	pt_data[14] := "Custom spawn point";	// Notes
+	SetObjProperty( point, PROPID_SPAWNPOINT_SETTING, pt_data );
+	
+	//get props from monster and put on spawnpoint
+	var counter:=1;
+	
+	var propnames := GetObjPropertyNames( templatemonster );
+	
+	foreach pname in propnames
+		var pval := GetObjProperty(templatemonster, pname);
+		SetObjProperty(point, "MonsterCustomCProp" + counter, {pname, TypeOf(pval), pval}); 
+		counter:=counter+1;
+	endforeach
+	
+	counter:=1;
+	var e_array;
+	foreach equip in ListEquippedItems(templatemonster)
+		e_array:=array;
+		e_array.append(Hex(equip.objtype));
+		e_array.append(CInt(equip.color));
+		foreach ipname in GetObjPropertyNames( equip )
+			e_array.append(ipname);
+			e_array.append(GetObjProperty(equip, ipname));
+		endforeach
+		if (equip.objtype==0xF021)
+			e_array.append("graphic");
+			e_array.append(equip.graphic);
+		endif
+		SetObjProperty(point, "MonsterCustomEquip" + counter, e_array); 
+		//Broadcast(e_array);
+		counter:=counter+1;
+	endforeach
+
+	SetObjProperty(point, "MonsterCustomName", templatemonster.name);
+	
+	SetObjProperty(point, "MonsterCustomGraphic", templatemonster.graphic);
+	
+	SetObjProperty(point, "MonsterCustomColor", templatemonster.color);	
+	SendSysMessage(who, "Custom spawn point made. Use the spawnpoint to activate");
+endprogram

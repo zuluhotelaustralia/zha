@@ -1,0 +1,213 @@
+use uo;
+use os;
+
+include "include/gumps";
+include "include/yesno";
+include "war";
+
+program use_war_stone(who, stone)
+
+	if (!GetCurrentWarUser(stone))
+		SetCurrentWarUser(stone,who);
+	else
+		//there is a current user
+		if (!CheckCurrentWarUser(stone, who)) //the who isnt the curent user
+			if (CheckCurrentWarUserTimeElapsed(stone, who)) //if that users time has elapsed
+				SetCurrentWarUser(stone,who); //set the clicker as the user
+			else
+				//output message saying stone is in use
+				SendSysMessage(who, "War stone in use. Please wait.", 3 ,34);
+				return;
+			endif
+		endif
+	endif
+		
+	playerGump(who, stone);
+	
+	//problem where if someone has gump open but isnt current user they will release the stone
+	//when they finish this program block... even tho someone else already using stone...
+	//get around by...
+	if (CheckCurrentWarUser(stone, who)) //clicker is current user
+		//theyve finished with the gump now so clear the user
+		ClearCurrentWarUser(stone, who);
+	endif
+endprogram
+
+
+function playerGump(who, stone)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 360, 330);
+	
+	var ball:=GetWarBall(stone);
+	
+	GFTextMid(10, 20, 280, 53, "War Stone for: " + GetWarTeamName((ball), GetStoneTeamNumber(stone)));
+
+	GFTextLine(90, 50, 5, "War Introduction");
+	GFTextLine(90, 80, 5, "Join up for the war!");
+	GFTextLine(90, 110, 5, "Resign from the war!");
+	GFTextLine(90, 140, 5, "War summary!");
+	GFTextLine(90, 170, 5, "My Battle report");
+	GFTextLine(90, 200, 5, "Help");
+	GFTextLine(90, 230, 5, "Exit");
+
+	var informationButton :=  GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var joinBtn := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var resignBtn := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var warSummBtn := GFButtonID( 60, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var mybattlereportBtn := GFButtonID( 60, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var helpButton := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	if (WarStoneUserElapsed(stone, who))
+		return;
+	endif
+
+	if(choice[informationButton.keyid])
+		WarIntroGump(ball, who);
+	elseif (choice[joinBtn.keyid])
+		RegisterAPlayer(who, stone);
+	elseif(choice[resignBtn.keyid])
+		ResignAPlayer(who,stone);
+	elseif(choice[warSummBtn.keyid])
+		WarSummary(who, ball);
+	elseif(choice[mybattlereportBtn.keyid])	
+		MyWarProgress(who,ball);
+	elseif(choice[helpButton.keyid])	
+		ShowPlayerHelp(who);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+
+endfunction
+
+function RegisterAPlayer(player, stone)
+	var ball := GetWarBall(stone);
+	var teamNum := GetStoneTeamNumber(stone);
+
+	if (! IsWarRegistrationOpen(ball))
+		SendSysMessage(player, "The war is not open for registration", 3, 53);
+		return;
+	endif
+	
+	if (IsPlayerRegistered(ball, player.serial))
+		SendSysMessage(player, "You have already registered for this war!", 3, 53);
+		return;
+	endif
+	
+	if (GetOnPlayerWarSerial (player))
+		SendSysMessage(player, "You are only able to be enlisted in 1 war at a time", 3, 53);
+		return;	
+	endif
+	
+	if (!CheckMinimumRegistrationCondition(player))
+		return;
+	endif
+	
+	if (! CheckAccountNotOnOtherTeam(ball, teamNum, player.acct.name))
+		SendSysMessage(player, "This account has already joined the other team! You can now only join that side.", 3, 53);
+		return;
+	endif
+	
+	if (! CheckWarRegistrationCondition(player, ball, teamNum))
+		SendSysMessage(player, "This war team will only accept " + GetWarRegistrationConditionString(ball, teamnum) + " recruits!", 3, 53);
+		return;
+	endif
+
+	AddPlayerWData(ball, player, teamNum);
+	SetOnPlayerData (player, ball, teamNum);
+	SendSysMessage(player, "You have enlisted in the war! When the war starts you will be temporarily removed from any guild that you are in, and made a member of the warstone guild, until the war is over.", 3, 53);	
+endfunction
+
+function ResignAPlayer(who,stone)
+	var ball := GetWarBall(stone);
+	var teamNum := GetStoneTeamNumber(stone);
+
+	if (! IsWarRegistrationOpen(ball))
+		SendSysMessage(who, "You cannot quit the war as it is no longer open for registration!", 3, 53);
+		return;
+	endif
+	
+	if (! IsPlayerRegistered(ball, who.serial))
+		SendSysMessage(who, "You have not registered for this war!", 3, 53);
+		return;
+	endif
+	
+	RemoveAPlayerFromWar(who, ball);
+			
+	SendSysMessage(who, "You have quit the war!", 3, 53);	
+endfunction
+
+function MyWarProgress(who,ball)
+	if (! IsPlayerRegistered(ball, who.serial))
+		SendSysMessage(who, "You have not registered for this war!", 3, 53);
+		return;
+	endif
+	
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 600, 600);
+		
+	GFTextMid(10, 20, 400, 53, "Progress Report for " + GetOnPlayerRank(who) + who.name);
+	
+	var playerdata := GetPlayerWData(ball, who.serial);
+
+	GFTextLine(90, 50, 10, "You are on team: " + GetWarTeamName(ball, playerdata.team));
+	GFTextLine(90, 80, 10, "Kills: " + playerdata.kills);
+	GFTextLine(90, 110, 10, "Battlepoints: " + playerdata.battlepoints);
+	GFTextLine(90, 140, 10, "Your status: " + playerdata.killed);
+	
+	
+	var highestkills := GetMaxKills(ball);
+	if (highestkills && highestkills == playerdata.kills)
+		GFTextLine(90, 200, 53, "You currently have the highest number of kills in the war!");
+	endif
+	var highestbps := GetMaxBPs(ball);
+	if (highestbps && highestbps == playerdata.battlepoints)
+		GFTextLine(90, 230, 53, "You currently have the highest number of battlepoints in the war!");
+	endif
+
+	GFTextLine(90, 260, 53, "Enemies killed:");
+	var y:=290;
+	var tempknstr:="None";
+	var tknum:=0;
+	
+	var killednames := playerdata.playersKilled;
+	foreach kname in killednames
+		if (tempknstr=="None")
+			tempknstr:=kname;
+			tknum:=1;
+		elseif (tknum>3)
+			tknum:=0;
+			GFTextLine(90, y, 10, tempknstr);
+			y:=y+30;
+			tempknstr:=kname;
+		else
+			tempknstr := tempknstr + ", " +kname;
+			tknum:=tknum+1;
+		endif
+	endforeach
+	GFTextLine(90, y, 10, tempknstr);
+	
+	GFTextLine(90, 570, 5, "Exit");
+	
+	var exitButton := GFButtonID( 60, 575, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	
+	var choice := GFSendGump(who);
+	
+	if(choice[exitButton.keyid])
+		return;
+	endif
+endfunction
+
+function ShowPlayerHelp(who)
+	var helpstring:= "WAR SYSTEM HELP:- Wars work in the following way. You initially register to enlist in a war team. " +
+	"You are permitted to register if your are level 3+, have more than 2000 skillpoints, and are not a crafter. Also note that "+
+	"Two players from the same account cannot join opposite sides of a war. When the war starts you will be automatically added to "+
+	"the war guild for your team and given a rank. As you kill people on the opposite side you will be promoted and gain battlepoints. "+
+	"Note that you will be declared AWOL if you do not kill an enemy once every 2 days. The war ends when all members of one side have been "+
+	"killed or declared AWOL. At any time during or after the war you can go to a war stone and get information about the war.";
+	SendStringAsTipWindow( who, helpstring );
+endfunction

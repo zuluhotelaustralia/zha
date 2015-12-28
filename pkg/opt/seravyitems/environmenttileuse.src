@@ -1,0 +1,48 @@
+/* Environment Tile                    **
+** Various   **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+const TEXTTILE_TEXT := 89;
+
+program envtile( who, tile )
+
+  var text := GetObjProperty(tile, "text");
+  var id := GetObjProperty(tile, "id");
+  var printAllTimes :=  GetObjProperty(tile, "printAllTimes");
+
+  if(id && id != 1)
+    text := "";
+    tile := SystemFindObjectBySerial(id);
+    if (tile)
+      text := GetObjProperty(tile, "text");
+    endif
+  endif
+
+  var chars := GetObjProperty(tile, "chars");
+  if (!chars)
+    chars := {};
+  endif
+
+  if (text && !who.isA(POLCLASS_NPC))
+    var charNotFound := 1;
+    foreach char in chars
+      if (char == who.serial)
+        charNotFound := 0;
+      endif
+    endforeach
+
+    if (charNotFound || printAllTimes)
+      PrintTextAbovePrivate( who, text, who, 3, TEXTTILE_TEXT);
+      if (charNotFound)
+        chars.append( who.serial );
+        SetObjProperty(tile, "chars", chars);
+      endif
+    endif
+
+  endif
+
+endprogram
+

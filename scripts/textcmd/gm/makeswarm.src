@@ -1,0 +1,31 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+program makeswarm (character, template)
+	if (!checkStaff(character, "makeswarm", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+var x;
+var y;
+var z;
+var tempname := SplitWords(template);
+var count := tempname[1];
+var templ := tempname[2];
+var startx := character.x - CInt(count);
+var starty := character.y - CInt(count);
+var endx := character.x + CInt(count);
+var endy := character.y + CInt(count);
+
+for (x := startx; x <= endx; x := x + 1)
+        for (y := starty; y <= endy; y := y + 1)
+                print("creating " + templ + " at " + x + " , " + y );
+                CreateNpcFromTemplate(templ, x, y, GetMapInfo(x,y).z);
+                sleepms(500);
+        endfor
+endfor
+
+endprogram

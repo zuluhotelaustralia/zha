@@ -1,0 +1,31 @@
+/* Druid Spell - Call Beast        **
+** Summons a beast at the caster's **
+** Location.                       */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/client";
+
+const SPELL_ID := SPELL_ID_CALLBEAST;
+
+program cast_callbeast( parms )
+	var monster_list := { "gorilla", "horse",  "horse2",  "horse3", "horse4",  "snake",  "pig",  "hildisvini", "rabbit", "sheep", "goat",  "bear",  "blackbear",  "grizzly", "panther", "llama",  "walrus", "wolf", "cow", "cow2", "bull", "bull2", "deer", "hart", "cat", "dog", "rat", "alligator", "direwolf", "eagle", "bird",  "chicken", "birddog", "goldenhawk"};
+	
+	var caster;
+	var fromhit;
+	var circle:=GetCircle( SPELL_ID_CALLBEAST );
+	
+	if (parms[1] == "#MOB") //npc cast it
+		caster := parms[2];
+	else
+		caster := parms;
+	endif
+
+	PlaySoundEffect(caster, SFX_SPELL_CALLBEAST);
+	var myrand := RandomInt(len(monster_list))+1;
+	SummonCreature( caster, monster_list[myrand], caster );
+	
+	EraseObjProperty( caster, "#Casting");
+endprogram

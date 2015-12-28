@@ -1,0 +1,162 @@
+use uo;
+use os;
+use basic;
+
+include "include/attributes";
+include "include/client";
+include "include/dotempmods";
+
+program logon(who)
+	if (who.cmdlevel)
+		return;
+	endif
+
+	set_critical(1);
+	
+	var props := { 	 "PermPoisonImmunity",
+			 "PermMagicImmunity",
+			 "Permmr",
+			 "FireProtection",
+			 "WaterProtection",
+			 "AirProtection",
+			 "EarthProtection",
+			 "FreeAction",
+			 "NecroProtection",
+			 "AcidProtection",
+			 "HolyProtection",
+			 "PhysicalProtection",
+			 "HealingIncrease",
+			 "PoisonImmunity",
+			 "MagicImmunity",
+			 "SpellReflect"
+		     };
+	
+	var vals := {};
+	foreach prop in props
+		vals.append(0);
+	endforeach
+	
+	WipeMods(who); // DO NOT REMOVE THIS LINE
+	var strMod := 0, intMod := 0, dexMod := 0;
+
+	var equippedItems := ListEquippedItems(who);
+	var nextval, i;
+	foreach item in equippedItems
+		for (i := 1; i <= props.size(); i := i + 1)
+			nextval := GetObjProperty(item, props[i]);
+			if (nextval)
+				if ((nextval > vals[i]) || ((vals[i]<=0) && (nextval < vals[i])) )
+					vals[i] := nextval;
+				endif
+			endif
+		endfor
+		
+		nextval := GetObjProperty(item, "str");
+		if (nextval)
+			strMod := strMod + CInt(nextval);
+		endif
+		
+		nextval := GetObjProperty(item, "int");
+		if (nextval)
+			intMod := intMod + CInt(nextval);
+		endif
+		
+		nextval := GetObjProperty(item, "dex");
+		if (nextval)
+			dexMod := dexMod + CInt(nextval);
+		endif
+		
+		nextval := GetObjProperty(item, "DefaultDex");
+		if (nextval)
+			dexMod := dexMod + CInt(nextval);
+		endif
+		
+	endforeach
+	
+	SetStrengthMod(who, strMod);
+	SetIntelligenceMod(who, intMod);
+	SetDexterityMod(who, dexMod);
+	
+	for (i := 1; i <= props.size(); i := i + 1)
+		if (vals[i])
+			SetObjProperty(who, props[i], vals[i]);
+		else
+			EraseObjProperty(who, props[i]);
+		endif
+	endfor
+	
+	// Replace temporary skill mods at logon.
+	var skillMods := array;
+	foreach property in GetObjPropertyNames(who);
+		if (property[1,8]=="currskbv")
+			var itemSerial := CInt(property[9,len(property)]); // Get the serial of the item.
+			var item := SystemFindObjectBySerial(itemSerial);
+			if (item in equippedItems)
+				var skillnum := CInt(GetObjProperty(item, "skilladv"));
+				var power := GetObjProperty(who, property);
+				
+				var oldSkillMod := skillMods[skillnum];
+				if (oldSkillMod)
+					skillMods[skillnum] := skillMods[skillnum] + power;
+				else
+					skillMods[skillnum] := power;
+				endif
+			else
+				EraseObjProperty(who, property);
+			endif
+		endif
+	endforeach
+	for (i := 1; i <= len(skillMods); i := i + 1)
+		if (skillMods[i] && !GetSkillTemporaryMod(who, i))
+			AlterSkillTemporaryModBaseValue(who, i, skillMods[i]);
+		endif
+	endfor
+	
+	
+	// Set Hair/Beard Colour CProps
+	if (!GetObjProperty(who, "HairColour"))
+		var oldhair := GetEquipmentByLayer( who, LAYER_HAIR );
+		if (oldhair)
+			SetObjProperty(who, "HairColour", oldhair.color);
+		else
+			SetObjProperty(who, "HairColour", 0);
+		endif
+	endif
+	if (!GetObjProperty(who, "BeardColour"))
+		var oldbeard := GetEquipmentByLayer( who, LAYER_BEARD );
+		if (oldbeard)
+			SetObjProperty(who, "BeardColour", oldbeard.color);
+		else
+			SetObjProperty(who, "BeardColour", 0);
+		endif
+	endif
+	
+	// Wipe CProps on hair/beard if some cheaky beggar managed to hack them.
+	wipeProperties( GetEquipmentByLayer( who, LAYER_HAIR ) );
+	wipeProperties( GetEquipmentByLayer( who, LAYER_BEARD ) );
+	
+	// Clear Liche form
+	if (GetObjProperty( who, "IsLiche"))
+		EraseObjProperty( who, "IsLiche" );
+		EraseObjProperty( who, "Type" );
+		EraseObjProperty( who, "origform");
+		EraseObjProperty( who, "strmod");
+		EraseObjProperty( who, "dexmod");
+		EraseObjProperty( who, "intmod");
+	endif
+
+	if (who.graphic==401)
+    		DestroyItem(GetEquipmentByLayer( who, LAYER_BEARD ));
+	endif
+	
+	// Set class and race prots
+	SetClasse(who);
+	
+	set_critical(0);
+endprogram
+
+function wipeProperties(item)
+	foreach property in GetObjPropertyNames(item)
+		EraseObjProperty(item, property);
+	endforeach
+endfunction

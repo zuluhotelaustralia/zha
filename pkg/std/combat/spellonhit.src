@@ -1,0 +1,48 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/damages";
+include "include/random";
+program spellonhit(parms)
+
+	var attacker 	:= parms[1];
+	var defender 	:= parms[2];
+	var weapon 	:= parms[3];
+	var armor 	:= parms[4];
+	var basedamage := parms[5];
+	var rawdamage	:= parms[6];
+
+	var chance := CInt(GetObjProperty(armor, "ChanceOfEffect"));
+	if(RandomDiceStr("1d100") <= chance)
+		var spellid := GetObjProperty( armor, "HitWithSpell" );
+		var circle := CInt(GetObjProperty(armor, "EffectCircle"));
+		var targ;
+		var caster := defender;
+
+		if (GetObjProperty( armor, "Cursed"))
+			targ := defender;
+		else
+			targ := attacker;
+		endif
+
+		var spellparms := { };
+		spellparms[1] := "#MOB";
+		spellparms[2] := caster;
+		spellparms[3] := targ;
+		spellparms[4] := circle;
+		spellparms[5] := 1;
+		start_script( GetScript( spellid ), spellparms );
+
+	endif
+
+	if( basedamage != rawdamage )
+		rawdamage := rawdamage - 10;
+		if( rawdamage < 1 )
+			rawdamage := 1;
+		endif
+	endif
+
+	ApplyTheDamage( defender, attacker, rawdamage );
+
+endprogram

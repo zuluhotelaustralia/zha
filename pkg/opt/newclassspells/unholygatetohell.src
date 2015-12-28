@@ -1,0 +1,138 @@
+/* Unholy Spell - Gate to Hell                   **
+** Creates a portal to a personal hunting ground **
+** with a time limit.                            **
+** Seravy - seravy@gmail.com                     */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_GATETOHELL;
+
+program cast_gatetohell(parms)
+  var caster;
+
+  if (parms[1] == "#MOB")
+    EraseObjProperty( caster, "#Casting");
+    return;
+  else
+    caster := parms;
+  endif
+
+  var class:=GetClass(caster);
+  if(class != CLASSEID_NECROMANCER && class != CLASSEID_DEATHKNIGHT)
+    SendSysMessage(caster, "You could never understand the true meaning of this spell like a true necromancer would.");
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+
+  var gatestone := SystemFindObjectBySerial(GetGlobalProperty("#GateToHellStone"));
+  if(!gatestone)
+    SendSysMessage(caster, "The magical engery cannot find a suitible hell stone. Please page a staff member about this problem.");
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+
+  if(GetObjProperty(gatestone, "#ready") != 2 || GetObjProperty(gatestone, "#CurrentlyCasting"))
+    SendSysMessage(caster, "The streams's power has not grown enough to open a gate yet.");
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+
+  SetObjProperty(gatestone, "#CurrentlyCasting", 1); // So 2 gates can't be open past this point
+  var gateposition := {caster.x, caster.y, caster.z};
+
+  // Preform the intro
+  var z;
+  for (z := 10; z >= 0; z := z - 1)
+    PlayStationaryEffect(gateposition[1]-z, gateposition[2], gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1]+z, gateposition[2], gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1], gateposition[2]+z, gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1], gateposition[2]-z, gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1]-z, gateposition[2]-z, gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1]+z, gateposition[2]+z, gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1]+z, gateposition[2]-z, gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    PlayStationaryEffect(gateposition[1]-z, gateposition[2]+z, gateposition[3], FX_SPELL_GATETOHELL, SPEED_SPELL_GATETOHELL, LOOP_SPELL_GATETOHELL);
+    sleepms(400);
+  endfor
+
+
+  // Passed the checks
+  set_critical(1);
+  var gate1 := CreateItemAtLocation(gateposition[1], gateposition[2], gateposition[3], 0x0f6c, 1);
+  var gate2 := CreateItemAtLocation(gatestone.x, gatestone.y, gatestone.z, 0x0f6c, 1 );//0x1AE5 red portal
+  if( !gate1 || !gate2 || !caster )
+    DestroyItem(gate1);
+    DestroyItem(gate2);
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+
+  SetObjProperty( gate1, "GateDestX", gate2.x );
+  SetObjProperty( gate1, "GateDestY", gate2.y );
+  SetObjProperty( gate1, "GateDestZ", gate2.z );
+  SetObjProperty( gate1, "f", 1);
+  SetObjProperty( gate1, "perma", 1);
+  SetObjProperty( gate1, "GateMessage", "Warning! Do you wish to enter hell? Any items or corpse's on the ground after the time limit expires WILL be lost! There is a big risk of losing your items.");
+  SetObjProperty( gate2, "GateDestX", gate1.x );
+  SetObjProperty( gate2, "GateDestY", gate1.y );
+  SetObjProperty( gate2, "GateDestZ", gate1.z );
+  SetObjProperty( gate2, "f", 1);
+  SetObjProperty( gate2, "perma", 1);
+
+  gate1.name := "Gate to Hell";
+  gate2.name := "Gate to Britainnia";
+  gate1.movable := 0;
+  gate2.movable := 0;
+
+  EraseObjProperty(caster, "#Casting");
+  set_critical(0);
+
+  PlaySoundEffect(gate1, SFX_SPELL_GATETOHELL);
+  PlaySoundEffect(gate2, SFX_SPELL_GATETOHELL);
+
+  var i;
+  for( i := 6886; i <= 6893; i := i+1 )
+    gate1.graphic := i;
+    gate2.graphic := i;
+    sleepms( 150 );
+  endfor
+  gate1.graphic := 0x0DDA;
+  gate2.graphic := 0x0DDA;
+
+
+  CreateNpcFromTemplate("daemon", gateposition[1], gateposition[2], gateposition[3]); // Just for fun :P
+
+  // Stuff
+  var skills := GetClasseSkills(CLASSEID_NECROMANCER);
+  var duration := CInt(30);
+  foreach skill in skills
+    duration := duration + CInt(GetEffectiveSkill(caster, skill));
+  endforeach
+
+  PrintTextAbove(gate1, "The strengh of the portal should hold for about "+(duration/60)+" Minutes", 3, 54);
+  SetObjProperty(gatestone, "LastGateOpenedAt", readgameclock());
+  SetObjProperty(gatestone, "LastGatePos", {gateposition[1], gateposition[2], gateposition[3]});
+  SetObjProperty(gatestone, "#OpenUntil", (readgameclock()+duration));
+  SetObjProperty(gatestone, "#GateSerial", gate2.serial);
+  EraseObjProperty(gatestone, "#CurrentlyCasting"); // Finished casting
+  sleep(duration-3); // Gotta make sure kicked out after.
+  // Make sure can't run through after eject script has run.
+  EraseObjProperty(gate1, "GateDestX");
+  EraseObjProperty(gate1, "GateDestY");
+  EraseObjProperty(gate1, "GateDestZ");
+  sleep(3);
+
+  for( i := 6893; i >= 6886; i := i-1 )
+    gate1.graphic := i;
+    gate2.graphic := i;
+    sleepms( 150 );
+  endfor
+
+  set_critical(1);
+  DestroyItem(gate1);
+  DestroyItem(gate2);
+  set_critical(0);
+
+endprogram

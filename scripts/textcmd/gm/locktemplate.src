@@ -1,0 +1,47 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/constants";
+include "include/mobileutil";
+include "include/managers";
+include "include/cmdlevel_check";
+
+
+//for Corsair's spawnpoint mod.. locking templates for admin cmdlevel 
+//usage is .locktemplate (will return all locked templates)
+//.locktemplate balron (will erase the list and add balron to it)
+//eg..
+//.locktemplate balron goldendragon undeadflayer
+
+
+
+program textcmd_locktemplate(me, parms)
+	if (!checkStaff(me, "locktemplate", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+var blist := GetGlobalProperty( blist );
+
+if(!parms)
+	if(!blist)
+		SendSysMessage(me, "nothing in list...");
+	else
+
+			foreach template in blist
+				SendSysMessage(me, template);
+			endforeach
+		return;
+	endif
+endif
+
+	var tmp;
+
+foreach template in parms
+
+	tmp := tmp + template;
+	SendSysMessage(me, "added " + template + " to the list.");
+	SetGlobalProperty("blist", tmp);
+endforeach
+
+endprogram

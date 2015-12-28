@@ -1,0 +1,32 @@
+//Author: Racalac, 1/15/99
+//Issues: Must write necessary data to file before it becomes useful.
+//
+//Update: 1/31/99, 30 minutes before the Super Bowl...
+//This command now prompts you for a location, then an npc type (human, animal, monster), then 
+//     for a specific npc in that category (from spawndef.cfg, must add new npcs to both npcdesc
+//     AND spawndef.cfg for them to be available). This then appends the spawns.cfg with the needed
+//     data.
+
+use uo;
+
+include "include/cmdlevel_check";
+
+
+
+program spawn( character )
+	if (!checkStaff(character, "what", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+    SendSysMessage( character, "Where do you want to know about? " );
+    var where := TargetCoordinates( character );
+
+     if (!where)
+        return;
+     endif
+
+    var info := GetMapInfo( where.x, where.y );
+
+    SendSysMessage(character, "That is objtype " + Hex(info.landtile));
+
+endprogram

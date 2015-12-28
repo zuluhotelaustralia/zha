@@ -1,0 +1,305 @@
+#
+#  GUILDS.TXT: Guild Data
+#
+
+General
+{
+	NextGuildId	33
+}
+
+Guild
+{
+	GuildId	2
+	Member	0x1a0edb
+	Member	0x1d0144
+	Member	0x2161ed
+	CProp	abrvtime i26201784
+	CProp	gc a1:S4:NONE
+	CProp	gm i1707739
+	CProp	guildabv sStaff
+	CProp	guildicon i5545
+	CProp	guildname sStaff
+	CProp	movetime i26201779
+	CProp	nametime i26201779
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1793662267
+}
+
+Guild
+{
+	GuildId	24
+	Member	0x1ab63e
+	Member	0x1abdb0
+	Member	0x1b0db6
+	Member	0x1b2f6b
+	Member	0x1b3793
+	Member	0x1b3796
+	Member	0x1b37a2
+	Member	0x1b3823
+	Member	0x1b3978
+	Member	0x1b3f50
+	Member	0x1b4405
+	Member	0x1b46d1
+	Member	0x1b4ddb
+	Member	0x1b507e
+	Member	0x1b9319
+	Member	0x1bd94f
+	Member	0x1be306
+	Member	0x1c1936
+	Member	0x1c3e5c
+	Member	0x1c3fd2
+	Member	0x1c9cb6
+	Member	0x1fad4e
+	AllyGuild	0x19
+	AllyGuild	0x1b
+	CProp	GuildDeclareStatus a1:a3:i24i26S2:RE
+	CProp	GuildUniSers a12:i1799624324i1799627868i1801844477i1803119489i1803119514i1803119524i1808504931i1808504932i1808504934i1808504935i1808504940i1808504941
+	CProp	abrvtime i27532842
+	CProp	gc a1:S4:NONE
+	CProp	gm i1752496
+	CProp	guildabv sGML
+	CProp	guildicon i5545
+	CProp	guildname sGiant Midget League
+	CProp	guildunicolour i1160
+	CProp	movetime i28262642
+	CProp	nametime i27532838
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1799620866
+}
+
+Guild
+{
+	GuildId	25
+	Member	0x1aa553
+	Member	0x1aa555
+	Member	0x1b379f
+	Member	0x1b37a1
+	Member	0x1b37ad
+	Member	0x1b6543
+	Member	0x1b6822
+	Member	0x1b7906
+	Member	0x1b8347
+	Member	0x1b8bb1
+	Member	0x1b95ba
+	Member	0x1bb965
+	Member	0x1bcd9f
+	Member	0x1bcf46
+	Member	0x1bd508
+	Member	0x1be583
+	Member	0x1c0c68
+	Member	0x1c23ff
+	Member	0x1db372
+	Member	0x1e631e
+	Member	0x1fd0ae
+	AllyGuild	0x18
+	AllyGuild	0x1b
+	EnemyGuild	0x1a
+	CProp	GuildDeclareStatus a0:
+	CProp	GuildUniSers a9:i1801036548i1801037790i1801040889i1801040891i1801040894i1801040896i1801040908i1801040915i1801040917
+	CProp	abrvtime i30433151
+	CProp	gc a2:xS30:We kick ass and chew bubblegum
+	CProp	gm i1746259
+	CProp	guildabv sIH
+	CProp	guildicon i5557
+	CProp	guildname sInternet Heroes
+	CProp	guildunicolour i1488
+	CProp	movetime i30829340
+	CProp	nametime i30433143
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1799718358
+}
+
+Guild
+{
+	GuildId	26
+	Member	0x1adb7b
+	Member	0x1b1bca
+	Member	0x1b1bcc
+	Member	0x1b43e5
+	Member	0x1b43eb
+	Member	0x1b43f6
+	Member	0x1b43fa
+	Member	0x1b4404
+	Member	0x1b4409
+	Member	0x1b4483
+	Member	0x1b44a5
+	Member	0x1b45a8
+	Member	0x1b45b4
+	Member	0x1b45bb
+	Member	0x1b45e9
+	Member	0x1b61a3
+	Member	0x1b79a4
+	Member	0x1b8213
+	Member	0x1bf694
+	Member	0x1bfe00
+	Member	0x1c360c
+	Member	0x1c5b76
+	Member	0x1c5b7b
+	Member	0x1c5b81
+	Member	0x1c5b8b
+	Member	0x1dc4ed
+	Member	0x1e2374
+	Member	0x1ea424
+	Member	0x1fa748
+	EnemyGuild	0x19
+	EnemyGuild	0x1b
+	CProp	GuildUniSers a9:i1801063132i1801063263i1801063283i1801063360i1802408315i1810487017i1814717162i1816805081i1816805088
+	CProp	abrvtime i28016453
+	CProp	gc a1:S4:NONE
+	CProp	gm i1760123
+	CProp	guildabv sXi
+	CProp	guildicon i5569
+	CProp	guildname sXtreme Individuals
+	CProp	guildunicolour i1171
+	CProp	movetime i30858453
+	CProp	nametime i28016444
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1801061856
+}
+
+Guild
+{
+	GuildId	27
+	Member	0x1aca44
+	Member	0x1ad9f9
+	Member	0x1ada18
+	Member	0x1b37a8
+	Member	0x1b37a9
+	Member	0x1b37ab
+	Member	0x1cbf07
+	AllyGuild	0x18
+	AllyGuild	0x19
+	EnemyGuild	0x1a
+	CProp	GuildDeclareStatus a0:
+	CProp	GuildUniSers a3:i1803870290i1803876955i1804315800
+	CProp	abrvtime i28166443
+	CProp	gc a1:S4:NONE
+	CProp	gm i1755716
+	CProp	guildabv sF!
+	CProp	guildicon i5545
+	CProp	guildname sFear Incarnate
+	CProp	guildunicolour i1282
+	CProp	movetime i28166367
+	CProp	nametime i28166367
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1801743429
+}
+
+Guild
+{
+	GuildId	28
+	Member	0x1b37c4
+	Member	0x1b4944
+	Member	0x1b4fa8
+	CProp	GuildDeclareStatus a1:a3:i28i26S2:RE
+	CProp	abrvtime i28689495
+	CProp	gc a1:S4:NONE
+	CProp	gm i1783748
+	CProp	guildabv sLonE
+	CProp	guildicon i5563
+	CProp	guildname sLonE WolF
+	CProp	movetime i28689466
+	CProp	nametime i28689466
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1803922364
+}
+
+Guild
+{
+	GuildId	29
+	Member	0x1b0364
+	Member	0x1b0788
+	Member	0x1b1959
+	Member	0x1b195a
+	Member	0x1b379c
+	Member	0x1b37a5
+	Member	0x1ba5a4
+	Member	0x1c23a4
+	Member	0x1c286a
+	Member	0x1d9ffb
+	Member	0x1f9169
+	CProp	GuildUniSers a2:i1810502148i1810503750
+	CProp	abrvtime i29749349
+	CProp	gc a1:S4:NONE
+	CProp	gm i1771400
+	CProp	guildabv sLSD
+	CProp	guildicon i5553
+	CProp	guildname sLysergic Acid Diethylamide
+	CProp	guildunicolour i1499
+	CProp	movetime i29016060
+	CProp	nametime i29749389
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1806004943
+}
+
+Guild
+{
+	GuildId	30
+	Member	0x1b410f
+	Member	0x1b447a
+	Member	0x1b45db
+	Member	0x1b8231
+	Member	0x1b82de
+	Member	0x1b8bd1
+	Member	0x1bada0
+	Member	0x1baef0
+	Member	0x1bc07e
+	Member	0x1d85e8
+	CProp	GuildUniSers a3:i1809953601i1811591346i1813743093
+	CProp	abrvtime i29828702
+	CProp	gc a1:S4:NONE
+	CProp	gm i1802801
+	CProp	guildabv sDI
+	CProp	guildicon i5545
+	CProp	guildname sDark Illusion
+	CProp	guildunicolour i1193
+	CProp	movetime i29828695
+	CProp	nametime i29828695
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1809932588
+}
+
+Guild
+{
+	GuildId	31
+	Member	0x1b875c
+	Member	0x1b887c
+	Member	0x1b8914
+	Member	0x1baca8
+	Member	0x1c634e
+	Member	0x20b0cd
+	CProp	abrvtime i31034309
+	CProp	gc a1:S4:NONE
+	CProp	gm i1813672
+	CProp	guildabv sTF141
+	CProp	guildicon i5545
+	CProp	guildname sTask Force 141
+	CProp	guildunicolour i1300
+	CProp	movetime i31034254
+	CProp	nametime i31034301
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1812579475
+}
+
+Guild
+{
+	GuildId	32
+	Member	0x1d009b
+	Member	0x1d00c0
+	Member	0x1d1903
+	Member	0x1d1ad2
+	Member	0x1fc2c9
+	Member	0x201f46
+	CProp	abrvtime i31242548
+	CProp	gc a1:S4:NONE
+	CProp	gm i1900736
+	CProp	guildabv sP
+	CProp	guildicon i5545
+	CProp	guildname sPlayers
+	CProp	guildunicolour i1305
+	CProp	movetime i31242494
+	CProp	nametime i31242494
+	CProp	recruits a1:S4:NONE
+	CProp	stoneserial i1816380634
+}
+

@@ -1,0 +1,23 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+
+program gotNothingGate( who, item )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	SendSysMessage(who, "Select gate destination");
+	var targcoords := TargetCoordinates(who);
+	if (targcoords)
+		SetObjProperty(item, "MoveToLocation", targcoords.x + " " + targcoords.y + " " + targcoords.z);
+		SendSysMessage(who, "Gate destination set");
+	else
+		SendSysMessage(who, "Cancelled");
+	endif
+
+endprogram

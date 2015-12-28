@@ -1,0 +1,29 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program move_em(who, serial)
+	if (!checkStaff(who, "moveoffline", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+	if (!serial)
+		return;
+	endif
+	
+	serial := CInt(serial);
+
+	var tgt := SystemFindObjectBySerial(serial);
+	if (!tgt)
+		SendSysMessage(who, "Target not found online - checking offline mobiles.");
+		tgt := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+		if (!tgt)
+			SendSysMessage(who, "Target could not be found.");
+			return;
+		endif
+	endif
+	
+	SendSysMessage(who, "Click where you want to send them.");
+	var where := TargetCoordinates(who);
+	
+	MoveCharacterToLocation(tgt, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
+endprogram

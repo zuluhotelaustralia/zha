@@ -1,0 +1,80 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+
+program norecallpoint( who, item )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, item);
+
+endprogram
+
+function configGump(who, item)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 440, 150);
+	var zrange := CInt(GetObjProperty(item, "norecallzrange"));
+	GFTextMid(10, 10, 440, 70, "No-Recall Point");
+	GFTextLine(90, 50, 5, "Currently set to no recall within range: " + GetObjProperty(item, "norecallrange"));
+	GFTextLine(90, 70, 5, "Z range: " + ZRangeString (zrange, item));
+	GFTextLine(90, 90, 53, "Change no-recall range");
+	GFTextLine(90, 110, 53, "Change z range");
+	GFTextLine(90, 130, 53, "Exit");
+
+	var changenorecall := GFButtonID( 60, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var changezrange := GFButtonID( 60, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[changenorecall.keyid])
+		EnterNoRecallRange(item, who);
+	elseif(choice[changezrange.keyid])
+		EnterZRange(item, who);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+	configGump(who, item);
+endfunction
+
+
+
+function EnterNoRecallRange(point, who)
+	SendSysMessage(who, "You are now specifying the range from this point that recall/gating is not allowed. Max range is 100");
+	var norecallrange := CInt(SendTextEntryGump( who, "Enter no-recall range"));
+	if (! norecallrange || norecallrange <0)
+		return;
+	endif
+	if (norecallrange >100)
+		norecallrange:=100;
+	endif
+	SetObjProperty(point, "norecallrange", CInt(norecallrange));
+endfunction
+
+function EnterZRange(point, who)
+	SendSysMessage(who, "You are now specifying the z range around this point's z that recall/gating is not allowed. Max range is 19. Enter 0 for unlimited");
+	var zrange := CInt(SendTextEntryGump( who, "Enter z range (19 max, 0 unlimited = 19)"));
+	
+	if (zrange <=0)
+		SendSysMessage(who, "Z range set to 19");
+		zrange:=19;
+	elseif (zrange >19)
+		zrange:=19;
+	endif
+	SetObjProperty(point, "norecallzrange", CInt(zrange));
+endfunction
+
+
+function ZRangeString (zrange, item)
+	if (zrange >0)
+		return (item.z-zrange) + " to " + (item.z + zrange);
+	endif
+	return "unlimited = " + (item.z-19) + " to " + (item.z + 19);
+endfunction

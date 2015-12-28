@@ -1,0 +1,52 @@
+/* Unholy Spell - Fire Sense                              **
+** Flamestrike fire apears on hiding people for duration. **
+** Seravy - seravy@gmail.com                              */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_FIRESENSE;
+
+program cast_firesense( parms )
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+  endif
+
+  var people;
+  var duration := 10 + (GetClasseLevel(caster)*5);
+  var range := 3 + GetClasseLevel(caster);
+  if(GetClass(caster) == CLASSEID_NECROMANCER)
+    range := range * 3;
+    duration := duration * 3;
+  elseif(GetClass(caster) == CLASSEID_DEATHKNIGHT)
+    range := range * 2;
+    duration := duration * 2;
+  endif
+  var endTime := ReadGameClock() + duration;
+  EraseObjProperty( caster, "#Casting");
+
+  while(ReadGameClock() < endTime)
+    people := ListMobilesNearLocationEx( caster.x, caster.y, caster.z, range, LISTEX_FLAG_HIDDEN );
+
+    foreach person in people
+      if (person.hidden)
+        PlayStationaryEffect( person.x, person.y, person.z, FX_SPELL_FIRESENSE, SPEED_SPELL_FIRESENSE, LOOP_SPELL_FIRESENSE);
+        PlaySoundEffect( person, SFX_SPELL_FIRESENSE );
+      endif
+    endforeach
+
+    sleep(2);
+  endwhile
+endprogram

@@ -1,0 +1,45 @@
+use uo;
+use os;
+
+include "include/hitscriptinc";
+
+
+program slayerscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+
+	var slaytype := GetObjProperty( weapon, "SlayType" );
+	var type := GetObjProperty( defender, "Type" );
+	var targ;
+	if (GetObjProperty( weapon, "Cursed"))
+		targ := attacker;
+	else
+		targ := defender;
+	endif
+
+	if((slaytype == "Human") && !defender.npctemplate )
+		rawdamage := RecalcDmg( attacker, defender, weapon, armor, CInt(basedamage*1.25), 1 );
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+
+	elseif(slaytype == type)
+		rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage * 2, 1 );
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+		
+	else
+		rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage );
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+
+	endif
+	//Broadcast(rawdamage);
+
+endprogram

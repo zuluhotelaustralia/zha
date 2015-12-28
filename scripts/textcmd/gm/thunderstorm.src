@@ -1,0 +1,126 @@
+//////////////////////////////////////////////////////////////
+// 
+// .thunderstorm command - Creates a thunderstorm and rain-
+//	fall somewhat synchronized.  Also gradually darkens
+//	the light region until the summit of the storm, then
+//	begins to fade light back in.
+//			
+// * Created 9/10/99
+// * GM Runestaff
+//
+//	* Note : Similar to .rain, but adds more depth.
+//		 However... the PlayLightningBoltEffect line
+//		 does not permit players to see this graphic.
+//		 Must determine how this can be accomplished.
+//
+//////////////////////////////////////////////////////////////
+
+use uo;
+use os;
+include "include/random";
+program thunderstorm(character)
+
+		PlaySoundEffect( character, 0x0207 );
+			sleep(15);
+
+	SetRegionLightLevel( "Background", 12);
+		
+		PlaySoundEffect( character, 0x0207 );
+			sleep(12);
+
+	SetRegionLightLevel( "Background", 15);
+
+		PlaySoundEffect( character, 0x0207 );
+			sleep(10);
+
+SetRegionWeatherLevel( "Background", 1, 10, 0, -1);
+
+	SetRegionLightLevel( "Background", 18);
+		sleep(10);
+
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x0029 );
+			sleep(5);
+
+	SetRegionLightLevel( "Background", 22);
+		sleep(7);
+
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x0029 );
+			sleep(5);
+
+SetRegionWeatherLevel( "Background", 1, 17, 0, -1);
+	
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x0029 );
+			sleep(8);
+
+	SetRegionLightLevel( "Background", 25);
+		sleep(7);
+
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x002a );
+			sleep(3);
+
+SetRegionWeatherLevel( "Background", 1, 26, 0, -1);
+
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x002a );
+			sleep(5);
+
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x002a );
+			sleep(3);
+
+	SetRegionLightLevel( "Background", 20);
+
+			PlayLightningBoltEffect( character );
+			
+		PlaySoundEffect( character, 0x002a );
+			sleep(6);
+		
+			PlayLightningBoltEffect( character );
+
+		PlaySoundEffect( character, 0x0029 );
+			sleep(8);
+
+	SetRegionLightLevel( "Background", 16);
+
+SetRegionWeatherLevel( "Background", 1, 17, 0, -1);
+
+		PlaySoundEffect( character, 0x0029 );
+			sleep(12);
+
+		PlaySoundEffect( character, 0x0207 );
+			sleep(14);
+
+	SetRegionLightLevel( "Background", 12);
+
+SetRegionWeatherLevel( "Background", 1, 12, 0, -1);
+
+		PlaySoundEffect( character, 0x0207 );
+			sleep(17);
+
+	SetRegionLightLevel( "Background", 7);
+
+SetRegionWeatherLevel( "Background", 1, 9, 0, 0);
+			sleep(10);
+	
+
+var i;
+var j;
+j := Random(10) + 1;
+Detach();
+for (i:= 1; i <= j; i := i + 1)
+        sleep(800);
+endfor
+
+SetRegionWeatherLevel( "Background", 0, 15);
+
+endprogram

@@ -1,0 +1,15 @@
+use uo;
+
+program makecounselor( char )
+
+	var who := Target( char );
+
+	if( who.cmdlevel > char.cmdlevel && char.cmdlevel < 5 )
+		SendSysMessage( who, char.name + " is trying to decrease you to counselor." );
+	else
+		who.cmdlevel := 1;
+	endif
+
+	SendSysMessage( char, who.name + " is now a counselor");
+
+endprogram

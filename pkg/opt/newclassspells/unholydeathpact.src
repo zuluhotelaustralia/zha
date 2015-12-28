@@ -1,0 +1,59 @@
+/* Unholy Spell - Death Pact  **
+** Peacemaking targed undead. **
+** Seravy - seravy@gmail.com  */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_DEATHPACT;
+
+program cast_deathpact(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack(cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell(caster, circle, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS);
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  if (!cast_on.ISA(POLCLASS_MOBILE) || !GetObjProperty(cast_on, "Type")=="Undead")
+    SendSysMessage(caster, "You may only make a death pact with a undead creature.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+  var ev := struct;
+  ev.+type;
+  ev.type := EVID_PEACEMADE;
+
+  SendEvent(cast_on, ev);
+  SendSysMessage(caster, "You have made a death pact with " + cast_on.name);
+  cast_on.warmode := 0;
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_DEATHPACT, SPEED_SPELL_DEATHPACT, LOOP_SPELL_DEATHPACT);
+  PlaySoundEffect(cast_on, SFX_SPELL_DEATHPACT);
+  EraseObjProperty( caster, "#Casting");
+endprogram

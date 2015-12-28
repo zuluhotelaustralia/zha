@@ -1,0 +1,102 @@
+/* Psionics Spell - Hallucination                     **
+** Everyone in area of caster taken to mythical fight **
+** where they are dealt damage and brought back.      ** 
+** Seravy - seravy@gmail.com                          */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_HALLUCINATION;
+var LOCATION_ONE_HALLUCINATION := {5297,1088,0};
+var LOCATION_TWO_HALLUCINATION := {5270,1087,0};
+
+program cast_hallucination(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var element := 0;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+  endif
+
+  var range := calcDmgRange(caster, SKILLID_PSIONICS);
+  var dmg;
+
+  var goOnTrip := {};
+  var victims := ListMobilesNearLocation(caster.x, caster.y, caster.z, range);
+  foreach mobile in victims
+    if (AutoCallGuardCheck(caster, mobile))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+
+    if (!mobile.isA(POLCLASS_NPC) && !getobjproperty(mobile, "#duel"))
+      goOnTrip.append({mobile.serial, mobile.x, mobile.y, mobile.z});
+    endif
+  endforeach
+
+  EraseObjProperty(caster, "#Casting");
+  detach();
+
+  foreach mobile in victims
+    mobile.frozen := 1;
+  endforeach
+
+  foreach mobarray in goOnTrip
+    var person := SystemFindObjectBySerial(mobarray[1], SYSFIND_SEARCH_OFFLINE_MOBILES);
+    if (person)
+      person.hidden := 1;
+      person.squelch(3);
+      MoveCharacterToLocation(person, LOCATION_ONE_HALLUCINATION[1], LOCATION_ONE_HALLUCINATION[2], LOCATION_ONE_HALLUCINATION[3], MOVECHAR_FORCELOCATION);
+      PlaySoundEffectPrivate(person, SFX_SPELL_HALLUCINATION, person);
+    endif
+  endforeach
+  
+  sleep(1);
+
+  foreach mobarray in goOnTrip
+    var person := SystemFindObjectBySerial(mobarray[1], SYSFIND_SEARCH_OFFLINE_MOBILES);
+    if (person)
+      MoveCharacterToLocation(person, LOCATION_TWO_HALLUCINATION[1], LOCATION_TWO_HALLUCINATION[2], LOCATION_TWO_HALLUCINATION[3], MOVECHAR_FORCELOCATION);
+      PlaySoundEffectPrivate(person, SFX_SPELL_HALLUCINATION2, person);
+    endif
+  endforeach
+
+  sleep(1);
+
+  foreach mobarray in goOnTrip
+    var person := SystemFindObjectBySerial(mobarray[1], SYSFIND_SEARCH_OFFLINE_MOBILES);
+    if (person)
+      person.hidden := 0;
+      person.squelch(0);
+      MoveCharacterToLocation(person, mobarray[2], mobarray[3], mobarray[4], MOVECHAR_FORCELOCATION);
+    endif
+  endforeach
+
+  foreach mobile in victims
+    mobile.frozen := 0;
+    if(!mobile.multi && caster != mobile)
+      var immunity := IsProtected( caster, mobile, circle );
+      var circ := circle;
+      if( immunity != IMMUNED )
+        if( immunity == CURSED )
+          circ := circ * 2;
+        endif
+      endif
+      
+      dmg := (CalcSpellDamage( caster, mobile, circ, AREA_EFFECT_SPELL) * 1.1);
+      send_attack(mobile, caster, SPELL_ID);
+
+      ApplyElementalDamage(caster, mobile, circ, dmg, element);
+    endif
+  endforeach
+endprogram

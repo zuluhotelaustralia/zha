@@ -1,0 +1,183 @@
+// 18/1/03 - Sno made a check whether the item to move has changed container. This stops a player from using
+// .move, targeting an item, trading the item, and then targeting a container in their pack to get the item back.
+
+use uo;
+
+include "include/client";
+include "include/attributes";
+include "include/myutil";
+include "util/bank";
+
+program textcmd_dump(me)
+
+	var num := 0;
+	var mypack := me.backpack;
+
+	SendSysMessage(me, "Move all of what?");
+	var it := Target(me);
+
+	if (GetObjProperty(it,"cansteal"))
+		SendSysMessage(me, "This item can not be moved.");
+		exit;
+	elseif (!Accessible(me, it))
+		SendSysMessage(me, "That is too far away.");
+		exit;
+	endif
+
+	if (!it)
+		return;
+	endif
+
+	if (it.objtype==0x2006)
+		return;
+	endif
+
+	var original_container := it.container; // Added by Sno 18/1/03
+
+	if( GetObjProperty(it, "auctionview") )
+		if( GetObjProperty(me,"AbusedAuctionBugOnce") )
+			PunishForBugAbusing(me);
+			return 0;
+		else
+			SetObjProperty(me,"AbusedAuctionBugOnce",1);
+		endif
+	endif
+
+	SendSysMessage(me, "Move them where?");
+	var thing := Target(me);
+	if (!thing || (it.container != original_container) || (thing.objtype==UOBJ_RUNEBOOK) ) // Altered by Sno 18/1/03
+		return;
+	endif
+
+	if (thing.locked)
+		SendSysMessage(me,"It's locked.");
+		return;
+	endif
+
+	var thingy := InMyPack(thing, mypack);
+	if (thingy != 1)
+		return 0;
+	endif
+
+	if (thing.serial == me.serial)
+		thing := me.backpack;
+	else
+		if ( (thing.container.serial != mypack.serial) && (thing.serial != mypack.serial) )
+			if ( (!Accessible(thing,me)) || (Distance(thing,me)>2) )
+				if (!InMyPack(thing, mypack))
+					SendSysMessage(me,"Can't reach it.");
+					return;
+				endif
+			endif
+		endif
+	endif
+
+/*
+	var stackeditems := {};
+	foreach item in EnumerateItemsInContainer(thing)
+		if (item.amount > 1)
+			stackeditems[len(stackeditems)+1]:=item.objtype;
+		endif
+	endforeach
+	foreach item in EnumerateItemsInContainer(mypack)
+		if (item.amount > 1)
+			stackeditems[len(stackeditems)+1]:=item.objtype;
+		endif
+	endforeach
+*/
+
+	var theobjtype := it.objtype;
+	var thecolor := it.color;
+	var thecontainer := it.container.serial;
+	var thename;
+
+	if (it.name)
+		thename := it.name;
+	endif
+
+	foreach item in ListRootItemsInContainer(it.container)
+
+		if ( (item.objtype == theobjtype) &&
+		     (item.color == thecolor) &&
+		     (!item.newbie) )
+		   if ( ((!thename) && (!item.name)) || (item.name == thename) )
+			if (!ReserveItem(item)) return; endif
+			/*if ( ( item.objtype in stackeditems ) )
+				if (CreateItemInContainer( thing, item.objtype, item.amount ))
+					//DestroyItem(item);
+					num := num + 1;
+				else
+					SendSysMessage(me,"That container is full!");
+					return;
+				endif
+			else*/if (MoveItemToContainer(item,thing,1,1))
+				num := num +1;
+			endif
+
+		  endif
+		endif
+
+	endforeach
+
+	SendSysMessage(me,num + " items moved");
+
+endprogram
+
+function InMyPack(it, mypack)
+
+	foreach item in enumerateitemsincontainerofobjtype(mypack, it.objtype)
+		if (item.serial == it.serial)
+			return 1;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+
+function PunishForBugAbusing( who )
+
+	foreach item in EnumerateItemsInContainer(FindBankBox(who))
+		case(item.objtype)
+			0x0eed:
+			0x0efa:
+			0xa100:
+			0xb100:
+			0xc100:
+			0x6100:	DestroyItem(item);
+		endcase
+	endforeach
+
+	foreach item in EnumerateItemsInContainer(who.backpack)
+		case(item.objtype)
+			0x0eed:
+			0x0efa:
+			0xa100:
+			0xb100:
+			0xc100:
+			0x6100:	DestroyItem(item);
+		endcase
+	endforeach
+
+	SendSysMessage( who, "You'll be punished for using auction duping bug." );
+	PlayLightningBoltEffect(who);
+
+	var name	:= who.name;
+	var account	:= who.acctname;
+
+	who.title_race := "bug abuser";
+	SetBaseIntelligence(who,1);
+	SetBaseSkill( who, SKILLID_MAGERY, 0 );
+
+	foreach mobile in EnumerateOnlineCharacters()
+		if( mobile.cmdlevel )
+			SendSysMessage( mobile,
+					name + " account: " + account + " abused the auction duping bug and was punished for it.",
+					3,
+					33 );
+		endif
+	endforeach
+
+	return 1;
+
+endfunction

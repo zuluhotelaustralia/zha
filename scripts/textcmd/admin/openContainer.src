@@ -1,0 +1,28 @@
+/* Open Container             **
+** opens targeted object      **
+** Seravy - seravy@gmail.com  */
+
+use uo;
+
+program textcmd_opencontainer(who, text)
+	var item;
+	if (!text)
+		item := Target( who );
+	else
+		item := SystemFindObjectBySerial(CInt(text));
+		if (!item)
+			SendSysMessage(who, "Item Not Found");
+			SendSysMessage(who, text);
+
+			return;
+		endif
+	endif
+
+	if (item)
+		if (!SendViewContainer(who, item))
+			if(!SendOpenSpecialContainer(who, item))
+				sendsysmessage(who, "Failed to open container");
+			endif
+		endif
+	endif
+endprogram

@@ -1,0 +1,16 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_createore( who, amountstr )
+	if (!checkStaff(who, "createore", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    var amount := CInt(amountstr);
+    if (!amount)
+        amount := 1;
+    endif
+
+    CreateItemInBackpack( who, 0x19b7, amount );
+endprogram

@@ -1,0 +1,65 @@
+/* Psionics Spell - Fists of Fury    **
+** Reduces Hitting rate by half      ** 
+** Seravy - seravy@gmail.com         */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_FISTSOFFURY;
+
+program cast_fistsoffury(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetArea(caster, circle);
+
+    if (!cast_on)
+      EraseObjProperty(caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var dmg;
+  var range := ModifyWithMagicEfficiency( caster, 3 + (GetEffectiveSkill( caster, SKILLID_PSIONICS)/25));
+
+  EraseObjProperty( caster, "#Casting");
+
+  var victims := ListMobilesNearLocation(CInt(cast_on.x), CInt(cast_on.y), CInt(cast_on.z), range);
+
+  foreach mobile in victims
+
+    if(CheckLineOfSight( mobile, caster))
+      var immunity := IsProtected( caster, mobile, circle );
+      var circ := circle;
+      if( immunity != IMMUNED && mobile != caster )
+        if( immunity == CURSED )
+          circ := circ * 2;
+        endif
+        if (AutoCallGuardCheck(caster, mobile))
+          EraseObjProperty( caster, "#Casting");
+          return;
+        endif
+
+        dmg := CInt(CalcSpellDamage( caster, mobile, circ, AREA_EFFECT_SPELL)*1.2);
+        send_attack(mobile, caster, SPELL_ID);
+        PlayMovingEffect( caster, mobile, FX_SPELL_FISTSOFFURY, SPEED_SPELL_FISTSOFFURY, LOOP_SPELL_FISTSOFFURY, 1);
+        PlaySoundEffect(mobile, SFX_SPELL_FISTSOFFURY);
+
+        ApplyElementalDamage(caster, mobile, circ, dmg, 0);
+      endif
+    endif
+  
+  sleepms(150);
+  endforeach
+endprogram

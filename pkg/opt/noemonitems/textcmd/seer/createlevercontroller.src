@@ -1,0 +1,14 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+program createswitch(who)
+	if (!checkStaff(who, "createlevercontroller", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    var item := CreateItemAtLocation( who.x, who.y, who.z, 0xf00f, 1 );
+    SendSysMessage(who, "You create a lever Controller.");
+
+
+endprogram

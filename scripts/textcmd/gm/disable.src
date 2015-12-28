@@ -1,0 +1,41 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//  .disable [priv]        - disable a privilege
+//
+//  example:
+//      ".disable invul"   - disable invulnerability, if you have it enabled
+//
+//  see also enable.src
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+use uo;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program txtcmd_enable( who, priv )
+	if (!checkStaff(who, "disable", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	SendSysMessage( who, "Disabling '" + priv + "' on who?" );
+	var mobile := Target( who );
+	if( !mobile )
+		return 0;
+	elseif( !GetIntelligence(mobile) )
+		SendSysMessage( who, "You must target a mobile." );
+		return 0;
+	elseif( mobile.npctemplate )
+		SendSysMessage( who, "You must target a player." );
+		return 0;
+	elseif( mobile.disable( priv ) )
+		SendSysMessage( who, "Privilege '" + priv + "' is now disabled on " + mobile.name + "." );
+		return 1;
+	else
+		SendSysMessage( who, mobile.name + " don't have that privilege." );
+		return 0;
+	endif
+
+endprogram

@@ -1,0 +1,24 @@
+use uo;
+use os;
+use file;
+use util;
+include "include/cmdlevel_check";
+
+program search_Report(who, searchstring)
+
+	if (searchstring == "raw")
+		start_script(":searchreport:searchraw", who);
+		return;
+	endif
+	SendSysMessage(who, "Reporting....");
+	if (!checkStaff(who, "searchreport", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	if(!searchstring)
+		searchstring:="-";
+	endif
+
+	start_script(":searchreport:searchreport2", CStr(CStr(who.serial)+" 1 "+searchstring));
+
+endprogram
+

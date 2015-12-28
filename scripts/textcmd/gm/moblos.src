@@ -1,0 +1,25 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_moblos( who )
+	if (!checkStaff(who, "moblos", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "List mobiles in line-of-sight from what?" );
+
+    var what := Target( who );
+    if (what)
+        var inlos := ListMobilesInLineOfSight( what, 10 );
+        if (len(inlos))
+            foreach mobile in inlos
+                print( mobile.name );
+                SendSysMessage( who, "In line of sight: " + mobile.name );
+            endforeach
+            SendSysMessage( who, "done." );
+        else
+            SendSysMessage( who, "No mobiles found." );
+        endif
+    endif
+endprogram

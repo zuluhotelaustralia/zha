@@ -1,0 +1,28 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_ident( who, text )
+	if (!checkStaff(who, "keyword", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    SendSysMessage( who, "Assign a keyword to whom?" );
+    var what := Target( who );
+
+    if (!what || !text)
+	SendSysMessage( who, "Canceled." );
+    endif
+
+    var keyword := "keyword"+text;
+
+	if (!GetObjProperty(what, keyword ) )
+		var response := RequestInput( who, who.backpack, "What should their response be?");
+		SetObjProperty(what, keyword, response);
+		SendSysMessage( who, "npc will respond to "+ text + " by saying: "+ response );
+	else
+		EraseObjProperty( what, keyword );
+		SendSysMessage( who, "npc will no longer respond to "+ text );
+	endif
+
+endprogram

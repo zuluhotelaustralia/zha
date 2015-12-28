@@ -1,0 +1,5 @@
+include "include/time";
+
+program printTime(who)
+	SendSysMessage(who, NowString());
+endprogram

@@ -1,0 +1,32 @@
+use uo;
+
+include "include/cmdlevel_check";
+include "include/packets";
+
+program setseason(who, params)
+	if (!checkStaff(who, "setseason", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    params := SplitWords( params );
+    params[1] := CInt(params[1]);
+    params[2] := CInt(params[2]);
+    if (!(params[1] >= 0 && params[1] <= 4))
+      Sendsysmessage(who, "Parameter needs to be between 0 and 4:" + params[1]);
+      return;
+    endif
+
+  if (params[2] != 1)
+    var targeted := Target( who);
+    if (!targeted)
+      return;
+      Sendsysmessage(who, "Canceled");
+    endif
+    SetSeasonForPlayer(targeted, params[1]);
+  else
+    var players := EnumerateOnlineCharacters();
+    foreach player in players
+      SetSeasonForPlayer(player, params[1]);
+    endforeach
+  endif
+
+endprogram

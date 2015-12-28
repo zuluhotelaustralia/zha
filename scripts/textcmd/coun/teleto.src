@@ -1,0 +1,29 @@
+use uo;
+include "include/cmdlevel_check";
+include "include/councycmdlog";
+
+
+program teleto(who)
+	if (!checkStaff(who, "teleto", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+var what:= Target(who, TGTOPT_NOCHECK_LOS);
+SendSysMessage(who, "Move where?");
+var where := TargetCoordinates(who);
+
+if (where)
+        MoveCharacterToLocation(what, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
+		  if (who.cmdlevel == 1)
+			var prevpos:=struct;
+			prevpos.x:=who.x;
+			prevpos.y:=who.y;
+			prevpos.z:=who.z;
+
+			councycommandlog(who, "teleto", what, prevpos, where);
+
+		  endif
+
+endif
+
+endprogram

@@ -1,0 +1,20 @@
+use uo;
+
+include "include/client";
+include "include/cmdlevel_check";
+
+
+program buzz( who )
+	if (!checkStaff(who, "buzz", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+   SendSysMessage( who, "Who should i give a buzzcut to?" );
+   var baldy := Target( who );
+
+   var hair := GetEquipmentByLayer( baldy, LAYER_HAIR );
+
+   DestroyItem( hair );
+
+endprogram

@@ -1,0 +1,99 @@
+//GM Barnabus 2/2/2003
+//Reports which accounts are in jail, for how long, whether the account is online,
+//which player of that account is online, and whether they are in jail or not.
+//I plan to extend this as a prop so that u can view the account notes from this.
+
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+
+program textcmd_speedhack( who )
+	if (!checkStaff(who, "speedhack", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+	SendSysMessage(who, "Select a player to check for speedhack:", 3, 53);
+	var player:= Target(who);
+	if (player.acct)
+		if(CheckSpeedHack(who))
+			SendSysMessage(who, "SPEEDHACK ALERT!!!", 3, 53);
+		else
+			SendSysMessage(who, "No speedhack alert based on 5 seconds of observation", 3, 53);
+		endif
+	else
+		SendSysMessage(who, "Invalid selection",3,70);
+	endif
+	
+endprogram
+
+function CheckSpeedHack(who)
+ //Broadcast("Checking player : " + who.name);
+ SetObjProperty(who, "CheckingSpeed", 1);
+ var charCoords:=struct; 
+ charCoords.+x:=who.x;
+ charCoords.+y:=who.y;
+ var charSpeedX;     
+ var charSpeedY;
+ var charSpeedMD;
+ var charMount;
+ var i;    
+ 
+ var maxSpeed;
+ EraseObjProperty(who, "RecalledGatedTeled"); 
+
+ sleep(1);
+ for (i:=1;i<6;i:=i+1)
+   SendPacket(who, "220000");// request resync 
+   charSpeedX:=abs(who.x-charCoords.x);   
+   charSpeedY:=abs(who.y-charCoords.y);
+
+   charSpeedMD:=maxOf( charSpeedX, charSpeedY );      
+
+   charMount:=GetEquipmentByLayer( who, LAYER_MOUNT );
+
+   if( charMount )
+     //minSpeed:= 17;//was 15
+     //maxSpeed:= 46;
+		maxSpeed:=15; //5 more than max riding
+   else
+     //minSpeed:= 10;//was 8
+     //maxSpeed:= 30;
+		//maxSpeed:=22; //allows for running and teleport spell in same direction
+ 		maxSpeed:=8; // more than max running.  
+	endif
+
+	//if( charSpeedMD>minSpeed and charSpeedMD<maxSpeed)
+	//Broadcast(who.name + " speed was " + charSpeedMD);
+	if(charSpeedMD>maxSpeed)
+		if (CheckLosAt( who, charCoords.x, charCoords.y, who.z ))
+			if (! GetObjProperty(who, "RecalledGatedTeled"))
+				EraseObjProperty(who, "CheckingSpeed");   
+				return 1;
+			else
+				EraseObjProperty(who, "RecalledGatedTeled");
+			endif
+		endif
+	endif
+   charCoords.x:=who.x;
+   charCoords.y:=who.y;
+   SendPacket(who, "220000");// request resync 
+	sleep(1);
+ endfor
+ EraseObjProperty(who, "CheckingSpeed");
+ return 0;
+endfunction
+
+function maxOf( userVal1, userVal2 )
+
+  if(userVal1>userVal2)
+    return userVal1;
+  else
+    return userVal2;  
+  endif
+
+endfunction
+
+
+

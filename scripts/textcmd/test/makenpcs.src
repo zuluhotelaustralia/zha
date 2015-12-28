@@ -1,0 +1,30 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/random";
+include "include/cmdlevel_check";
+
+program textcmd_makerand( who, params )
+	if (!checkStaff(who, "makenpcs", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    params := SplitWords( params );
+    var howmany := CInt( params[1] );
+    var template := params[2];
+   
+    SendSysMessage( who, "Creating " + howmany + " " + template + " npcs" );
+   
+    set_critical(0);
+   
+    while (howmany > 0)
+        var x := Random( 6144 );
+        var y := Random( 4096 );
+        var z := GetMapInfo( x, y ).z;
+        var npc := CreateNpcFromTemplate( template, x, y, z );
+        if (npc)
+            howmany := howmany - 1;
+        endif
+    endwhile // FIXME if 'endfor' here, prints an incorrect error!
+    SendSysMessage( who, "Done creating npcs!" );
+endprogram

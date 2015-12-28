@@ -1,0 +1,116 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+
+program ambushtile( who, item )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, item);
+
+endprogram
+
+function configGump(who, tile)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 440, 530);
+	
+	var tstat := tileStatus(tile);
+	
+	GFTextMid(10, 10, 440, 70, "Configure Ambush Tile");
+	GFTextMid(10, 30, 440, 53, "Select any of the following options:");
+	GFTextLine(90, 80, 53, "Select ambush monsters");
+	GFTextLine(90, 130, 5, "Currently set to:");
+	GFTextLine(90, 150, 5, "Npctemplate: " + tstat[1]);
+	GFTextLine(90, 170, 5, "Number to spawn at ambush: " + tstat[2]);
+	GFTextLine(90, 190, 5, "Time Interval (mins): " + CInt(tstat[3]/60));
+	GFTextLine(90, 350, 53, "Add auxillary tile (extend area of location tile by tile)");
+	GFTextLine(90, 400, 53, "Reset all");
+	GFTextLine(90, 430, 53, "Exit");
+
+	var createMonsters := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var tilebtn := GFButtonID( 60, 355, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var resetallbtn := GFButtonID( 60, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[createMonsters.keyid])
+		enterCreateMonsters(tile, who);
+	elseif(choice[tilebtn.keyid])
+		createAuxTile(tile, who);
+	elseif(choice[resetallbtn.keyid])
+		ResetAllOpts(tile);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+	configGump(who, tile);
+endfunction
+
+function tileStatus(tile)
+//returns an array of file settings for gump above
+ 	return {GetObjProperty(tile, "createMonsterTemplate"),
+	GetObjProperty(tile, "createMonsterTemplateNo"),
+	GetObjProperty(tile, "TimeInterval")};
+endfunction
+
+
+function enterCreateMonsters(tile, who)
+	var mtemp := SendTextEntryGump( who, "Enter Monster Template. Assumes valid template");
+	if (! mtemp)
+		return;
+	endif
+	var mnum := SendTextEntryGump( who, "Enter number of monsters to spawn at ambush");
+	if (! mnum)
+		return;
+	endif
+	SendSysMessage(who, "This is the time period in minutes that passes after the ambush tile has been triggered before it can triggered again");
+	var timetemp := SendTextEntryGump( who, "Enter time interval (mins)");
+	if (! timetemp)
+		return;
+	endif
+	
+	SetObjProperty(tile, "createMonsterTemplate", mtemp);
+	SetObjProperty(tile, "createMonsterTemplateNo", CInt(mnum));
+	SetObjProperty(tile, "TimeInterval", CInt(timetemp)*60);
+endfunction
+
+function ResetAllOpts(tile)
+	SetObjProperty(tile, "createMonsterTemplate", "");
+	SetObjProperty(tile, "createMonsterTemplateNo", 0);
+	SetObjProperty(tile, "TimeInterval", 0);
+endfunction
+
+function createAuxTile(tile, who)
+	SendSysMessage(who, "Select the position of the auxillary location tile");
+	var loc := TargetCoordinates(who);
+	if (!loc)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+
+	var assoctile := CreateItemAtLocation( loc.x, loc.y, loc.z, 0x16);
+	if (!assoctile)
+		SendSysMessage(who, "Problems creating tile at that position. Cancelled");
+		return;
+	endif
+	
+	SetObjProperty(assoctile, "AssociatedAmbushTile", tile.serial);
+	
+	//add to aux tile array
+	var auxtilearray := array;
+	auxtilearray := GetObjProperty(tile, "auxtilearray");
+	if (!auxtilearray[1])
+		SetObjProperty(tile, "auxtilearray",{assoctile.serial});
+	else
+		auxtilearray.append(assoctile.serial);
+		SetObjProperty(tile, "auxtilearray", auxtilearray);
+	endif
+endfunction
+

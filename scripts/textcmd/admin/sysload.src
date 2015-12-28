@@ -1,0 +1,12 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program sysload(who)
+	if (!checkStaff(who, "sysload", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	SendSysMessage(who, "Sysload is " + polcore().sysload + " (" + polcore().sysload_severity + ")" );
+
+endprogram

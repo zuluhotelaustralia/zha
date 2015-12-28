@@ -1,0 +1,92 @@
+//
+// .createrect command - create items in a targetted rectangle
+//
+// usage: .createrect [objtype]
+// Items created with this command will not decay.
+//
+
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_create( who, params )
+	if (!checkStaff(who, "createrect", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    var objtype, zheight;
+
+    params := SplitWords( params );
+
+    objtype := params[1];
+    if (CInt(objtype))
+        objtype := CInt(objtype);
+    endif
+
+    if (len(params)>=2)
+        zheight := CInt( params[2] );
+    else
+        zheight := 0;
+    endif
+
+    SendSysMessage( who, "Target the top-left corner" );
+    var topleft := TargetCoordinates( who );
+    if (!topleft)
+        return;
+    endif
+    SendSysMessage( who, "Target the bottom-left corner" );
+    var botright := TargetCoordinates( who );
+    if (!botright)
+        return;
+    endif
+   
+    if (topleft.x <= botright.x && topleft.y <= botright.y)
+        var x, y, z;
+        for( x := topleft.x; x <= botright.x; x := x + 1 )
+            for( y := topleft.y; y <= botright.y; y := y + 1 )
+                z := GetMapInfo( x,y ).z;
+                var item := CreateItemAtLocation( x, y, z+zheight, objtype, 1 );
+                item.decayAt := 0;
+                log(who, item);
+	    	SetObjProperty(item, "LFucker", who.name + who.serial);
+            endfor
+        endfor
+    endif
+
+      
+endprogram
+
+function log(who, item)
+var where := who;
+var desc := who.name + " / " + who.acctname;
+
+var elemkey := desc;
+var props := array;
+var prop := array;
+prop .+ pname;
+prop .+ pvalue;
+
+prop.pname := "item";
+prop.pvalue := item.name;
+props[1] := prop;
+
+prop.pname := "serial";
+prop.pvalue := item.serial;
+props[2] := prop;
+
+prop.pname := "myserial";
+prop.pvalue := who.serial;
+props[3] := prop;
+
+prop.pname := "amount";
+prop.pvalue := item.amount;
+props[4] := prop;
+
+prop.pname := "x y z";
+prop.pvalue := where.x + " " + where.y + " " + where.z;
+props[5] := prop;
+
+
+AppendConfigFileElem( "createstack", "createstack", elemkey, props );
+UnloadConfigFile("createstack");
+endfunction

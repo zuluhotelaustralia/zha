@@ -1,0 +1,125 @@
+use uo;
+use os;
+include "include/gumps";
+include "include/random";
+include "include/client";
+include "include/itemutil";
+include "ostardbreeding";
+
+
+program breedingegg(user, egg)
+
+	if (!ReserveItem(egg))
+		return;
+	endif
+	var hatchtime := GetObjProperty(egg, "HatchTime");
+	if (hatchtime > ReadGameClock())
+		SendSysMessage(user, "The egg will be ready to hatch in " + CInt((hatchtime-ReadGameClock())/60+1) + " minute(s)");
+		return;
+	elseif (egg.container)
+		SendSysMessage(user, "You must place the egg on the ground before hatching");
+		return;
+	endif
+	EraseObjProperty(egg, "HatchTime");
+	PrintTextAbove(egg, "The egg begins to stir...");
+	var difficulty:= GetObjProperty(egg, "Rating")+HATCH_DIFF_MOD;
+	sleepms(2000);
+	var osty;
+	if (GetObjProperty(egg, "Rating") >= 100)
+		CreateSuperOsty(user, egg);
+		return;
+	endif
+	if (!Random(100))
+		PrintTextAbove(egg, "A mutant ostard emerges!");
+		var ostard;
+		case( Random(35) )
+		0:
+		1:
+		2:
+		3:
+		4:	ostard := "frenziedostard";
+		5:	
+		6:
+		7:	ostard := "goldenfrenziedostard";
+		8:
+		9:
+		10:	ostard := "plainsfrenziedostard";
+		11:
+		12:
+		13:	ostard := "mountainfrenziedostard";
+		14:
+		15:
+		16:	ostard := "swampfrenziedostard";
+		17:
+		18:	ostard := "highlandfrenziedostard";
+		19:
+		20:	ostard := "shadowfrenziedostard";
+		21:
+		22:	ostard := "valleyfrenziedostard";
+		23:
+		24:	ostard := "stonefrenziedostard";
+		25:
+		26:	ostard := "emeraldfrenziedostard";
+		27:
+		28:	ostard := "rubyfrenziedostard";
+		29:
+		30:	ostard := "tropicalfrenziedostard";
+		31:	ostard := "snowfrenziedostard";
+		32:	ostard := "icefrenziedostard";
+		33:	ostard := "firefrenziedostard";
+		34:	ostard := "heavenlyfrenziedostard";
+		endcase
+		CreateNpcFromTemplate(ostard, egg.x, egg.y, egg.z);
+		SubtractAmount(egg, 1);
+		return;
+	endif
+	if (Random(2))
+		osty:=CreateNpcFromTemplate("femalebreedingostard", egg.x, egg.y, egg.z);
+	else
+		osty:=CreateNpcFromTemplate("malebreedingostard", egg.x, egg.y, egg.z);
+	endif
+	osty.color := egg.color;
+	osty.truecolor := egg.color;
+	if (!CheckSkill(user, SKILLID_ANIMALLORE, difficulty, 0))
+		SendSysMessage(user, "The poor thing died just after hatching");
+		ApplyRawDamage(osty, GetMaxHp(osty)+3);
+		SubtractAmount(egg, 1);
+		return;
+	endif
+	
+	foreach prop in GetObjPropertyNames(egg)
+		SetObjProperty( osty, prop, GetObjProperty( egg, prop ) );
+	endforeach
+	SetObjProperty(osty, "NextMate", ReadGameClock() + MIN_TIME_BETWEEN_BREEDING);
+	SendSysMessage(user, "You successfully hatch the egg!");
+	SubtractAmount(egg, 1);
+	if (GetObjProperty(osty, "Temperament") < 3)
+		osty.script := "killpcs";
+		RestartScript(osty);
+	endif
+	
+endprogram
+
+function CreateSuperOsty(user, egg)
+
+	var npctemplate := "eliteostard";
+	var difficulty:= GetObjProperty(egg, "Rating")+HATCH_DIFF_MOD;
+	case(GetObjProperty(egg, "Temperament"))
+		0:	npctemplate := "demonicostard";
+		10:	npctemplate := "celestialostard";
+	endcase
+	var osty := CreateNpcFromTemplate(npctemplate, egg.x, egg.y, egg.z);	
+	if (!CheckSkill(user, SKILLID_ANIMALLORE, difficulty, 0))
+		SendSysMessage(user, "The poor thing died just after hatching");
+		ApplyRawDamage(osty, GetMaxHp(osty)+3);
+		SubtractAmount(egg, 1);
+		return;
+	endif
+	CreateItemAtLocation(egg.x, egg.y, egg.z, "perfectostardfeather");
+	case (npctemplate)
+		"demonicostard":	SendSysMessage(user, "Oh my God! You've created a monster!");
+		"celestialostard":	SendSysMessage(user, "You have created a being of pure goodness!");
+		"eliteostard":		SendSysMessage(user, "You have created an elite ostard!");
+	endcase
+	SubtractAmount(egg, 1);
+endfunction

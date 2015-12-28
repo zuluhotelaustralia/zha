@@ -1,0 +1,115 @@
+use uo;
+use os;
+
+include "include/objtype";
+
+program redeed( who )
+
+	var the_item := Target( who );
+	if( !the_item )
+		return;
+	endif
+
+	if( the_item.isA(POLCLASS_MOBILE) )
+		SendSysMessage( who, "You can't redeed that!" );
+		return;
+	endif
+
+	var owner_serial := GetObjProperty( the_item, "DeedOwnerSerial" );
+	if( !owner_serial )
+		SendSysMessage( who, "You can't redeed that!" );
+		return;
+	endif
+
+	if( who.serial != owner_serial )
+		SendSysMessage( who, "You don't own this." );
+		return;
+	endif
+
+	var the_serials  := GetObjProperty( the_item, "ItemsCreatedSerials" );
+	var deed_onjtype := GetObjProperty( the_item, "FromDeed" );
+	if( !the_serials || !deed_onjtype )
+		SendSysMessage( who, "Error in the process please page a staff to report." );
+		return;
+	endif
+
+	var created := {};
+	foreach serial in the_serials
+		var part := SystemFindObjectBySerial( serial );
+		if( part )
+			created.append( part );
+		endif
+	endforeach
+
+	if( !len(created) )
+		SendSysMessage( who, "Error in the process please page a staff to report." );
+		return;
+	endif
+
+	var itemname;
+	var itemqual;
+	var lockable;
+	var is_excep;
+	var the_color;
+
+	foreach item in created
+		if( item.objtype != UOBJ_COPPER_KEY )
+			if( !itemname )
+				itemname := GetObjProperty( item, "BaseName" );
+			endif
+		
+			if( !itemqual )
+				itemqual := item.quality;
+			endif
+		
+			if( !lockable )
+				lockable := GetObjProperty( item, "lockable" );
+			endif
+		
+			if( !is_excep )
+				is_excep := GetObjProperty( item, "IsExceptional" );
+			endif
+		
+			if( !the_color )
+				the_color := item.color;
+			endif
+		endif
+	
+		if( item.isa( POLCLASS_CONTAINER ) )
+			var content := EnumerateItemsInContainer( item );
+			if( len( content ) )
+				SendSysMessage( who, "All the items from the " + item.desc + " as been moved in your pack." );
+			endif
+		
+			foreach thing in content
+				MoveItemToContainer( thing, who.backpack );
+			endforeach
+		endif
+	
+		DestroyItem( item );
+	endforeach
+
+
+	var the_deed := CreateItemInBackpack( who, deed_onjtype );
+	SetObjProperty( the_deed, "ItemBaseName", itemname );
+	SetObjProperty( the_deed, "ItemQuality", itemqual );
+
+	if( itemname )
+		SetName( the_deed, "deed for : " + itemname );
+	endif
+
+	if( lockable )
+		SetObjProperty( the_deed, "ItemIsLockable", 1 );
+	endif
+	
+	if( is_excep )
+		SetObjProperty( the_deed, "ItemIsExceptional", 1 );
+	endif
+
+	if( the_color )
+		the_deed.color := the_color;
+	endif
+
+	SendSysMessage( who, "You place the deed in your pack." );
+
+endprogram

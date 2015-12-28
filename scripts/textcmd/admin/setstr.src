@@ -1,0 +1,9 @@
+include "include/attributes";
+include "include/cmdlevel_check";
+
+program textcmd_setstr( who, newstr )
+	if (!checkStaff(who, "setstr", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SetBaseStrength(who, CInt(newstr) );
+endprogram

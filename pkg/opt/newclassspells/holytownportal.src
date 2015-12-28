@@ -1,0 +1,193 @@
+/* Holy Spell - Town Portal          **
+** Creates Portal to selected town   **
+** Seravy - seravy@gmail.com         */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/areas";
+include "../pkg/std/housing/utility";
+
+const SPELL_ID := SPELL_ID_TOWNPORTAL;
+
+program cast_holytownportal( caster )
+
+  var location := {0,0,0};
+  var gatelocations := {	{4467,	1178,	0},	// moonglow
+			    	{1421,	1699,	0},	// britain
+  			    	{1322,	3778,	0},	// jhelom
+			        {629,	858,	0},	// yew
+		    		{2503,	562,	0},	// minoc
+			    	{1821,	2821,	0},	// trinsic
+			    	{586,	2154,	0},	// skara
+			    	{3726,	2161,	20}	// magincia
+				};
+
+
+  if(IsForbiddenAreaToGateFrom( caster ))
+    SendSysMessage(caster, "You can't gate from there." );
+    EraseObjProperty(caster, "#Casting");
+    return 0;
+  endif
+
+  var result := sendGump(caster);
+
+  if (!result[0])
+    EraseObjProperty(caster, "#Casting");
+    return;
+  else
+    for i := 1 to 8
+      if (result[0] == i)
+        location := gatelocations[i];
+      endif
+    endfor
+  endif
+
+  if (location[1] == 0 || location[2] == 0)
+    EraseObjProperty(caster, "#Casting");
+    return 0;
+  endif
+
+  var casterx := caster.x;
+  var castery := caster.y;
+  var casterz := caster.z;
+
+  if(IsForbiddenAreaToGateFrom( caster ))
+    SendSysMessage(caster, "You can't gate from there." );
+    EraseObjProperty(caster, "#Casting");
+    return 0;
+  endif
+
+  if( caster.multi )
+    if( !IsOwner( caster, caster.multi )  )
+      if( !IsFriend( caster, caster.multi ) )
+        EraseObjProperty(caster, "#Casting");
+        SendSysMessage( caster, "You can't gate from this house." );
+        return;
+      endif
+    endif
+  endif
+
+  if (caster.dead)
+    SendSysMessage(caster, "You can't cast this while dead!" );
+    EraseObjProperty(caster, "#Casting");
+    return 0;
+  endif
+
+  set_critical(1);
+
+  var gate1 := CreateItemAtLocation( casterx, castery, casterz, 0x0f6c, 1 );
+  var gate2 := CreateItemAtLocation( location[1], location[2], location[3], 0x0f6c, 1 );
+  if( !gate1 || !gate2 || !caster )
+    DestroyItem(gate1);
+    DestroyItem(gate2);
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+
+  SetObjProperty( gate1, "GateDestX", gate2.x );
+  SetObjProperty( gate1, "GateDestY", gate2.y );
+  SetObjProperty( gate1, "GateDestZ", gate2.z );
+  SetObjProperty( gate1, "f", 1);
+  SetObjProperty( gate2, "GateDestX", gate1.x );
+  SetObjProperty( gate2, "GateDestY", gate1.y );
+  SetObjProperty( gate2, "GateDestZ", gate1.z );
+  SetObjProperty( gate2, "f", 1);
+  SetObjProperty( gate1, "gateHasWarnings", 1);
+  SetObjProperty( gate2, "gateHasWarnings", 1);
+
+  gate1.color := COLOUR_TOWNPORTAL;
+  gate2.color := COLOUR_TOWNPORTAL;
+  gate1.name := caster.name + "'s Townportal";
+  gate2.name := caster.name + "'s Townportal";
+  gate1.movable := 0;
+  gate2.movable := 0;
+
+  EraseObjProperty(caster, "#Casting");
+  Detach();
+  set_critical(0);
+
+  PlaySoundEffect( gate1, SFX_TOWNPORTAL );
+  PlaySoundEffect( gate2, SFX_TOWNPORTAL );
+
+  var i;
+  for( i := 6900; i <= 6907; i := i+1 )
+    gate1.graphic := i;
+    gate2.graphic := i;
+    sleepms( 150 );
+  endfor
+  gate1.graphic := 0x0f6c;
+  gate2.graphic := 0x0f6c;
+  
+  var level :=GetClasseLevel(caster);
+  if (GetClass(caster) == CLASSEID_PALADIN)
+    level := CInt(level/2);
+  elseif (GetClass(caster) != CLASSEID_PRIEST)
+    level := CInt(level/5);
+  endif
+  var skill := GetEffectiveSkill(caster, SKILLID_PIETY);
+  var duration := CInt(calcSummonDuration(skill, level)/2);
+  sleep(duration);
+
+  for( i := 6907; i >= 6900; i := i-1 )
+    gate1.graphic := i;
+    gate2.graphic := i;
+    sleepms( 150 );
+  endfor
+
+  set_critical(1);
+  DestroyItem(gate1);
+  DestroyItem(gate2);
+  set_critical(0);
+
+endprogram
+
+
+function sendGump(who)
+
+var layout := {
+	"page 0",
+	"gumppic 30 30 5528",
+	"text 150 40 1153 0",
+	"text 235 80 1153 1",
+	"button 165 80 247 248 1 0 1",
+
+	"text 235 120 1153 2",
+	"button 165 120 247 248 1 0 2",
+
+	"text 235 160 1153 3",
+	"button 165 160 247 248 1 0 3",
+
+	"text 235 200 1153 4",
+	"button 165 200 247 248 1 0 4",
+
+	"text 235 240 1153 5",
+	"button 165 240 247 248 1 0 5",
+
+	"text 235 280 1153 6",
+	"button 165 280 247 248 1 0 6",
+
+	"text 235 320 1153 7",
+	"button 165 320 247 248 1 0 7",
+
+	"text 235 360 1153 8",
+	"button 165 360 247 248 1 0 8"
+};
+
+var data := {
+	"Choose your destination",
+	"Moonglow",
+	"Britain",
+	"Jhelom",
+	"Yew",
+	"Minoc",
+	"Trinsic",
+	"Skara Brae",
+	"Magincia"
+};
+
+
+  var result := SendDialogGump( who, layout, data );
+  return result;
+endfunction

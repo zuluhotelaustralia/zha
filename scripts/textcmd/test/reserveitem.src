@@ -1,0 +1,35 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_zadd( who, num )
+	if (!checkStaff(who, "reserveitem", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+  var tgt := Target(who);
+  if (!tgt)
+    return;
+  endif
+  var res := Cint(num);
+
+  if (res == 1)
+    if(!ReleaseItem(tgt))
+      SendSysMessage(who, "You cannot release that.");
+      return;
+    else
+      SendSysMessage(who, "You release the item.");
+    endif
+  else
+    if(!ReserveItem(tgt))
+      SendSysMessage(who, "You cannot reserve that.");
+      return;
+    else
+      SendSysMessage(who, "You reserved the item.");
+    endif
+  endif
+
+  SendSysMessage(who, "Sleeping for 10 seconds.");
+  Sleep(10);
+
+
+endprogram

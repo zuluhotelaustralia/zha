@@ -1,0 +1,168 @@
+/*
+	Barnabus 24/4/04
+
+	Lets players enter notes they want to play on an instumer
+*/
+
+use uo;
+use os;
+
+include "include/client";
+include "include/spelldata";
+include "include/attributes";
+include "barditems";
+	
+
+const SYSEVENT_UPDATEMUSIC:=0x0001234;
+var validnotes := {"P", "A1","A#1","A2","A#2","B1","B2","C1","C#1","C2","C#2","C3","D1","D#1","D2","D#2","E1","E2","F1","F2", "F#1","F#2", "G1","G2", "G#1", "G#2" };
+		
+//NOTE: CLIENT RESTRICTION IS SAME SOUND CAN ONLY BE PLAYED ONCE EVERY 1+ seconds... so have at least 5 notes between
+//each same note
+				
+program use_playable_instrument (who, instrument)
+	//drum
+	/*
+	const SND_DRUM1 :=57;
+	const SND_DRUM2 :=58;
+	const SND_DRUM3 :=747;
+	const SND_DRUM4 :=748;
+	const SND_DRUM5 :=749;
+	const SND_DRUM6 :=750;
+	const SND_DRUM7 :=744;
+	const SND_DRUM8 :=745;
+	const SND_DRUM9 :=746;
+
+	
+	
+	//initial checks
+	if (! CheckMaxMusicianShip(who))
+		SendSysMessage(who, "You require 130 musicianship to use an arcane instrument.");
+		return 0;
+	endif
+	
+	var check := BardLevelCheck(who, instrument);
+	
+	if (check==-1)
+		SendSysMessage(who, "Only a classed Bard could use this instrument!");
+		return;
+	elseif(check==0)
+		SendSysMessage(who, "You are not a high enough level Bard to use this instrument!");
+		return;		
+	endif
+	
+	*/
+
+	var instring:=RequestInput(who, who.backpack, "Enter notes to play (e.g. A#1 is A sharp octave 1, P to pause, enter all with a space between e.g. A#2 F2 G#1)");
+	if (!instring||instring==error)
+		return;
+	endif
+	var notes:= SplitWords(instring);
+	//instrument type for music played
+			
+	PlayLuteMusic(who, notes);
+	SendSysMessage(who,"You stop playing...");
+
+endprogram
+
+function IsValidMusic(notes)
+	//var validnotes := {"P", "A","A#","B","C","C#","D","D#","E","F"};
+	var counter:=0;
+	foreach n in notes
+		foreach v in validnotes
+			if (n==v)
+				counter:=counter+1;
+			endif
+		endforeach
+	endforeach
+	if (counter==notes.size())
+		return 1;
+	endif
+	return 0;
+endfunction
+
+
+
+function PlayLuteMusic(who, notes)
+	if (! IsValidMusic(notes))
+		SendSysMessage(who, "You don't know how to play that!");
+		return;
+	endif
+	var i:=1;
+	while(i<=notes.size())
+		if (notes[i]!="P")
+			PlaySoundEffect(who, GetSFXFromNote(notes[i]));
+		endif
+		sleepms(250);
+		
+		i:=i+1;
+	endwhile
+	InformNearbyMuscians(who, notes);
+endfunction
+
+function GetSFXFromNote(note)
+	case (note)
+		"A1": return 1022;
+		"A#1": return 1024;
+		"A2": return 1023;
+		"A#2": return 1025;
+		"B1": return 1026;
+		"B2": return 1027;
+		"C1": return 1029;
+		"C#1": return 1032;
+		"C2": return 1030;
+		"C#2": return 1033;
+		"C3": return 1031;
+		"D1": return 1034;
+		"D#1": return 1037;
+		"D2": return 1035;
+		"D#2": return 1038;
+		"E1": return 1039;
+		"E2": return 1040;
+		"F1": return 1041;
+		"F2":return 1042;
+		"F#1": return 1043;
+		"F#2": return 1044;
+		"G1": return 1045;
+		"G2": return 1046;
+		"G#1": return 1047;
+		"G#2": return 1048;		
+	endcase
+	
+endfunction
+
+function InformNearbyMuscians(who, notes)
+	var mobs := ListMobilesInLineOfSight( who, 12 );
+	var ev := struct;
+	ev.+ type;
+	ev.+ source;
+	ev.source	:= who;
+	ev.type		:= SYSEVENT_UPDATEMUSIC;
+	foreach m in mobs
+		if (m.script=="musician")
+			SetObjProperty(m, "playedToBy", who.serial);
+			SetObjProperty(m, "notesPlayed", notes);
+			var res:= SendEvent(m, ev);
+			//Broadcast("found musician " +m.name);
+			//Broadcast("event " +res);
+		endif
+	endforeach
+endfunction
+
+/*
+function IsValidDrumMusic(notes)
+	var validnotes := {"P", "1","2","3","4","5","6","7","8","9"};
+	
+	var counter:=0;
+	foreach n in notes
+		foreach v in validnotes
+			if (n==v)
+				counter:=counter+1;
+			endif
+		endforeach
+	endforeach
+	if (counter==notes.size())
+		return 1;
+	endif
+	return 0;
+endfunction
+*/

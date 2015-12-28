@@ -1,0 +1,58 @@
+/* Clean Tamed Serials                 **
+** Finds all characters on shard and   **
+** checks each serial in tamed_serials **
+** cprop to dead ones and removes them **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+use file;
+
+program textcmd_cleanTamedSerials(who)
+  var lines := ReadFile("data/pcs.txt");
+  var words, characterName, character := 0;
+  var i:=0;
+
+  foreach line in lines
+    i := i + 1;
+    if (!who)
+      break;
+    endif
+    words := SplitWords(line);
+
+    if (words[1]=="Serial")
+      characterName := SplitWords(lines[i-1]);
+      if (characterName[1] == "Name")
+         character := SystemFindObjectBySerial(CInt(words[2]), SYSFIND_SEARCH_OFFLINE_MOBILES);
+         if (character)
+           cleanTamedSerials(character, who);
+         else
+           SendSysMessage(who, "Error finding:"+words[2]);
+         endif
+      endif
+    endif
+
+    if ((i % 50)==0)
+      sleepms(1); // Sleep so no time outs.
+    endif		
+  endforeach
+
+  SendSysMessage(who, "Cleaning Done");
+endprogram
+
+function cleanTamedSerials(character, who)
+  var tamedserials := GetObjProperty(character, "tamed_serials");
+  if (tamedserials)
+    var newtamedserials := {};
+    foreach serial in tamedserials
+      if (SystemFindObjectBySerial(serial))
+        newtamedserials.append(serial);
+      endif
+    endforeach
+    if (CInt(tamedserials.size() - newtamedserials.size()) > 0)
+      SendSysMessage(who, CInt(tamedserials.size() - newtamedserials.size()) + " animals cleaned up for "+character.name);
+    endif
+    SetObjProperty(character, "tamed_serials", newtamedserials);
+  endif
+  return 1;
+endfunction

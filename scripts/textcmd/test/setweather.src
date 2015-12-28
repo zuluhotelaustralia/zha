@@ -1,0 +1,20 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program setweather( who, params )
+	if (!checkStaff(who, "setweather", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    params := SplitWords( params );
+
+    var res :=
+      SetRegionWeatherLevel( params[1],       // region name
+                           CInt(params[2]),   // weather type
+                           CInt(params[3]),   // severity
+                           CInt(params[4]),   // aux
+                           CInt(params[5]) ); // lightoverride
+    if (!res)
+        SendSysMessage( who, "Error: " + res.errortext );
+    endif
+endprogram

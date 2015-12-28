@@ -1,0 +1,73 @@
+/* Holy Spell - Negate Curse         **
+** Negates the curse on a person     **
+** Seravy - seravy@gmail.com         */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_NEGATECURSE;
+
+program cast_negatecurse( parms)
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    SendSysMessage( caster, "Whos curse do you wish to negate?");
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  PlayObjectCenteredEffect( cast_on, FX_SPELL_NEGATECURSE, SPEED_SPELL_NEGATECURSE, LOOP_SPELL_NEGATECURSE);
+  PlaySoundEffect( cast_on, SFX_SPELL_NEGATECURSE);
+
+  set_critical(1);
+  var all := GetMod(cast_on, "all");
+  if (all[1] < 0)
+    WipeMod(cast_on, "all");
+    if (CanMod(cast_on, "all"))
+      DoTempMod(cast_on, "all", -all[1], (all[2]-ReadGameClock()));
+    endif
+  endif
+
+  var str := GetMod(cast_on, "str");
+  if (str[1] < 0)
+    WipeMod(cast_on, "str");
+    if (CanMod(cast_on, "str"))
+      DoTempMod(cast_on, "str", -str[1], (str[2]-ReadGameClock()));
+    endif
+  endif
+
+  var int := GetMod(cast_on, "int");
+  if (int[1] < 0)
+    WipeMod(cast_on, "int");
+    if (CanMod(cast_on, "int"))
+      DoTempMod(cast_on, "int", -int[1], (int[2]-ReadGameClock()));
+    endif
+  endif
+
+  var dex := GetMod(cast_on, "dex");
+  if (dex[1] < 0)
+    WipeMod(cast_on, "dex");
+    if (CanMod(cast_on, "dex"))
+      DoTempMod(cast_on, "dex", -dex[1], (dex[2]-ReadGameClock()));
+    endif
+  endif
+  set_critical(0);
+
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

@@ -1,0 +1,19 @@
+*.dep
+*.lst
+*.ecl
+*.dbg
+*.dbg.txt
+*.dmp
+log/
+config/sell-logger.cfg
+config/servers.cfg
+config/createstack.cfg
+config/staffcommands - admin.cfg
+config/textcmd.res.cfg
+scripts/ecompile.cfg
+scripts/ECOMPILE.BAT
+leftovers.txt
+objtypes.txt
+orphans.txt
+pol.cfg
+2005-4-19 - ZHA.7z

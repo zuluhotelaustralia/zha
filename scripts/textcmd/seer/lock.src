@@ -1,0 +1,17 @@
+use os;
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_lock( speaker )
+	if (!checkStaff(speaker, "lock", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    SendSysMessage( speaker, "What do you wish to lock?" );
+
+    var what := Target( speaker,TGTOPT_NOCHECK_LOS );
+    if (what)
+        what.locked := 1;
+    endif
+endprogram

@@ -1,0 +1,25 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+program textcmd_loot(who)
+	if (!checkStaff(who, "grabcont", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var item := Target( who,TGTOPT_NOCHECK_LOS );
+	if (!item) return; endif
+
+	var storepack := CreateItemInBackpack( who, 0x9b0, 1 );
+
+	foreach thingie in EnumerateItemsInContainer(item)
+
+	if (thingie.container.serial == item.serial)
+	MoveItemToContainer(thingie,storepack);
+	endif
+
+	endforeach
+
+endprogram

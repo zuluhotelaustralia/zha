@@ -1,0 +1,15 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program masscreate( who, start )
+	if (!checkStaff(who, "masscreate", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    start := CInt(start);
+
+    var i;
+    for( i := 0; i < 16; i := i + 1 )
+        CreateItemAtLocation( who.x + i*2, who.y, who.z, start+i, 1 );
+    endfor
+endprogram

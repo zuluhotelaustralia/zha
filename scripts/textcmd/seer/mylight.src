@@ -1,0 +1,9 @@
+include "include/cmdlevel_check";
+
+program mylight( who, params )
+	if (!checkStaff(who, "mylight", CMDLEVEL_SEER))
+		return 0;
+	endif
+    params := SplitWords( params );
+    who.setlightlevel( CInt(params[1]), CInt(params[2]) );
+endprogram;

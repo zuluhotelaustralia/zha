@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+program vote(who)
+
+	start_script(":poll:voting", who);
+	
+endprogram
+
+
+
+
+	
+	
+	
+	

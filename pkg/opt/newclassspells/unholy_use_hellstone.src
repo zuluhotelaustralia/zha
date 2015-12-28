@@ -1,0 +1,64 @@
+use uo;
+use os;
+
+program hellstone_use(who, stone)
+  detach();
+
+  if (GetObjProperty(stone, "setup"))
+    SendSysMessage(who, "This stone is already set up. If you wanna change its settings please recreate.");
+    return;
+  endif
+  if (who.cmdlevel > 2)
+    var duration, hellarea, randomtime;
+
+    duration := CInt(RequestInput(who, stone, "What duration do you want until the (in mins)"));
+    if (!duration) return; endif
+
+    randomtime := CInt(RequestInput(who, stone, "Up to how much radom time do you wish to add to the duration? (in mins)"));
+    if (!randomtime) return; endif
+
+    hellarea := GetAreaLocation(who);
+    if (!hellarea) return; endif
+
+    SetObjProperty(stone, "LFucker", who.name+who.serial);
+    SetObjProperty(stone, "duration", duration);
+    SetObjProperty(stone, "randomtime", randomtime);
+    SetObjProperty(stone, "hellarea", hellarea);
+    SendSysMessage(who, "The hell stone has now been set up.");
+    SetObjProperty(stone, "setup", 1);
+  endif
+endprogram
+
+function GetAreaLocation(who)
+  var tOne, tTwo;
+  SendSysMessage(who, "Select one corner of the boxed area of Hell.");  
+  tOne := TargetCoordinates(who);
+  SendSysMessage(who, "Select the oposite corner of the boxed area of Hell.");
+  tTwo := TargetCoordinates(who);
+  var area := GetAreaLocationArray(tOne.x, tTwo.x, tOne.y, tTwo.y);
+  if(!area)
+    return 0;
+  endif
+  return area;
+endfunction
+
+function GetAreaLocationArray(xOne, xTwo, yOne, yTwo)
+  var xMin, xMax, yMin, yMax;
+
+  if(xOne < xTwo)
+    xMin := xOne;
+    xMax := xTwo;
+  else
+    xMin := xTwo;
+    xMax := xOne;
+  endif
+  if(yOne < yTwo)
+    yMin := yOne;
+    yMax := yTwo;
+  else
+    yMin := yTwo;
+    yMax := yOne;
+  endif
+
+  return({xMin, xMax, yMin, yMax});
+endfunction

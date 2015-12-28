@@ -1,0 +1,131 @@
+//////////////////////////////////////////////////////////////////////
+//
+//  ".wipebank" text command
+//
+
+use uo;
+use os;
+
+include "include/objtype";
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+
+var worldbank := FindStorageArea( "World Bank" );
+var merchant  := FindStorageArea( "Merchant Storage" );
+var tamed	 := FindStorageArea( "Tamed Storage" );
+
+program newsystemwipe( who )
+	if (!checkStaff(who, "newsystemwipe", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+	var max_serial := CInt( 0xffffffff );
+	if( !max_serial )
+		SendSysMessage( who, "You must enter the max serial to be wiped." );
+		return;
+	endif
+
+	Detach();
+	SendSysMessage( who, "Processing the online items/npcs wipe, please wait..." );
+	var i1;
+	set_critical( 1 );
+	for( i1 := 1; i1 <= max_serial; i1 := i1 + 1 )
+		var item := SystemFindObjectBySerial( i1 );
+		if( item )
+			if( NeedToBeDestroyed( item ) )
+				DestroyItem( item );
+			elseif( item.npctemplate )
+				set_critical( 0 );
+				RevokePrivilege( item, "invul" );
+				SetObjProperty( item, "guardkill", 1 );
+				ApplyRawDamage( item, item.hp+10 );
+				set_critical( 1 );
+			endif
+		endif
+	endfor
+	set_critical( 0 );
+
+	sleep( 5 );
+	SendSysMessage( who, "Processing the offline items wipe, please wait..." );
+	var i2;
+	set_critical( 1 );
+	for( i2 := 1; i2 <= max_serial; i2 := i2 + 1 )
+		var item := SystemFindObjectBySerial( i2, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		if( item )
+			if( NeedToBeDestroyed( item ) )
+				DestroyItem( item );
+			endif
+		endif
+	endfor
+	set_critical( 0 );
+
+	sleep( 5 );
+	SendSysMessage( who, "Processing the storage areas items wipe, please wait..." );
+	var i3;
+	set_critical( 1 );
+	for( i3 := 1; i3 <= max_serial; i3 := i3 + 1 )
+		var item := SystemFindObjectBySerial( i3, SYSFIND_SEARCH_STORAGE_AREAS );
+		if( item )
+			if( NeedToBeDestroyed( item ) )
+				DestroyItem( item );
+			endif
+		endif
+	endfor
+	set_critical( 0 );
+
+	sleep( 5 );
+	SendSysMessage( who, "Processing the unused world storage areas wipe, please wait..." );
+	var i4;
+	set_critical( 1 );
+	for( i4 := 1; i4 <= max_serial; i4 := i4 + 1 )
+		var item1 := SystemFindObjectBySerial( i4, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		var item2 := SystemFindObjectBySerial( i4 );
+		if( !item1 && !item2 )
+			WipeAllHisStorageAreas( Hex(i4) );
+		endif
+	endfor
+	set_critical( 0 );
+
+endprogram
+
+function NeedToBeDestroyed( item )
+
+	if( item.isa(POLCLASS_EQUIPMENT) )
+		return 1;
+	elseif( item.isa(POLCLASS_ARMOR) )
+		return 1;
+	elseif( item.isa(POLCLASS_WEAPON) )
+		return 1;
+	elseif( item.isa(POLCLASS_CORPSE) )
+		return 1;
+	elseif( item.objtype >= UOBJ_HIDES_START && item.objtype <= UOBJ_HIDES_END )
+		return 1;
+	elseif( item.objtype >= 0x706b && item.objtype <= 0x7080 )
+		return 1;
+	elseif( item.objtype >= 0xb100 && item.onjtype <= 0xb110 )
+		return 1;
+	elseif( item.objtype >= 0xa100 && item.onjtype <= 0xa110 )
+		return 1;
+	elseif( item.objtype >= 0x7587 && item.onjtype <= 0x758f )
+		return 1;
+	elseif( item.objtype >= 0x7031 && item.onjtype <= 0x7032 )
+		return 1;
+	elseif( item.objtype == 0x3709 || item.onjtype == 0x0f3c || item.onjtype == 0x186e || item.objtype == 0x8245 )
+		return 1;
+	else
+		return 0;
+	endif
+	
+endfunction
+
+function WipeAllHisStorageAreas( serial )
+
+	DestroyRootItemInStorageArea( worldbank, "Bankbox  " + serial);
+	DestroyRootItemInStorageArea( merchant, serial + " FS");
+	DestroyRootItemInStorageArea( merchant, serial + " PB");
+	DestroyRootItemInStorageArea( merchant, serial + " 1C");
+	DestroyRootItemInStorageArea( tamed, "Bankbox  " + serial );
+
+endfunction

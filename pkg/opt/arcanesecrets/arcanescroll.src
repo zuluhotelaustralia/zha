@@ -1,0 +1,34 @@
+use uo;
+use os;
+
+program arcane_scroll(user, scroll)
+
+	if (scroll.container != user.backpack)
+		SendSysMessage(user, "That must be in your backpack");
+		return;
+	endif
+	if (!GetObjProperty(user, "IsMage"))
+		SendSysMessage(user, "You have no idea how to use the scroll");
+		return;
+	endif
+	if (GetObjProperty(user, "MagicBonus"))
+		SendSysMessage(user, "You are already under the influence!");
+		return;
+	endif
+	PlayObjectCenteredEffect(user, 0x1153, 0);
+	PlaySoundEffect(user, 0xff);
+	SendSysMessage(user, "You feel arcane power coursing through your veins!");
+	set_critical(1);
+	SubtractAmount(scroll, 1);
+	SetObjProperty(user, "MagicBonus", 50);
+	Detach();
+	sleep(110);
+	SendSysMessage(user, "The power starts to fade...");
+	sleep(10);
+	SendSysMessage(user, "You have returned to normal");
+	EraseObjProperty(user, "MagicBonus");
+	set_critical(0);
+
+endprogram
+	
+	

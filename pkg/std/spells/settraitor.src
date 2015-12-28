@@ -1,0 +1,32 @@
+use uo;
+use os;
+include "include/traitorcheck";
+
+program SetAsTraitor(who)
+
+	case (who.title_race)
+
+	"Elf": 
+		who.title_race := "Traitor Elf";
+		Detach();
+		sleep(TIME_AS_TRAITOR);
+		who.title_race := "Elf";
+
+	"Traitor Elf":
+		Detach();
+		sleep(TIME_AS_TRAITOR);
+		who.title_race := "Elf";
+
+	"Dark-Elf":
+		who.title_race := "Traitor Dark-Elf";
+		Detach();
+		sleep(TIME_AS_TRAITOR);
+		who.title_race := "Dark-Elf";
+
+	"Traitor Dark-Elf":
+		Detach();
+		sleep(TIME_AS_TRAITOR);
+		who.title_race := "Dark-Elf";
+
+	endcase
+endprogram

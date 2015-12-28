@@ -1,0 +1,24 @@
+use os;
+use uo;
+use boat;
+include "include/client";
+include "include/attributes";
+
+program textcmd_kill( who )
+
+	var tgt := TargetCoordinates( who );
+	if( tgt.mobile )
+		var mob := tgt.mobile;
+		if( mob.cmdlevel > who.cmdlevel && who.cmdlevel < 5 )
+			SendSysMessage( who, "You cant kill him, he is superior to you." );
+			SendSysMessage( mob, who.name + " is trying to kill you." );
+		else
+			PlayLightningBoltEffect( mob );
+			PlaySoundEffect( mob, SFX_SPELL_LIGHTNING );
+			RevokePrivilege( mob, "invul" );
+			SetObjProperty(  mob, "guardkill", 1 );
+			ApplyRawDamage(  mob, CInt(GetMaxHp(mob) + 3) );
+		endif
+	endif
+
+endprogram

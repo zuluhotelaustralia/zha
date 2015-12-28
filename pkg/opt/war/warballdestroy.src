@@ -1,0 +1,11 @@
+use uo;
+use os;
+include "war";
+
+program warball_destroy(ball)
+	DeleteWarGuilds(ball);
+	ClearPlayerWData(ball);
+	DestroyItem(GetWarStone(ball, 1));
+	DestroyItem(GetWarStone(ball, 2));
+	start_script("::maindestroy");
+endprogram

@@ -1,0 +1,18 @@
+Element 1707739
+{
+	total i242327
+	vendors a5:i1709121i1709122i1709123i1709063i1709066
+}
+
+Element 1707763
+{
+	total i51031
+	vendors a1:i1709063
+}
+
+Element 1707764
+{
+	total i21108
+	vendors a1:i1709055
+}
+

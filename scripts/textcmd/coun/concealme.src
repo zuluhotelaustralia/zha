@@ -1,0 +1,19 @@
+include "include/cmdlevel_check";
+
+program concealme( who, text )
+	if (!checkStaff(who, "concealme", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+	var conceal := CInt(text);
+	if (GetObjProperty(who, "noconceal"))
+		SendSysMessage(who, "You do not have concealment rights");
+		return;
+	elseif (conceal >= 1 && conceal <= 5 && conceal <= who.cmdlevel)    
+		who.concealed := conceal;
+	else    	
+    		who.concealed := 1;
+  	endif
+	
+	SetObjProperty(who, "#lastconcealed", CInt(ReadGameClock()));
+endprogram

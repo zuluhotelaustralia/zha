@@ -1,0 +1,23 @@
+use uo;
+include "include/cmdlevel_check";
+
+program txtcmd_eraseobjproperty( who, propname )
+	if (!checkStaff(who, "eraseobjproperty", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	SendSysMessage( who, "Erase " + propname + " cprop from what?" );
+	var object := Target( who );
+	if( !object )
+		return;
+	endif
+
+	var result := EraseObjProperty( object, propname );
+	if( result )
+		SendSysMessage( who, "Property " + propname + " was successfully erased." );
+		SetObjProperty( object, "LFucker", who.name + who.serial);
+	else
+		SendSysMessage( who, "Error erasing property: " + result.errortext );
+	endif
+
+endprogram

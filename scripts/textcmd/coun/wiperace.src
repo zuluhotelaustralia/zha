@@ -1,0 +1,9 @@
+use uo;
+use os;
+
+program wipe_titles (who)
+
+	who.title_race:="";
+	SendSysMessage(who, "Race title removed");
+	
+endprogram

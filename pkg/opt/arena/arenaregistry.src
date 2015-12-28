@@ -1,0 +1,129 @@
+use uo;
+use os;
+use cfgfile;
+use basic;
+
+var mainlayout := {
+    "page 0",
+    "resizepic 30 30 83 280 200",
+    "button 50 70 2104 2103 1 0 1001",
+    "button 50 90 2104 2103 1 0 1002",
+    "button 50 110 2104 2103 1 0 1003",
+    "button 50 130 2104 2103 1 0 1004",
+    "text 50 42 35 0",
+    "text 70 65 35 1",
+    "text 70 85 35 2",
+    "text 70 105 35 3",
+    "text 70 125 35 4",
+    "button 141 195 2119 2120 1 0 1"
+};
+
+var maindata := {
+    "Select you opponent:",
+    "One opponent",
+    "Many opponents",
+    "Another Player",
+    "Many Players"
+};
+
+var difflayout := {
+    "page 0",
+    "resizepic 30 30 83 280 200",
+    "button 50 70 2104 2103 1 0 2001",
+    "button 50 90 2104 2103 1 0 2002",
+    "button 50 110 2104 2103 1 0 2003",
+    "button 50 130 2104 2103 1 0 2004",
+    "button 50 150 2104 2103 1 0 2005",
+    "text 50 42 35 0",
+    "text 70 65 35 1",
+    "text 70 85 35 2",
+    "text 70 105 35 3",
+    "text 70 125 35 4",
+    "text 70 145 35 5",
+    "button 141 195 2119 2120 1 0 1"
+};
+
+var diffdata := {
+	"Select Dificulty:",
+	"Weak",
+	"Medium",
+	"Advanced",
+	"Dangerous",
+	"Oh my God, run... RUNNN!!"
+};
+
+var pvplayout := {
+    "page 0",
+    "resizepic 30 30 83 280 200",
+    "button 50 70 2104 2103 1 0 3001",
+    "button 50 90 2104 2103 1 0 3002",
+    "text 50 42 35 0",
+    "text 70 65 35 1",
+    "text 70 85 35 2",
+    "button 141 195 2119 2120 1 0 1"
+};
+
+var pvpdata := {
+    "Do you accept the chalange?",
+    "Accept",
+    "Refuse"
+};
+
+
+program usearenaregistry(who, arenacontrol)
+	var i, x, y, temp;
+	var queuelen;
+	var selection, difficulty;
+	var targopp;
+	var queuelist:=GetObjProperty(arenacontrol, "QueueList");
+	var opolist:=GetObjProperty(arenacontrol, "OpoList");
+
+	if (!queuelist)
+		queuelist:={};
+		opolist:={};
+	endif
+
+	queuelen := len(queuelist);
+
+	//Checks if Player in Already Regitred
+	for (i:=1;i<=queuelen;i:=i+1)
+		if ( ( CInt(queuelist[i]) == who.serial) || ( CInt(opolist[i]) == who.serial ) )
+			SendSysMessage(who, "You have already registered.");
+			return;
+		endif
+	endfor
+
+	//Checks if there is room in the Queue
+	if (queuelen > 7)
+		SendSysMessage(who, "This arena is Full. Try again in a few battles.");	
+		return;
+	endif
+
+	var res := SendDialogGump( who, mainlayout, maindata );
+	if ( (res[0]==0) || (res[0]==1) )
+		SendSysMessage(who, "canceled.");
+		return;
+	endif
+	selection := res[0] - 1000;
+
+
+	if     (selection == 1)
+		res := SendDialogGump( who, difflayout, diffdata );
+		if ( (res[0]==0) || (res[0]==1) )
+			SendSysMessage(who, "Aborted.");
+			return;
+		endif
+		difficulty := res[0] - 2000;
+	
+		queuelist[queuelen+1]:=who.serial;;
+		opolist[queuelen+1]:="@"+CStr(difficulty);
+	
+		SetObjProperty(arenacontrol, "QueueList",queuelist);
+		SetObjProperty(arenacontrol, "OpoList",opolist);
+	else
+		SendSysMessage(who, "Option Disabled.");	
+		return;
+	endif
+	SendSysMessage(who,"You have been registered. There are "+ queuelen+" gladiators in front of you.");
+
+endprogram

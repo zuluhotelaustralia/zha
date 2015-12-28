@@ -1,0 +1,8 @@
+use uo;
+include "party";
+program logoff( character )
+	DeleteFromParty(character);
+	EraseObjProperty(character,"partygump");
+	EraseObjProperty(character, "#partyoffer");
+	EraseObjProperty(character, "addrequest");
+endprogram

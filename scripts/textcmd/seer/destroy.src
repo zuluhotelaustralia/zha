@@ -1,0 +1,25 @@
+//
+// Destroy an item
+//
+
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_destroy( who )
+	if (!checkStaff(who, "destroy", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    SendSysMessage( who, "Please target something to destroy" );
+
+    var tgt := TargetCoordinates( who );
+    if (tgt)
+        if (tgt.item)
+            SetObjProperty( tgt.item, "destroyit", 1 );
+            DestroyItem( tgt.item );
+        else
+            SendSysMessage( who, "You can only destroy items" );
+        endif
+    endif
+endprogram

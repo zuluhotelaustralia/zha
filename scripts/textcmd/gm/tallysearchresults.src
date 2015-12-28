@@ -1,0 +1,9 @@
+use uo;
+use os;
+use file;
+
+program tally_search_results(who)
+
+	start_script(":searchreport:tallysearchresults", who);
+	
+endprogram

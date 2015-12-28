@@ -1,0 +1,13 @@
+use uo;
+
+include "../../userlist";
+include "include/cmdlevel_check";
+
+program textcmd_msgrebuild(character)
+	if (!checkStaff(character, "msgrebuild", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	UserList(EVID_USERLIST_REBUILD, character);
+
+endprogram

@@ -1,0 +1,19 @@
+use uo;
+include "include/cmdlevel_check";
+
+program lockradius( who, text )
+  if (!checkStaff(who, "hellradius", CMDLEVEL_SEER))
+    return 0;
+  endif
+
+  var ranget := CInt( text );
+  if (ranget > 15)
+    SendSysMessage(who, "The area cannot be bigger than 15!");
+  endif
+
+  foreach thing in ListItemsNearLocation(who.x, who.y, who.z, ranget);
+    SetObjProperty(thing, "hellstoneignore", 1);
+  endforeach
+   
+  SendSysMessage(who, "Everything will be ignored by hellstone in a radius of "+ranget);
+endprogram

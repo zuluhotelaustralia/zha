@@ -1,0 +1,13 @@
+use uo;
+
+program SingleClick(who, singleSerials)
+	var myinput := SplitWords (singleSerials);
+	//Broadcast("HI! " + myinput[1] + " " + myinput[2]);
+	foreach st in myinput
+		Broadcast(st);
+	endforeach
+	var singClObject := SystemFindObjectBySerial(singleSerials);
+	if (!who.cmdlevel && singClObject.cmdlevel && singClObject.concealed)
+		SendSysMessage(singClObject, "You are being detected by a player");
+	endif
+endprogram

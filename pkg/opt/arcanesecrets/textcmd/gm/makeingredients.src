@@ -1,0 +1,17 @@
+use uo;
+use os;
+
+program Make_Ingredients(user)
+
+	CreateItemInBackpack(user, 0x75b3);
+	CreateItemInBackpack(user, 0x75b4);
+	CreateItemInBackpack(user, 0x75b5);
+	CreateItemInBackpack(user, 0x75b6);
+	CreateItemInBackpack(user, 0x75b7);
+	CreateItemInBackpack(user, 0x75b8);
+	CreateItemInBackpack(user, 0x75b9);
+	CreateItemInBackpack(user, 0x75ba);
+	
+endprogram
+
+	

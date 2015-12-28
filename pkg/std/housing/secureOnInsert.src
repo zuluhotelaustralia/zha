@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "securechests";
+
+program on_insert( who, secure, movetype, INSERT_ADD_ITEM, item )
+	if (!MoveItemToContainer( item, FindSecureChest( secure.serial ) ))
+		SendSysMessage(who, "Unable to put in secure chest");
+		MoveItemToContainer( item, who.backpack );
+	endif
+
+endprogram

@@ -1,0 +1,55 @@
+use uo;
+use os;
+
+include "include/yesno";
+
+program wipe_objtype( who, objtype )
+
+	if( !objtype )
+		SendSysMessage( who, "Usage is .wipeobj <objtype>." );
+		return;
+	endif
+
+	objtype := CInt( objtype );
+	if( !objtype )
+		SendSysMessage( who, "Usage is .wipeobj <objtype>." );
+		return;
+	endif
+
+	if( !YesNo( who, "Wipe " + Hex( objtype ) ) )
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	var count		:= 0;
+	var timer		:= 0;
+	var clock		:= ReadGameClock();
+	
+	SendSysMessage( who, "Starting " + Hex( objtype ) + " wiping, please wait..." );
+
+	foreach obj in ListObjectsInBox(0, 0, -128, 6142, 4094, 128)
+		if( obj.objtype == objtype )
+
+			SetObjProperty( obj, "destroyit", 1 );
+			DestroyItem( obj );
+			count := count + 1;
+
+		endif
+	
+		sleepms( 5 );
+		timer := timer + 5;
+	
+		if( timer >= 30000 )
+			timer := timer - 30000;
+			SendSysMessage( who, "Wiping is still in progress, be patient..." );
+		endif
+	endforeach
+
+	if( count )
+		SendSysMessage( who, "Wiping completed, took " + CStr( ReadGameClock() - clock ) + " seconds to complete." );
+		SendSysMessage( who, "A total of " + count + " item have been wiped." );
+	else
+		SendSysMessage( who, "Wiping failed or no item were found to be destroyed." );
+	endif
+
+endprogram

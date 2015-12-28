@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/dotempmods";
+include "include/random";
+include "pickdoor";
+
+program walkon_hiddentraptile( who, tile )
+	if (who.dead || !who.acct)
+		return;
+	endif
+	FireTrapIfPresent(who,tile);
+endprogram
+

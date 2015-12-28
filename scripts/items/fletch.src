@@ -1,0 +1,62 @@
+use uo;
+
+include "include/client";
+include "include/objtype";
+include "include/utility";
+include "include/skillpoints";
+
+
+program on_fletch( character, shafts )
+
+    if(!ReserveItem(shafts))  return;  endif
+
+    var feathers;
+    var thepoints := get_default_points(SKILLID_BOWCRAFT);
+    SendSysMessage( character, "Select feathers to use." );
+
+    feathers := Target( character );
+    if (!feathers) // canceled, or targetting error
+        return;
+    endif
+
+    if(!ReserveItem(feathers))
+        SendSysMessage( character, "Cannot use feathers." );
+        return;
+    endif
+
+    if (GetObjType(feathers) != UOBJ_FEATHER)
+        SendSysMessage( character, "I can only make arrows from shafts and feathers." );
+        return;
+    endif
+
+    var choice := SelectMenuItem2( character, "fletching" );
+    if (!choice)
+        SendSysMessage( character, "Canceled." );
+        return;
+    endif
+
+    if (Accessible( character, shafts ) && Accessible( character, feathers ))
+        if (CheckSkill( character,
+                        SKILLID_BOWCRAFT,
+                        -1,                     // difficulty
+                        thepoints ))                   // points
+            var num_to_make := Min( GetAmount(shafts), GetAmount(feathers) );
+
+           
+            //print( "Would create " + num_to_make + " arrows." );
+            var arrows := CreateItemInBackpack( character, choice.objtype, num_to_make );
+            if (GetAmount(arrows) > 0)
+                SubtractAmount( shafts, num_to_make );
+                SubtractAmount( feathers, num_to_make );
+                SendSysMessage( character, "You create some arrows and put them in your pack." );
+            endif
+            // else report error? hmm, no information on that!
+        else
+            SubtractAmount( shafts, 1 );
+            SubtractAmount( feathers, 1 );
+            SendSysMessage( character, "You destroy some materials." );
+        endif
+    else
+        SendSysMessage( character, "I can't seem to find either the shafts or the feathers!" );
+    endif
+endprogram

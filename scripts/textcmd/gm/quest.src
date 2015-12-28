@@ -1,0 +1,111 @@
+use uo;
+use os;
+
+include "include/constants/propids";
+
+program textcmd_quest( who, text )
+
+	if( !text )
+		SendSysMessage( who, "Usage: .quest <option>" );
+		SendSysMessage( who, "Options are: start, stop, protect, unprotect, current and description." );
+		return 0;
+	endif
+
+	var player;
+	var description	  := GetGlobalProperty("QuestDescription");
+	var running_quest := CInt(GetGlobalProperty(PROPID_GLOBAL_RUNNING_QUEST));
+	var last_quest	  := CInt(GetGlobalProperty("LastQuest"));
+	case(text)
+		"start":	if(running_quest)
+					SendSysMessage( who, "There's already a quest running. Only one quest can run at a time.");
+				else
+				
+					SetGlobalProperty(PROPID_GLOBAL_RUNNING_QUEST,last_quest+1);
+					SetGlobalProperty("LastQuest",last_quest+1);
+					description := RequestInput( who, who.backpack, "Enter a description for this new quest. Hit ESC for no description." );
+					if( !description )
+						SendSysMessage( who, "No description set for this quest." );
+					else
+						SetGlobalProperty( "QuestDescription", description );
+					endif
+				
+					SendSysMessage( who, "Starting quest number " + (last_quest+1) );
+					if(description)
+						SendSysMessage( who, "With description:" );
+						SendSysMessage( who, description );
+					endif
+				endif
+	
+		"stop":		if(!running_quest)
+					SendSysMessage( who, "There's no running quest to stop at the moment." );
+				else
+					EraseGlobalProperty(PROPID_GLOBAL_RUNNING_QUEST);
+					EraseGlobalProperty("QuestDescription");
+					SendSysMessage( who, "Ended quest number " + running_quest + "." );
+				endif
+	
+		"protect":	if(!running_quest)
+					SendSysMessage( who, "You can't protect someone when there's no quest running." );
+				else
+					player := Target( who, TGTOPT_NOCHECK_LOS );
+					if( player )
+						if( player.IsA(POLCLASS_MOBILE) )
+							if( !player.IsA(POLCLASS_NPC) )
+								SetObjProperty( player, PROPID_MOBILE_PARTICIPATING_QUEST, running_quest );
+								SendSysMessage( who, player.name + " is now protected from looting during the quest number " + running_quest + "." );
+							else
+								SendSysMessage( who, "This isn't a player." );
+							endif
+						else
+							SendSysMessage( who, "This isn't a mobile." );
+						endif
+					endif
+				endif
+			
+		"unprotect":	if(!running_quest)
+					SendSysMessage( who, "There's no quest running presently, so no need to unprotect anyone." );
+				else
+					player := Target( who, TGTOPT_NOCHECK_LOS );
+					if( player )
+						if( player.IsA(POLCLASS_MOBILE) )
+							if( !player.IsA(POLCLASS_NPC) )
+								EraseObjProperty( player, PROPID_MOBILE_PARTICIPATING_QUEST );
+								SendSysMessage( who, player.name + " is no longer protected from looting during quest number " + running_quest + "." );
+							else
+								SendSysMessage( who, "This isn't a player." );
+							endif
+						else
+							SendSysMessage( who, "This isn't a mobile." );
+						endif
+					endif
+				endif
+			
+		"current":	if(!running_quest)
+					SendSysMessage( who, "There's no quest running presently." );
+				else
+					SendSysMessage( who, "Quest number " + running_quest + " is running currently." );
+					SendSysMessage( who, "Description: " + description );
+				endif
+			
+		"description":	if(!running_quest)
+					SendSysMessage( who, "There's no quest running presently, so you can't set a description." );
+				else
+					if( description )
+						SendSysMessage( who, "Current description for quest " + running_quest + " is '" + description + "'." );
+					else
+						SendSysMessage( who, "There's no description currently set for quest number " + running_quest + "." );
+					endif
+				
+					description := RequestInput( who, who.backpack, "Enter a new description for quest number " + running_quest + " that is presently running. Hit ESC to keep it as it is." );
+					if( !description )
+						SendSysMessage( who, "No description entered." );
+					else
+						SetGlobalProperty( "QuestDescription", description );
+						SendSysMessage( who, description + " was successfully set as a description for quest number " + running_quest + "." );
+					endif
+				endif
+
+		default:	SendSysMessage( who, "Unknown option. Valid options are: start, stop, protect, unprotect, current and description." );
+	endcase
+
+endprogram

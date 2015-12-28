@@ -1,0 +1,45 @@
+use uo;
+
+include "include/objtype";
+include "include/spelldata";
+include "include/areas";
+include "include/client";
+include "include/cmdlevel_check";
+
+program cast_mark( caster )
+	if (!checkStaff(caster, "mark", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	var circle := 6;
+
+	if( IsForbiddenAreaToRecallTo( caster, caster.x, caster.y ) )
+		SendSysMessage( caster, "You can't mark a rune here." );
+		return 0;
+	endif
+
+
+	SendSysMessage( caster, "Select a rune to mark." );
+	var cast_on := CanTargetThing(caster, circle, TGTOPT_CHECK_LOS );
+
+	if( !cast_on )
+		return 0;
+	elseif( !Accessible( caster, cast_on ) )
+		SendSysMessage( caster, "You can't reach that." );
+		return 0;
+	elseif( cast_on.objtype != UOBJ_RUNE )
+		SendSysMessage(caster, "You can only mark recall runes!");
+		return 0;
+	elseif( !ReserveItem( cast_on ) )
+		return 0;
+	endif
+
+
+
+	SetObjProperty(cast_on, "x", caster.x);
+	SetObjProperty(cast_on, "y", caster.y);
+	SetObjProperty(cast_on, "z", caster.z);
+
+	SetName(cast_on, "a marked recall rune");
+   
+endprogram

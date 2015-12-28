@@ -1,0 +1,9 @@
+use uo;
+use os;
+
+program elecfield_destroy(fieldtile )
+	var field := SystemFindObjectBySerial(GetObjProperty(fieldtile, "currentFieldSer"));
+	if (field)
+		DestroyItem(field);
+	endif
+endprogram

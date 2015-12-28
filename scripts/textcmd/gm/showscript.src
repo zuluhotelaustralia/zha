@@ -1,0 +1,17 @@
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_action( who, action )
+	if (!checkStaff(who, "showscript", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "Select an NPC" );
+
+    var npc := Target( who );
+    if (npc)
+        SendSysMessage( who, "Script: " + npc.script );
+    endif
+endprogram

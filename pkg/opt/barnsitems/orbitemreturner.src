@@ -1,0 +1,37 @@
+//usescript for orbitemreturner
+//basically when a player uses this they dislodge the magic crystal inside
+//the orbitemreturner will return the orb (crystal) to itself after
+//30 minutes. Useful for quests where people need to return an item.
+
+use uo;
+use os;
+
+include "orbitemreturner";
+include "include/client";
+
+program orbitemreturner( who, orbitemreturner )
+	if (orbitemreturner.graphic==2584)//crystal already removed
+		SendSysMessage(who, "You search the magic crystal generator but there is no crystal inside!");	
+		return;
+	endif
+	
+	//has crystal in it
+	var orb := CreateItemInContainer( who.backpack, 0x18);
+	if (!orb)
+		SendSysMessage(who, "You try to scoop the magic crystal into your backpack but is too full!");		
+		return;
+	endif
+	
+	SetObjProperty(orbitemreturner, "OrbSerial", orb.serial);	
+
+	SendSysMessage(who, "You have dislodged the magic crystal from the holder and quickly put it into your backpack!",3,73);	
+	//orbitemreturner.graphic:=0x0A18;	
+	//Broadcast(orbitemreturner.graphic);
+	orbitemreturner.graphic:=2584;
+	//Broadcast(orbitemreturner.graphic);
+	PlaySoundEffect( who, SFX_58);
+	Detach();
+	SetOrbReturnTime(orbitemreturner);
+	RunOrbReturnManager(orbitemreturner);
+endprogram
+

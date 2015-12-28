@@ -1,0 +1,25 @@
+use uo;
+include "include/cmdlevel_check";
+
+program  z(who, howfar)
+	if (!checkStaff(who, "py", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+var what := Target(who, TGTOPT_NOCHECK_LOS);
+
+if (!what)
+        return;
+endif
+
+var tdist;
+
+if (howfar == "")
+        tdist := 1;
+else
+        tdist := CInt(howfar);
+endif
+
+
+MoveItemToLocation(what, what.x, what.y + tdist, what.z, MOVECHAR_FORCELOCATION);
+endprogram

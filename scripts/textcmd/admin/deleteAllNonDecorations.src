@@ -1,0 +1,45 @@
+use uo;
+use os;
+
+include "include/yesno";
+include "include/cmdlevel_check";
+
+program deleteAllNonDecorations( who, objtype )
+	set_critical(1);
+	if (!checkStaff(who, "deleteAllNonDecorations", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+
+	if( !YesNo( who, "You sure?" ) )
+		SendSysMessage( who, "Canceled." );
+		return;
+	endif
+
+	var count		:= 0;
+	var timer		:= 0;
+	var clock		:= ReadGameClock();
+	
+	SendSysMessage( who, "Starting deletion of non decorations, please wait..." );
+
+	foreach obj in ListObjectsInBox(0, 0, -128, 6142, 4094, 128)
+		//Broadcast(obj.name);
+		if (!GetobjProperty(obj, "WORLD_DECORATION"))
+			DestroyItem(obj);
+			count:=count+1;
+		endif
+		
+		sleepms( 5 );
+		timer := timer + 5;
+	
+		if( timer >= 30000 )
+			timer := timer - 30000;
+			SendSysMessage( who, "deleting non decorations...");
+		endif
+	endforeach
+
+	SendSysMessage( who, "Non decoration deletion completed, took " + CStr( ReadGameClock() - clock ) + " seconds to complete." );
+	SendSysMessage( who, "A total of " + count + " item have been deleted." );
+
+	set_critical(0);
+endprogram

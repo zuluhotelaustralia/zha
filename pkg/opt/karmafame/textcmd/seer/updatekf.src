@@ -1,0 +1,18 @@
+use uo;
+
+include "../../karmafame";
+include "include/cmdlevel_check";
+
+program textcmd_updatekf( who )
+	if (!checkStaff(who, "updatekf", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	var tgt := TargetCoordinates( who );
+	if( tgt.mobile )
+		var mob := tgt.mobile;
+		SetNewNotoName( mob );
+		SendSysMessage( who, "Setting " + mob.name + " right title: " + mob.title_prefix + " K:"+ GetKarma( mob ) +" F:" + GetFame( mob ) );
+	endif
+
+endprogram

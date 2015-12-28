@@ -1,0 +1,90 @@
+/* Holy Spell - Holy Vengeance **
+** Ultimate: Holy Damage Area  **
+** Seravy - seravy@gmail.com   */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/packets";
+
+const SPELL_ID := SPELL_ID_HOLYVENGEANCE;
+
+program cast_holyvengeance(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var plane := HOLY;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+  endif
+
+
+  caster.frozen := 1;
+  PlaySoundEffect(caster, SFX_SPELL_HOLYVENGEANCE);
+  EraseObjProperty( caster, "#Casting");
+
+  var flamepos := {  {0,0},  {2,2},  {4,0},  {2,-2},  {0,-4},  
+  {-2,-4},  {-4,-2},  {-6,0},  {-6,4},  {-2,8},  {4,8},  {10,4},  
+  {10,-4},  {4,-10},  {-4,-10},  {-10,-6},  {-11,2},  {-8,10},  {2,11},  {10,10}};
+
+  var pillar := CreateItemAtLocation( caster.x, caster.y, caster.z-15, 0x02A7, 1);
+  for i := 1 to 20
+    set_critical(1);
+    pillar.movable := 1;
+    MoveItemToLocation(pillar, pillar.x, pillar.y, pillar.z+1, MOVEITEM_FORCELOCATION);
+    pillar.movable := 0;
+    set_critical(0);
+    MoveCharacterToLocation( caster, caster.x, caster.y, caster.z+1, MOVECHAR_FORCELOCATION);
+    PlayStationaryEffectHuefx( caster.x+flamepos[i][1], caster.y+flamepos[i][2], caster.z,
+      FX_SPELL_HOLYVENGEANCE, SPEED_SPELL_HOLYVENGEANCE, LOOP_SPELL_HOLYVENGEANCE, 0, 1580, 4);
+    PlaySoundEffect(caster, SFX_SPELL_HOLYVENGEANCE2);
+
+    sleepms(100);
+  endfor
+   
+  var dmg;
+  var range := calcDmgRange(caster, SKILLID_PIETY);
+  var victims := ListMobilesNearLocation(caster.x, caster.y, caster.z-18, range);
+  foreach mobile in victims
+    if(!mobile.multi && mobile != caster)
+      var immunity := IsProtected( caster, mobile, circle );
+      var circ := circle;
+      if( immunity != IMMUNED )
+        if( immunity == CURSED )
+          circ := circ * 2;
+        endif
+        if (AutoCallGuardCheck(caster, mobile))
+          EraseObjProperty( caster, "#Casting");
+          return;
+        endif
+
+        dmg := (CalcSpellDamage(caster, mobile, circ, AREA_EFFECT_SPELL));
+        send_attack(mobile, caster, SPELL_ID);
+        PlaySoundEffect(mobile, SFX_SPELL_HOLYVENGEANCE2);
+        PlayObjectCenteredEffectHuefx(mobile, FX_SPELL_HOLYVENGEANCE, SPEED_SPELL_HOLYVENGEANCE, LOOP_SPELL_HOLYVENGEANCE, 1499);
+        ApplyPlanarDamage(caster, mobile, circle, dmg, plane);
+      endif
+    endif
+  endforeach
+  sleep(1);
+  for i := 1 to 20
+    set_critical(1);
+    pillar.movable := 1;
+    MoveItemToLocation(pillar, pillar.x, pillar.y, pillar.z-1, MOVEITEM_FORCELOCATION);
+    pillar.movable := 0;
+    set_critical(0);
+    MoveCharacterToLocation( caster, caster.x, caster.y, caster.z-1, MOVECHAR_FORCELOCATION);
+    sleepms(50);
+  endfor
+  destroyItem(pillar);
+  caster.frozen := 0;
+
+endprogram

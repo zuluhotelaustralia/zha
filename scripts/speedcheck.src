@@ -1,0 +1,134 @@
+/* ************************************************************************
+ *                                                                        *
+ *    File: speedcheck.src                              ADItems Package  *
+ *   Usage: SpeedHack catcher. Scheme 6 v.3.25. Second idea.              *
+ *  Author: AnDenix ICQ 11828872, LKnight ICQ 18652680.                   *
+ * Version: 0.4/S6V3.25                                                   *
+ *  E-mail: andenix@zuluhotel.ru                                          *
+ *                                                                        *
+ *   Notes: Special for ZuluHotel Russia.                                 *
+ *          Idea based in Ethereal Portal SpeedHack/Gear catcher.         *
+ *                                                                        *
+ * History: (c) AnDenix & LKnight. 16.04.2002                             *
+ *                                                                        *
+ * Last Change: 04/17/2002                                                *
+ *              04/27/2002 by zulu                                        *
+ ************************************************************************ */
+
+
+/* **************
+ * Used modules *
+ ************** */
+
+use uo;
+use os;
+use math;
+
+
+/* **********
+ * Includes *
+ ********** */
+
+include "include/client";
+
+
+/* **************
+ * Pogram block *
+ ************** */
+
+program calc_speed()
+
+While(1)
+	foreach player in EnumerateOnlineCharacters()
+	checkply(player);
+	endforeach
+	Sleep(3600);
+Endwhile
+
+endprogram
+
+
+function checkply(who)
+
+ var charCoords:=struct;
+     charCoords.+x:=0;
+     charCoords.+y:=0;
+
+ var charSpeedX,
+     charSpeedY,
+     charSpeedMD;
+     
+ var charMount,i;    
+ 
+ var maxSpeed ,minSpeed;
+ 
+ SetObjProperty( who, "#was_recall", 1 );
+
+ for (i:=1;i<6;i:=i+1)
+   charSpeedX:=abs(who.x-charCoords.x);   
+   charSpeedY:=abs(who.y-charCoords.y);
+
+   charSpeedMD:=maxOf( charSpeedX, charSpeedY );      
+   charCoords.x:=who.x;
+   charCoords.y:=who.y;
+
+   if( GetObjProperty( who, "#was_recall" ) )
+     charSpeedMD:=0;
+     EraseObjProperty( who, "#was_recall" );
+   endif   
+
+   if( GetObjProperty( who, "JustGated" ) )
+     charSpeedMD:=0;
+     EraseObjProperty( who, "JustGated" );
+   endif   
+
+   if( GetObjProperty( who, "#moved" ) )
+     charSpeedMD:=0;
+     EraseObjProperty( who, "#moved" );
+   endif 
+
+   charMount:=GetEquipmentByLayer( who, LAYER_MOUNT );
+
+   if( charMount )
+     minSpeed:= 17;//was 15
+     maxSpeed:= 46;
+   else
+     minSpeed:= 10;//was 8
+     maxSpeed:= 30;
+   endif
+
+   if( charSpeedMD>minSpeed and charSpeedMD<maxSpeed)
+     foreach character in EnumerateOnlineCharacters()
+       if( character.cmdlevel>2 )
+	SendSysMessage( character, who.name+" is Speed Hacked ( Speed:"+charSpeedMD+"/"+minSpeed+" )", 3, COLOR_RED );
+       endif
+     endforeach
+	SendSysMessage( who, "Speed Hack/Gear warning!", 3, COLOR_RED );
+//	print ("speed:"+charSpeedMD);
+//	SendSysMessage( who, "You have been jailed, 1 day.");
+	var acc := who.acct;
+	acc.setprop("Release", (ReadGameClock() + 86400));
+	MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+	DisconnectClient( who );
+	return;
+   endif
+
+   SleepMs( 1000 );
+
+ endfor
+
+   sendsysmessage(who, "Speed Check: "+charSpeedMD);
+
+endfunction
+
+//---------------------------------------------------------------------------
+
+function maxOf( userVal1, userVal2 )
+
+  if(userVal1>userVal2)
+    return userVal1;
+  else
+    return userVal2;  
+  endif
+
+endfunction

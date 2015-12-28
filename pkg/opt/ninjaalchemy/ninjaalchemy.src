@@ -1,0 +1,251 @@
+use uo;
+use cfgfile;
+use basic;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/objtype";
+include "include/classes";
+include "include/itemutil";
+include "include/autoloop";
+
+const SFX_GRIND        := 0x023e;
+const SFX_POUR         := 0x0241;
+const SFX_BUBBLE       := 0x004f;
+
+const APPEAR_AT        := -10;
+const POINT_MULTIPLIER := 15;
+const NUM_PERFORM      := 4;
+const ANIM_DELAY_MS    := 1500;
+
+var conf := ReadConfigFile( "ninjaalchemy" );
+
+program use_mortar( user, mortar )
+	
+	if(!ReserveItem(mortar))
+		return;
+	endif
+
+	if(!IsNinja(user))
+		SendSysMessage(user, "Only a Ninja knows the use of this item.");
+		return;
+	endif
+
+	
+	SendSysMessage( user, "What would you like to use that on?" );
+
+	var use_on := Target( user, TGTOPT_CHECK_LOS );
+	
+	if( !use_on )
+		return;
+	endif
+
+	if( !IsInContainer( user.backpack, use_on ) )
+		SendSysMessage( user, "That item has to be in your backpack." );
+		return;
+	endif
+
+	if( !ReserveItem( use_on ) )
+		return;
+	endif
+
+	//if( use_on.isa(POLCLASS_WEAPON) )
+	//	makethrowable( user, use_on );
+	//	return;
+	//endif 
+
+	var elem := conf[use_on.objtype];
+	if( !elem )
+		SendSysMessage( user, "You don't know how to make anything with this." );
+		return;
+	endif
+
+	var possibles := GetConfigStringArray( elem, "potion" );
+	if( !len(possibles) )
+		SendSysMessage( user, "You don't know how to make anything out of this." );
+		return;
+	endif
+
+	var num_possibilities;
+	var ninja := IsNinja(user);
+	var menu := CreateMenu( "Select an item to make." );
+
+	foreach potion_type in possibles
+		if( CanMake( user, potion_type, use_on, ninja ) )
+			AddMenuItem( menu, conf[potion_type].objtype, conf[potion_type].pname );
+			num_possibilities := 1;
+		endif
+	endforeach
+
+	if( !num_possibilities )
+		SendSysMessage( user, "You can't make anything at the moment." );
+		return;
+	endif
+
+	var choice := SelectMenuItem2( user, menu ).index;
+	if( !choice )
+		return;
+	endif
+
+	TryToMakePotion( user, mortar, possibles[choice], use_on, ninja );
+
+endprogram
+
+
+
+
+
+function TryToMakePotion( user, mortar, potion := 0, reg := 0, ninja := 0 )
+
+	var bonus := 0;
+
+	if( potion && reg )
+
+		var difficulty := conf[potion].skill;
+		var sx := user.x;
+		var sy := user.y;
+		var i;
+		var product := conf[potion].objtype;
+
+		if( ninja )
+			var itemcfg := ReadConfigFile( "itemdesc" );
+			var base := itemcfg[product].strength;
+			bonus := CInt( base * ClasseBonus( user, CLASSEID_NINJA ) ) - base;
+			if( !bonus )
+				bonus := 1;
+			endif
+		endif
+
+		if( !ReserveItem( reg ) )
+			return;
+		endif
+
+		AutoLoop_init( user );
+
+		SendSysMessage( user, "You start working with your resource..." );
+
+		while( AutoLoop_more() && not user.dead)
+
+			if( CanMake( user, potion, reg, ninja, usereg := 1 ) )
+
+				for( i := 1; i <= NUM_PERFORM; i := i + 1 )
+					PlaySoundEffect( user, SFX_GRIND );
+					PerformAction( user, ANIM_SALUTE );
+					sleepms( ANIM_DELAY_MS );
+				endfor
+
+				if( CheckSkill( user, SKILLID_ALCHEMY, difficulty, difficulty * POINT_MULTIPLIER ) )
+				if( conf[potion].NeedBottle == 1 )
+
+					if( GetBottle( {mortar.container, user.backpack, reg.container} ) )
+						var the_potion := CreateItemInContainer( mortar.container, product, 1 );
+						//SetName( the_potion, GetPotionName( product ) );
+						PlaySoundEffect( user, SFX_POUR );
+						if( ninja )
+							SetObjProperty( the_potion, "ByTrueMage", bonus );
+						endif
+					else
+						SendSysMessage( user, "With no bottles to store the potion, you pour it out, and stop making potions." );
+						AutoLoop_finish();
+						return;
+					endif
+
+				else
+						var the_potion := CreateItemInContainer( mortar.container, product, 1 );
+						SetName( the_potion, GetPotionName( product ) );
+						PlaySoundEffect( user, SFX_POUR );
+						if( ninja )
+							SetObjProperty( the_potion, "ByTrueMage", bonus );
+						endif
+				endif
+				else
+					PlaySoundEffect( user, SFX_POUR );
+					PrintTextAbovePrivate( user, "You fail to create anything.", user );
+				endif
+
+			else
+
+				break;
+
+			endif
+
+		endwhile
+
+		SendSysMessage( user, "You put your tools away." );
+		AutoLoop_finish();
+
+	endif
+
+endfunction
+
+
+function CanMake( user, potion, reg, ninja, usereg := 0 )
+
+	var skillneeded:= conf[potion].skill;
+	var amount_needed:= conf[potion].reagent_amount;
+
+	if( ninja != 0 )
+		amount_needed := CInt( amount_needed / ClasseBonus( user, CLASSEID_NINJA ) );
+		if( amount_needed < 1 )
+			amount_needed := 1;
+		endif
+	endif
+
+	if( GetEffectiveSkill( user, SKILLID_ALCHEMY ) >= ( skillneeded + APPEAR_AT ) )
+		if( reg.amount )
+			if( reg.amount >= amount_needed )
+				if( usereg > 0 )
+					SubtractAmount( reg, amount_needed );
+				endif
+				return 1;
+			endif
+		endif
+	endif
+	return 0;
+
+endfunction
+
+
+function GetPotionName( product )
+
+	var alchemcfg := ReadConfigFile(":ninjaalchemy:itemdesc");
+	return alchemcfg[product].Desc;
+
+endfunction
+
+
+// find a bottle in backpack and reserve it
+function GetBottle( byref conts )
+
+	var item;
+	foreach container in conts
+		item := FindObjtypeInContainer( container, UOBJ_EMPTY_BOTTLE );
+		if( item )
+			if( ReserveItem( item ) )
+				SubtractAmount( item, 1 );
+				return 1;
+			endif
+		endif
+	endforeach
+	return 0;
+
+endfunction
+
+// convert a weapons usescript to be :ninjaalchemy:throwwep
+function makethrowable( user, use_on )
+
+	var difficulty := 120;
+	if( use_on.usescript == ":ninjaalchemy:throwwep" )
+		SendSysMessage( user, "This weapon is already modified to be thrown.");
+		return 0;
+	endif
+	if( CheckSkill( user, SKILLID_ALCHEMY, difficulty, 0 ) )
+		use_on.usescript := ":ninjaalchemy:throwwep";
+		SendSysMessage( user, "You modify the weapon so that it is aerodynamic.");
+	else
+		DestroyItem( use_on );
+		SendSysMessage( user, "You fail in your attempt to make the item aerodynamic and destroy it.");
+		return 0;
+	endif
+endfunction

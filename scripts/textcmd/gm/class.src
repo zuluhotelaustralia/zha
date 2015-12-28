@@ -1,0 +1,35 @@
+use uo;
+use os;
+include "include/classes";
+include "include/attributes";
+include "include/client";
+
+program class_powerup (who, text)
+
+        var params := SplitWords(text);
+        var newclass:=params[1];
+        var level:= CInt(params[2]);
+        newclass[1] := upper(newclass[1]);
+        newclass:="Is"+newclass;
+        var classlist:=GetClasseIds();
+        	
+        if (!text || !newclass || !level || level < 1 || level > 150 || !(newclass in classlist))
+           SendSysMessage(who, "Usage: .class [class] [1 to 150]");
+           SendSysMessage(who, "Valid classes are:");
+           foreach classe in GetClasseIds()
+                   SendSysMessage(who, GetClasseName(classe));
+           endforeach
+           return;
+        endif
+
+        var skills:=GetClasseSkills(newclass);
+        for skillid := 0 to SKILLID__HIGHEST
+            if (skillid in skills)
+               SetBaseSkill(who, skillid, level);
+            else
+                SetBaseSkill(who, skillid, 0);
+            endif
+        endfor
+        SetClasse(who);
+        
+endprogram

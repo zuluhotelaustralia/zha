@@ -1,0 +1,4 @@
+LIBRARY PartySystem
+EXPORTS
+POLHookPlugin
+KillPlugin

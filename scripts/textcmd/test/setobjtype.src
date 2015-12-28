@@ -1,0 +1,15 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_setobjtype( speaker, newobjtype )
+	if (!checkStaff(speaker, "setobjtype", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    SendSysMessage( speaker, "Select object of which to set object type" );
+    var tgt := Target( speaker );
+    if (tgt)
+        tgt.objtype := CInt(newobjtype);
+    endif
+endprogram

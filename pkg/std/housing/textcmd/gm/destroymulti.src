@@ -1,0 +1,17 @@
+use uo;
+//include "../pkg/std/housing/setup";
+include "../pkg/std/housing/housemanagement";
+include "include/cmdlevel_check";
+
+
+program destroy_multi( who )
+	if (!checkStaff(who, "destroymulti", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	if (who.multi.components)
+		deleteHouse (who.multi);
+	else
+		SendSysMessage(who, "This can only be used on houses");
+	endif
+endprogram

@@ -1,0 +1,28 @@
+use uo;
+use os;
+
+include "securechests";
+include "utility";
+
+program securechest_use(who, chest)
+	var houseSerial := GetObjProperty(chest, "houseserial");
+	if ( houseSerial )
+		var house := SystemFindObjectBySerial(houseSerial);
+		if (house)
+			if (!IsOwner(who, house) && !IsFriend(who, house))
+				SendSysMessage(who, "Only an owner, co-owner or friend of the house can open this.");
+				return;
+			endif
+		endif
+	endif
+	
+	if (Distance( chest, who )>5)
+		return;
+	endif
+	
+	var securechestish :=FindSecureChest( chest.serial );
+	if (securechestish)
+		SendOpenSpecialContainer( who, securechestish );
+	endif
+endprogram
+

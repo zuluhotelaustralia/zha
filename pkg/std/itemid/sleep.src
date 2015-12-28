@@ -1,0 +1,9 @@
+use uo;
+use os;
+
+program wait_ten_seconds(who)
+
+	sleep(9);
+	EraseObjProperty(who, "IDing");
+	
+endprogram

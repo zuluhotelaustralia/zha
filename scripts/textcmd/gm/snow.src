@@ -1,0 +1,35 @@
+////////////////////////////////////////////////////////////
+// 
+// .snow command - Begin a snow fall
+// * Last Updated 9/10/99 
+// * GM Runestaff
+//
+//	* Note : Previous version did not start
+//	 	 the actual snowfall or change
+//		 the light level for the region.
+//
+////////////////////////////////////////////////////////////
+
+use uo;
+use os;
+
+include "include/random";
+program rain(character)
+
+SetRegionLightLevel( "Background", 12);
+	sleep(8);
+
+SetRegionWeatherLevel( "Background", 2, 15);
+
+
+var i;
+var j;
+j := Random(10) + 1;
+Detach();
+for (i:= 1; i <= j; i := i + 1)
+        sleep(600);
+endfor
+
+SetRegionWeatherLevel( "Background", 0, 7);
+
+endprogram

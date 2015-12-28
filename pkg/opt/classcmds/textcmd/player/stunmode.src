@@ -1,0 +1,20 @@
+use uo;
+use os;
+include "include/classes";
+
+program disarmmode(who)
+
+	if (!GetObjProperty(who, CLASSEID_MONK))
+		return;
+	endif
+	EraseObjProperty(who, "DisarmMode");
+
+	if (GetObjProperty(who, "StunMode"))
+		SendSysMessage(who, "Stun mode disabled");
+		EraseObjProperty(who, "StunMode");
+	else	
+		SetObjProperty(who, "StunMode", 1);
+		SendSysMessage(who, "Stun mode activated");
+	endif
+		
+endprogram

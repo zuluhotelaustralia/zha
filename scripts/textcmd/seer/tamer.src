@@ -1,0 +1,32 @@
+use cfgfile;
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_tamer(character, words)
+	if (!checkStaff(character, "tamer", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+SendSysMessage(character, "Select the creature that should be tamable");
+var thecritter := Target(character);
+if (!thecritter)
+	return;
+endif
+
+var difficulty := CInt(words);
+var props := array;
+props .+ difficulty;
+
+props[1]:= "difficulty";
+props[2]:= difficulty;
+
+var proplist := array;
+proplist[1] := props;
+
+AppendConfigFileElem( "taming","tame", thecritter.objtype,proplist );
+
+UnloadConfigFile("taming");
+
+
+endprogram

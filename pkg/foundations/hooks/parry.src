@@ -1,0 +1,17 @@
+use uo;
+use os;
+
+include "include/skillpoints";
+
+program newparry()
+
+	print( "Using Parry Advancement..." );
+	return 1;
+
+endprogram
+
+exported function NewParryAdvancement( attacker, weapon, defender, shield )
+
+	AwardSkillPoints( defender, SKILLID_PARRY, 30 );
+
+endfunction

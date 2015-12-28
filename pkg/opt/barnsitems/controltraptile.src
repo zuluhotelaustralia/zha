@@ -1,0 +1,5 @@
+use uo;
+
+program controltraptile(tile)
+	tile.invisible := 1;
+endprogram

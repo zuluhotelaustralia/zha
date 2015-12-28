@@ -1,0 +1,55 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/attributes";
+include "include/damages";
+include "include/hitscriptinc";
+include "include/dotempmods";
+
+program banishscript(attacker, defender, weapon, armor, basedamage, rawdamage)
+	
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+	var summoned := GetObjProperty( defender, "summoned" );
+	var animated := GetObjProperty( defender, "animated" );
+	var cursed := GetObjProperty( weapon, "Cursed" );
+
+	if( summoned )
+		if( !cursed )
+    			PlayObjectCenteredEffect( defender, FX_SPELL_MANA_VAMPIRE, 7,7);
+			PlaySoundEffect( attacker, SFX_SPELL_MANA_VAMPIRE );
+			PlayStationaryEffect( defender.x, defender.y, defender.z, FX_SPELL_SUMMON_CREATURE, 0xa, 0xa );
+			MoveCharacterToLocation(defender,5288, 1176, 0, MOVECHAR_FORCELOCATION);
+			ApplyTheDamage( defender, attacker, GetMaxHp(defender) + 3, DMGID_MAGIC );
+		else
+			PlayObjectCenteredEffect( attacker, FX_SPELL_MANA_VAMPIRE, 7,7);
+			PlaySoundEffect( defender, SFX_SPELL_MANA_VAMPIRE );
+			ApplyTheDamage( attacker, attacker, GetMaxHp(defender) + 3, DMGID_MAGIC );
+		endif
+
+	elseif( animated )
+		if( !cursed )
+    			PlayObjectCenteredEffect( defender, FX_SPELL_MANA_VAMPIRE, 7,7);
+			PlaySoundEffect( attacker, SFX_SPELL_MANA_VAMPIRE );
+			ApplyTheDamage( defender, attacker, GetMaxHp(defender) + 3, DMGID_MAGIC );
+		else
+			PlayObjectCenteredEffect( attacker, FX_SPELL_MANA_VAMPIRE, 7,7);
+			PlaySoundEffect( defender, SFX_SPELL_MANA_VAMPIRE );
+			ApplyTheDamage( attacker, attacker, GetMaxHp(defender) + 3, DMGID_MAGIC );
+		endif
+	else
+		rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage );
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+	endif
+
+endprogram

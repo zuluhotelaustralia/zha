@@ -1,0 +1,395 @@
+use uo;
+use os;
+
+include "include/gumps";
+include "include/constants/multiids";
+include "include/cmdlevel_check";
+
+
+program textcmd_houseshower (who, text)
+	if (!checkStaff(who, "showhouses", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	var page:=0;
+	var start:=1;
+	var retrieve:=21;//retrieves 21 max.. displays 20
+	//if 21 available it will allow next to be available
+	//for retrieval of next 20 records
+	var mode, title;
+	var parms := SplitWords (text);
+	if (parms[1])
+		if (parms[1]=="-player")
+			mode:=1;
+		endif
+		if (parms[1]=="-account")
+			mode:=2;
+		endif
+		if (parms[1]=="-all")
+			mode:=3;
+		endif
+		if (parms[1]=="-error")
+			mode:=4;
+		endif
+		if (parms[1]=="-decay")
+			mode:=5;
+		endif
+
+		
+	else
+		SendSysMessage(who, "Invalid parameter: .showhouses[-player|-account|-all|-error|-decay]");
+		SendSysMessage(who, "eg. .showhouses -player");
+		return 0;
+	endif
+
+	SendSysMessage(who, "Showhouses may take a moment to search through all houses on the shard. Please be patient.");
+
+	var player, houses;	
+ 	case (mode)
+ 		1:
+ 			SendSysMessage(who, "Target a player to find all houses for.");
+ 			player:= Target(who);
+ 			title:="Houses for " + player.name;
+ 			houses:=EnumeratePlayerHouses(start, retrieve, player);
+ 			break;
+ 		2:
+ 			
+ 			SendSysMessage(who, "Target a player to find houses for that account.");
+ 			player:= Target(who);
+ 			title:="Houses for account " + player.acct.name;
+ 			houses:=EnumerateAccountHouses(start, retrieve, player.acct);
+ 			break;
+ 		3:
+ 			title:="ALL HOUSES ON ZHA";
+ 			houses:=EnumerateAllHouses(start, retrieve);
+ 			break;
+ 		4:
+ 			title:="ALL ERROR HOUSES ON ZHA";
+ 			houses:=EnumerateAllErrorHouses(start, retrieve);
+ 			break;
+ 		5:
+ 			title:="ALL HOUSES GIVEN DECAY WARNING";
+ 			houses:=EnumerateAllDecayHouses(start, retrieve);
+ 			break;
+
+ 		default:
+ 			return 0;
+ 	endcase
+	
+	
+	
+	var res:=housegump(who, houses, page, title);
+	
+	while (res)
+		if (res<=20)
+		//move char to location
+			SendSysMessage(who, "House " + houses[res].x + ", " + houses[res].y + ", " + houses[res].z);
+			MoveCharacterToLocation(who, houses[res].x, houses[res].y, houses[res].z+10, MOVECHAR_FORCELOCATION);
+			res:=housegump(who, houses, page, title);
+		endif
+		if (res==21)//prev
+			if (page>0)
+				page:=page-1;
+				start:=start-(retrieve-1);
+				
+				case (mode)
+ 				1:	houses:=EnumeratePlayerHouses(start, retrieve, player);
+ 					break;
+ 				2:		
+ 					houses:=EnumerateAccountHouses(start, retrieve, player.acct);
+ 					break;
+ 				3:
+ 					houses:=EnumerateAllHouses(start, retrieve);
+ 					break;
+ 				4:
+ 					houses:=EnumerateAllErrorHouses(start, retrieve);
+ 					break;
+				5:
+ 					houses:=EnumerateAllDecayHouses(start, retrieve);
+ 					break;
+
+ 				default:
+ 					return 0;
+ 				endcase
+				
+				
+				res:=housegump(who, houses, page, title);
+			endif
+		elseif (res==22) //next
+			if (houses.size()>20) 
+				page:=page+1;
+				start:=start+(retrieve-1);
+				case (mode)
+ 				1:	houses:=EnumeratePlayerHouses(start, retrieve, player);
+ 					break;
+ 				2:		
+ 					houses:=EnumerateAccountHouses(start, retrieve, player.acct);
+ 					break;
+ 				3:
+ 					houses:=EnumerateAllHouses(start, retrieve);
+ 					break;
+ 				4:
+ 					houses:=EnumerateAllErrorHouses(start, retrieve);
+ 					break;
+				5:
+ 					houses:=EnumerateAllDecayHouses(start, retrieve);
+ 					break;
+
+ 				default:
+ 					return 0;
+ 				endcase	
+				res:=housegump(who, houses, page, title);
+			endif
+		endif
+	endwhile
+	SendSysMessage(who, "Cancelled");
+
+endprogram
+
+function housegump(who, houses, page, title)
+	
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SCROLL, 400, 500);
+	GFTextMid(100, 10, 200, 10, title);
+	
+	var i;
+	var y := 40;
+	
+	//because 21 max are taken but 20 only are to be displayed
+	//21st indicates more available for next gump
+	//so:
+	var hSize;
+	if (houses.size()>20)
+		hSize:=20;
+	else
+		hSize:=houses.size();
+	endif
+	
+	
+	var outString;
+	var hButton:=array;
+	
+	for(i:=1;i<=hSize;i:=i+1)
+		outString := GetHouseTypeString(houses[i].objtype) + " " + houses[i].x + ", " + houses[i].y + ", " + houses[i].z;
+		GFTextLine(50, y, 5, outString);
+		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		y:=y+20;
+	endfor
+	
+	//prev and next page buttons
+	var prevButton, nextButton;
+	
+	if (page>0)
+		GFTextLine(20, 480, 4, "PREVIOUS" );
+		prevButton := GFButtonID(10, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+	
+	if (houses.size()>20)
+		GFTextLine(280, 480, 4, "NEXT" );
+		nextButton := GFButtonID(270, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+	
+	var choice := GFSendGump(who);
+	
+	
+	
+	//return values
+	
+	if (choice[prevButton.keyid])
+		return 21;
+	endif
+	
+	if (choice[nextButton.keyid])
+		return 22;
+	endif
+	
+	var counter:=0;
+	
+	foreach b in hButton
+		counter:=counter+1;
+    		if (choice[b.keyid])
+			return counter;
+		endif
+	endforeach
+	return 0;
+	
+endfunction
+
+function EnumerateAllHouses(start, returnSize)
+	var signs := GetGlobalProperty("signs");
+	
+	var maxHouses:=signs.size();
+	
+	var i:=0;
+	var house, sign;
+	var hisHouses:=array;
+	
+	for(i:=start;i<=maxHouses&&hisHouses.size()<returnSize;i:=i+1)
+		sign:=SystemFindObjectBySerial(CInt(signs[i]));
+		house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
+		hisHouses.append(house);
+	endfor
+	return hisHouses;
+endfunction
+
+function EnumerateAllErrorHouses(start, returnSize)
+	var signs := GetGlobalProperty("signs");
+	
+	var maxHouses:=signs.size();
+	
+	var i:=0;
+	var hisHouses:=array;
+	var house, sign, owneracct, acctsearch, lastowner;
+	var ownerserial;
+
+	for(i:=start;i<=maxHouses&&hisHouses.size()<returnSize;i:=i+1)
+		sign:=SystemFindObjectBySerial(CInt(signs[i]));
+		lastowner :=  GetObjProperty(sign, "lastownername");
+		
+		house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
+		owneracct:=GetObjProperty(house, "owneracct");
+		ownerserial := GetObjProperty( house, "ownerserial" );
+		acctsearch := FindAccount(owneracct);
+		if(!acctsearch || !ownerserial || !lastowner)
+			hisHouses.append(house);
+		endif
+	endfor
+	return hisHouses;
+endfunction
+
+function EnumerateAccountHouses(start, returnSize, account)
+	var signs := GetGlobalProperty("signs");
+	
+	var maxHouses:=signs.size(),sign;
+	
+	var i:=0;
+	var hisHouses:=array;
+	var house, acct;
+	
+	for(i:=start;i<=maxHouses&&hisHouses.size()<returnSize;i:=i+1)
+		sign:=SystemFindObjectBySerial(CInt(signs[i]));
+		house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
+		acct:=GetObjProperty(house, "owneracct");
+		if (acct==account.name)
+			hisHouses.append(house);
+		endif
+	endfor
+	return hisHouses;
+endfunction
+
+function EnumeratePlayerHouses(start, returnSize, player)
+	var signs := GetGlobalProperty("signs");
+	var maxHouses:=signs.size(),sign;
+	var i:=0;
+	var hisHouses:=array;
+	var house, ownerserial;
+	
+	for(i:=start;i<=maxHouses&&hisHouses.size()<returnSize;i:=i+1)
+		sign:=SystemFindObjectBySerial(CInt(signs[i]));
+		house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
+		ownerserial:=GetObjProperty(house, "ownerserial");
+		if (ownerserial==player.serial)
+			hisHouses.append(house);
+		endif
+	endfor
+	return hisHouses;
+endfunction
+
+function EnumerateAllDecayHouses(start, returnSize)
+	var signs := GetGlobalProperty("decayingSigns");
+	var maxHouses:=signs.size(),sign;
+	var i:=0;
+	var hisHouses:=array;
+	var house, ownerserial;
+	
+	for(i:=start;i<=maxHouses&&hisHouses.size()<returnSize;i:=i+1)
+			sign:=SystemFindObjectBySerial(CInt(signs[i]));
+			house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
+			hisHouses.append(house);
+	endfor
+	return hisHouses;
+endfunction
+
+
+function GetHouseTypeString (housetype)
+	//returns the string corresponding to the houses type
+	var houseTypeStr;
+	case housetype
+		MULTIID_HOUSE_CASTLE:	
+			houseTypeStr := "Castle";
+			break;	
+		MULTIID_HOUSE_KEEP:	
+			houseTypeStr := "Keep";
+			break;	
+		MULTIID_HOUSE_LARGE_BRICK:
+			houseTypeStr := "Large brick house";
+			break;
+		MULTIID_HOUSE_LARGE_MARBLE_PATIO:
+			houseTypeStr := "Large marble patio house";
+			break;
+		MULTIID_HOUSE_LARGE_PATIO:		
+			houseTypeStr := "Large patio house";
+			break;
+		MULTIID_HOUSE_LARGE_RANCH_PATIO:
+			houseTypeStr := "Large ranch patio house";
+			break;
+		MULTIID_HOUSE_LOG_CABIN:		
+			houseTypeStr := "Log cabin";
+			break;
+		MULTIID_HOUSE_SAND_STONE_PATIO:
+			houseTypeStr := "Sand stone patio house";
+			break;
+		MULTIID_HOUSE_SMALL_MARBLE_SHOP:		
+			houseTypeStr := "Small marble shop";
+			break;
+		MULTIID_HOUSE_SMALL_PLASTER:	
+			houseTypeStr := "Small plaster house";
+			break;
+		MULTIID_HOUSE_SMALL_STONE_AND_PLASTER:
+			houseTypeStr := "Small stone and plaster house";
+			break;
+		MULTIID_HOUSE_SMALL_STONE_1:
+			houseTypeStr := "Small stone house 1";
+			break;
+		MULTIID_HOUSE_SMALL_STONE_2:
+			houseTypeStr := "Small stone house 2";
+			break;
+		MULTIID_HOUSE_SMALL_STONE_SHOP:
+			houseTypeStr := "Small stone shop";
+			break;
+		MULTIID_HOUSE_SMALL_TOWER:
+			houseTypeStr := "Small tower";
+			break;
+		MULTIID_HOUSE_SMALL_WOODEN:	
+			houseTypeStr := "Small wooden house";
+			break;
+		MULTIID_HOUSE_SMALL_WOOD_AND_STRAW:
+			houseTypeStr := "Small wood and straw";
+			break;
+		MULTIID_HOUSE_TENT_BLUE:
+			houseTypeStr := "Blue tent";
+			break;
+		MULTIID_HOUSE_TENT_GREEN:
+			houseTypeStr := "Green tent";
+			break;
+		MULTIID_HOUSE_TOWER:
+			houseTypeStr := "Tower";
+			break;
+		MULTIID_HOUSE_TWO_STORY_LOG_CABIN:
+			houseTypeStr := "2 storey log cabin";
+			break;
+		MULTIID_HOUSE_TWO_STORY_STONE_AND_PLASTER:
+			houseTypeStr := "2 storey stone and plaster house";
+			break;
+		MULTIID_HOUSE_TWO_STORY_VILLA:
+			houseTypeStr := "2 storey villa";
+			break;
+		MULTIID_HOUSE_TWO_STORY_WOOD_AND_PLASTER:
+			houseTypeStr := "2 storey wood and plaster house";
+			break;
+		default:
+			houseTypeStr := "House";
+	endcase
+	return houseTypeStr;
+endfunction

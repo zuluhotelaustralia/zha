@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "include/eventid";
+ 
+
+program magestaff(who, staff) 
+	Detach();
+	ReleaseItem(staff);
+	start_script( "::skilladvancerunequip", {who, staff});	
+
+endprogram

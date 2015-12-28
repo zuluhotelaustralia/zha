@@ -1,0 +1,16 @@
+use os;
+use uo;
+
+include "sendmsg";
+
+program SendMsgGump(parms)
+
+	var result:=SendDialogGump(parms.who, parms.layout, parms.data);
+	var chr:=SystemFindObjectBySerial(result[0]);
+	if(chr)
+		SendTheMessage(parms.who, chr);
+	else
+		SendSysMessage(parms.who, "Aborted.");
+	endif
+
+endprogram

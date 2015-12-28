@@ -1,0 +1,88 @@
+/////////////////////////////////
+// Zulu Australia Server Status
+// Author: crazzykid
+// Modified from Zulu It.s Server Status Page
+//
+
+use os;
+use uo;
+use http;
+include "include/races";
+//include "include/findcity";
+
+
+var system    := polcore();
+var load      := system.load;
+var uptime    := system.uptime;
+var sysver    := system.version;
+var bytesent  := system.bytes_sent;
+var itemcount := GameStat( "itemcount" );
+var mobcount  := GameStat( "mobilecount" );
+var struptime;
+var team, totalplayers, players;
+
+uptime := uptime / 60;
+
+if (uptime > 60)
+        uptime := uptime /60;
+        struptime := CStr(uptime);
+else
+        struptime := CStr(uptime);
+
+endif
+
+
+writehtml( "<html><head><title>Zulu Shard Status</title><meta http-equiv=Refresh content=200></head><body bgcolor=#FFFFFF>" );
+
+writehtml("<table width=100% border=0 cellspacing=1 align=center cellpadding=5>");
+writehtml("<tr><td height=20 width=100%>");
+writehtml("<b>&nbsp;Server Status</b></font></td></tr>");
+writehtml("<tr><td>");
+
+writehtml("<b>SERVER HARDWARE:</b><br> ");
+writehtml("CPU: ");
+writehtml("AMD Athalon XP 1800<br>");
+writehtml("RAM: 2 GB DDR<br>");
+writehtml("HDD: 12GB IDE 5400<br>");
+writehtml("OS: Windows 2000 Server SP3<br>");
+writehtml("Connection: 10Mbits @ <a href='http://www.gamiix.com'>GAMiiX</a>&nbsp;<br><br>");
+writehtml("Big thanx to all who donated and do donate, a round of beers for GAMiiX and anyone else who helps make this possible!<br><br>");
+
+
+writehtml("<b>SHARD STATISTICS:</b><br>");
+writehtml("Total NPCs in the world:" +  mobcount + "<br>");
+writehtml("Total item count:" + itemcount + "<br>");
+writehtml("Current Uptime since last restart : "+ struptime + "<br>");
+writehtml("Current Server Load : " + CStr(system.sysload) + " % <br>");
+writehtml("Current Bytes Sent since last restart : "+ bytesent +"<br>");
+writehtml("Server Timezone: Perth, Australia (GMT +0800)<br>");
+
+players := EnumerateOnlineCharacters();
+totalplayers :=len(players);
+
+writehtml( "<br>" );
+writehtml("<b>"+totalplayers+ " Players Online:</b><br><br>");
+writehtml( "<br>" );
+
+foreach chr in players
+team :=GetObjProperty(chr, "team");
+
+if (chr.cmdlevel==0)
+  if (team=="BLUE")
+   writehtml( chr.name + "<font color=0000ff>Playing CTF</font><br>" );
+  elseif (team=="RED")
+   writehtml( chr.name + " <font color=ff0000>Playing CTF</font><br>" );
+  else
+   writehtml( " <font color = "+GetHtmlColor(chr) + "> "+  chr.name + "</font><br>" );
+  endif
+else
+	totalplayers:=totalplayers-1;
+endif
+
+endforeach
+
+
+writehtml( "The page is updated in real time every 5 minutes and will automatically reload.<br>Server Version: "+ sysver +"<br>Administrators:" );
+writehtml( "<a href=mailto:harl@gamiix.com>Harlequin</a><br>" );
+
+writehtml("</td></tr></table></body></html>");

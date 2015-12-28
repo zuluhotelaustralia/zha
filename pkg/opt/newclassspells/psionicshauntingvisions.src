@@ -1,0 +1,102 @@
+/* Psionics Spell - Haunting Visions **
+** Int based damage attack.          ** 
+** Seravy - seravy@gmail.com         */
+
+use uo;
+use os;
+use math;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_HAUNTINGVISIONS;
+// For Resisted()
+const SPELL_EFFECT_TYPE_MOVING := FX_SPELL_HAUNTINGVISIONS;
+const SPELL_EFFECT_ID		 := FX_SPELL_HAUNTINGVISIONS;
+const SPELL_EFFECT_SPEED	 := SPEED_SPELL_HAUNTINGVISIONS;
+const SPELL_EFFECT_LOOP		 := LOOP_SPELL_HAUNTINGVISIONS;
+
+program cast_hauntingvisions(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  if( !fromhit )
+    cast_on := Reflected( caster, cast_on, circle);
+  endif
+
+  var immunity := IsProtected(caster, cast_on, circle);
+  if( immunity == IMMUNED )
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+  if( immunity == CURSED )
+    circle := circle * 2;
+  endif
+
+  var my_int := ModifyWithMagicEfficiency( caster, CInt(GetIntelligence(caster)) );
+  var his_int := CInt(GetIntelligence(cast_on));
+
+  if( GetObjProperty(caster, CLASSEID_MONK))
+    my_int := CInt( my_int * CLASSE_BONUS );
+  endif	
+  if (cast_on.isA(POLCLASS_NPC))
+    his_int := his_int / 2;
+  endif
+
+  if (his_int > my_int)
+    PlaySoundEffect( cast_on, SFX_SPELL_MAGIC_REFLECTION );
+    PlayObjectCenteredEffect( cast_on, FX_SPELL_MAGIC_REFLECTION, SPEED_SPELL_MAGIC_REFLECTION, LOOP_SPELL_MAGIC_REFLECTION );
+    cast_on := caster;
+    SendSysMessage(caster, "Their superior intellect reflects the spell!");
+  elseif (his_int == my_int)
+    SendSysMessage(caster, "You are of equal intellect!");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+
+  PlaySoundEffect(cast_on, SFX_SPELL_HAUNTINGVISIONS);
+  PlayObjectCenteredEffect( cast_on, FX_SPELL_HAUNTINGVISIONS, SPEED_SPELL_HAUNTINGVISIONS, LOOP_SPELL_HAUNTINGVISIONS);
+
+  var difference := CDbl(Abs(his_int - my_int));
+  if (difference > 100)
+    difference := CDbl(100);
+  endif
+  difference := CDbl(difference / 150)+1;
+
+  var dmg := CalcSpellDamage( caster, cast_on, circle);
+  dmg := CInt(dmg * difference);
+
+  if ( GetObjProperty( caster, CLASSEID_MONK))
+    dmg := dmg * CLASSE_BONUS;
+  endif
+
+  ApplyTheDamage(cast_on, caster, Resisted( caster, cast_on, circle, dmg), DMGID_MAGIC);
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

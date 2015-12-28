@@ -1,0 +1,46 @@
+/* UnHoly Spell - Commune with Living   **
+** Targeted dead person can talk        **
+** Seravy - seravy@gmail.com            */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_COMMUNEWITHLIVING;
+
+program cast_communewithliving( caster )
+
+  var clevel:=GetClasseLevel(caster);
+  var end_time := ReadGameClock()+CInt(20*clevel);
+  var circle := GetCircle( SPELL_ID );
+  var cast_on := Target( caster,  TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
+  var ev;
+  
+  RegisterForSpeechEvents(cast_on , 1, LISTENPT_HEAR_GHOSTS );
+  EnableEvents(SYSEVENT_SPEECH, 1);
+
+  if (!cast_on.dead)
+    SendSysMessage(caster, "This person is not dead!");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  EraseObjProperty( caster, "#Casting");
+
+  while( ReadGameClock() < end_time && cast_on.dead)
+    ev := os::wait_for_event( 1 );
+
+    if (ev)
+      if (ev.type == SYSEVENT_SPEECH)
+        if (ev.source == cast_on)
+          if (cast_on.dead)
+            PrintTextAbove( cast_on, ev.text, COMMUNEWITHLIVING_TEXT_FONT, COMMUNEWITHLIVING_TEXT_COLOR );
+          endif
+        endif
+      endif
+    endif
+
+  endwhile
+  
+
+endprogram

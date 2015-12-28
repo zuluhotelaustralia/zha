@@ -1,0 +1,48 @@
+include "newclassbook";
+include "include/stringarrays";
+
+program newscroll_use( who, scroll )
+  var spellId := GetObjProperty(scroll, "SpellID");
+  if (!spellId || spellId < 129)
+    SendSysMessage( who, "This scroll is blank!");
+  endif
+
+  if (who.hidden);
+    SendSysMessage(who, "You cannot cast this while hidden.");
+    who.hidden := 0;
+  endif
+
+  var booknum;
+  if (spellId < 145)
+    booknum:=SPELLBOOK_TYPE_BARD;
+  elseif (spellId < 161)
+    booknum:=SPELLBOOK_TYPE_DRUID;
+  elseif (spellId < 177)
+    booknum:=SPELLBOOK_TYPE_HOLY;
+  elseif (spellId < 193)
+    booknum:=SPELLBOOK_TYPE_UNHOLY;
+  elseif (spellid < 209)
+    booknum:=SPELLBOOK_TYPE_PSIONICS;
+  endif
+
+  // Try to cast	
+  if (!ReserveItem(scroll))
+    return;
+  endif
+
+  if (NewClassSpellCast( who, spellId, GetBookTypeSkillID(booknum), 1)!=SUCCESS)
+    return;
+  endif
+
+  var spell:= GetScript(spellid);
+  if (!spell)
+    return;
+  endif
+  DestroyItem(scroll);
+  SetObjProperty(who, "#Casting", 1);
+  start_script(spell, who);
+  while (GetObjProperty(who, "#Casting"))
+    sleepms(300);
+  endwhile
+
+endprogram

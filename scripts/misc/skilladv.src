@@ -1,0 +1,33 @@
+use uo;
+use os;
+include "include/attributes";
+
+const LOWER_BY := 10000;
+
+program skilladv( who, skillid )
+	syslog("rar");
+
+
+	var state := GetObjProperty( who, "SkillsState" );
+	if( !state )
+		state := {};
+	endif
+
+	var this_skill_state := state[skillid+1];
+
+	if( !this_skill_state || this_skill_state == "r" )
+		return 1;
+	elseif( this_skill_state == "d" )
+		var current	:= GetBaseSkill( who, skillid );
+		var new	:= current - 1;
+		if( new < 0 )
+			new := 0;
+		endif
+	
+		SetBaseSkill( who, skillid, new );
+		return 0;
+	else
+		return 0;
+	endif
+
+endprogram

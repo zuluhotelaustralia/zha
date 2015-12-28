@@ -1,0 +1,105 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/namechange";
+
+ 
+program namechangevial(who, vial)
+	if (!ReserveItem(vial))
+		PrintTextAbovePrivate(who, "That item is in use.", who);
+		return;
+	endif
+	
+	if (changename(who))
+		DestroyItem(vial);
+	endif
+endprogram
+
+function changename(who)
+	var changeTime := CInt(GetObjProperty(who, "#nextnamechange"));
+	if (changeTime>ReadGameClock())
+		SendSysMessage(who, "You can only change your name once a week.",3,53);
+		return 0;
+	endif
+
+	SendSysMessage(who, "Please enter a name.",3,41);
+	SendSysMessage(who, "Note if staff find your name is offensive to other players for any reason we are at our discretion to modify your name, jail or ban you",3,41);
+	sleep(1);
+	var vname := SendTextEntryGump(who, "What shall your new name be?",	TE_CANCEL_ENABLE, TE_STYLE_NORMAL);
+	if (!vname || vname == error)
+		SendSysMessage(who, "Cancelled.",3,70);
+		return 0;
+	endif
+	
+	if (vname == who.name)
+		SendSysMessage(who, "You already have that name.",3,41);
+		return 0;
+	endif
+	
+	var hisname := lower(vname);
+	var cfg := ReadConfigFile("badnames");
+	var elem := FindConfigElem(cfg, hisname);
+	
+	var badname := (elem || !NameValidation(hisname));
+
+	if (badname)
+		SendSysMessage(who, "You have chosen an invalid or inappropriate name.",3,41);
+		return 0;
+	endif
+	if (!len(getNameChanges(who)))
+		addNameChange(who, "name change vial");
+	endif
+	who.name:=vname;
+	addNameChange(who, "name change vial");
+	SetObjProperty(who, "#nextnamechange", CInt(ReadGameClock()+604800));
+	SendSysMessage(who, "Name changed.",3,41);
+	return 1;
+endfunction
+
+function NameValidation(thestring)
+  	thestring:=lower(thestring);
+  	
+	if (!thestring)
+		return 0;
+	endif
+	if(len(thestring)<3)
+		return 0;
+	endif
+	if (thestring[1]==" " &&	thestring[len(thestring)]==" ")
+		return 0;
+	endif
+
+ 	var i, validstr:={"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", " "};
+
+	for(i:=1;i<=len(thestring);i:=i+1)
+    	if(!(thestring[i] in validstr)) 
+			return 0; 
+		endif
+  	endfor
+	
+	var name:=upper(thestring);
+	if (name["GM"])
+		return 0;
+	elseif (name["SHIT"] || (name["FUCK"])|| (name["CUNT"])|| (name["ARSE"])|| (name["MOTHER"]))
+		return 0;
+	elseif (name["GAMEMASTER"] || (name["GAME"]))
+		return 0;
+	elseif (name["SCRIPTER"])
+		return 0;
+	elseif (name["ADMIN"])
+		return 0;
+	elseif (name["ADMINISTRATOR"])
+		return 0;
+	elseif (name["SEER"])
+		return 0;
+	elseif (name["DEVELOPER"])
+		return 0;
+	elseif (name["COUNSELOR"])
+		return 0;
+	elseif (name["COUNS"])
+		return 0;
+	endif
+	
+	return 1;
+endfunction

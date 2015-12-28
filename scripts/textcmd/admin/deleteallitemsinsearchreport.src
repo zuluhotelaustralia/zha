@@ -1,0 +1,19 @@
+use uo;
+use os;
+use file;
+use util;
+include "include/cmdlevel_check";
+
+program deleteallitemsinsearchreport(who, searchstring)
+
+	//SendSysMessage(who, "Reporting....");
+	if (!checkStaff(who, "deleteallitemsinsearchreport", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+	if(!searchstring)
+		searchstring:="-";
+	endif
+	
+	start_script(":searchreport:deleteitemsinreport",who);
+endprogram
+

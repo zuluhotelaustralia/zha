@@ -1,0 +1,23 @@
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_fixstone( who )
+	if (!checkStaff(who, "fixstone", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+SendSysMessage( who, "Select townstone to clear." );
+var stone := Target( who );
+
+EraseObjProperty(stone,"mayor");
+EraseObjProperty(stone,"mayorserial");
+EraseObjProperty(stone,"pleibicito");
+EraseObjProperty(stone,"mayorserial");
+EraseObjProperty(stone,"Pleibicito_Result");
+EraseObjProperty(stone,"timer");
+EraseObjProperty(stone,"populacao");
+EraseObjProperty(stone,"votepercent");
+EraseObjProperty(stone,"votos");
+SetObjProperty(stone,"eleicao",1);
+
+endprogram

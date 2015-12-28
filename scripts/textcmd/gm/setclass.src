@@ -1,0 +1,57 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+include "include/classes";
+include "include/attributes";
+
+program textcmd_account( who, text )
+	if (!checkStaff(who, "setclass", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+    var params := SplitWords( text );
+
+    if (len(params)<2)
+        SendSysMessage( who, ".setclass <classname> <level>" );
+        return;
+    endif
+    
+    var classchosen := GetClasseName( params[1] );
+    if (classchosen=="INVALID")
+	SendSysMessage(who, "Invalid class selected");
+	return;
+    endif
+
+	
+      SendSysMessage( who, "Select a MOBILE." );
+      var targ :=  Target( who, TGTOPT_NOCHECK_LOS );
+      if(!targ  || !GetStrength(targ))
+        SendSysMessage(who, "Invalid selection." );
+      endif
+
+    var levelchosen := CInt( params[2]);
+    if (levelchosen <0 || levelchosen > 4)
+     	SendSysMessage(who, "Level must be within the range of 0 to 4 inclusive");
+	return;
+    endif
+
+    var newskillval := 0;
+    
+    case (levelchosen)
+        0: newskillval:=0;
+	1: newskillval:=760;
+	2: newskillval:=910;
+	3: newskillval:=1110;
+	4: newskillval:=1260;
+    endcase
+
+    //SendSysMessage( who, params[1] );
+    foreach sk in GetClasseSkills( params[1] )
+	Broadcast (GetAttributeIdBySkillId(sk));
+	SetBaseSkillBaseValue( targ , sk,  newskillval  );
+    endforeach
+    AssignClasse( targ);
+
+    SendSysMessage(who, targ.name + " is now a level " + levelchosen + " " + classchosen);
+    
+endprogram

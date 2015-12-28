@@ -1,0 +1,23 @@
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_action( who, newscript )
+	if (!checkStaff(who, "restart", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "Target an NPC to restart" );
+
+    var npc := Target( who, TGTOPT_NOCHECK_LOS );
+    if (npc)
+        if (newscript)
+            npc.script := newscript;
+        endif
+        var res := RestartScript( npc );
+        if (!res)
+            SendSysMessage( who, "Unable to restart: " + res.errortext );
+        endif
+    endif
+endprogram

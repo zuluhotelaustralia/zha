@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/dotempmods";
+include "include/random";
+include "pickdoor";
+
+program revealtraptile(params)
+	var who := params[1]; 
+	var tile := params[2];
+	Detach();
+	var diff := GetObjProperty(tile, "LockDifficulty");
+	var thief  := GetObjProperty( who, CLASSEID_THIEF );
+	if (! thief)
+		diff:=diff+20;
+	endif
+	if( CheckSkill( who, SKILLID_DETECTINGHIDDEN, diff, diff*2 ))
+		if (tile.objtype==0x14)
+			if (tile.invisible)
+				tile.invisible:=0;
+				//PrintTextAbovePrivate( tile, "Trapped", who );
+				sleep(30);
+				tile.invisible:=1;
+			endif
+		else
+			PrintTextAbovePrivate( tile, "Trapped", who );		
+		endif
+	endif
+endprogram

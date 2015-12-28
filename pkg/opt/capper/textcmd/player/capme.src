@@ -1,0 +1,16 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/attributes";
+
+const SKILLCAP := 130;
+
+program capme(who)
+	var skill;
+	for( skill:= 0; skill <= SKILLID__HIGHEST; skill := skill + 1 )
+		if( GetBaseSkill( who, skill ) > SKILLCAP) // + difference) )
+			SetBaseSkill( who, skill, SKILLCAP);
+		endif
+	endfor
+endprogram

@@ -1,0 +1,20 @@
+//
+// Cause another to perform an action by number
+//
+
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_action( who, action )
+	if (!checkStaff(who, "action", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    SendSysMessage( who, "Whom do you want to perform the action?" );
+
+    var performer := Target( who, TGTOPT_NOCHECK_LOS );
+    if (performer)
+        PerformAction( performer, CInt(action));
+    endif
+endprogram

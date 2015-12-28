@@ -1,0 +1,55 @@
+use uo;
+use cfgfile;
+use os;
+
+include "include/client";
+//include "include/objtype";
+include "include/starteqp";
+//include "include/skillpoints";
+include "include/coords";
+include "include/random";
+
+const UOBJ_SOS_BOTLE_TILE := 0xa365;
+const UOBJ_SOS_BOTLE := 0xa360;
+const UOBJ_SOS_MESSAGE := 0xa363;
+const MSG_COUNT := 5;
+
+program use_bottle( who, bottle )
+
+if(!ReserveItem(bottle)) return; endif
+
+var tox := CInt(GetObjProperty(bottle, "tileX"));
+var toy := CInt(GetObjProperty(bottle, "tileY"));
+// var toz := cint(GetObjProperty(bottle , "tileZ"));
+
+if( tox.errortext || toy.errortext)
+	syslog("bad bottle "+tox+" "+toy);
+	DestroyItem(bottle);
+	SendSysMessage(who, "You find nothing inside!");
+	return;
+endif
+
+
+var tile := CreateItemAtLocation( tox,toy,-5,0xa365,1);
+
+var message := CreateItemInContainer(who.backpack, UOBJ_SOS_MESSAGE);
+
+DestroyItem(bottle);
+if(message)
+  if(tile)
+SetObjProperty(tile, "msgserial", message.serial);
+SetObjProperty(message, "tileX", tox);
+SetObjProperty(message, "tileY", toy);
+SetObjProperty(message, "msgnum", Random(MSG_COUNT));
+SendSysMessage(who, "You have extracted a message from the bottle!");
+return;
+  else
+    syslog("failed to create tile");
+    DestroyItem(message);
+    SendSysMessage(who, "You find nothing inside!");
+return;
+  endif
+endif
+DestroyItem(tile);
+SendSysMessage(who, "You find nothing inside!");
+endprogram

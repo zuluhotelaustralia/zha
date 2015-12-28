@@ -1,0 +1,289 @@
+use uo;
+use os;
+use util;
+
+const SLEEPMSDURATION := 2000;
+include "include/attributes";
+
+var duration, hellarea, randomtime, currentrandomtime;
+
+program hellstone_control(stone)
+  var setup := 0;
+  while(!setup && stone)
+    if (GetObjProperty(stone, "setup"))
+      duration := GetObjProperty(stone, "duration");
+      randomtime := GetObjProperty(stone, "randomtime");
+      hellarea := GetObjProperty(stone, "hellarea");
+      hellarea := GetAreaLocationArray(hellarea[1], hellarea[2], hellarea[3], hellarea[4]);
+      if (duration && hellarea)
+        if (!randomtime)
+          randomtime := 0;
+        endif
+        setup := 1;
+      endif
+    endif
+    sleep(1);
+  endwhile
+
+  SetGlobalProperty("#GateToHellStone", stone.serial);
+  currentrandomtime := RandomInt(randomtime+1);
+
+  while(stone)
+    if (GetObjProperty(stone, "#OpenUntil") > readgameclock()) // Session still open
+
+      if (!SystemFindObjectBySerial(GetObjProperty(stone, "#GateSerial")))
+        EraseObjProperty(stone, "#OpenUntil");
+      endif
+
+      var timeremaining := GetObjProperty(stone, "#OpenUntil") - readgameclock();
+      var sleepduration := CInt(SLEEPMSDURATION/1000);
+      if (timeremaining >= 600 && timeremaining < (600+sleepduration))
+        msgPlayersInHell("You feel that you have 10 Minutes left.");
+      elseif (timeremaining >= 300 && timeremaining < (300+sleepduration))
+        msgPlayersInHell("You feel that you have 5 Minutes left.");
+      elseif (timeremaining >= 60 && timeremaining < (60+sleepduration))
+        msgPlayersInHell("Warning! Only 1 Minute left!");
+      elseif (timeremaining >= 30 && timeremaining < (30+sleepduration))
+        msgPlayersInHell("Warning! Only 30 seconds left!");
+      elseif (timeremaining >= 20 && timeremaining < (20+sleepduration))
+        msgPlayersInHell("Warning! Only 20 seconds left!");
+      elseif (timeremaining >= 10 && timeremaining < (10+sleepduration))
+        msgPlayersInHell("Warning! Only 10 seconds left!");
+      elseif (timeremaining >= 5 && timeremaining < (5+sleepduration))
+        msgPlayersInHell("Warning! Only 5 seconds left!");
+      endif
+
+      if (GetObjProperty(stone, "#ready")) // Make it not ready.
+        EraseObjProperty(stone, "#ready");
+        currentrandomtime := RandomInt(randomtime+1);
+      endif
+    else
+      if (!GetObjProperty(stone, "#ready"))  // kill everything off and respawn it
+        cleanupHell(stone);
+        respawnHell();
+        SetObjProperty(stone, "#ready", 1);
+      endif
+      if (GetObjProperty(stone, "#ready") == 1 && (GetObjProperty(stone, "LastGateOpenedAt")+(CInt(duration)*60)+(CInt(currentrandomtime)*60)) < readgameclock())
+        SetObjProperty(stone, "#ready", 2);
+      endif
+    endif
+ 
+    sleepms(SLEEPMSDURATION);
+  endwhile
+
+endprogram
+
+function cleanupHell(stone)
+  // Move everone out!
+  var allChars;
+  EnumerateAllCharacters(allChars);
+  foreach char in allChars
+    if (IsPersonInArea(char, hellarea))
+      if (!char.cmdlevel)
+        MoveObjectToSafeArea(char, stone);
+      endif
+    endif
+  endforeach
+
+  // Kill and move out Mobiles
+  foreach object in ListObjectsInBox(hellarea[1], hellarea[3], -128, hellarea[2], hellarea[4], 128)
+    if (object.isA(POLCLASS_MOBILE))
+      if (object.isA(POLCLASS_NPC))
+        if (object.script == "tamed" || object.script == "humuc") // Its a tamed creature
+          MoveObjectToSafeArea(object, stone);
+        else
+          SetObjProperty(object, "summoned", 1);
+          ApplyRawDamage(object, GetHp(object)+3);
+        endif
+      else
+        if (!object.cmdlevel)
+          broadcastStaff("WARNING! Player "+object.name+" should have been ejected from hell before this!");
+          MoveObjectToSafeArea(object, stone);
+        endif
+      endif
+    endif
+    sleepms(5);
+  endforeach
+
+
+  /* NO LONGER DESTROYING ITEMS! damn you arch :( taking out my code
+
+  sleep(1); // Give time for corpses of npcs that picked up shit to drop it. If not long enough could lose items.
+
+  // Moveout and destroy items
+  foreach object in ListObjectsInBox(hellarea[1], hellarea[3], -128, hellarea[2], hellarea[4], 128)
+    if (!object.isA(POLCLASS_MOBILE))
+      if (!GetObjProperty(object, "hellstoneignore")) // Ignore hell placed items
+        if (object.isA(POLCLASS_CORPSE))
+          if (GetObjProperty(object, "npctemplate")) // Monster corpse
+            DestroyItem(object);
+          else // Player corpse
+            object.movable := 1;
+            MoveObjectToSafeArea(object, stone);
+            object.movable := 0;
+          endif
+        else
+          if (object.movable)
+            MoveObjectToSafeArea(object, stone);
+          else
+            DestroyItem(object);
+          endif
+        endif
+      endif
+    endif
+    sleepms(5);
+  endforeach
+  */
+
+  eraseobjproperty(stone, "LastGatePos");
+endfunction
+
+function respawnHell()
+  foreach object in ListObjectsInBox(hellarea[1], hellarea[3], -128, hellarea[2], hellarea[4], 128)
+    if (object.objtype == 0xa61)
+      var template := CStr(GetObjProperty(object, "createMonsterTemplate"));
+      var number := CInt(GetObjProperty(object, "createMonsterTemplateNo"));
+      var noLoot := CInt(GetObjProperty(object, "noLoot"));
+/*
+      var custom := GetObjProperty(object, "custom");
+      if (!custom)
+        custom := 0;
+      else
+        var newcustom := struct;
+        foreach thing in custom
+          newcustom[thing[1]] := thing[2];
+        endforeach
+        custom := newcustom;
+      endif
+*/
+      if (template && number)
+        var i;
+        for (i := 1; i <= number; i := i + 1)
+          var creature := CreateNpcFromTemplate(template, object.x, object.y, object.z);
+          if (!creature)
+            broadcastStaff("Error! Cannot create "+template+" in hell! ("+object.x+","+object.y+","+object.z+")");
+          else
+            if (GetObjProperty(object, "OnDeathGateLocation"))
+              SetObjProperty(creature, "OnDeathGateLocation", GetObjProperty(object, "OnDeathGateLocation"));
+            endif
+            if (noLoot)
+              SetObjProperty(creature, "noloot", 1);
+            endif
+          endif
+        endfor
+      endif
+    endif
+  endforeach
+endfunction
+
+function MoveObjectToSafeArea(object, stone)
+
+  var LastGatePos := GetObjProperty(stone, "LastGatePos");
+  var safeItemLocation := GetObjProperty(stone, "safeItemLocation");
+  var safePCLocation := GetObjProperty(stone, "safePCLocation");
+  if (LastGatePos && LastGatePos[1] != 0 && LastGatePos[2] != 0)
+    safeItemLocation := LastGatePos;
+    safePCLocation := LastGatePos;
+  endif
+
+  if (object.isA(POLCLASS_ITEM))
+    MoveItemToLocation(object, safeItemLocation[1], safeItemLocation[2], safeItemLocation[3], MOVEITEM_FORCELOCATION);
+  elseif (object.isA(POLCLASS_MOBILE))
+    MoveCharacterToLocation(object, safePCLocation[1], safePCLocation[2], safePCLocation[3], MOVECHAR_FORCELOCATION);
+    if (!object.isA(POLCLASS_NPC)) // Player
+      SendSysMessage(object, "You were sucked out of hell.");
+    endif
+  else
+    broadcastStaff("Error in moving "+object.name+"/"+object.desc+" out of hell! Unknown object");
+  endif
+endfunction
+
+function broadcastStaff(message)
+  foreach person in EnumerateOnlineCharacters()
+    if (person.cmdlevel)
+      SendSysMessage(person, message, 3, 38);
+    endif
+  endforeach
+endfunction
+
+function msgPlayersInHell(text)
+  foreach player in EnumerateOnlineCharacters()
+    if (IsPersonInArea(player, hellarea))
+      SendSysMessage(player, text, 3, 38);
+    endif
+  endforeach
+endfunction
+
+function GetAreaLocationArray(xOne, xTwo, yOne, yTwo)
+  var xMin, xMax, yMin, yMax;
+
+  if(xOne < xTwo)
+    xMin := xOne;
+    xMax := xTwo;
+  else
+    xMin := xTwo;
+    xMax := xOne;
+  endif
+  if(yOne < yTwo)
+    yMin := yOne;
+    yMax := yTwo;
+  else
+    yMin := yTwo;
+    yMax := yOne;
+  endif
+
+  return({xMin, xMax, yMin, yMax});
+endfunction
+
+
+
+function IsPersonInArea(person, area)
+  if(person.x >= area[1])
+    if(person.x <= area[2])
+      if(person.y >= area[3])
+        if(person.y <= area[4])
+          return 1;
+        endif
+      endif
+    endif
+  endif
+  return 0;
+endfunction
+
+// BY Myrathi
+// Returns an array of <OfflineMobileRef>'s for
+// all characters in all accounts.
+function EnumerateAllCharacters( byref zOutChars )
+
+    // Clean result array
+    zOutChars:= {};
+
+    // Grab account names
+    var zAccts := ListAccounts();
+
+    // Loop through the account names
+    foreach sAcct in zAccts
+
+        // Get the account object (sanity check it)
+        var oAcct := FindAccount( sAcct );
+        if ( !oAcct )
+            continue; // um.. doesn't exist? err...
+        endif
+
+        // Loop through the character slots and
+        // add any we find to the Result Array.
+        for slot := 1 to 5
+            var oChar := oAcct.getcharacter( slot );
+            // Returns 'error' if doesn't exist
+            if ( oChar != error )
+                zOutChars.append( oChar );
+            endif
+        endfor
+        sleepms( 2 ); // no lag plzkthx!
+
+    endforeach
+
+    // Return the number of characters found
+    return (zOutChars.size());
+
+endfunction

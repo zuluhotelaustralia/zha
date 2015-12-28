@@ -1,0 +1,72 @@
+use uo;
+
+include "include/spawnnet";
+include "include/objtype";
+
+
+program hide_tele(who,range)
+
+	if(!range) range:=5; endif
+
+	range:=CInt(range);
+
+	if(!range)
+		SendSysMessage( who, "parameter range must be a number" );
+		return;
+	endif
+
+	var counter :=0;
+
+	foreach rune in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLACK_MOONGATE )
+		rune.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach rune in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLACK_MOONGATE2 )
+		rune.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLUE_MOONGATE )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_BLUE_MOONGATE2 )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_RED_MOONGATE )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_RED_MOONGATE2 )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_WHITE_MOONGATE )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, UOBJ_WHITE_MOONGATE2 )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+	
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, 0xba37 )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	foreach gate in ListItemsNearLocationOfType( who.x, who.y, who.z, range, 0xba38 )
+		gate.graphic := 0x1;
+		counter:=counter+1;
+	endforeach
+
+	SendSysMessage( who, "A total of "+counter+" teleporters have been hidden." );
+
+endprogram

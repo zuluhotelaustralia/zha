@@ -1,0 +1,29 @@
+use uo;
+
+include "pvparena";
+
+program teleporter(who, stone)	
+	if (!canGoThrough(who))
+		return;
+	endif
+
+	killPlayer(who);
+	var x := GetObjProperty(stone, "x");
+	var y := GetObjProperty(stone, "y");
+	var z := GetObjProperty(stone, "z");
+	MoveCharacterToLocation(who, x, y, z, MOVECHAR_FORCELOCATION);
+	resPlayer(who);
+endprogram
+
+function canGoThrough(who)
+	if (who.cmdlevel)
+		return 1;
+	endif
+	
+	if (hasItems(who))
+		SendSysMessage(who, "You may not go through while you have items equipped or in your backpack.");
+		return 0;
+	endif
+	
+	return 1;
+endfunction

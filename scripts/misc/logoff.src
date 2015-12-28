@@ -1,0 +1,185 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/camouflage";
+include "../pkg/opt/zuluctf/ctf1";
+
+program logoff(who)
+
+	print("Logoff: "+who.name);
+
+	var temp := GetObjProperty(who,"realname");
+	if (temp)
+		SetName(who,temp);
+		EraseObjProperty(who,"realname");
+	endif
+
+	temp := GetObjProperty(who, "tn");
+	if (temp)
+		 SetName(who,temp);
+		 EraseObjProperty(who, "tn");
+	endif
+
+	EraseObjProperty(who, "tc");
+
+	temp := GetObjProperty(who, "tg");
+	if (temp)
+		 who.graphic := temp;
+		 EraseObjProperty(who, "tg");
+	endif
+
+	var scripts := GetObjProperty( who, "#RunningScripts" );
+	if( scripts )
+		var process;
+		foreach pid in scripts
+			process := getprocess(pid);
+			if( process )
+				process.kill();
+			endif
+		endforeach
+	endif
+
+//	setchat(who);
+
+//	if (TypeOf(getobjproperty(who,"ctfloc"))="Integer")
+//		quitctf(who);
+//	else
+//		fixchr(who);
+//	endif
+
+	EraseObjProperty( who, "ReactiveArmor" );
+	//  if (who.cmdlevel>0) return; endif
+
+	// online time counter
+	var sessiontime:=ReadGameClock()-GetObjProperty(who,"#logontime");
+	var timer:=GetObjProperty(who,"onlinetimer");
+	if(!timer) timer:=0; endif
+	SetObjProperty(who,"onlinetimer",timer+sessiontime);
+/*
+	//reset newbie status
+	var newbieflag := GetObjProperty(who,"newbie");
+
+	if (((timer+sessiontime) >= 1000000) and newbieflag)
+		var result:=find(who.name," [New]",1),name:=who.name;
+	if (result)
+		result:=result-1;
+		name:=name[1,result];
+		who.name:=name;
+		endif
+		SetObjProperty(who,"newbie", 0);
+	endif*/
+	// end online time counter
+
+	// Broadcast( "Player " + who.name + " has departed");
+
+endprogram
+
+function setchat(who)
+
+	while (GetGlobalProperty("plylock")==1)
+	sleep(10);
+	endwhile
+	set_critical(1);
+
+	SetGlobalProperty("plylock",1);
+
+	var i,plychat:=GetGlobalProperty("plychat"),csize:=plychat.size();
+
+	for (i:=1;i<=csize;i:=i+1)
+		if (plychat[i]==who.serial) plychat.erase(i); break; endif
+	endfor
+
+	if (plychat.size()==0) plychat:={"NONE"}; endif
+	SetGlobalProperty("plychat",plychat);
+	SetGlobalProperty("plylock",0);
+	set_critical(0);
+
+endfunction
+
+
+function fixchr(who)
+
+	var temp;
+
+	temp := GetObjProperty(who,"realname");
+
+	if (temp)
+		SetName(who,temp);
+		EraseObjProperty(who,"realname");
+	endif
+
+	temp := GetObjProperty(who,"origform");
+	if (temp)
+		who.graphic := temp;
+		EraseObjProperty(who,"origform");
+		who.frozen := 0;
+	endif
+
+	// druid spell shapechange
+	temp := GetObjProperty(who, "tn");
+	if (temp)
+		 SetName(who,temp);
+		 EraseObjProperty(who, "tn");
+	endif
+
+	if (GetObjProperty(who, "tc"))
+		 EraseObjProperty(who, "tc");
+	endif
+
+	temp := GetObjProperty(who, "tg");
+	if (temp)
+		 who.graphic := temp;
+		 EraseObjProperty(who, "tg");
+	endif
+
+	// liche Fix
+	temp := GetObjProperty(who, "IsLiche");
+	if (temp)
+	  SetStrengthMod(who, GetStrengthMod(who) - GetObjProperty( who, "strmod"));
+	  SetDexterityMod(who, GetDexterityMod(who) - GetObjProperty( who, "dexmod"));
+	  SetIntelligenceMod(who, GetIntelligenceMod(who) - GetObjProperty( who, "intmod"));
+
+	  EraseObjProperty( who, "strmod");
+	  EraseObjProperty( who, "dexmod");
+	  EraseObjProperty( who, "intmod");
+	  EraseObjProperty( who, "IsLiche" );
+	  EraseObjProperty( who, "Type" );
+	endif
+
+	// Camouflage Fix
+	temp := GetObjProperty(who, "cmfc");
+	if (temp)
+		RemoveCamouflage( who );
+	endif
+
+	fixcolor(who);
+
+endfunction
+
+function fixcolor(who)
+
+	var newcolor, racepicked := who.title_race;
+
+	if (racepicked=="Elf")
+		newcolor := 770;
+	elseif (racepicked=="Dark-Elf")
+		newcolor := 33877;
+	elseif (racepicked=="Goblin")
+		newcolor := 34186;
+	elseif (racepicked=="Barbarian")
+		newcolor := 33804;
+	elseif (racepicked=="Dwarf")
+		newcolor := 33888;
+	elseif (racepicked=="Orc")
+		newcolor := 1056;
+	elseif (racepicked=="Frost-Elf")
+		newcolor := 91;
+	else
+		newcolor := who.truecolor;
+	endif
+
+	who.color := newcolor;
+
+endfunction

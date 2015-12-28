@@ -1,0 +1,52 @@
+use uo;
+use cfgfile;
+include "include/attributes";
+
+include "include/cmdlevel_check";
+
+program tamable( who, text )
+	if (!checkStaff(who, "tamable", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	SendSysMessage(who, "Select target");
+	var npc := Target(who);
+	if(text)
+		if(CInt(text))
+			setTaming(who, npc, CInt(text));
+			return;
+		endif
+	endif
+
+	var conf := ReadConfigFile("::npcdesc");
+	var elem := FindConfigElem(conf, npc.npctemplate);
+	if(!elem)
+		SendSysMessage(who, "You can't make this tamable.");
+		return;
+	endif
+
+	var tameskill := CInt(GetConfigInt(elem, "tameskill"));
+	if (!tameskill)
+		var skill := GetStrength(npc);
+		if (GetIntelligence(npc) > skill)
+			skill := GetIntelligence(npc);
+		endif
+		if (GetDexterity(npc) > skill)
+			skill := GetDexterity(npc);
+		endif
+		setTaming(who, npc, (skill / 4));
+		return;
+	endif
+
+	EraseObjProperty(npc, "untamable");
+	EraseObjProperty(npc, "tamableAt");
+	SendSysMessage(who, "The skill needed to tame that creature is now : " + tameskill);
+
+endprogram
+
+
+function setTaming(who, npc, skill)
+	EraseObjProperty(npc, "untamable");
+	SetObjProperty(npc, "tamableAt", skill);
+	SendSysMessage(who, "The skill needed to tame that creature is now : " + skill);
+endfunction

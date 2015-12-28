@@ -1,0 +1,22 @@
+use uo;
+include "include/namingbyenchant";
+include "include/cmdlevel_check";
+
+
+program uncurse( who )
+	if (!checkStaff(who, "uncurse", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	var what := TargetCoordinates( who );
+    	if (what)
+        	if (what.item)
+			BanishCurse( what );
+		else
+			SendSysMessage( who, "You can only target an item " );
+		endif
+	endif
+
+endprogram
+
+ 

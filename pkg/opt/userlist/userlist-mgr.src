@@ -1,0 +1,322 @@
+use os;
+use uo;
+use cfgfile;
+
+include "userlist";
+include "include/random";
+include "include/findcity";
+
+const DEFAULT_WAIT:=5*60; // 5 min
+const CACHE_TIME:=  3*60; // 3 min
+const SAVE_TIME:=   5*60; // 5 min
+
+var list; // var user list
+var gump_time, gump_layout, gump_data; // cached gump, time in polcore().systime format
+
+var listeners; // listener list
+var listenersactive:=1; // to turn off during rebuild
+
+program UserListManager()
+
+	SetGlobalProperty("#UserListPID", getpid());
+	print("[USERLIST MANAGER] started.  PID = "+getpid()+" TIME = "+polcore().systime);
+	UL_Clear();
+
+	/*var cfg:=ReadConfigFile("names");
+	var elem:=FindConfigElem(cfg, 6);
+	var maxn:=CInt(GetConfigInt(elem, "Count"));*/
+
+	var lastsave:=0;
+
+	var ev;
+	while(1)
+		/*
+		// I WILL SAVE IT NO MORE, WE'LL USE AUX OR HTTP TO GET LIST FROM OUTSIDE
+		if(polcore().systime-lastsave>=SAVE_TIME)
+			lastsave:=UL_Save();
+			Listener_Msg("Userlist just saved to disk [UL: "+list.size()+" for "+SizeOf(list)+" bytes]");
+		endif
+		*/
+		ev:=wait_for_event(DEFAULT_WAIT);
+		if(ev)
+			//print("UserList: received event "+ev); // DEBUG ONLY
+			case(ev[1])
+				EVID_USERLIST_ADD:
+					UL_Add(ev[2]);
+				EVID_USERLIST_DEL:
+					UL_Del(ev[2]);
+				EVID_USERLIST_UPDATE:
+					UL_Del(ev[2]);
+					UL_Add(ev[2]);
+				EVID_USERLIST_ALIASES:
+					/*
+					// THIS HANGS THE WHOLE POL! dunno why!
+					var nm:=GetConfigString(elem, "Name"+(Random(maxn)+1));
+					if(nm)
+						UL_Add(ev.user, CStr(nm));
+						SendSysMessage(ev.user, "Random name added: "+nm+".");
+					else
+						SendSysMessage(ev.user, "Random name cannot be generated.");
+					endif
+					*/
+					break;
+				EVID_USERLIST_CLEAR:
+					UL_Clear();
+					SendSysMessage(ev[2], "Index cleared ("+list.size()+" players).");
+					Listener_Msg("Userlist cleared [UL: #"+list.size()+" "+SizeOf(list)+"b]");
+				EVID_USERLIST_REBUILD:
+					listenersactive:=0; // to prevent too much messages
+					UL_Clear();
+					foreach chr in EnumerateOnlineCharacters()
+						UL_Add(chr);
+					endforeach
+					print("USERLIST="+list);
+					listenersactive:=1;
+					SendSysMessage(ev[2], "Index rebuilt ("+list.size()+" players).");
+					Listener_Msg("Userlist rebuilt [UL: #"+list.size()+" "+SizeOf(list)+"b]");
+				EVID_USERLIST_MSGBYGUMP:
+					UL_MsgByGump(ev[2]);
+				EVID_USERLIST_MSGBYNAME:
+					UL_MsgByName(ev[2], ev[3]);
+				EVID_USERLIST_LISTEN:
+					if(ev[3])
+						Listener_Add(ev[2]);
+						Listener_Msg(ev[2].name+" just joined the listeners ["+listeners.size()+"].");
+					else
+						Listener_Msg(ev[2].name+" is no more a listener ["+listeners.size()+"].");
+						Listener_Del(ev[2]);
+					endif
+				default:
+					print("Don't know how to manage event type "+ev[1]+" ("+TypeOf(ev[1])+").");
+			endcase
+		//else
+			//qualcosa di utile da fare quando non c'è carico...
+		endif
+	endwhile
+
+endprogram
+
+function UL_Add(who, alias:=0)
+	var ppl:=struct;
+	ppl.+serial:=who.serial;
+	if(alias!=0)
+		ppl.+name:=alias;
+	else
+		ppl.+name:=who.name;
+	endif
+	ppl.+cmd:=who.cmdlevel;
+	if((!list)||(list.size()==0))
+		list:={ppl};
+	else
+		var pos:=1;
+		var max:=list.size();
+		while((pos<max)&&(upper(list[pos].name)<upper(ppl.name)))
+			pos:=pos+1;
+		endwhile
+		if(list[pos].serial==ppl.serial)
+			if(alias==0)
+				syslog("Cannot add '"+ppl.name+"', user already in list as '"+list[pos].name+"' (#"+ppl.serial+").");
+				return;
+			endif
+		endif
+		// insert the record in the right place
+		if(pos==max)
+			list.append(ppl);
+		else
+			list.insert(pos, ppl);
+		endif
+	endif
+	if(who.cmdlevel>=3) // auto-add GM+ to Listeners list
+		Listener_Add(who);
+	endif
+	gump_time:=0; // sets it dirty
+	Listener_Msg(who.name+"#"+who.serial+"@"+who.ip+" just connected [UL: #"+list.size()+" "+SizeOf(list)+"b]");
+endfunction
+
+function UL_Del(who)
+	var pos:=1;
+	var err:=1;
+	while(pos<=list.size())
+		if(list[pos].serial==who.serial)
+			list.erase(pos);
+			gump_time:=0; // sets it dirty
+			err:=0; // user found
+		else
+			pos:=pos+1;
+		endif
+	endwhile
+	if(err)
+		syslog("Cannot delete '"+who.name+"', user was not in list (#"+who.serial+").");
+	else
+		Listener_Msg(who.name+"#"+who.serial+"@"+who.ip+" just disconnected [UL: #"+list.size()+" "+SizeOf(list)+"b]");
+	endif
+endfunction
+
+function UL_Clear()
+	list:={};
+	gump_time:=0;
+	gump_layout:={};
+	gump_data:={};
+	listeners:={};
+	listenersactive:=1;
+endfunction
+
+function TwoChar(a)
+	a:=CInt(a);
+	if(a<10)
+		a:="0"+a;
+	endif
+	return(a);
+endfunction
+
+function UL_MsgByGump(who)
+	var parms:=struct;
+	var now:=polcore().systime;
+	parms.+who:=who;
+	if((now-gump_time>CACHE_TIME)||(who.cmdlevel>0)) // rebuilds it if timed out or is GM
+		var layout:={
+			"page 0",
+			"nodispose",
+			"resizepic 150   0 2600 520 405", // background
+			"resizepic 210 360 5100 400  25", // buttons
+			"text 200 40 600 0",
+			"text 390 40 600 3",
+			"text 500 40 600 1",
+			"text 600 40 600 2"
+		};
+		var data:={
+			"Player Name",
+			"Place",
+			"0", // number of players displayed
+			TwoChar(((now/3600)+1)%24)+":"+TwoChar((now/60)%60) // time of the last update
+		};
+		var i;
+		var num:=0;
+		var y:=60;
+		var page:=1;
+		var ply;
+		layout.append("page "+page);
+		for(i:=1; i<=list.size(); i:=i+1)
+			ply:=SystemFindObjectBySerial(list[i].serial);
+			if(!ply.concealed)
+				if((y==60)&&(page>1))
+					layout.append("button 550 361 5540 5541 0 "+page);
+					layout.append("page "+page);
+					layout.append("button 260 361 5537 5538 0 "+(page-1));
+				endif
+				if((who.cmdlevel>0)||(list[i].cmd==0))
+					if(GetObjProperty(ply, "Messages")!=1)
+						layout.append("button 175 "+(y+3)+" 2118 2117 1 40 "+list[i].serial);
+					endif
+				endif
+				layout.append("text 200 "+y+ " 0 "+data.size());
+				layout.append("text 500 "+y+ " 0 "+(data.size()+1));
+				data.append(list[i].name);
+				data.append(FindCity(ply));
+				y:=y+20;
+				num:=num+1;
+				if(y>=360 /*60+20*15*/)
+					y:=60;
+					page:=page+1;
+				endif
+			endif
+		endfor
+		data[3]:=CStr(num); // updates number of displayed players
+		if(who.cmdlevel==0) // caches only player gumps
+			gump_time:=polcore().systime;
+			gump_layout:=layout;
+			gump_data:=data;
+		endif
+		parms.+layout:=layout;
+		parms.+data:=data;
+	else
+		parms.+layout:=gump_layout;
+		parms.+data:=gump_data;
+	endif
+	start_script("sendmsg_gump", parms);
+endfunction
+
+function UL_MsgByName(who, name)
+	name:=upper(name);
+	var ll:=len(name);
+	var min:=1;
+	var max:=list.size();
+	var	pos:=max/2;
+	var txt:=upper(list[pos].name)[1,ll];
+	while((txt!=name)&&(min<max))
+		if(txt<name)
+			min:=pos+1;
+		else
+			max:=pos-1;
+		endif
+		pos:=(min+max)/2;
+		txt:=upper(list[pos].name)[1,ll];
+	endwhile
+	if(txt==name)
+		if((who.cmdlevel>0)||(list[pos].cmd==0))
+			var chr:=SystemFindObjectBySerial(list[pos].serial);
+			if(chr)
+				if(GetObjProperty(chr, "Messages")!=1)
+					var parms:=struct;
+					parms.+who:=who;
+					parms.+chr:=chr;
+					start_script("sendmsg", parms);
+					return;
+				endif
+			endif
+		endif
+	endif
+	SendSysMessage(who, "No player with name '"+name+"*' was found.");
+endfunction
+
+function UL_Save()
+	var log:={};
+	var prop:={};
+	prop.+pname:="player";
+	prop.+pvalue:="";
+	var ply;
+	var i;
+	for(i:=1; i<=list.size(); i:=i+1)
+		ply:=SystemFindObjectBySerial(list[i].serial);
+		if(!ply.concealed)
+			prop.pvalue:=list[i].name+" at "+FindCity(ply);
+			log.append(prop);
+		endif
+	endfor
+	var time:=polcore().systime;
+	AppendConfigFileElem("::userlist", "userlist", time, log);
+	UnloadConfigFile("::userlist");
+	return(time);
+endfunction
+
+function Listener_Add(who)
+	Listener_Del(who);
+	if(!listeners.size())
+		listeners:={who};
+	else
+		listeners.append(who);
+	endif
+endfunction
+
+function Listener_Del(who)
+	var i:=1;
+	while(i<=listeners.size())
+		if(listeners[i].serial==who.serial)
+			listeners.erase(i);
+		else
+			i:=i+1;
+		endif
+	endwhile
+endfunction
+
+function Listener_Msg(msg)
+	var i;
+	if(!listenersactive)
+		return;
+	endif
+	for(i:=listeners.size(); i>=1; i:=i-1)
+		SendSysMessage(listeners[i], msg);
+	endfor
+	print("UserList: "+msg);
+	syslog("Listeners: "+msg);
+endfunction

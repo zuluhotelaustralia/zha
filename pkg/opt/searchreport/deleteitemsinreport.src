@@ -1,0 +1,45 @@
+use uo;
+use os;
+use file;
+use util;
+include "include/cmdlevel_check";
+include "include/yesno";
+
+program deleteitemsinreport(who)
+	SendSysMessage(who, "WARNING: You are about to delete all items in the current search report.",3,53);
+	SendSysMessage(who, "If you do not know what this contains hit CANCEL, type .searchreport to see",3,53);
+	SendSysMessage(who, "the items you are about to wipe. If you want to wipe different items",3,53);
+	SendSysMessage(who, "do the following: 1) .savenow 2) either .searchitem <name> or .searchobjtype <objtype>",3,53);
+	SendSysMessage(who, "If you hit OK all items in the searchreport will be erased PERMANENTLY!!",3,53);	
+	if (!YesNo(who,"Are you SURE???"))
+		SendSysMessage(who, "ABORTED",3,53);	
+		return;
+	endif
+	var itemNum := 1;
+	SendSysMessage(who, "Loading report...");
+	var itemArray:= ReadFile("searchdata.txt");
+	//Broadcast(itemArray);
+	if (!itemArray)
+		SendSysMessage(who, CStr(itemArray));
+		return;
+	elseif (!len(itemArray))
+		SendSysMessage(who, "Matches found: "+len(itemarray));
+		return;
+	endif
+	var temp;
+	
+	var tempitem;
+	foreach item in itemArray
+		SendSysMessage(who, "deleting item " + item);
+		tempitem:=SystemFindObjectBySerial(Cint(item), SYSFIND_SEARCH_OFFLINE_MOBILES);
+		if (!tempitem)
+			tempitem:=SystemFindObjectBySerial(Cint(item), SYSFIND_SEARCH_STORAGE_AREAS);
+		endif
+		if (!DestroyItem(tempitem))
+			SendSysMessage(who, "error: " + item.name + " " +item.serial + " not deleted");
+		endif
+	endforeach
+
+endprogram
+
+

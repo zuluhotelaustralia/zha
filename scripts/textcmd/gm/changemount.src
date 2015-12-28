@@ -1,0 +1,32 @@
+use uo;
+
+include "include/client";
+include "include/cmdlevel_check";
+
+
+program textcmd_changemount( who, parms )
+	if (!checkStaff(who, "changemount", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var split := SplitWords( parms );
+	var newgraphic := CInt(split[1]);
+	if( !newgraphic )
+		SendSysMessage( who, "Structure is .changemount <graphic> <color>" );
+		return;
+	endif
+
+	var mount := GetEquipmentByLayer( who, LAYER_MOUNT );
+	if( !mount )
+		SendSysMessage( who, "You must be already mounted to use this command." );
+		return;
+	endif
+	sendsysmessage(who, "Old Graphic:"+mount.graphic+"("+Hex(mount.graphic)+")  Old Colour:"+mount.color);
+	mount.graphic := newgraphic;
+
+	if( CInt(split[2]) )
+		mount.color := CInt(split[2]);
+	endif
+
+endprogram

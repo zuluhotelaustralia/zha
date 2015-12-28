@@ -1,0 +1,22 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/dotempmods";
+include "include/random";
+include "pickdoor";
+
+program openpickdoor( params )
+	var character :=  params[1];
+	var door :=  params[2]; 
+	FireTrapIfPresent(character,door);
+	door._open();
+	Detach();
+	sleep(10);
+	if (door.isopen)
+		PlaySoundEffect( door, SFX_CLOSE_METAL_DOOR );
+		door._close();
+	endif
+	
+endprogram

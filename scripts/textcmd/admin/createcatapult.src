@@ -1,0 +1,131 @@
+use os;
+use uo;
+
+program makecat(who, text)
+
+if ((text=="") || (!text)) SendSysMessage( who, ".placecat <north> <south> <east> <west>"); return; endif
+
+var item, cat := TargetCoordinates( who );
+
+if (!cat) SendSysMessage( who, "Canceled."); return; endif
+
+if (text=="north")
+item:=CreateItemAtLocation( cat.x, cat.y, cat.z, 0x1695, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y, cat.z, 0x16b1, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x, cat.y-1, cat.z, 0x1697, 1);
+item.movable := 0;
+
+
+item:=CreateItemAtLocation( cat.x-1, cat.y, cat.z, 0x1696, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-1, cat.z, 0x16a2, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-2, cat.z, 0x1699, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-3, cat.z, 0x16ac, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-4, cat.z, 0x169a, 1);
+item.movable := 0;
+
+
+item:=CreateItemAtLocation( cat.x+1, cat.y, cat.z, 0x1694, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-1, cat.z, 0x169d, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-2, cat.z, 0x1698, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-3, cat.z, 0x16a7, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-4, cat.z, 0x169c, 1);
+item.movable := 0;
+
+elseif(text=="south")
+item:=CreateItemAtLocation( cat.x, cat.y, cat.z, 0x1649, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y, cat.z, 0x1663, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x, cat.y-2, cat.z, 0x1648, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x, cat.y-3, cat.z, 0x164d, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y, cat.z, 0x165e, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-1, cat.z, 0x164b, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-2, cat.z, 0x1659, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-3, cat.z, 0x164c, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y, cat.z, 0x164f, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-1, cat.z, 0x164a, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-2, cat.z, 0x1654, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-3, cat.z, 0x164e, 1);
+item.movable := 0;
+elseif(text=="east")
+item:=CreateItemAtLocation( cat.x, cat.y, cat.z, 0x1672, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x, cat.y+1, cat.z, 0x168d, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-2, cat.y, cat.z, 0x1678, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-3, cat.y, cat.z, 0x1676, 1);
+item.movable := 0;
+
+
+item:=CreateItemAtLocation( cat.x, cat.y-1, cat.z, 0x1688, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y-1, cat.z, 0x1674, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-2, cat.y-1, cat.z, 0x1683, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-3, cat.y-1, cat.z, 0x1675, 1);
+item.movable := 0;
+
+item:=CreateItemAtLocation( cat.x, cat.y+1, cat.z, 0x1679, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-1, cat.y+1, cat.z, 0x1673, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-2, cat.y+1, cat.z, 0x167e, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x-3, cat.y+1, cat.z, 0x1677, 1);
+item.movable := 0;
+elseif(text=="west")
+item:=CreateItemAtLocation( cat.x+3, cat.y, cat.z, 0x16bc, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+4, cat.y+1, cat.z, 0x16d6, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+4, cat.y, cat.z, 0x16ba, 1);
+item.movable := 0;
+
+
+item:=CreateItemAtLocation( cat.x+1, cat.y+1, cat.z, 0x16cc, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+2, cat.y+1, cat.z, 0x16bd, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+3, cat.y+1, cat.z, 0x16c2, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+4, cat.y+1, cat.z, 0x16b9, 1);
+item.movable := 0;
+
+
+item:=CreateItemAtLocation( cat.x, cat.y-1, cat.z, 0x16bf, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+1, cat.y-1, cat.z, 0x16d1, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+2, cat.y-1, cat.z, 0x16be, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+3, cat.y-1, cat.z, 0x16c7, 1);
+item.movable := 0;
+item:=CreateItemAtLocation( cat.x+4, cat.y-1, cat.z, 0x16bb, 1);
+item.movable := 0;
+
+else
+SendSysMessage( who, ".placecat <north> <south> <east> <west>");
+endif
+
+endprogram

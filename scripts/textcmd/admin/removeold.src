@@ -1,0 +1,13 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program removeold(who)
+	if (!checkStaff(who, "removeold", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+EraseGlobalProperty( "orelist");
+EraseGlobalProperty( "deathpool");
+
+endprogram

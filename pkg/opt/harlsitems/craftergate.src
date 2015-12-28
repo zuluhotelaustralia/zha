@@ -1,0 +1,19 @@
+//Created by: Harlequin, ZHA Admin
+//Contact: harl@gamiix.com
+//Last Mod: 10-09-02
+//Version: 1.2
+
+
+use os;
+use uo;
+
+program craftergate (who)
+
+if(GetObjProperty( who, "IsCrafter"))
+	MoveCharacterToLocation( who, 5205, 1992, 5 );
+	SendSysMessage( who, "Welcome to the Crafter mine!");
+else
+	SendSysMessage( who, "You are NOT a Crafter!");
+endif
+
+endprogram

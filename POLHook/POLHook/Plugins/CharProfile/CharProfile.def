@@ -1,0 +1,4 @@
+LIBRARY CharProfile
+EXPORTS
+POLHookPlugin
+KillPlugin

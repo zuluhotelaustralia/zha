@@ -1,0 +1,27 @@
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+
+program makefloor( who, n )
+	if (!checkStaff(who, "makefloor", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    n := CInt(n);
+
+    var xdiff := 0, ydiff := 0;
+    if (who.facing == 2)
+        xdiff := 1;
+    elseif (who.facing == 4)
+        ydiff := 1;
+    elseif (who.facing == 6)
+        xdiff := -1;
+    elseif (who.facing == 0)
+        ydiff := -1;
+    endif
+
+    var i;
+    for( i := 1; i <= n; i := i + 1 )
+        CreateItemAtLocation( who.x + i*xdiff, who.y + i*ydiff, who.z, 0x495, 1 );
+    endfor
+endprogram

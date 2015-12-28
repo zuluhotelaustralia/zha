@@ -1,0 +1,5 @@
+include "include/client";
+
+program party(who, message)
+	TellAllPartyMembers(who, message);
+endprogram

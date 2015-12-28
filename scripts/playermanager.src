@@ -1,0 +1,217 @@
+use uo;
+use os;
+
+include "include/time";
+include "include/classes";
+include "../../pkg/opt/karmafame/karmafame";
+include "include/dotempmods";
+include "include/constants/propids";
+include "include/jail";
+include "include/newbieprotection";
+include "include/gumps";
+include "include/packets";
+
+
+// Added jail check here instead of the memory
+// hogging jailkeeper.src
+// Archaean 27/6/3
+
+program logon( who )
+
+	//setchat(who);
+	var acc := who.acct;
+
+	acc.setprop("Login", NowString());
+	acc.setprop("IP", who.ip);
+	SetObjProperty(who, "#logontime", ReadGameClock() );
+
+	set_critical(1);
+	CurePoison(who);
+	JailCheck(who);
+	set_critical(0);
+
+	var welcStr := "Ensure that you use .password, .email and .emailpassword to prevent your account from being hacked. Please report bugged items, spawns or npcs, by paging staff.";
+	welcStr := welcStr + " ";
+
+	var news := GetGlobalProperty("news");
+	var n;
+	
+	var newsstr := " [newline] [newline] [2118] Currently in the news: [newline] [2100]";
+	foreach n in news
+		newsstr := newsstr + " " + n + " ";
+	endforeach
+
+	var macrowhen := GetMacroString();
+	var description := GetGlobalProperty("QuestDescription");
+	if( !description )
+		description := "";
+	endif
+
+	if( who.cmdlevel )
+		var gmpages := GetGlobalProperty(PROPID_GLOBAL_STAFF_PAGES);
+		//SendStringAsTipWindow( who, welcStr + "There are " + CInt(gmpages.size()/2) + " page(s).                                                             " + newsstr);
+		ShowWelcomeGump(who, welcStr +newsstr + "[newline] [newline] [2118] There are " +CInt(gmpages.size()/2) +"page(s). [newline] [2100] ");
+	else
+		//SendStringAsTipWindow( who, welcStr +newsstr);
+		ShowWelcomeGump(who, welcStr +newsstr);
+		StartScripts(who);
+		AssignClasse(who);
+		ReleaseIfJailTimeUp(who);
+		//SetNewNotoName(who);
+		if (DetermineNewbie(who))
+			SendSysMessage(who, "You are no longer newbie!");
+			MoveCharacterToLocation(who,1475,1645,20); //brit starting area
+		endif
+	endif
+
+endprogram
+
+
+function StartScripts(who)
+
+	var process := {};
+	process.append(start_script(":cooking:hunger",who).pid);
+	process.append(start_script(":areas:areaban", who ).pid);
+	SetObjProperty( who, "#RunningScripts", process );
+
+/*
+	var ctf:=getobjproperty(who,"ctfloc");
+
+	if(who.cmdlevel>0) return; endif
+
+	if (ctf<=3 && ctf>=0)
+	MoveCharacterToLocation(who,6083,450,-22);
+	setobjproperty(who,"ctfloc",0);
+	else*/
+
+endfunction
+
+
+function setchat(who)
+
+	while (GetGlobalProperty("plylock")==1)
+	sleep(10);
+	endwhile
+
+	set_critical(1);
+	SetGlobalProperty("plylock",1);
+
+	var plychat:=GetGlobalProperty("plychat"),csize:=plychat.size();
+
+	if (plychat[1]=="NONE") csize:=0; endif
+
+	plychat[csize+1]:=who.serial;
+
+	SetGlobalProperty("plychat",plychat);
+	SetGlobalProperty("plylock",0);
+	set_critical(0);
+
+endfunction
+
+function ReleaseIfJailTimeUp(who)
+
+	var relday := who.acct.getprop("Release");
+	if (relday)
+		if (ReadGameClock() >= relday)
+          		who.acct.setprop("Release",0);
+          		MoveCharacterToLocation( who, 1475, 1645, 20, 0);
+		endif
+        endif
+
+endfunction
+
+function ShowWelcomeGump(who, message)
+	const GUMPPOSX:=100;
+	const GUMPPOSY:=100;
+	const GUMPWIDTH:=500;
+	const GUMPHEIGHT:=500;
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(GUMPPOSX, GUMPPOSY, BKGND_BLACKSLAB,GUMPWIDTH,GUMPHEIGHT  );
+	GFGumpPic( GUMPPOSX+55, GUMPPOSY+230, "0x58A" );//castle
+	GFGumpPic( GUMPPOSX+10, GUMPPOSY+10, "0x28A0" );//dragon 1
+	GFGumpPic( GUMPPOSX+12, GUMPPOSY+245, "0x28A2" );
+	GFGumpPic( GUMPPOSX+25, GUMPPOSY+120, "0x28AB" );
+	GFGumpPic( GUMPPOSX+405, GUMPPOSY+10, "0x28AA" );//dragon 2
+	GFGumpPic( GUMPPOSX+403, GUMPPOSY+245, "0x28AC" );
+	GFGumpPic( GUMPPOSX+390, GUMPPOSY+120, "0x28A1" );
+	//GFTextCrop( GUMPPOSX, GUMPPOSY, GUMPWIDTH, GUMPHEIGHT, 53, message );
+	var messagewords := SplitWords(message);
+		
+	var i:=1;
+	var y:=GUMPPOSY+70;
+	var linemessage:="";
+	var color:=2100;
+	while (i<=messagewords.size())
+		if (len(linemessage)<50 && messagewords[i][1]!="[")
+			linemessage := linemessage + messagewords[i] + " ";
+		else
+			if (CInt(messagewords[i][messagewords[i][2],len(messagewords[i])-1]))
+				
+				color:=Cint(messagewords[i][messagewords[i][2],len(messagewords[i])-1]);
+			else
+				GFTextLine(GUMPPOSX+90, y, color, linemessage);
+				y:=y+20;
+				if (messagewords[i][1]!="[")
+					linemessage:=messagewords[i] + " ";
+				else
+					linemessage:="";
+				endif	
+			endif	
+		endif
+			
+		i:=i+1;
+	endwhile
+	
+	if (len(linemessage))
+		GFTextLine(GUMPPOSX+90, y, color, linemessage);
+	endif
+
+	GFTextLine(GUMPPOSX + 120, GUMPPOSY +40, 2119, "Welcome to ZULU HOTEL AUSTRALIA");
+
+	
+	var openmainpage := GFButtonID(GUMPPOSX+10,GUMPPOSY+450, 0xA52, 0xA53, 1 );
+	GFTextLine(GUMPPOSX + 50, GUMPPOSY+460, 2118, "View ZHA Web Site");
+	var openforumpage := GFButtonID(GUMPPOSX+180,GUMPPOSY+450, 0xA52, 0xA53, 1 );
+	GFTextLine(GUMPPOSX + 220, GUMPPOSY +460, 2118, "View ZHA Forums");
+	var openrulespage :=GFButtonID(GUMPPOSX+350,GUMPPOSY+450, 0xA52, 0xA53, 1 );
+	GFTextLine(GUMPPOSX + 390, GUMPPOSY +460, 2118, "View ZHA Rules");
+	var exitbtn :=GFButtonID(GUMPPOSX+470,GUMPPOSY+10, G_STONE_X_1, G_STONE_X_0, 1 );
+	var choice := GFSendGump(who);
+
+	if (!choice)
+		return;
+	endif
+		
+  	if (choice[openmainpage.keyid])
+		OpenWebSite(who, "ultima.gamiix.com");
+		ShowWelcomeGump(who, message);
+	elseif (choice[openforumpage.keyid])
+		OpenWebSite(who, "forum.gamiix.com");
+		ShowWelcomeGump(who, message);
+	elseif (choice[openrulespage.keyid])
+		OpenWebSite(who, "http://ultima.gamiix.com/rules.php");
+		ShowWelcomeGump(who, message);
+	endif
+
+endfunction
+
+/*
+function GetRandomMonsterTilePic()
+	//8392-8503  //111
+	//9600-9693  //93
+	//9720-9779  //59
+	var rand := 8392+RandomInt(111+93+59+1);
+	if (rand>8503 && rand <9600)
+		rand:=rand+1097;
+	elseif(rand>9693 && rand <9720)
+		rand:=rand+37;
+	endif
+	if (rand==8452 || rand==8453)
+		rand:=9604;
+	endif
+	return rand;
+
+endfunction
+*/

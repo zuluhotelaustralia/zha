@@ -1,0 +1,21 @@
+use uo;
+
+include "../../userlist";
+include "include/cmdlevel_check";
+
+program textcmd_msglisten(character, opts)
+	if (!checkStaff(character, "msglisten", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	if(upper(opts)=="OFF")
+		opts:=0;
+	elseif(upper(opts)=="ON")
+		opts:=1;
+	else
+		SendSysMessage(character, "USE: .msglisten [on,off]");
+		return;
+	endif
+	UserList(EVID_USERLIST_LISTEN, character, opts);
+
+endprogram

@@ -1,0 +1,19 @@
+use os;
+use uo;
+include "include/client";
+include "include/cmdlevel_check";
+
+program textcmd_savenow(who)
+	if (!checkStaff(who, "savenow", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    Broadcast( "SYSTEM: Saving World State", FONT_BOLD, 33 );
+    Broadcast( "REPEAT: Saving World State", FONT_BOLD, 33 );
+    sleep(1);
+    foreach character in EnumerateOnlineCharacters() 
+      SendPacket(character, "220000");// request resync 
+    endforeach 
+    SaveWorldState();
+    Broadcast( "SYSTEM: World Saved", FONT_BOLD, 33 );
+endprogram

@@ -1,0 +1,83 @@
+/* Druid Spell - Acid Rain   **
+** Area acid attack.         **
+** Seravy - seravy@gmail.com */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/packets";
+
+const SPELL_ID := SPELL_ID_ACIDRAIN;
+
+program cast_acidrain(parms)
+  var caster;
+  var circle := GetCircle( SPELL_ID);
+  var element := ACID;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetArea(caster, circle);
+
+    if (!cast_on)
+      EraseObjProperty(caster, "#Casting");
+      return;
+    endif
+  endif
+  
+  var level :=GetClasseLevel(caster);
+  var skill := GetEffectiveSkill(caster, SKILLID_NATURELORE);
+  var range := calcDmgRange(caster, SKILLID_NATURELORE);
+  var times := (10+(level*2));
+  var dmg, i;
+
+  var seerain := ListMobilesNearLocation(cast_on.x, cast_on.y, cast_on.z, 20);
+  foreach person in seerain
+    SetWeatherForPlayer(person, WEATHER_FIERCE_STORM, 70);
+  endforeach
+
+  EraseObjProperty( caster, "#Casting");
+  for (i := 1; i <= times; i := i + 1)
+    var victims := ListMobilesNearLocation(cast_on.x, cast_on.y, cast_on.z, range);
+
+    foreach mobile in victims
+      if(!mobile.multi)
+        var immunity := IsProtected( caster, mobile, circle );
+        var circ := circle;
+        if( immunity != IMMUNED )
+          if( immunity == CURSED )
+            circ := circ * 2;
+          endif
+          if (AutoCallGuardCheck(caster, mobile))
+            EraseObjProperty( caster, "#Casting");
+              foreach person in seerain
+                SetWeatherForPlayer(person, WEATHER_DISABLE, 0);
+              endforeach
+            return;
+          endif
+
+          dmg := (CalcSpellDamage( caster, mobile, circ, AREA_EFFECT_SPELL)/(times*0.9));
+          send_attack(mobile, caster, SPELL_ID);
+          PlayStationaryEffect( CInt(mobile.x), CInt(mobile.y), CInt(mobile.z), FX_SPELL_ACIDRAIN, SPEED_SPELL_ACIDRAIN, LOOP_SPELL_ACIDRAIN);
+          PlaySoundEffect(mobile, SFX_SPELL_ACIDRAIN);
+
+          ApplyElementalDamage(caster, mobile, circ, dmg, element);
+        endif
+      endif
+    endforeach
+
+    sleepms(100);
+  endfor
+
+  foreach person in seerain
+    SetWeatherForPlayer(person, WEATHER_DISABLE, 0);
+  endforeach
+  PlaySoundEffect(caster, SFX_SPELL_ACIDRAIN2);
+endprogram

@@ -1,0 +1,308 @@
+use uo;
+use os;
+include "include/gumps";
+include "include/random";
+include "include/client";
+include "include/classes";
+include "ostardbreeding";
+
+program ostardbook (user, scroll)
+
+	if (!ReserveItem(scroll))
+		return;
+	endif
+	if (scroll.container != user.backpack )
+		SendSysMessage(user, "The scroll must be in your backpack");
+		return;
+	endif
+	if (!GetObjProperty(user, CLASSEID_RANGER))
+		SendSysMessage(user, "The treatise is beyond your comprehension");
+		return;
+	endif
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 200, 250);
+	GFTextMid(20, 20, 155, 63, "The Ancient Art");
+	GFTextMid(20, 40, 155, 63, "of");
+	GFTextMid(20, 60, 155, 63, "Ostard Breeding");
+	GFTextLine(35, 120, 0, "Read the Treatise");
+	GFTextLine(35, 140, 0, "Evaluate an Ostard");
+	GFTextLine(35, 160, 0, "Breed Ostards");
+
+	var button3  := GFButtonID( 20, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button1  := GFButtonID( 20, 145, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var button2  := GFButtonID( 20, 165, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var result := GFSendGump(user);
+
+	if (result[button1.keyid])
+		EvaluateOstard(user);
+	elseif (result[button2.keyid])
+		BreedOstards(user);
+	elseif (result[button3.keyid])
+		ReadTreatise(user, scroll);
+	endif
+
+endprogram
+
+function EvaluateOstard(user)
+
+	SendSysMessage(user, "Select an ostard");
+	var osty := Target(user);
+
+	if (!CheckOstard(user, osty))
+		return;
+	endif
+
+	var rating := GetObjProperty(osty, "Rating");
+	var temperament := GetObjProperty(osty, "Temperament");
+	var sex;
+	if (osty.gender == 1)
+		sex:= "Female";
+	else
+		sex:="Male";
+	endif
+	var temptext;
+	case (temperament)
+		0:	temptext:="Devilish";
+		1:	temptext:="Vicious";
+		2:	temptext:="Aggressive";
+		3:	temptext:="Feisty";
+		4:	temptext:="Tenacious";
+		5:	temptext:="Placid";
+		6:	temptext:="Playful";
+		7:	temptext:="Friendly";
+		8:	temptext:="Kind";
+		9:	temptext:="Saintly";
+		10:	temptext:="Angelic";
+	endcase
+	var matetext;
+	var nummates:=GetObjProperty(osty, "Mated");
+	var NextMate := GetObjProperty(osty, "NextMate");
+	if (IsReadyToMate(osty))
+		matetext:= "Next mate: Now!";
+	else
+		var nextmating:= CInt((NextMate-ReadGameClock()) / 60) +1;
+		matetext:="Next mate: " + nextmating + " minute(s)";
+	endif
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 260, 260);
+	GFTextMid(20, 20, 215, 0, "Evaluation for");
+	GFTextMid(20, 40, 215, osty.color, osty.name);
+	GFTextLine(20, 80, 63, "Sex: " + sex);
+	GFTextLine(20, 100, 63, "Rating: " + rating + "%");
+	GFTextLine(20, 120, 63, "Temperament: " + temptext);
+	GFTextLine(20, 140, 63, "Number of times mated: " + nummates);
+	GFTextLine(20, 160, 63, matetext);
+	GFSendGump(user);
+
+	return;
+
+endfunction
+
+function BreedOstards(user)
+
+	var level := GetObjProperty(user, CLASSEID_RANGER);
+	var i;
+
+	SendSysMessage(user, "Select a male ostard");
+	var male := Target(user);
+	if (!CheckOstard(user, male))
+		return;
+	elseif (male.gender != 0)
+		SendSysMessage(user, "That's not a male ostard!");
+		return;
+	elseif (!CheckBreed(user, male))
+		return;
+	endif
+	var malerating := GetObjProperty(male, "Rating");
+	SetObjProperty(male, "mating", 1);
+
+	SendSysMessage(user, "Select a female ostard");
+	var female := Target(user);
+	if (!CheckOstard(user, female))
+		EraseObjProperty(male, "mating");
+		return;
+	elseif (female.gender != 1)
+		EraseObjProperty(male, "mating");
+		SendSysMessage(user, "That's not a female ostard!");
+		return;
+	elseif (!CheckBreed(user, female))
+		EraseObjProperty(male, "mating");
+		return;
+	endif
+	var femalerating := GetObjProperty(female, "Rating");
+	SetObjProperty(female, "mating", 1);
+	
+	if (GetObjProperty(male, "Mother") == female.serial)
+		SendSysMessage(user, "The male ostard refuses to mate with it's own mother!");
+		EraseObjProperty(female, "mating");
+		EraseObjProperty(male, "mating");
+		return;
+	elseif (GetObjProperty(female, "Father") == male.serial)
+		SendSysMessage(user, "The female ostard refuses to mate with it's own father!");
+		EraseObjProperty(female, "mating");
+		EraseObjProperty(male, "mating");
+		return;
+	endif
+
+	MoveCharacterToLocation(male, female.x, female.y, female.z);
+	female.frozen := 1;
+	male.frozen := 1;
+
+	for (i:=0; i<Random(3)+3; i:=i+1)
+		PlaySoundEffect(male, 0x279);
+		PerformAction(male, 9);
+		sleepms(1800);
+	endfor
+
+	var difficulty := CInt(((malerating+femalerating)/2) + MATING_DIFF_MOD);
+	if (!CheckSkill(user, SKILLID_TAMING, difficulty, 1));
+		SendSysMessage(user, "You have failed to mate the ostards!");
+		PlaySoundEffect(female, 0x27a);
+	else
+		SendSysMessage(user, "The female ostard lays an egg!");
+		PlaySoundEffect(female, 0x275);
+		PerformAction(female, 4);
+		var egg := CreateItemAtLocation(female.x, female.y, female.z, "breedingegg");
+		SetObjProperty(egg, "Rating", CInt( ((malerating+femalerating)/2) + Random(15)+1 + (CInt(GetEffectiveSkill(user, SKILLID_TAMING)/10)) - 22 + level));
+		var color := (male.color + female.color)/2 + Random(16)-7;
+		if (color < 2) color := 2; endif
+		egg.color := CInt(color);
+		var maletemp := GetObjProperty(male, "Temperament");
+		var femaletemp := GetObjProperty(female, "Temperament");
+		var eggtemp:= CInt((maletemp + femaletemp)/2);
+		if (Random(100)+1+(level*3) >= 50)
+			var tempchange := eggtemp - 5;
+			if (tempchange < 0)
+				tempchange := tempchange * -1;
+			endif
+			if (Random(7) >= tempchange)
+				if (eggtemp > 5)
+					eggtemp := eggtemp + 1;
+				elseif (eggtemp < 5)
+					eggtemp := eggtemp - 1;
+				else
+					if (Random(2))
+						eggtemp := eggtemp -1;
+					else
+						eggtemp := eggtemp +1;
+					endif	
+				endif
+			elseif (!Random(3))
+				if (eggtemp > 5)
+					eggtemp := eggtemp - 1;
+				elseif (eggtemp < 5)
+					eggtemp := eggtemp + 1;
+				endif
+			endif
+								
+		endif				
+		if (eggtemp > 10)
+			eggtemp := 10;
+		elseif (eggtemp < 0)
+			eggtemp := 0;
+		endif
+		
+		SetObjProperty(egg, "Temperament", eggtemp);
+		SetObjProperty(egg, "Mother", female.serial);
+		SetObjProperty(egg, "Father", male.serial);
+		SetObjProperty(egg, "tamableAt", GetObjProperty(egg, "Rating")+TAME_DIFF_MOD);
+		if (GetObjProperty(egg, "Rating") >= 100)
+			egg.color := 1298;
+			egg.desc := "Elite Ostard Egg";
+		endif
+		SetObjProperty(egg, "HatchTime", ReadGameClock() + INCUBATION_PERIOD);
+	endif
+
+	SetObjProperty(male, "Rating", CInt(malerating-(malerating*0.1)));
+	SetObjProperty(male, "Mated", GetObjProperty(male, "Mated")+1);
+	SetObjProperty(male, "NextMate", ReadGameClock()+MIN_TIME_BETWEEN_BREEDING);
+	EraseObjProperty(male, "mating");
+	male.frozen := 0;
+
+	SetObjProperty(female, "Rating", CInt(femalerating-(femalerating*0.1)));
+	SetObjProperty(female, "Mated", GetObjProperty(female, "Mated")+1);
+	SetObjProperty(female, "NextMate", ReadGameClock()+MIN_TIME_BETWEEN_BREEDING);
+	EraseObjProperty(female, "mating");
+	female.frozen := 0;
+
+endfunction
+
+function CheckOstard(user, osty)
+		
+	if (!osty.isA(POLCLASS_MOBILE))
+		SendSysMessage(user, "Cancelled");
+		return 0;
+	elseif (osty.graphic != 218 && osty.graphic != 219)
+		SendSysMessage(user, "That's not an ostard!");
+		return 0;
+	elseif (!GetObjProperty(osty, "Rating"))
+		SendSysMessage(user, "You cannot breed this ostard");
+		return 0;
+	elseif (GetObjProperty(osty, "Mated") >= MAX_MATES)
+		SendSysMessage(user, "That ostard is past it's prime");
+		return 0;
+	endif
+	return 1;
+
+endfunction	
+
+function IsReadyToMate(osty)
+	
+	if (GetObjProperty(osty, "NextMate") < ReadGameClock() || !GetObjProperty(osty, "NextMate"))
+		return 1;
+	endif
+	return 0;
+
+endfunction
+
+function CheckBreed(user, osty)
+
+	if (osty.script != "tamed")
+		SendSysMessage(user, "The ostard is too wild to attempt the breeding");
+		return 0;
+	elseif (GetObjProperty(osty, "master") != user.serial)
+		SendSysMessage(user, "That ostard is not under your control");
+		return 0;
+	elseif (!IsReadyToMate(osty))
+		SendSysMessage(user, "That ostard is not yet ready to mate");
+		return 0;
+	elseif (GetObjProperty(osty, "mating"))
+		SendSysMessage(user, "That ostard is already mating!");
+		return 0;
+	endif
+	return 1;
+
+endfunction
+
+function ReadTreatise(user, scroll)
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_PAPER_EX, 410, 500);
+	GFTextMid(20, 20, 355, 63, "THE ANCIENT ART OF OSTARD BREEDING");
+	GFTextLine(20, 50, 0, "This crumbling treatise was written by a member");
+	GFTextLine(20, 70, 0, "of an ancient order of Rangers. It details the");
+	GFTextLine(20, 90, 0, "methods involved in breeding perfect ostards.");
+	GFTextLine(20, 110, 0, "Amongst the crumpled pages are instructions on");
+	GFTextLine(20, 130, 0, "how to evaluate ostards, how to bring them together");
+	GFTextLine(20, 150, 0, "to mate, and how to incubate and hatch the eggs.");
+	GFTextLine(20, 170, 0, "After reading the treatise, you learn that breeding");
+	GFTextLine(20, 190, 0, "ostards requires great skill in Animal Taming and");
+	GFTextLine(20, 210, 0, "that hatching the eggs can only be done by those");
+	GFTextLine(20, 230, 0, "well versed in Animal Lore.");
+	GFTextLine(20, 270, 0, "There are some confusing notes towards the end");
+	GFTextLine(20, 290, 0, "of the tome about two special ostards. Apparently,");
+	GFTextLine(20, 310, 0, "some rangers were able to breed sentient ostards");
+	GFTextLine(20, 330, 0, "by selectively breeding out the normally placid ");
+	GFTextLine(20, 350, 0, "nature of ostards. It doesn't go into much detail");
+	GFTextLine(20, 370, 0, "but it warns against breeding together the more");
+	GFTextLine(20, 390, 0, "violent ostard types. These ostards would be very");
+	GFTextLine(20, 410, 0, "difficult to breed indeed.");
+	
+	GFSendGump(user);
+	
+endfunction

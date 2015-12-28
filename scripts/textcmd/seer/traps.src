@@ -1,0 +1,105 @@
+use uo;
+use os;
+
+include "layout";
+include "include/cmdlevel_check";
+
+
+program textcmd_gmtools( params )
+  var who;
+  
+  if (!checkStaff(who, "traps", CMDLEVEL_SEER))
+		return 0;
+  endif
+	
+  if ( params[1] == "ICP" )
+    who := params[2];
+  else
+	who := params;
+  endif
+  if ( who  == -1 )
+	return 1;
+  endif
+  Detach();
+  maintaingump(who);
+endprogram
+
+function maintaingump(who)
+  var gmtool := SendDialogGump( who, layout, data);
+  case (gmtool[0])
+   11: setinfernotrap(who);
+   18: standard_trap(who, 3);
+   19: standard_trap(who, 2);
+   20: standard_trap(who, 1);
+   21: remove_trap(who);
+   22: hideinferno(who, 5);
+   23: hideinferno(who, 10);
+   24: showinferno(who, 5);
+   25: showinferno(who, 10);
+  endcase
+endfunction
+
+function hideinferno( who, range)
+  var i := 0;
+  foreach x in ListItemsNearLocationOfType(who.x, who.y, who.z, range, 0x888a)
+    x.graphic := 0x0001;
+    x.movable := 0;
+	i := i + 1;
+  endforeach
+  SendSysMessage(who, "Hid " + i + " infernos.");
+  maintaingump(who);
+endfunction
+
+function showinferno( who, range)
+  var i := 0;
+  foreach x in ListItemsNearLocationOfType(who.x, who.y, who.z, range, 0x888a)
+    x.graphic := 0x1ea7;
+	PrintTextAbove(x, "Hello, I am bringer of DOOM!");
+	i := i + 1;
+  endforeach
+  SendSysMessage(who, "Revealed " + i + " infernos.");
+  maintaingump(who);
+endfunction
+
+function remove_trap(who)
+  SendSysMessage(who,"Select the item to remove traps from.");
+  var chest := Target(who);
+  if (!chest)
+    SendSysMessage(who,"canceled");
+  else
+    var scr := GetObjProperty(chest,"usescript");
+    if (!scr || scr == error)
+      chest.usescript := "";
+    else
+      chest.usescript := scr;
+    endif
+	EraseObjProperty( chest, "trap_type" );
+	EraseObjProperty( chest, "trap_strength" );
+	EraseObjProperty( chest, "usescript" );
+  endif
+  maintaingump(who);
+endfunction
+
+function standard_trap(who, type)
+  var str := CInt(SendTextEntryGump( who, "What trap strength? [0 - 100]", 40 ));
+  SendSysMessage(who,"Select the item to place a trap on.");
+  var chest := Target(who);
+  if (!chest)
+    SendSysMessage(who,"canceled");
+  else
+    SetObjProperty(chest, "trap_type", type);
+    SetObjProperty(chest, "trap_strength", str);
+    SetObjProperty(chest, "usescript", chest.usescript);
+    SendSysMessage(who, "You carefully place the trap on the container.");
+    chest.usescript := ":zuluitems:tooltraps";
+  endif
+  maintaingump(who);
+endfunction
+
+function setinfernotrap(who)
+  SendSysMessage(who,"Set it where?");
+  var where := TargetCoordinates(who);
+  var landmine := CreateItemAtLocation(where.x, where.y, where.z, 0x888a, 1);
+  Detach();
+  maintaingump(who);
+endfunction

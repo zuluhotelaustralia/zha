@@ -1,0 +1,8 @@
+use uo;
+use os;
+
+program logon_wipe_IDing(who)
+
+	EraseObjProperty(who, "IDing");
+	
+endprogram

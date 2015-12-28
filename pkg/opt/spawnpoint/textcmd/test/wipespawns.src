@@ -1,0 +1,88 @@
+use uo;
+use os;
+
+include "include/constants/propids";
+include "include/managers";
+include "include/cmdlevel_check";
+
+program goto_spawnpoint( who, text )
+	if (!checkStaff(who, "gotospawnpoint", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+	if( !text )
+		SendSysMessage( who, "Usage is .wipespawns <template>" );
+		return 0;
+	endif
+
+	var spawnpoints := SendSpawnPointEvent(EVID_SPAWNPOINT_REQUEST_POINTS);
+	if( !spawnpoints )
+		SendSysMessage( who, "There's no runes in the world yet..." );
+		return 0;
+	endif
+
+	text := SplitWords(text);
+	var wanted := text[1];
+	if( !wanted )
+		SendSysMessage( who, "Bug in the command. Contact a Developer." );
+		return 0;
+	endif
+
+	var pt_data;
+	var found := {};
+	foreach point in spawnpoints
+		if( point )
+			pt_data := GetObjProperty( point, PROPID_SPAWNPOINT_SETTING );
+			if( !pt_data )
+				pt_data	    := {};
+				pt_data[1]  := "NPC";	// Type
+				pt_data[2]  := "nil";	// Template
+				pt_data[3]  := 0;	// Max appear
+				pt_data[4]  := 0;	// Appear Range
+				pt_data[5]  := 4;	// Wander Range
+				pt_data[6]  := 0;	// Frequency
+				pt_data[7]  := 0;	// Disabled
+				pt_data[8]  := 0;	// Spawn in group.
+				pt_data[9]  := 0;	// Despawn on destroy
+				pt_data[10] := 0;	// Expire time
+				pt_data[11] := 0;	// Expire number
+				pt_data[12] := 0;	// Start spawning hours
+				pt_data[13] := 0;	// End spawning hours
+				pt_data[14] := "";	// Notes
+				SetObjProperty( point, PROPID_SPAWNPOINT_SETTING, pt_data );
+			endif
+		
+			if( pt_data[2] == wanted )
+				found.append(point);
+			endif
+			if(TypeOf(pt_data[2]) == "Array") // Added by Seravy to check for arrays
+				if (wanted in pt_data[2])
+					found.append(point);
+				endif
+			endif
+			sleepms(2);
+		endif
+	endforeach
+
+	if( !found.Size() )
+		SendSysMessage( who, "There's no rune spawning this template." );
+		return 0;
+	endif
+
+	var killedspawns := 0;
+	if( !YesNo( who, "Are you sure you wish to wipe all "+ wanted + " spawn points?" ) )
+		SendSysMessage( who, "Canceled." );
+		return;
+	else
+	if( YesNo( who, "This will wipe all "+Len(found)+" "+ wanted + " spawnpoints, are you 100% sure?" ) )
+	foreach spawn in found
+		DestroyItem(spawn);
+		killedspawns := killedspawns+1;
+	endforeach
+	endif	
+	endif
+	SendSysMessage(who, "A Total of "+killedspawns+" spawnpoints of npctemplate "+wanted+" were destroyed.");
+
+endprogram
+
+

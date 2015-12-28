@@ -1,0 +1,99 @@
+use uo;
+
+include "include/cmdlevel_check";
+include "include/namechange";
+include "include/gumps";
+include "include/yesno";
+
+const NUM_CHANGES_PER_PAGE := 5;
+const HEIGHT := 300;
+
+program nameChange(who)
+	if (!checkStaff(who, "namechange", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+
+	SendSysMessage(who, "Whose name-change history to you wish to view?");
+	var tgt := Target(who);
+	if(!tgt)
+		SendSysMessage(who, "Canceled.");
+		return;
+	elseif(!(tgt.isA(POLCLASS_MOBILE) && !tgt.isA(POLCLASS_NPC)))
+		SendSysMessage(who, "Please target a player.");
+		return;
+	endif
+	
+	var nameChanges := getNameChanges(tgt);
+	
+	var i;
+	var numPages := (len(nameChanges)/NUM_CHANGES_PER_PAGE);
+	if (len(nameChanges)%NUM_CHANGES_PER_PAGE)
+		numPages := numPages + 1;
+	endif
+	var changeNum := 1; // Which change are we currently looking at?
+	var yOffset;
+
+	// START BUILDING GUMP.
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_GOLDTRIM, 600, HEIGHT);
+	
+	var addButton := GFButtonID(90, HEIGHT - 30, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(105, HEIGHT - 35, 0x0022, "Record current name");
+	var wipeButton := GFButtonID(290, HEIGHT - 30, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	GFTextLine(305, HEIGHT - 35, 0x0022, "Clear entire history (admin+)");
+	
+	GFTextLine(20, 10,  0x0035, "Name");
+	GFTextLine(150, 10, 0x0035, "Date/Time");
+	GFTextLine(350, 10, 0x0035, "By");
+	
+	// Add pages.
+	for (i := 1; i <= numPages; i := i + 1)
+		GFPage(i); // make the new page.
+		while ((changeNum <= (i*NUM_CHANGES_PER_PAGE)) && (changeNum <= len(nameChanges)))
+			yOffset := (changeNum - ((i-1)*NUM_CHANGES_PER_PAGE)) * 40;
+			GFTextLine(20, yOffset, 0x0040, nameChanges[changeNum].name);
+			GFTextLine(150, yOffset + 15, 300, nameChanges[changeNum].date);
+			GFTextLine(350, yOffset + 15, 300, nameChanges[changeNum].whoby);
+			
+			if (i > 1)
+				GFButtonPage(0, HEIGHT, G_BUTTON_PREVIOUS_0, G_BUTTON_PREVIOUS_1, i-1);
+			endif
+			if (i < (numPages))
+				GFButtonPage(545, HEIGHT, G_BUTTON_NEXT_0, G_BUTTON_NEXT_1, i+1);
+			endif
+			
+			changeNum := changeNum + 1;
+		endwhile
+	endfor
+	
+	var result := GFSendGump(who);
+	
+	if (result[addButton.keyid])
+		handleAddButton(who, tgt);
+	elseif (result[wipeButton.keyid])
+		handleWipeButton(who, tgt);
+	endif
+endprogram
+
+function handleAddButton(who, subject)
+	if (YesNo(who, "Record name?"))
+		addNameChange(subject, who/*by*/);
+		SendSysMessage(who, "\"" + subject.name + "\" added to their name-change history.");
+	else
+		SendSysMessage(who, "Canceled.");
+	endif
+endfunction
+
+function handleWipeButton(who, subject)
+	if (who.cmdlevel >= 4) // admin+
+		if (YesNo(who, "Clear record?"))
+			clearChanges(subject);
+			SendSysMessage(who, "Name-change record completely erased.");
+		else
+			SendSysMessage(who, "Canceled.");
+		endif
+	else
+		SendSysMessage(who, "Canceled.");
+	endif
+endfunction

@@ -1,0 +1,31 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program trap(who, words)
+	if (!checkStaff(who, "trap", CMDLEVEL_SEER))
+		return 0;
+	endif
+var wrds := SplitWords(words);
+
+var traptype := wrds[1];
+var traplvl := wrds[2];
+var keeptrap := wrds[3];
+
+SendSysMessage(who, "Select an item to trap");
+var what := Target(who, TGTOPT_NOCHECK_LOS);
+
+if(!what)
+	SendSysMessage(who, "Targetting canceled");
+	return;
+endif
+
+SetObjProperty(what, "trap_type", CStr(traptype));
+SetObjProperty(what, "trap_strength", CStr(traplvl));
+what.usescript := ":traps:traps";
+if (keeptrap)
+	SetObjProperty(what, "keep", 1);
+endif
+
+SendSysMessage(who, "trap set!");
+endprogram

@@ -1,0 +1,25 @@
+use uo;
+use cfgfile;
+include "include/cmdlevel_check";
+
+
+program load_tus_acct( who, filename )
+	if (!checkStaff(who, "loadtusacct", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    var tusfile := LoadTusScpFile( filename );
+    if (!tusfile)
+        SendSysMessage( who, "Unable to load: " + tusfile.errortext );
+        return;
+    endif
+
+    var n := GetConfigMaxIntKey( tusfile );
+    var i;
+    for( i := 1; i <= n; i := i + 1 )
+        var acct := tusfile[i];
+        print( "Acct: " + acct._key );
+        print( "  Password: " + acct.password );
+        print( "  Priv:     " + acct.priv );
+        print( "  Level:    " + acct.level );
+    endfor
+endprogram

@@ -1,0 +1,56 @@
+use uo;
+use os;
+
+include "include/classes";
+
+program summon_special_steed(who)
+
+	var class:= GetClass(who);
+	var level:= GetClasseLevel(who);
+	if (level < GET_STEED_AT_LEVEL)
+		return;
+	elseif (!(class==CLASSEID_PALADIN || class==CLASSEID_DEATHKNIGHT))
+		return;
+	endif
+	var currsteed:=GetObjProperty(who, "currsteed");
+	if (currsteed)
+		if (SystemFindObjectBySerial(currsteed))
+			SendSysMessage(who, "You already have a special steed!");
+			return;
+		endif
+	endif
+		
+	var laststeedat:=GetObjProperty(who, "#laststeedat");
+	if (!laststeedat)
+		laststeedat:=0;
+	endif
+	var laststeed:=ReadGameClock() - laststeedat;
+	if (laststeed < 86400)
+		SendSysMessage(who, "You cannot use this power for another "+(86400-laststeed)/60+" minutes");
+		return;
+	endif	
+	
+	var steed;
+	
+	if (class==CLASSEID_PALADIN)
+		steed:="paladinsteed";
+	else
+		steed:="deathknightsteed";
+	endif
+	
+	var mount:= CreateNpcFromTemplate(steed, who.x, who.y, who.z);
+	if (!mount)
+		SendSysMessage(who, "Summoning failed...");
+		return;
+	endif
+	
+	mount.script:="tamed";
+	mount.setmaster(who);
+	SetObjProperty(mount, "master", who.serial);
+	SetObjProperty(who, "currsteed", mount.serial);
+	SetObjProperty(who, "#laststeedat", ReadGameClock());
+	RestartScript(mount);
+	
+endprogram
+	
+	

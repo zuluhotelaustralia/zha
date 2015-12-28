@@ -1,0 +1,14 @@
+use uo;
+include "include/cmdlevel_check";
+
+program newbie( who )
+	if (!checkStaff(who, "newbie", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+      var what := Target( who );
+	what.newbie := 1;
+
+endprogram
+
+ 

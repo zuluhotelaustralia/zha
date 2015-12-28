@@ -1,0 +1,156 @@
+#
+#  PCS.TXT: Player-Character Data
+#
+#  In addition to PC data, this also contains hair, beards, death shrouds,
+#  and backpacks, but not the contents of each backpack.
+#
+
+Character
+{
+	Account	admin
+	CharIdx	0
+	Name	Admin
+	Serial	0x1a0edb
+	ObjType	0x190
+	Graphic	0x190
+	X	1450
+	Y	1624
+	Z	20
+	Facing	6
+	CProp	Equip i1
+	CProp	Fame i10400
+	CProp	HighSkill i43
+	CProp	ImmunityMatrix a12:a0:a0:a0:xa0:xa0:a0:xxa0:a0:
+	CProp	IsMage i4
+	CProp	IsPowerPlayer i4
+	CProp	IsRanger i4
+	CProp	IsThief i4
+	CProp	Karma i10000
+	CProp	KilledBy sa Golden Dragon
+	CProp	KilledBySerial i1707744
+	CProp	LFucker s1707739 - Admin
+	CProp	LastLog i25142884
+	CProp	NewRegenRateForlife i1200
+	CProp	NewRegenRateFormana i1200
+	CProp	NewRegenRateForstamina i1200
+	CProp	OnCreate i25065898
+	CProp	PermMagicImmunity i30
+	CProp	PermPoisonImmunity i10
+	CProp	Permmr i5
+	CProp	PhysicalProtection i0
+	CProp	PlayerAttackList a3:a2:i1720811i25514223a2:i1729653i25731128a2:i1707739i26008647
+	CProp	ProtectionMatrix a0:
+	CProp	Quester a1:i1793772162
+	CProp	TrainMaxCost i4000000
+	CProp	TrainSkillID i13
+	CProp	Type sUndead
+	CProp	abv s1
+	CProp	auction i1
+	CProp	autoloop i10
+	CProp	barter i1
+	CProp	basemanaregen i0
+	CProp	baseregen i0
+	CProp	basestamregen i-500
+	CProp	cap_pid i14940
+	CProp	currskbv1793096438 i0
+	CProp	currskbv1794651481 i0
+	CProp	currskbv1795957235 i0
+	CProp	currskbv1796725818 i0
+	CProp	currskbv1796725820 i0
+	CProp	currskbv1796756315 i0
+	CProp	currskbv1796792245 i0
+	CProp	dexmod i-3000
+	CProp	fealty i1707739
+	CProp	guardkill i1
+	CProp	guild_id i2
+	CProp	guildtitle sHead Developer
+	CProp	hearchat i3
+	CProp	intmod i6000
+	CProp	logontime i25141452
+	CProp	mailkeeper i35
+	CProp	newbie i999
+	CProp	onlinetimer i181412085
+	CProp	origform i400
+	CProp	qPObjComp1793772162 a1:i5100
+	CProp	strmod i-3030
+	CProp	talkchat i1
+	CProp	tamed_serials a2:i1744372i1746032
+	CmdLevel	test
+	TrueColor	0x83ea
+	TrueObjtype	0x190
+	Gender	0
+	Strength	6000
+	Intelligence	6000
+	Dexterity	6000
+	Alchemy	200
+	Anatomy	200
+	AnimalLore	200
+	ItemId	200
+	ArmsLore	200
+	Parry	200
+	Begging	200
+	Blacksmithy	200
+	Bowcraft	200
+	Peacemaking	200
+	Camping	200
+	Carpentry	200
+	Cartography	200
+	Cooking	200
+	DetectingHidden	200
+	Enticement	200
+	EvaluatingIntelligence	200
+	Healing	200
+	Fishing	200
+	ForensicEvaluation	200
+	Herding	200
+	Hiding	200
+	Provocation	200
+	Inscription	200
+	Lockpicking	200
+	Magery	200
+	MagicResistance	200
+	Tactics	200
+	Snooping	200
+	Musicianship	200
+	Poisoning	200
+	Archery	200
+	SpiritSpeak	200
+	Stealing	200
+	Tailoring	200
+	AnimalTaming	200
+	TasteIdentification	200
+	Tinkering	200
+	Tracking	200
+	Veterinary	200
+	Swordsmanship	200
+	Macefighting	200
+	Fencing	200
+	Wrestling	200
+	Lumberjacking	200
+	Mining	200
+	Meditation	200
+	Stealth	200
+	RemoveTrap	200
+	Life	6045
+	Mana	6005
+	Stamina	6000
+	Privs	clotheany dblclickany freemove hearghosts ignoredoors invul losany moveany renameany seeghosts seehidden seeinvisitems 
+	Settings	clotheany dblclickany freemove hearghosts ignoredoors invul losany renameany seeghosts seehidden seeinvisitems 
+	CreatedAt	25065898
+	TitleGuild	"Head Developer, [Staff]"
+	TitleRace	"human"
+}
+
+Item
+{
+	Serial	0x6ae06346
+	ObjType	0xe75
+	Graphic	0xe75
+	X	5123
+	Y	1779
+	Z	0
+	CProp	LFucker sAdmin1707739
+	Layer	21
+	Container	0x1a0edb
+	DecayAt	25866212
+}

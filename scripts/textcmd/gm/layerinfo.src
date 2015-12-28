@@ -1,0 +1,12 @@
+use uo;
+use os;
+include "include/client";
+program list_equip_by_layer(who, layer)
+
+	var targ:=target(who);
+	
+	layer:=CInt(layer);
+	sendsysmessage(who, "Cprops on that layer are: "+GetObjPropertyNames(GetEquipmentByLayer(targ, layer)), 3, 38);
+	
+endprogram
+	

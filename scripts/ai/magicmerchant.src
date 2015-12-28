@@ -1,0 +1,683 @@
+/* Magic Merchant                         **
+** A merchant that deals with magic items **
+** Uses starteqp.inc functions            **
+** Seravy - seravy@gmail.com              */
+
+use npc;
+use basic;
+use cfgfile;
+use datafile;
+use os;
+use uo;
+
+include "include/guardcall";
+include "include/dotempmods";
+include "include/attributes";
+include "include/eventid";
+include "include/npcbackpacks";
+include "include/randname";
+include "include/utility";
+include "include/mrcspawn";
+include "include/speech";
+include "include/myutil";
+include "ai/setup/modsetup";
+include "ai/main/sleepmode";
+include "include/random";
+
+include "include/starteqp";
+include "include/namingbyenchant";
+
+const REACT_THRESHOLD := 3;
+const RESPAWN_MINUTES := 30;
+const MAXFRIENDS      := 3;
+const MAX_SKILLS      := 52;
+const MAXITEMSRESTOCK := 5;
+const DEFAULTMAGICITEMCHANCE := 100;
+const DEFAULTMAGICLEVEL := 3;
+const DEFAULTMAGICSELLPRICE := 100000;
+
+
+var me := Self();
+var storage, inv_fs, inv_pb, inv_1c;
+
+storage := FindStorageArea( "Merchant Storage" );
+if (!storage)
+	exit;
+endif
+
+inv_fs := find_or_create_item( storage, me.serial + " FS", 0xe7c );
+inv_pb := find_or_create_item( storage, me.serial + " PB", 0xe7c );
+inv_1c := find_or_create_item( storage, me.serial + " 1C", 0xe7c );
+
+if (!inv_fs || !inv_pb || !inv_1c)
+	exit;
+endif
+
+var speech;
+var currentmoney;
+var restockmin;
+
+SetSpeechAndType();
+
+if( me.name["<random>"] )
+	SetMeUp();
+endif
+
+EnableEvents( REACT_THRESHOLD );
+
+program magicmerchant()
+	var tmptitle := SplitWords(me.title_suffix);
+	me.title_suffix := " " + tmptitle[1] + " " + tmptitle[2];
+
+	if ( me.graphic == 401 )
+		me.gender := 1;
+	endif
+	me.graphic := 400 + me.gender;
+
+	var next_restock := ReadGameClock() + restockmin*60;
+
+	EnableMainEvents();
+
+	var ev;
+	var mydestx := 0;
+	var mydesty := 0;
+	var steps   := 0;
+	var wanders := 60;
+	var next_wander := ReadGameClock();
+
+	while (1)
+
+		if (me.hidden)
+			me.hidden := 0;
+		endif
+
+		if (ReadGameClock() > next_wander)
+			PerformAction(me, ANIM_CAST_DIR);
+			next_wander := ReadGameClock() + 60;
+			wanders := wanders + 1;
+			if (wanders > 2)
+				wanders := 0;
+				ev := sleepmode();
+			endif
+		else
+			ev := os::wait_for_event( 2 );
+		endif
+
+		if (ev)
+			if (ProcessEvent(ev, mydestx, mydesty, steps))
+				next_wander := ReadGameClock() + 60;
+			endif
+		elseif (ReadGameClock() > next_restock)
+			if ( GetObjProperty(me, "restock") )
+				PerformAction(me, ANIM_CAST_AREA);
+				RestockMagicalItems(inv_fs);
+				EraseObjProperty(me, "restock");
+			endif
+			next_restock := ReadGameClock() + restockmin*60;
+			
+		endif
+
+	endwhile
+
+endprogram
+
+function ProcessEvent(byref ev, byref mydestx, byref mydesty, byref steps)
+
+	if (ev.source.isA(POLCLASS_NPC))
+		return 0;
+	endif
+
+	case (ev.type)
+
+		SYSEVENT_ENGAGED:
+			say( ev.source.name + ", I'll call a guard, if you don't stop that!");
+		SYSEVENT_DAMAGED:
+			SetHp(me, GetMaxHP(me));
+			if( me.poisoned ) CurePoison( me ); endif
+			// ev.source.hp := 0; hploss removed
+			say("Help guards!!! I'm being attacked!!");
+			SetObjProperty(me, "guardkill", 1);
+			start_script( ":areas:callguards", me );
+			sleep(5);
+			say("You scoundrel!!!");
+
+			foreach chr in EnumerateOnlineCharacters()
+				if (chr.cmdlevel>0)
+					SendSysMessage(chr, CStr(ev.source.name + " is attacking an invul NPC!!!"), 3, 130);
+				endif
+			endforeach
+			me.hidden := 1;
+			sleep(200);
+			me.hidden := 0;
+
+		SYSEVENT_ENTEREDAREA:
+			foreach mob in ListMobilesInLineOfSight( me, 8)
+				if (mob.npctemplate)
+					if (mob.script=="killpcs" || mob.script=="killpcsTeleporter" ||
+					mob.script=="spellkillpcs" || mob.script=="spellkillpcsTeleporter"
+					||mob.script=="firebreather")
+						say("Guards!!!");
+						CallGuardOnNPC(mob, me);
+					endif
+			
+				endif
+			endforeach
+		SYSEVENT_SPEECH:
+			TurnToward(ev.source);
+			if (ev.text["buy"])
+				var res;
+				foreach item in (ev.source.backpack)
+					if(item.objtype == 0xeed)
+					     ReserveItem(item);
+					endif
+				endforeach
+				res := SendBuyWindow( ev.source, inv_fs, me, inv_pb );
+				foreach item in (ev.source.backpack)
+					if(item.objtype == 0xeed)
+					     ReleaseItem(item);
+					endif
+				endforeach
+				if (!res)
+					print( "SendBuyWindow failed: " + res.errortext );
+				endif
+			elseif (ev.text["sell"])
+				say("Sorry. I don't buy magical items yet. Mabye later");
+			else
+				check_speech(ev.text, ev.source);
+			endif
+
+		SYSEVENT_MERCHANT_BOUGHT:
+			TurnToward( ev.source );
+			PrintTextAbovePrivate( me, "The total of your sale is " + ev.amount, ev.source );
+			set_priority( 50 );
+			SetObjProperty(me, "restock", 1);
+			var currentamount := CheckMoney(ev.source)-currentmoney;
+			var newamount := ev.amount - currentamount;
+			while( newamount > 60000 )
+				CreateItemInBackpack( ev.source, UOBJ_GOLD_COIN, 60000 );
+				newamount := newamount - 60000;
+			endwhile
+			if( newamount > 0 ) CreateItemInBackpack( ev.source, UOBJ_GOLD_COIN, newamount ); endif
+			newamount := 0;
+
+		SYSEVENT_MERCHANT_SOLD:
+			TurnToward( ev.source );
+			PrintTextAbovePrivate( me, "The total of your purchase is " + ev.amount, ev.source );
+                        LogMaigcBuy(ev.source, me, ev.amount);								
+			SetObjProperty(me, "restock", 1);
+                        if (GetObjProperty(me, "MagicVenderType") == 2)
+                          IdentifyInventory(ev.source.backpack);
+                          if (GetObjProperty(me, "mV-GamblerRetockAfterBuy"))
+                            RestockMagicalItems(inv_fs);
+                          endif
+                        endif
+
+		SYSEVENT_ITEM_GIVEN:
+			TakeItem(ev.source, ev.item);
+
+		EVID_ALL_FOLLOW_CMD:
+			mydestx := ev.x;
+			mydesty := ev.y;
+			steps := 0;
+			SetAnchor( mydestx, mydesty, 3, 80 );
+			WalkTowardLocation(mydestx, mydesty);
+
+	endcase
+
+	return 1;
+
+endfunction
+
+function CheckMoney(who)
+
+   var totalmoney := 0, backpack := EnumerateItemsInContainer(who.backpack);
+
+   foreach item in backpack
+      if (item.objtype == UOBJ_GOLD_COIN)
+        totalmoney := totalmoney + GetAmount(item);
+      endif
+   endforeach
+   return totalmoney;
+endfunction
+
+
+function SetMeUp()
+  SetObjProperty(me, "serial", me.serial);
+
+  me.gender := Random(2);
+  me.graphic := 400+me.gender;
+
+  me.name := RandomName( me );
+
+  var style := "funky";
+
+  var parms := {};
+  parms[1]:= me;
+  parms[2]:= style;
+  set_priority( 1 );
+  start_script("::/misc/dressme", parms);
+
+  if (!me.title_suffix)
+    var names := SplitWords(me.name);
+    if ( names[2] == "the" )
+      if (GetObjProperty(me, "MagicVenderType") == 1)
+        me.title_suffix := " the Magistic Collector";
+      else
+        me.title_suffix := " the Magistic Gambler";
+      endif        
+      me.name := names[1];
+    endif
+  endif
+
+  if (!GetObjProperty(me, "mV-MaxRestockitems"))
+    SetObjProperty(me, "mV-MaxRestockitems", MAXITEMSRESTOCK);
+  endif
+
+  RestockMagicalItems(inv_fs);
+endfunction
+
+function SetSpeechAndType()
+
+	var npccfg := ReadConfigFile("npcdesc");
+	var elem := npccfg[me.npctemplate];
+	speech := GetConfigString(elem, "speech");
+
+  if (GetObjProperty(me, "mV-RestockTime"))
+//    restockmin := GetObjProperty(me, "mV-RestockTime");
+    restockmin := 0.1;
+  else
+    restockmin := RESPAWN_MINUTES;
+  endif
+endfunction
+
+function EnableMainEvents()
+
+	EnableEvents( SYSEVENT_ITEM_GIVEN );
+	EnableEvents( SYSEVENT_ENGAGED);
+	EnableEvents( SYSEVENT_DAMAGED );
+	EnableEvents( SYSEVENT_ENTEREDAREA, 4 );
+	EnableEvents( SYSEVENT_SPEECH, 1 );
+
+endfunction
+
+function DisableMainEvents()
+
+	DisableEvents( SYSEVENT_ITEM_GIVEN );
+	DisableEvents( SYSEVENT_SPEECH );
+
+endfunction
+
+function IsMagicItem(item)
+	if ( item.desc["magic"] )
+		return 1;
+	else
+		return 0;
+	endif
+endfunction
+
+
+
+function RestockMagicalItems(inventory)
+
+
+
+  /*************************** Is a Magic Dealer or Gambler ***************************/
+  if (GetObjProperty(me, "MagicVenderType") == 1 || GetObjProperty(me, "MagicVenderType") == 2) 
+    var noOfItemsToDo := GetObjProperty(me, "mV-MaxRestockitems")-myInventoryCount();
+    var i, itemtypes := {};
+    magicspawnchance := DEFAULTMAGICITEMCHANCE;
+    if(GetObjProperty(me, "mV-MagicChance"))
+      magicspawnchance := GetObjProperty(me, "mV-MagicChance");
+    endif
+    basechance := magicspawnchance;
+    magiclevel := DEFAULTMAGICLEVEL;
+    baselevel := magiclevel;
+
+    if (noOfItemsToDo < 1) return; endif
+
+    for (i := 0; i < noOfItemsToDo; i := i + 1)
+      var tempItemType := getRandomItemType();
+      if(GetObjProperty(me, "mV-MagicLevel"))
+        magiclevel := GetRandomMagicLevel(GetObjProperty(me, "mV-MagicLevel"));
+        baselevel := magiclevel;
+      endif
+
+
+      if (tempItemType)
+        itemtypes.append(tempItemType);
+      endif
+    endfor
+
+    foreach itemtype in itemtypes
+      var itemstring := CStr(1+" "+itemtype);
+      set_critical(1);
+      CreateFromItemString(inventory, itemstring);
+      SetupInventory(); // It could still be possible to buy item for orignal sellvalue :/
+      if (GetObjProperty(me, "MagicVenderType") != 2)
+        IdentifyInventory(inv_fs); // Identify it if your not a gambler.
+      endif
+      set_critical(0);
+      sleepms(100);
+    endforeach
+   
+  /**************************** Is a Loot Dealer ****************************/
+  elseif (GetObjProperty(me, "MagicVenderType") == 3 && GetObjProperty(me, "mV-MonsterTemplate")) // Is a loot dealer
+    var npcdesc := ReadConfigFile( "::npcdesc" );
+    var elem := FindConfigElem( npcdesc, GetObjProperty(me, "mV-MonsterTemplate"));
+    var mprop;
+    var mlevel;
+    var lootgroups;
+    if( elem )
+      mprop  := GetConfigInt( elem, "Magicitemchance");
+      mlevel := GetConfigInt( elem, "Magicitemlevel");
+      lootgroups := GetConfigStringArray( elem, "lootgroup" );
+    endif
+    if( mprop )
+      magicspawnchance := mprop;
+      basechance := magicspawnchance;
+    endif
+    if( mlevel )
+      magiclevel := mlevel;
+      baselevel := magiclevel;
+    endif
+    foreach str in lootgroups
+      CreateFromGroup(inventory, CInt(str));
+    endforeach
+  /**************************** Donno what the hell it is! ****************************/
+  else
+    foreach chr in EnumerateOnlineCharacters()
+      if (chr.cmdlevel>0)
+        SendSysMessage(chr, CStr("Vendor "+me.name+" isn't set up right ("+me.x+","+me.y+")"), 3, 130);
+      endif
+    endforeach
+  endif
+endfunction
+
+
+
+function myInventoryCount()
+  var myitems := 0;
+
+  if (GetObjProperty(me, "MagicVenderType") == 2)
+    if (GetObjProperty(me, "mV-GamblerDeletesInventory"))
+      foreach item in EnumerateItemsInContainer(inv_fs)
+        destroyItem(item);
+      endforeach
+    endif
+  endif
+
+  foreach item in EnumerateItemsInContainer(inv_fs)
+      myitems := myitems + item.amount;
+  endforeach
+  return myitems;
+endfunction
+
+
+function getRandomItemType()
+  var tempitemtype, itemList := {};
+  var cfgFile := ReadConfigFile("::nlootgroup");
+
+  var chanceOfNormalWeapons := 25;
+  var chanceOfNormalArmor := 25;
+  var chanceOfClothes := 15;
+  var chanceOfJewelry := 15;
+  var chanceOfMagicWeapons := 20;
+  var chanceOfGMArmor := 0.0;
+  var chanceOfGMWeapon := 0.0;
+
+  var decimalPlaces := 10;
+  var total := CInt(decimalPlaces*(chanceOfNormalWeapons + chanceOfNormalArmor + chanceOfClothes + chanceOfJewelry + chanceOfMagicWeapons + chanceOfGMArmor + chanceOfGMWeapon));
+  var totalSoFar := (chanceOfGMWeapon * decimalPlaces);
+  var randomValue := RandomInt(total);
+  var groupString := "GMWeapon";
+  
+  if (!(randomValue < totalSoFar))
+    groupString := "GMArmor";
+    totalSoFar := totalSoFar + (chanceOfGMArmor * decimalPlaces);
+    if (!(randomValue < totalSoFar))
+      groupString := "MagicWeapons";
+      totalSoFar := totalSoFar + (chanceOfMagicWeapons * decimalPlaces);
+      if (!(randomValue < totalSoFar))
+        groupString := "Jewelry";
+        totalSoFar := totalSoFar + (chanceOfJewelry * decimalPlaces);
+        if (!(randomValue < totalSoFar))
+          groupString := "Clothes";
+          totalSoFar := totalSoFar + (chanceOfClothes * decimalPlaces);
+          if (!(randomValue < totalSoFar))
+            groupString := "NormalArmor";
+            totalSoFar := totalSoFar + (chanceOfNormalArmor * decimalPlaces);
+            if (!(randomValue < totalSoFar))
+              groupString := "NormalWeapons";
+            endif
+          endif
+        endif
+      endif
+    endif
+  endif
+
+  var elem := FindConfigElem( cfgFile, groupString);
+  if(!elem)
+    return;
+  endif
+  foreach item in GetConfigStringArray(elem, "Item")
+    itemList.append(item);
+  endforeach
+  tempitemtype := itemList[(RandomInt(itemList.size())+1)];
+
+  return tempitemtype;
+endfunction
+
+function IdentifyInventory(inventory)
+  foreach item in EnumerateItemsInContainer(inventory)
+
+    if(GetObjProperty(item, "MagicVendor"))
+      if(!GetObjProperty(item, "IDed"))
+        SetObjProperty(item, "IDed", 1 );
+      
+        if (GetObjProperty(item, "UnIDedMagicalItem") || GetObjProperty(item, "Enchanted") || GetObjProperty(item, "IsGMItem") || GetObjProperty(item, "EnchantColor") || GetObjProperty(item, "StaticName"))
+          SetNameByEnchant(item);
+        endif
+      endif
+    endif
+  endforeach
+endfunction
+
+function SetupInventory()
+  foreach item in EnumerateItemsInContainer(inv_fs)
+    if(!GetObjProperty(item, "MagicVendor"))
+      if(!GetObjProperty(me, "LFucker")) 
+        SetObjProperty(item, "LFucker", "Noone"); 
+      endif
+      SetObjProperty(item, "MagicVendor", CStr("Made by vendor "+me.serial+" with magic level '"+GetObjProperty(me, "mV-MagicLevel")+"' last GM modification by "+GetObjProperty(me, "LFucker")));
+      item.sellprice := GetPriceOfItem(item);
+    endif
+  endforeach
+endfunction
+
+function GetPriceOfItem(item)
+  var sellprice;
+  if (GetObjProperty(me, "MagicVenderType") == 2) // If its a gambler, Sell for set price!
+    var magicSellPrice := GetObjProperty(me, "mV-MagicSellPrice");
+    if (!magicSellPrice)
+      magicSellPrice := DEFAULTMAGICSELLPRICE;
+    endif
+    sellprice := magicSellPrice;
+  else
+    sellprice := item.sellprice + 1000;
+//    sellprice := sellprice*1000;
+    
+    var isGm := GetObjProperty(item, "IsGMItem");
+    if (isGm) // Its it a gm item?
+      sellprice := sellprice + 1500000;
+    endif
+
+    var hitscript := GetObjProperty(item, "HitscriptNumber");
+    if (hitscript) // Does it have a hit script? (weapon)
+      if (hitscript <= 18) // Spell Hit scripts
+        sellprice := sellprice + (500 * hitscript);
+      elseif (hitscript <= 34) // Slayer Hit scripts
+        sellprice := sellprice + (30000);
+      elseif (hitscript == 35) // (Assasins) Slayer Hit scripts
+        sellprice := sellprice + (50000);
+      elseif (hitscript <= 42) // Affect Hit scripts
+        sellprice := sellprice + (15000);
+      else // Greater Hit scripts (DANGEROUS!)
+        sellprice := sellprice + (2000000);
+      endif
+    endif
+
+
+    var onhitscript := GetObjProperty(item, "OnHitscriptNumber"); 
+    if (onhitscript) // Does it have a On hit script? (Armour)
+      if (onhitscript <= 18) // Spell On Hit scripts
+        sellprice := sellprice + (500 * onhitscript);
+      elseif (onhitscript <= 34) // Race Resistant scripts
+        sellprice := sellprice + (10000);
+      elseif (onhitscript == 35) // (Human) Race Resistant scripts
+        sellprice := sellprice + (20000);
+      elseif (onhitscript <= 42) // Effect on hit scripts
+        sellprice := sellprice + (15000);
+      else // Greater Hit scripts (DANGEROUS!)
+        sellprice := sellprice + (2000000);
+      endif
+    endif
+
+    if (item.dmg_mod) // Has a damage Mod
+      sellprice := sellprice + (item.dmg_mod * 2000);
+    endif    
+
+    if (item.ar_mod) // Has a armour mod
+      sellprice := sellprice + (item.ar_mod * 1000);
+    endif    
+
+    var armourBonus := GetObjProperty(item, "ArBonus");
+    if (armourBonus) // Has armour bonus
+      sellprice := sellprice + (armourBonus * 1500);
+    endif
+
+    foreach prot in immunities // Element Immunitys
+      if (GetObjProperty(item, prot))
+        sellprice := sellprice + (GetObjProperty(item, prot) * 5000);
+      endif
+    endforeach
+
+    foreach mod in regenerations // Regeneration mods
+      if (GetObjProperty(item, mod))
+        sellprice := sellprice + (GetObjProperty(item, mod) * 3000);
+      endif
+    endforeach
+
+    var posionImm := GetObjProperty(item, "PoisonImmunity");
+    if (posionImm) // Poison Immunity
+      sellprice := sellprice + (5000);
+    endif
+
+    var magicImm := GetObjProperty(item, "MagicImmunity");
+    if (magicImm) // Magic Immunity
+      sellprice := sellprice + (4500);
+    endif
+
+    var magicReflect := GetObjProperty(item, "SpellReflect");
+    if (magicReflect) // Magic Reflect
+      sellprice := sellprice + (4000);
+    endif
+
+
+    if (item.maxhp_mod) // Item Has a hp Mod
+      sellprice := sellprice + (item.maxhp_mod * 1000);
+    endif 
+
+    if (GetObjProperty(item, "str"))
+      sellprice := sellprice + (GetObjProperty(item, "str") * 2000);
+    elseif (GetObjProperty(item, "int"))
+      sellprice := sellprice + (GetObjProperty(item, "int") * 2000);
+    elseif (GetObjProperty(item, "dex"))
+      sellprice := sellprice + (GetObjProperty(item, "dex") * 2000);
+    endif
+
+    if (GetObjProperty(item, "skilladv"))
+     sellprice := sellprice + (GetObjProperty(item, "skilladvamount") * 5000);
+    endif
+
+
+    var enchantment := GetObjProperty(item, "Enchanted"); // Is Enchanted?
+    if (enchantment == "Mystical") // Mystical
+      sellprice := sellprice * 1.7;
+    elseif (enchantment == "Swift") // Swift
+      sellprice := sellprice * 1.7;
+    elseif (enchantment == "Stygian") // Stygain
+      sellprice := sellprice * 1.95;
+    endif
+
+  endif
+  return sellprice;
+endfunction
+
+function GetRandomMagicLevel(levelArray)
+  levelArray := SplitWords(levelArray);
+  var i, chanceArray := {};
+  for (i := 1; i <= sizeOf(levelArray); i := i + 2)
+    if (levelArray[i] && levelArray[i+1])
+      if (CInt(levelArray[i]) > 0 && CInt(levelArray[i]) < 11)
+        chanceArray.append({CInt(levelArray[i]), CDbl(levelArray[i+1])});
+      endif
+    endif
+  endfor
+
+
+  if (chanceArray.size() < 1)
+    return DEFAULTMAGICLEVEL;
+  endif
+
+  var total := CDbl(0);
+  foreach chance in chanceArray
+    total := CDbl(total + chance[2]);
+  endforeach
+
+  
+var randomValue := CDbl(RandomInt(CInt(total * 100)))/100;
+//randomValue := CDbl(randomValue);
+  
+  //broadcast("random: "+ randomValue);
+  var tallysofar := CDbl(0);
+  for (i := 1; i <= chanceArray.size(); i := i+1)
+    tallysofar := CDbl(tallysofar + chanceArray[i][2]);
+
+    //broadcast( randomValue+" <= "+tallysofar+"??");
+    if (randomValue <= tallysofar)
+      //broadcast( "Returning level: "+chanceArray[i][1]);
+      return CInt(chanceArray[i][1]);
+    endif
+  endfor
+
+    return DEFAULTMAGICLEVEL;
+endfunction
+
+function LogMaigcBuy(me, vendor, price)
+  var file := OpenDataFile("::log-player-magicvendortally");
+  if (!file || file ==error)
+    CreateDataFile("::log-player-magicvendortally");
+  endif
+
+  var element := file.FindElement(CStr(me.serial));
+  if (!element || element == error)
+    element := file.CreateElement(CStr(me.serial));
+  endif
+  var total := CInt(element.GetProp("total"));
+  if (!total || total==error)
+    total := 0;
+  endif
+  total := total + price;
+  element.SetProp("total", CInt(total));
+  
+  var vendorArray := element.GetProp("vendors");
+  if (!vendorArray)
+    vendorArray := {};
+  endif
+  if(!(vendor.serial in vendorArray))
+    vendorArray.append(vendor.serial);
+    element.SetProp("vendors", vendorArray);
+  endif
+
+  UnloadDataFile("::log-player-magicvendortally");
+endfunction

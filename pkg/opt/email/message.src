@@ -1,0 +1,25 @@
+use uo;
+use os;
+include"include/gumps";
+
+program email_message(who);
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "*IMPORTANT - PLEASE READ*");
+	GFTextLine(40, 50, 5, "We have installed a new email password system.");
+	GFTextLine(40, 70, 5, "You will no longer be able to change the email");
+	GFTextLine(40, 90, 5,  "on your account without entering your ZHA email");
+	GFTextLine(40, 110, 5, "password first. This password is NOT retrievable");
+	GFTextLine(40, 130, 5, "using the homepage password retrieval system.");
+	GFTextLine(40, 150, 5, "So DON'T FORGET IT!");
+	GFTextLine(40, 170, 68, "New commands:");
+	GFTextLine(50, 190, 53, ".email    - Change your email");
+	GFTextLine(50, 210, 53, ".emailpassword   - Change your zha email password");
+	GFTextLine(40, 250, 68, "Click this button to set your new email password");
+	var button1  := GFButtonID( 20, 255, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	var result := GFSendGump(who);
+	if (result[button1.keyid])
+		start_script("textcmd/player/emailpassword", who);
+	endif
+endprogram

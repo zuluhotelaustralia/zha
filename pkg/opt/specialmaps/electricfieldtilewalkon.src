@@ -1,0 +1,28 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+program gravewalkon_lava( who, fieldtile )
+	if (who.dead || !who.acct)
+		return;
+	endif
+	if (CheckCurrentField(fieldtile))
+		return;
+	endif
+	sleep(2);
+	var thefield := CreateItemAtLocation( fieldtile.x, fieldtile.y, fieldtile.z, 0x3967);
+	if (thefield)
+		PlaySoundEffect( thefield, 0x1E0 );
+		SetObjProperty(fieldtile, "currentFieldSer", thefield.serial);
+	endif
+endprogram
+
+function CheckCurrentField(fieldtile)
+	//returns true if has field
+	if (!GetObjProperty(fieldtile, "currentFieldSer"))
+		return 0;
+	endif
+	return 1;
+endfunction
+

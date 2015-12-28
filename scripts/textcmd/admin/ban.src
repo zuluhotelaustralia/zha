@@ -1,0 +1,16 @@
+use os;
+use uo;
+
+// .unban <accountname>
+//
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_unban( who )
+	if (!checkStaff(who, "ban", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+        SendSysMessage( who, ".account <accountname> ban|unban|enable|disable" );
+
+endprogram

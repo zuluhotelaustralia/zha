@@ -1,0 +1,101 @@
+/* Psionics Spell - Psychoportation **
+** Teleport to a location           **
+** Seravy - seravy@gmail.com        */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/speedhackRecallCheck";
+
+const SPELL_ID := SPELL_ID_PSYCHOPORTATION;
+
+var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
+
+program cast_psychoportation( parms )
+
+  var circle := GetCircle(SPELL_ID);
+  var caster;
+  var where;
+  var bx;
+  var by;
+  var bz;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    where := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+
+  else
+    caster := parms;
+    where := CanTargetArea(caster, circle);
+    if (!where)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  bx:=caster.x;
+  by:=caster.y;
+  bz:=caster.z;
+	
+  if (caster.z > where.z+10 || caster.z < where.z-10)
+    SendSysMessage( caster, "You can't see that." );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+	
+  if (! CheckLosAt( caster, where.x, where.y, where.z ))
+    SendSysMessage( caster, "You can't see that." );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+  var firefield := CreateItemAtLocation(where.x, where.y, where.z, "firefield" ); //chose firefield cos if shard fails as script run it wont be made at reboot
+  if (!firefield)
+    SendSysMessage( caster, "You can't see that." );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  firefield.invisible:=1;
+	
+  if (! CheckLineOfSight(firefield, caster) ||  ! CheckLineOfSight(caster, firefield) || Distance(caster,firefield)>22)
+    SendSysMessage( caster, "You can't see that." );
+    DestroyItem(firefield);
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  DestroyItem(firefield);
+
+  foreach item in ListItemsNearLocation( CInt(where.x), CInt(where.y), CInt(where.z), 4 );
+    if( (item.objtype == 61457 || item.objtype == 61458) &&
+          (GetMapInfo(where.x,where.y).landtile in water) )
+      SendSysMessage( caster, "You cannot teleport there." );
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endforeach
+
+  var sx := caster.x, sy := caster.y, sz := caster.z;
+  MoveCharacterToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z) );
+  SetSpeedCheckNote(caster);
+  PlayStationaryEffect( sx, sy, sz, FX_SPELL_PSYCHOPORTATION, SPEED_SPELL_PSYCHOPORTATION, LOOP_SPELL_PSYCHOPORTATION );
+  PlayStationaryEffect( CInt(caster.x), CInt(caster.y), CInt(caster.z), FX_SPELL_PSYCHOPORTATION, SPEED_SPELL_PSYCHOPORTATION, LOOP_SPELL_PSYCHOPORTATION );
+
+  PlaySoundEffect( caster, SFX_SPELL_PSYCHOPORTATION );
+
+
+  if (caster.multi)
+    MoveCharacterToLocation( caster, bx, by, bz );
+    print("You Cannot Teleport Here!");
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+
+endprogram

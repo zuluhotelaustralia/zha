@@ -1,0 +1,89 @@
+//
+// .create command - create items
+// Items created with this command will not decay.
+// Two forms:
+//   ".create [objtype] [amount]" - specify object type and amount
+//       amount defaults to 1
+//   ".create" - show the item creation menu, create one of that item
+//
+use cfgfile;
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_create( staff_member, text )
+	if (!checkStaff(staff_member, "create", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    if( text )
+        var parameters := SplitWords(text);
+        var objtype    := CInt(parameters[1]);
+
+        if( !objtype )
+            objtype := GetObjtypeByName(parameters[1]);
+            if( !objtype )
+            	SendSysMessage(staff_member, parameters[1] + " isn't recognized as an existing objname.");
+            	return 0;
+            endif
+        endif
+       
+        if( objtype > 0x3fff )
+        	var item_cfg  := ReadConfigFile(":*:itemdesc");
+        	var item_elem := FindConfigElem(item_cfg, objtype);
+        	if( !item_elem )
+        		SendSysMessage(staff_member, parameters[1] + " isn't recognized as an existing objtype.");
+				return 0;
+			endif
+		endif
+	
+		var item := CreateItemAtLocation(staff_member.x, staff_member.y, staff_member.z, objtype, 1);
+		if( item )
+			item.decayAt := 0;
+			log(staff_member, item);
+			SetObjProperty(item, "LFucker", staff_member.name + staff_member.serial);
+			return 1;
+		else
+			SendSysMessage(staff_member, "Couldn't create item '" + parameters[1] + "', errortext: " + item.errortext);
+			return 0;
+		endif
+	else
+		SendSysMessage(staff_member, "Usage is: .create <objtype> or .create <objname>");
+		return 0;
+    endif
+endprogram
+
+function log(who, item)
+var where := who;
+var desc := who.name + " / " + who.acctname;
+
+var elemkey := desc;
+var props := array;
+var prop := array;
+prop .+ pname;
+prop .+ pvalue;
+
+prop.pname := "item";
+prop.pvalue := item.name;
+props[1] := prop;
+
+prop.pname := "serial";
+prop.pvalue := item.serial;
+props[2] := prop;
+
+prop.pname := "myserial";
+prop.pvalue := who.serial;
+props[3] := prop;
+
+prop.pname := "amount";
+prop.pvalue := item.amount;
+props[4] := prop;
+
+prop.pname := "x y z";
+prop.pvalue := where.x + " " + where.y + " " + where.z;
+props[5] := prop;
+
+
+AppendConfigFileElem( "createstack", "createstack", elemkey, props );
+UnloadConfigFile("createstack");
+endfunction

@@ -1,0 +1,88 @@
+/* Druid Spell - Resurrect Animal      **
+** Resurects anima as venterian would. **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_RESURRECTANIMAL;
+
+program cast_resurrectanimal(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetThing(caster, circle, TGTOPT_CHECK_LOS );
+//    var cast_on := Target(caster, TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+//  var clevel := CInt(GetClasseLevel(caster));
+
+  if( !GetObjProperty( cast_on, "resattempt" ) )
+    SetObjProperty( cast_on, "resattempt", 1 );
+  else
+    SendSysMessage( caster, "Someone is already resurrecting the creature." );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+  var npctemplate := GetObjProperty(cast_on, "npctemplate");
+
+  var conf := ReadConfigFile( ":*:npcdesc" );
+  var elem := FindConfigElem( conf, npctemplate );
+  var difficulty;
+
+  if( !elem || GetObjProperty(cast_on, "noresurrect"))
+    SendSysMessage( caster, "You can't resurrect that!" );
+    EraseObjProperty( cast_on, "resattempt" );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  var pname := GetConfigString( elem, "name" );
+
+  if( !GetObjProperty( cast_on, "untamable" ) )
+    difficulty := GetObjProperty( cast_on, "tamableAt" );
+    if( !difficulty )
+      difficulty := GetConfigInt( elem, "tameskill" );
+    endif
+  endif
+
+  if( !difficulty )
+    SendSysMessage( caster, "You can't resurrect that!" );
+    EraseObjProperty( cast_on, "resattempt" );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+  difficulty := difficulty+30;
+
+  if( CheckSkill(caster, SKILLID_NATURELORE, difficulty, 0))
+    SendSysMessage(caster, "You resurrected " + pname +"." );
+    var newmonster := CreateNpcFromTemplate(npctemplate, cast_on.x, cast_on.y, cast_on.z);
+    DestroyItem(cast_on);
+    SetObjProperty(newmonster, "noloot", 1);
+    PlayObjectCenteredEffect(newmonster, FX_SPELL_RESURRECTANIMAL, SPEED_SPELL_RESURRECTANIMAL, LOOP_SPELL_RESURRECTANIMAL);
+    PlaySoundEffect(newmonster, SFX_SPELL_RESURRECTANIMAL);
+  else
+    SendSysMessage( caster, "You couldn't resurrect " + pname +".");
+    EraseObjProperty( cast_on, "resattempt" );
+  endif
+
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

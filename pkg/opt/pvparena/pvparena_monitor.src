@@ -1,0 +1,122 @@
+use uo;
+
+include "pvparena";
+
+program arena_monitor(parms)
+	var team1 := parms[1];
+	var team2 := parms[2];
+	var stone := parms[3];
+	var options := parms[4];
+	
+	var prebless, detect;
+	if (BitAnd(options, PVPARENA_OPTION_DETECT))
+		detect := 1;
+	endif
+	if (BitAnd(options, PVPARENA_OPTION_PREBLESS))
+		prebless := 1;
+	endif
+	
+	// No Prebless / refresh vitals
+	foreach member in team1
+		fixStats(member, !prebless);
+		
+	endforeach
+	foreach member in team2
+		fixStats(member, !prebless);
+	endforeach
+	
+	messagePlayers(team1, "You have 8 minutes to fight. Good luck!", 3, 38);
+	messagePlayers(team2, "You have 8 minutes to fight. Good luck!", 3, 38);
+	
+	toggleDoors(stone, "*Fight!*"); // Open the doors, and leave them open until the fight is over.
+	
+	var finishtime := ReadGameClock() + (8*60); // Give them 8 minutes to finish the fight.
+	var whoWon := 0, detectcounter := 3;
+	while (!whoWon)
+		sleep(10);
+		if (detect)
+			if (!detectcounter)
+				detectHidden(team1, team2);
+				detectcounter := 3;
+			else
+				detectcounter := detectcounter - 1;
+			endif
+		endif
+		
+		whoWon := fightOver(team1, team2, finishtime);		
+	endwhile
+
+	case (whoWon)
+		1:	messagePlayers(team1, "Your team has won the battle!", 3, COLOR_YELLOW);
+			messagePlayers(team2, "Your team has lost the battle.", 3, COLOR_YELLOW);
+			break;
+		2:	messagePlayers(team1, "Your team has lost the battle.", 3, COLOR_YELLOW);
+			messagePlayers(team2, "Your team has won the battle!", 3, COLOR_YELLOW);
+			break;
+		3:	messagePlayers(team1, "It's a draw - everyone's out!", 3, COLOR_YELLOW);
+			messagePlayers(team2, "It's a draw - everyone's out!", 3, COLOR_YELLOW);
+			break;
+		4:	messagePlayers(team1, "It's a draw - you took too long!", 3, COLOR_YELLOW);
+			messagePlayers(team2, "It's a draw - you took too long!", 3, COLOR_YELLOW);
+	endcase
+	
+	toggleDoors(stone);
+	
+	cleanup(stone);
+endprogram
+
+function toggleDoors(stone, msg := "")
+	var i;
+	var numdoors := CInt(GetObjProperty(stone, "nDoors"));
+	var doors := Unpack(GetObjProperty(stone, "doors"));
+	var thedoor;
+	for (i := 1; i <= numdoors; i := i + 1)
+		thedoor := SystemFindObjectBySerial(doors[i]);
+		thedoor.toggle();
+		if (msg)
+			PrintTextAbove(thedoor, msg);
+		endif
+	endfor
+endfunction
+
+function fightOver(team1, team2, finishtime)
+	var i := team1.size(), j := team2.size();
+	foreach member in team1
+		if (!member || member.dead)
+			i := i - 1;
+		endif
+	endforeach
+	
+	foreach member in team2
+		if (!member || member.dead)
+			j := j - 1;
+		endif
+	endforeach
+	
+	if (i>0 && j==0)
+		return 1; // Team 1 won.
+	elseif (i==0 && j>0)
+		return 2; // Team 2 won.
+	elseif (i==0 && j==0)
+		return 3; // Draw. Both teams died.
+	elseif (finishtime <= ReadGameClock())
+		return 4; // Went over time limit.
+	endif
+	
+	return 0;
+endfunction
+
+function detectHidden(team1, team2)
+	foreach member in team1
+		if (member.hidden)
+			member.hidden := 0;
+			PrintTextAbove(member, "You have been discovered!");
+		endif
+	endforeach
+	foreach member in team2
+		if (member.hidden)
+			member.hidden := 0;
+			PrintTextAbove(member, "You have been discovered!");
+		endif
+	endforeach
+endfunction

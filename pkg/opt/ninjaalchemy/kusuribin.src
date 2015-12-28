@@ -1,0 +1,238 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/dotempmods";
+include "include/classes";
+include "include/random";
+include "include/res";
+include "include/traitorcheck";
+include "include/resDoorCheck";
+
+
+const SOUND_EFFECT_RES 	  := 0x215;
+const ACTION_EFFECT_CAST2 := 0x11;
+const BLOODY_BANDAGE 	  := 0x0e20;
+
+//To heal
+const BANDAGES_TO_HEAL	  := 1;
+const DELAY_TO_HEAL	  := 5;
+
+//To cure
+const BANDAGES_TO_CURE	  := 1;
+const DELAY_TO_CURE	  := 6;
+
+
+//Delay multiplier when you heal yourself
+const DELAY_MULT_FOR_SELF := 1;
+
+//Multiply diff by this for the point value
+const POINTS_MULTIPLIER := 15;
+
+program use_bandages( character, kusuribin )
+	if(!IsNinja(character))
+		SendSysMessage(character, "Only a Ninja knows the use of this item.");
+		return;
+	endif
+
+	var withheal := { "Giantkin",
+			    "Orc",
+			    "Troll",
+			    "Human"	};
+
+	var withvet := { "Animal",
+			   "Dragonkin",
+			   "Ratkin"	};
+
+	if( !ReserveItem( kusuribin ) )
+		return;
+	endif
+
+	SendSysMessage( character, "Who would you like to heal?" );
+	var patient := Target( character, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+
+	//Targeting was canceled
+	if( !patient )
+		return;
+	endif
+	
+	//The patient is too far
+	if( Distance( character, patient ) > 1 )
+		SendSysMessage( character, "The patient is too far." );
+		return;
+	endif
+
+
+	//The target isn't a mobile
+	if( !patient.isA(POLCLASS_MOBILE) )
+		SendSysMessage( character, "You can't heal that." );
+		return;
+	endif
+
+
+
+	if( patient.graphic != CID_HUMAN_MALE && patient.graphic != CID_HUMAN_FEMALE && patient.npctemplate )
+		var type := GetObjProperty( patient, "Type" );
+		if( type in withheal )
+			if( patient.poisoned )
+				TryToCure( character, patient, kusuribin );
+				return;
+			elseif( GetHp(patient) < GetMaxHp(patient) )
+				TryToHeal( character, patient, kusuribin );
+				return;
+			else
+				SendSysMessage( character,"This patient don't even have a bruise!" );
+				return;
+			endif
+		
+		elseif( type in withvet )
+			return;
+
+		else
+			SendSysMessage( character, "This creature can't be healed" );
+			return;
+		endif
+
+	else
+	
+		if( patient.poisoned )
+			if (GetGlobalProperty("traitors"))
+				CheckTraitor(character, patient);
+			endif
+			TryToCure( character, patient, kusuribin );
+			return;
+		elseif( GetHp(patient) < GetMaxHp(patient) )
+			if (GetGlobalProperty("traitors"))
+				CheckTraitor(character, patient);
+			endif
+			TryToHeal( character, patient, kusuribin );
+			return;
+		else
+			SendSysMessage( character,"This patient don't even have a bruise!" );
+			return;
+		endif
+	endif
+
+
+
+endprogram
+
+
+function TryToCure( character, patient, kusuribin )
+
+
+	var delay 	:= DELAY_TO_CURE;
+
+	if( patient.serial == character.serial )
+		delay := CInt( delay * DELAY_MULT_FOR_SELF );
+		SendSysMessage( character, "You start to cure yourself" );
+	else
+		SendSysMessage( character, "You start to cure " + patient.name );
+	 	SendSysMessage( patient, character.name + " starts to cure you" );
+	endif
+
+	sleep( delay );
+
+	if( Distance( character, patient ) > 1 )
+		SendSysMessage( character, "Your patient is too far." );
+		return;
+	endif
+
+	if( character.dead )
+		return;
+	endif
+
+	if( patient.dead )
+		SendSysMessage( character, "Your patient is dead." );
+	endif
+
+	var plvl 	:= PoisonLevel( patient );
+	var diff 	:= plvl * 20 + 15;
+	var points 	:= CInt(diff * POINTS_MULTIPLIER);
+
+	if( CheckSkill( character, SKILLID_ALCHEMY, diff, 0 ) )
+		CurePoison( patient, 0, character.name + " has cured you!" );
+		SendSysMessage( character, "You cured your patient." );
+	else
+		SendSysMessage( character, "You couldn't cure your patient." );
+	endif
+
+	SubtractAmount( kusuribin, 1 );
+
+	CreateItemInBackpack( character, 0xf0e );
+
+endfunction
+
+
+function TryToHeal( character, patient, kusuribin )
+	
+
+	var delay 	:= DELAY_TO_HEAL;
+	var healing	:= CInt( GetEffectiveSkill( character, SKILLID_ALCHEMY ) / 10 );
+	var anatomy	:= CInt( GetEffectiveSkill( character, SKILLID_POISONING ) / 5 );
+	var healed	:= RandomDiceStr( healing + "d4+" + healing ) + RandomDiceStr( "1d8+2" ) + anatomy;
+
+	if( patient.serial == character.serial )
+		delay := CInt( delay * DELAY_MULT_FOR_SELF );
+		SendSysMessage( character, "You start to heal yourself." );
+	else
+		SendSysMessage( character, "You start to heal " + patient.name );
+	 	SendSysMessage( patient, character.name + " starts to heal you" );
+	endif
+
+
+	var count	:= 10;
+	var shp	:= GetHp(character);
+	while( delay )
+		sleep( 1 );
+		delay := delay - 1;
+		if( GetHp(character) < shp )
+			SendSysMessage( character, "Yours fingers slip..." );
+			count := count - 1;
+			shp   := GetHp(character);
+		endif
+	endwhile
+
+	if( Distance( character, patient ) > 1 )
+		SendSysMessage( character, "Your patient is too far." );
+		return;
+	endif
+
+	if( character.dead )
+		return;
+	endif
+
+	if( patient.dead )
+		SendSysMessage( character, "Your patient is dead." );
+	endif
+
+	var diff   := GetMaxHp(patient) - GetHp(patient);
+
+	var bonus := GetObjProperty( patient, "HealingIncrease" );
+	if( bonus )
+		healed := healed + CInt( healed * bonus * 0.1 );
+	endif
+
+	if( count < 1 )
+		count := 1;
+	endif
+
+	//Broadcast(diff);
+
+
+	healed := CInt( healed * count / 10 );
+
+	if( CheckSkill( character, SKILLID_ALCHEMY, diff/2, 0 ) )
+		HealDamage( patient, healed );
+		SendSysMessage( character, "You healed " + healed + " damage." );
+		SendSysMessage( patient, character.name + " healed " + healed + " damage." );
+	else
+		SendSysMessage( character, "You couldn't heal your patient." );
+	endif
+
+	SubtractAmount( kusuribin, 1 );
+
+	CreateItemInBackpack( character, 0xf0e );
+
+endfunction

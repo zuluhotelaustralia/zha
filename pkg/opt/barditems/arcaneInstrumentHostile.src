@@ -1,0 +1,131 @@
+/*
+	Barnabus 2/5/03
+	This script is used for bard items that use their spell effect on all hostiles in LOS
+*/
+
+use uo;
+use os;
+
+include "include/client";
+include "include/spelldata";
+include "include/attributes";
+include "barditems";
+include "include/guardcall";
+	
+program use_arcaneinstrumentHostile (who, instrument)
+	
+	//initial checks
+	if (! CheckMaxMusicianShip(who))
+		SendSysMessage(who, "You require 130 musicianship to use an arcane instrument.");
+		return 0;
+	endif
+	
+	var check := BardLevelCheck(who, instrument);
+	
+	if (check==-1)
+		SendSysMessage(who, "Only a classed Bard could use this instrument!");
+		return;
+	elseif(check==0)
+		SendSysMessage(who, "You are not a high enough level Bard to use this instrument!");
+		return;		
+	endif
+	
+	//stam cost for use
+	var stamcost := CInt( GetObjProperty( instrument, "StamCost" ) );
+	
+	if (! (GetStamina(who) - stamcost >0))
+		SendSysMessage(who, "You do not have enough stamina to play this arcane instrument.");
+		return 0;
+	endif
+
+	if (PreventedCastInGuardedArea(who))
+		return;
+	endif
+
+
+	//use power.. does until character moves
+	var cx := who.x;
+	var cy := who.y;
+	SendSysMessage(who, "You begin playing...");
+	
+	//spell data stored on item as props	
+	
+	var spellid	:= CInt( GetObjProperty(instrument, "SpellId"));
+	
+	var range := CInt( GetObjProperty(instrument, "Range"));
+	
+	var circle	:= GetCircle( spellid );
+	
+	var delay := CInt(GetObjProperty(instrument, "SpellDelayMs"));
+	
+	var dontrepeat := CInt(GetObjProperty(instrument, "DontRepeat"));
+	
+	//instrument type for music played
+	var instrument_type	:=  GetObjProperty(instrument,"Instrument");
+	
+	//get values based on props
+	var music_effect;
+	
+	if (! can_cast( who, circle, 1 ))
+		SendSysMessage(who, "You cannot use that here.");
+		return 0;
+	endif
+
+	
+	if( instrument_type )
+		if (instrument_type == "drums")
+			music_effect := SFX_DRUM_SUCC;
+		elseif (instrument_type == "harp")
+			music_effect := SFX_HARP_SUCC;
+		elseif (instrument_type == "lute")
+			music_effect := SFX_LUTE_SUCC;
+		elseif (instrument_type == "tamborine")
+			music_effect := SFX_TAMB_SUCC;
+		else 
+			//not a valid value for instrument
+			return 0;
+		endif
+	else	
+		return 0;
+	endif
+
+	//Broadcast ("setting spell prop");
+	
+	//casts on all hostiles in LOS
+	
+	var spellparms := { };
+	spellparms[1] := "#MOB";
+	spellparms[2] := who;
+	spellparms[4] := circle;
+	
+	SetObjProperty(who, "UsingBardInstrument", 1);	
+	
+	repeat
+		//Broadcast ("playing...");
+
+		PlaySoundEffect( who, music_effect ); //play sound effect
+		
+		foreach mob in ListMobilesInLineOfSight( who, range)
+			if (IsHostileOrNotGuild(mob, who))
+				spellparms[3] := mob;
+				start_script(GetScript(spellid), spellparms);
+				SetStamina ( who, GetStamina( who ) - stamcost);
+				//Broadcast( "" + GetStamina( who ));
+				if(!(GetStamina( who) - stamcost >0))
+					break;
+				endif
+			endif
+		endforeach
+		
+		sleep(2);
+		
+		if( delay ) //power specific delay
+			sleep( delay );
+		endif
+
+	until ((who.x != cx) || (who.y != cy) || (who.dead) || (!(GetStamina( who) - stamcost >0))|| dontrepeat); //does until player moves or dead 
+	SendSysMessage(who,"You stop playing...");
+	EraseObjProperty(who, "UsingBardInstrument");
+
+endprogram
+

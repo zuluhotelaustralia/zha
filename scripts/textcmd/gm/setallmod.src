@@ -1,0 +1,23 @@
+use uo;
+include "include/attributes";
+include "include/cmdlevel_check";
+
+
+program textcmd_setallmod( who, newmod )
+	if (!checkStaff(who, "setallmod", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var targ := Target( who );
+	if( !targ )
+		return;
+	endif
+
+	newmod := CInt(newmod);
+
+	SetStrengthMod(targ, newmod);
+	SetIntelligenceMod(targ, newmod);
+	SetDexterityMod(targ, newmod);
+
+endprogram

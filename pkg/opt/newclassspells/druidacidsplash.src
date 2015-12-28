@@ -1,0 +1,51 @@
+/* Druid Spell - Acid Splash **
+** Acid attack spell.        **
+** Seravy - seravy@gmail.com */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_ACIDSPLASH;
+
+program cast_acidsplash( parms )
+	var caster;
+
+	var circle := GetCircle( SPELL_ID);
+	var cast_on;
+
+	if (parms[1] == "#MOB")
+		caster := parms[2];
+		cast_on := parms[3];
+		if (parms[4])
+			circle := parms[4];
+		endif
+		Send_Attack( cast_on, caster, SPELL_ID);
+	else
+		caster := parms;
+		cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+		if (!cast_on)
+			EraseObjProperty(caster, "#Casting");
+			return;
+		endif
+		if (AutoCallGuardCheck(caster, cast_on))
+			EraseObjProperty(caster, "#Casting");		
+			return;
+		endif
+	endif
+
+	PlayMovingEffect( caster, cast_on, FX_SPELL_ACIDSPLASH, SPEED_SPELL_ACIDSPLASH, LOOP_SPELL_ACIDSPLASH, 1);
+	PlaySoundEffect( cast_on, SFX_SPELL_ACIDSPLASH );
+  
+	var immunity := IsProtected( caster, cast_on, circle );
+	if( immunity == IMMUNED )
+		EraseObjProperty(caster, "#Casting");	
+		return;
+	endif
+
+	var dmg := CInt(CalcSpellDamage( caster, cast_on, circle, SINGLE_TARGET_SPELL, SKILLID_NATURELORE )/1.2);
+
+	ApplyElementalDamage(caster, cast_on, circle, dmg, ACID);
+	EraseObjProperty(caster, "#Casting");
+endprogram

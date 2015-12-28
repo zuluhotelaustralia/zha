@@ -1,0 +1,45 @@
+use uo;
+use os;
+
+include "include/time";
+include "include/cmdlevel_check";
+
+program mkaccount(who, text)
+	if (!checkStaff(who, "mkaccount", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	if ( !text)
+		SendSysMessage( who, ".mkaccount <accountname> <password> <email>" );
+		return;
+	endif
+
+	var params := SplitWords( text );
+
+	if (len(params)!=3)
+		SendSysMessage( who, ".mkaccount <accountname> <password> <email>" );
+		return;
+	endif
+
+	var username     := params[1];
+	var userpassword := params[2];
+	var useremail    := params[3];
+	var account;
+
+	var ret := CreateAccount( username, userpassword, 1 );
+
+	if( ret == error )
+		SendSysMessage( who, "Sorry, account creation failed.");
+		SendSysMessage( who, "Error: " + ret.errortext );
+		return;
+	else
+		account := FindAccount(username);
+		account.setprop("Email", useremail);
+		account.setprop("IP", who.ip);
+		account.setprop("Login ", NowString());
+		account.setprop("Notes", "<none>");
+		account.setprop("Release", 0);
+		SendSysMessage( who, "The account has been created." );
+	endif
+
+endprogram

@@ -1,0 +1,112 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/skillpoints";
+include "include/classes";
+
+program anatomy( character )
+ 
+	var thepoints := get_default_points(SKILLID_ANATOMY);
+	var skill := GetEffectiveSkill( character, SKILLID_ANATOMY );
+	var warrior  := GetObjProperty( character, CLASSEID_WARRIOR );
+
+	SendSysMessage( character, "Select a target." );
+	var subject := Target( character );
+
+	if( !subject )
+		return;
+	endif
+
+	if( !subject.isA(POLCLASS_MOBILE) )
+		SendSysMessage( character, "This got no anatomy at all!" );
+		return;
+	endif
+
+	if( !CheckSkill( character, SKILLID_ANATOMY, -1, thepoints ) )
+		SendSysMessage( character, "You're not sure..." );
+		return;
+	endif	
+
+	var strength := GetStrength(subject);
+	if( strength > 150 )
+		SendSysMessage(	character, "Superhumanly strong." );
+				
+	elseif( strength > 135 )
+		SendSysMessage(	character, "One of the strongest people you have ever seen." );
+				
+	elseif( strength > 120 )
+		SendSysMessage(	character, "Strong as an ox." );
+				
+	elseif( strength > 105 )
+		SendSysMessage(	character, "Extraordinarily strong." );
+				
+	elseif( strength > 90 )
+		SendSysMessage(	character, "Extremely strong." );
+
+	elseif( strength > 75 )
+		SendSysMessage(	character, "Very strong." );
+
+	elseif( strength > 60 )
+		SendSysMessage(	character, "Somewhat strong." );
+
+	elseif( strength > 45 )
+		SendSysMessage(	character, "To be of normal strength." );
+
+	elseif( strength > 30 )
+		SendSysMessage(	character, "Somewhat weak." );
+
+	elseif( strength > 15 )
+		SendSysMessage(	character, "Rather Feeble." );
+
+	else
+		SendSysMessage(	character, "like they would have trouble lifting small objects." );
+	endif
+
+
+	var dexterity := GetDexterity(subject);
+	if( dexterity > 150 )
+		SendSysMessage(	character, "Superhumanly agile." );
+				
+	elseif( dexterity > 135 )
+		SendSysMessage(	character, "One of the fastest people you have ever seen." );
+				
+	elseif( dexterity > 120 )
+		SendSysMessage(	character, "Moves like quicksilver." );
+				
+	elseif( dexterity > 105 )
+		SendSysMessage(	character, "Extraordinarily agile." );
+				
+	elseif( dexterity > 90 )
+		SendSysMessage(	character, "Extremely agile." );
+
+	elseif( dexterity > 75 )
+		SendSysMessage(	character, "Very agile." );
+
+	elseif( dexterity > 60 )
+		SendSysMessage(	character, "Somewhat agile." );
+
+	elseif( dexterity > 45 )
+		SendSysMessage(	character, "Moderately dextrous." );
+
+	elseif( dexterity > 30 )
+		SendSysMessage(	character, "Somewhat uncoordinated." );
+
+	elseif( dexterity > 15 )
+		SendSysMessage(	character, "Very clumsy." );
+
+	else
+		SendSysMessage(	character, "like they barely manage to stay standing." );
+	endif
+
+	if( skill > 75 )
+		var percent := CInt( CDbl(GetStamina(subject)) * 100.0 / GetMaxStamina(subject) );
+		SendSysMessage(	character, "This being is at " + percent + "% of his max vigor." );
+	endif
+
+endprogram
+
+
+
+

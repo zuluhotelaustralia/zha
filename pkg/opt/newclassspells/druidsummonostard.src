@@ -1,0 +1,128 @@
+/* Druid Spell - Summon Ostard    **
+** Summons tamable ostard.        **
+** Seravy - seravy@gmail.com      */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_SUMMONOSTARD;
+
+program cast_summonostard(parms)
+  var caster;
+  var circle := GetCircle(SPELL_ID);
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+  endif
+
+  if (GetObjProperty(caster, "summonOstard") > readGameClock())
+    SendSysMessage(caster, "You must wait another "+(CInt(GetObjProperty(caster, "summonOstard") - readGameClock())/3600+1)+" hours before summoning another ostard");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+  var ostard;
+  var chance := Random(100);
+  if (chance > 70)
+    sendsysmessage (caster, "You fail to summon a ostard");
+    ostard := "daemon";
+  else
+case (chance)
+  0:
+  1:
+  2:
+  3:    ostard := "goldenostard";
+  4:
+  5:
+  6:
+  7:    ostard := "plainsostard";
+  8:
+  9:
+  10:
+  11:   ostard := "mountainostard";
+  12:
+  13:
+  14:
+  15:   ostard := "swampostard";
+  16:
+  17:
+  18:
+  19:   ostard := "highlandostard";
+  20:
+  21:
+  22:   ostard := "shadowostard";
+  23:
+  24:
+  25:   ostard := "stoneostard";
+  26:
+  27:   ostard := "emeraldostard";
+  28:
+  29:   ostard := "rubyostard";
+  30:
+  31:   ostard := "tropicalostard";
+  32:
+  33:   ostard := "snowostard";
+  34:
+  35:   ostard := "iceostard";
+  36:
+  37:   ostard := "fireostard";
+  38:
+  39:   ostard := "frenziedostard";
+  40:
+  41:
+  42:   ostard := "goldenfrenziedostard";
+  43:
+  44:
+  45:   ostard := "plainsfrenziedostard";
+  46:
+  47:
+  48:
+  49:   ostard := "mountainfrenziedostard";
+  50:
+  51:
+  52:   ostard := "highlandfrenziedostard";
+  53:
+  54:   ostard := "shadowfrenziedostard";
+  55:
+  56:   ostard := "valleyfrenziedostard";
+  57:
+  58:   ostard := "stonefrenziedostard";
+  59:
+  60:   ostard := "emeraldfrenziedostard";
+  61:
+  62:   ostard := "rubyfrenziedostard";
+  63:
+  64:   ostard := "tropicalfrenziedostard";
+  65:   ostard := "snowfrenziedostard";
+  66:   ostard := "icefrenziedostard";
+  67:   ostard := "firefrenziedostard";
+  68:   ostard := "heavenlyostard";
+  69:   ostard := "heavenlyfrenziedostard";
+endcase
+ endif
+
+  var newOstard := CreateNpcFromTemplate(ostard, caster.x, caster.y, caster.z );
+  if( !newOstard )
+    SendSysMessage(caster, "The poor ostard died just after the summoning." );
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+  PlaySoundEffect(newOstard, SFX_SPELL_SUMMONOSTARD);
+  PlayObjectCenteredEffect(newOstard, FX_SPELL_SUMMONOSTARD, SPEED_SPELL_SUMMONOSTARD, LOOP_SPELL_SUMMONOSTARD);
+
+  SetObjProperty(newOstard, "SummonedOstardBy", caster.name );
+  var time := ((chance * 60 * 60)/10);
+  if ((chance/10) > 2 && chance < 70)
+    SendSysMessage(caster, "You must wait another "+(chance/10)+" hours before summoning again");
+    SetObjProperty(caster, "summonOstard", (readGameClock()+time));
+  endif
+
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

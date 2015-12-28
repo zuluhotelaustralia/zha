@@ -1,0 +1,24 @@
+// updated November 4, 2000
+// zulu (zulu@zuluhotel.com)
+
+use uo;
+use os;
+
+program auxquestlocation_destroy(tile)
+
+	var questlocser := GetObjProperty(tile, "AssociatedLocationSer");
+	var questloc := SystemFindObjectBySerial(questlocser);
+	if (questlocser && questloc)
+		var auxtileserials := GetObjProperty(questloc, "auxtilearray");
+		var tempauxserials := array;
+		if (auxtileserials[1])
+			foreach aux in auxtileserials
+				if (tile.serial!=aux)
+					tempauxserials.append(aux);
+				endif
+			endforeach
+			SetObjProperty(questloc, "auxtilearray", tempauxserials);
+		endif
+	endif
+	start_script("::maindestroy");
+endprogram

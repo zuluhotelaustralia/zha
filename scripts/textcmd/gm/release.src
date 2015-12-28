@@ -1,0 +1,39 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+
+program textcmd_Release(who, text)
+	if (!checkStaff(who, "release", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var npc := Target(who);
+
+	if(text)
+		var delay := CInt(text);
+		if(!delay)
+			Release(npc, 0);
+			return;
+		endif
+
+		Release(npc, delay);
+		return;
+	endif
+
+	Release(npc, 0);
+
+endprogram
+
+
+function Release(npc, delay)
+	npc.setmaster(0);
+	npc.script := GetObjProperty(npc, "script");
+	EraseObjProperty(npc, "master");
+	EraseObjProperty(npc, "script");
+	EraseObjProperty(npc, "prevtamed");
+	SetObjProperty(npc, "tametimer", (ReadGameClock() + delay));
+	RestartScript(npc);
+endfunction
+			

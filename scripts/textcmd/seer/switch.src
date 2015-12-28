@@ -1,0 +1,21 @@
+use os;
+use uo;
+
+include "include/cmdlevel_check";
+
+program createswitch(who)
+	if (!checkStaff(who, "switch", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+  SendSysMessage(who,"Select the item to make a switch out of");
+  var chest := Target(who);
+  if (!chest)
+    SendSysMessage(who,"canceled");
+  else
+    SetObjProperty(chest, "usescript", chest.usescript);
+    SendSysMessage(who, "You create a switch out of the item, be sure to change its graphic through the interface.");
+    chest.usescript := ":zuluitems:lever";
+  endif
+
+endprogram

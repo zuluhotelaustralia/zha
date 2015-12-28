@@ -1,0 +1,58 @@
+use uo;
+
+
+program fx( who, text )
+
+	if( !text )
+		SendSysMessage( who, "Structure is : .fx <id> <moving 0/1/2> <speed = 0xa> <loop = 0xa>" );
+		return;
+	endif
+
+	var switchs	:= SplitWords( text );
+
+	var id	:= switchs[1];
+	var moving;
+	var speed;
+	var loop;
+
+	if( switchs[2] )
+		moving	:= CInt( switchs[2] );
+	else
+		moving	:= 0;
+	endif
+
+	if( switchs[3] )
+		speed	:= CInt( switchs[3] );
+	else
+		speed	:= 0xa;
+	endif
+
+	if( switchs[4] )
+		loop	:= CInt( switchs[4] );
+	else
+		loop	:= 0xa;
+	endif
+
+	if( !moving )
+		SendSysMessage( who, "Around who will the animation be played?" );
+		var targ := Target( who, TGTOPT_CHECK_LOS );
+		PlayObjectCenteredEffect( targ, id, speed, loop );
+	
+	elseif( moving == 1 )
+		SendSysMessage( who, "The animation will be played from you to who?" );
+		var targ := Target( who, TGTOPT_CHECK_LOS );
+		PlayMovingEffect( who, targ, id, speed, loop );
+
+	elseif( moving == 2 )
+		SendSysMessage( who, "Where will the animation be played?" );
+		var targ := TargetCoordinates( who );
+		PlayStationaryEffect( targ.x, targ.y, targ.z, id, speed, loop );
+	
+	else
+		SendSysMessage( who, "Invalid moving entry, use 0 for object centered effects." );
+		SendSysMessage( who, "Use 1 for moving effect from you to a target." );
+		SendSysMessage( who, "And use 2 for stationary effects" );
+	
+	endif
+
+endprogram

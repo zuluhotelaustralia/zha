@@ -1,0 +1,692 @@
+Element briggand fort
+{
+	evilhuman i25143249
+}
+
+Element brit farmlands
+{
+	domestic i25143560
+	healer i25143249
+}
+
+Element brit n (a)
+{
+	domestic i25143249
+	healer i25143249
+}
+
+Element brit n (c)
+{
+	newbie i25143249
+	newbieforest i25143249
+}
+
+Element brit near n (a)
+{
+	domestic i25143249
+}
+
+Element brit near n (c)
+{
+	newbie i25143249
+	newbieforest i25143249
+}
+
+Element brit nw forest (a)
+{
+	domestic i25143249
+	healer i25143249
+}
+
+Element brit nw forest (c)
+{
+	newbie i25143249
+	newbieforest i25143249
+}
+
+Element brit/minoc swamp
+{
+	jungleanimals i25143249
+	junglemonsters i25143249
+	weaklizardmen i25143249
+}
+
+Element brit_e_town_creatures
+{
+	towncreatures i25143250
+	townies i25143549
+}
+
+Element brit_w_town_creatures
+{
+	towncreatures i25143680
+	townies i25143550
+}
+
+Element britain ne woods bg
+{
+	healer i25144750
+	plainswalkers i25143550
+}
+
+Element Britain_Graveyard
+{
+	lesserundead i25143130
+}
+
+Element cove
+{
+	townies i25143250
+}
+
+Element cove_orc_fort_docks
+{
+	weakorcs i25143250
+}
+
+Element cove_orc_fort_north
+{
+	strongorcs i25143550
+	weakorcs i25143250
+}
+
+Element cove_orc_fort_outside
+{
+	cove_orc_fort_outside i25143551
+}
+
+Element cove_orc_fort_south
+{
+	strongorcs i25143551
+	weakorcs i25143251
+}
+
+Element covetous_dragon_lake
+{
+	Dragon i25143071
+	Drake i25143191
+}
+
+Element covetous_liche
+{
+	grat i25143251
+	liche i25143071
+}
+
+Element delucia
+{
+	townies i25143251
+}
+
+Element Destard_lvl_1_entrancearea
+{
+	Dragon i25143851
+	Drake i25143551
+	Giantrat i25143251
+	Giantserpent i25143491
+	Slime i25143251
+}
+
+Element Destard_lvl_1_Shrine
+{
+	Slime i25143191
+	Waterelemental i25143371
+}
+
+Element Destard_lvl_1_tolvl2
+{
+	Drake i25143851
+	Giantrat i25143251
+	Giantserpent i25143671
+	Slime i25143191
+}
+
+Element Destard_lvl_1_u_Shrine
+{
+	Dragon i25143851
+	Drake i25143371
+	Giantrat i25143252
+	Giantserpent i25143552
+	Slime i25143252
+}
+
+Element Destard_lvl_1_Waterarea
+{
+	Drake i25143552
+	Slime i25143192
+	Waterelemental i25143252
+}
+
+Element Destard_lvl_2
+{
+	Dragon i25143852
+	Drake i25143552
+	Giantrat i25143252
+	Giantserpent i25143552
+	Slime i25143252
+}
+
+Element e skara brae
+{
+	domestic i25143252
+	healer i25143252
+	newbieforest i25143252
+}
+
+Element far s of trinsic
+{
+	evilhuman i25143252
+	forestanimals i25143252
+	horses i25143252
+	strongorcs i25143252
+	weakforestmonsters i25143252
+}
+
+Element great desert
+{
+	greatdesert i25143552
+}
+
+Element hills e of delucia
+{
+	domestic i25143252
+	healer i25143252
+	newbieforest i25143252
+}
+
+Element hills n of delucia
+{
+	domestic i25143252
+	healer i25143252
+	newbieforest i25143252
+}
+
+Element ice island
+{
+	arcticanimals i25143252
+}
+
+Element jhelom
+{
+	townies i25143252
+}
+
+Element justice shrine area
+{
+	forestanimals i25143252
+	healer i25143253
+	horses i25143253
+	randomother i25143253
+	ratmen i25143253
+}
+
+Element magincia
+{
+	domestic i25143253
+}
+
+Element minoc
+{
+	townies i25143253
+}
+
+Element moonglow
+{
+	townies i25143253
+}
+
+Element moonglow_east_animals
+{
+	domestic i25143073
+	plainswalkers i25143073
+}
+
+Element moonglow_graveyard
+{
+	liche i25150153
+	undead i25143073
+}
+
+Element moonglow_south_animals
+{
+	domestic i25143073
+	plainswalkers i25143073
+}
+
+Element moonglow_zoo_desert1
+{
+	zoo_desert i25143253
+}
+
+Element moonglow_zoo_dungeon1
+{
+	gazer i25143013
+}
+
+Element moonglow_zoo_dungeon2
+{
+	giantspider i25143013
+}
+
+Element moonglow_zoo_forest1
+{
+	zoo_forest1 i25143073
+}
+
+Element moonglow_zoo_forest2
+{
+	zoo_forest2 i25143073
+}
+
+Element moonglow_zoo_forest3
+{
+	forestanimals i25143073
+}
+
+Element moonglow_zoo_ice
+{
+	zoo_ice i25143073
+}
+
+Element moonglow_zoo_jungle
+{
+	jungleanimals i25143073
+}
+
+Element moonglow_zoo_swamp
+{
+	zoo_swamp i25143073
+}
+
+Element n of trinsic 1
+{
+	forestanimals i25143253
+	healer i25143253
+	strongforestmonsters i25143253
+	weakforestmonsters i25143253
+}
+
+Element n of trinsic 2
+{
+	healer i25143253
+	jungleanimals i25143253
+	junglemonsters i25143253
+	weaklizardmen i25143253
+}
+
+Element n of vesper
+{
+	domestic i25143254
+	forestanimals i25143253
+	healer i25143254
+}
+
+Element N trinsic swamp ruins
+{
+	weakundead i25143254
+}
+
+Element n_yew_e_penninsula
+{
+	forestanimals i25143254
+	strongforestmonsters i25146554
+}
+
+Element n_yew_w_penninsula
+{
+	domestic i25143074
+	strongforestmonsters i25146554
+}
+
+Element ne icelands t2a
+{
+	arcticanimals i25143254
+	arcticmonsters i25143254
+	healer i25143254
+	icybadstuff i25143254
+}
+
+Element ne of brit
+{
+	domestic i25143254
+	forestanimals i25143254
+	healer i25143254
+}
+
+Element north mines
+{
+	domestic i25143254
+	forestanimals i25143254
+	healer i25143254
+}
+
+Element north moonglow
+{
+	domestic i25143254
+}
+
+Element nujelm
+{
+	townies i25143254
+}
+
+Element nw iceland t2a
+{
+	arcticanimals i25143254
+	arcticmonsters i25143255
+	icybadstuff i25143255
+}
+
+Element occlo
+{
+	domestic i25143560
+}
+
+Element papua
+{
+	townies i25143255
+}
+
+Element papua_town
+{
+	towncreatures i25143555
+	townies i25144155
+}
+
+Element past hills e of delucia
+{
+	forestanimalst2a i25143255
+	healer i25143255
+	horses i25143255
+	humanoids i25143255
+	strongforestmonsters i25143255
+	weaklizardmen i25143255
+}
+
+Element past hills n of delucia
+{
+	forestanimalst2a i25143255
+	healer i25143255
+	horses i25143255
+	humanoids i25143255
+	strongforestmonsters i25143255
+	strongorcs i25143255
+	weakorcs i25143255
+}
+
+Element peninsula
+{
+	forestanimals i25143255
+	plainswalkers i25143255
+	weakforestmonsters i25144155
+}
+
+Element ratman valley
+{
+	ratfodder i25143255
+	ratmen i25143255
+}
+
+Element s of brit
+{
+	forestanimals i25143255
+	healer i25143256
+	humanoids i25143255
+	strongforestmonsters i25143255
+	weakforestmonsters i25143255
+}
+
+Element s of trinsic
+{
+	domestic i25143256
+	healer i25143256
+}
+
+Element Shame_lvl_1
+{
+	Earthelemental i25144156
+	Giantrat i25143256
+	Giantscorpion i25143556
+}
+
+Element Shame_lvl_2_downarea_lair
+{
+	Earthelemental i25143856
+	Giantrat i25143256
+	Giantscorpion i25143556
+}
+
+Element Shame_lvl_2_uparea
+{
+	Airelemental i25144156
+	Earthelemental i25143856
+	Giantrat i25143256
+	Giantscorpion i25143556
+}
+
+Element skara brae
+{
+	towncreatures i25143256
+	townies i25143256
+}
+
+Element sw of brit
+{
+	domestic i25143256
+	forestanimals i25143560
+	healer i25143256
+}
+
+Element sw of minoc
+{
+	forestanimals i25143256
+	healer i25143256
+	weakforestmonsters i25143256
+	weaklizardmen i25143256
+	weakorcs i25143256
+}
+
+Element sw of trinsic
+{
+	healer i25143256
+	horses i25143256
+	jungleanimals i25143256
+	junglemonsters i25143256
+	randomother i25143256
+}
+
+Element sw of vesper
+{
+	domestic i25143256
+	forestanimals i25143256
+	healer i25143256
+}
+
+Element swamp - w of trinsic
+{
+	healer i25143256
+	horses i25143256
+	jungleanimals i25143256
+	junglemonsters i25143256
+}
+
+Element t2a desert
+{
+	desertt2a i25143256
+	diablo i25143256
+	healer i25143257
+	stronghumanoids i25143256
+}
+
+Element t2a swamps
+{
+	forestanimalst2a i25143257
+	healer i25143257
+	jungleanimalst2a i25143257
+	randomother i25143257
+	ratmen i25143560
+}
+
+Element T2A_east_swamp
+{
+	T2A_eastern_swamp i25143557
+}
+
+Element T2A_keep_balron
+{
+	balron i25143557
+}
+
+Element T2A_keep_lower_enter
+{
+	terathans i25143257
+	terathans_greater i25143377
+}
+
+Element T2A_keep_lower_north
+{
+	terathans i25143257
+}
+
+Element T2A_keep_lower_outside
+{
+	terathans i25143257
+	terathans_greater i25143317
+}
+
+Element T2A_tera_keep_oph
+{
+	ophidians i25143557
+	ophidians_greater i25143857
+}
+
+Element T2A_tera_keep_outside
+{
+	terathans i25143557
+	terathans_greater i25143557
+}
+
+Element T2A_tera_keep_south
+{
+	terathans i25143557
+	terathans_greater i25143557
+}
+
+Element terra sanctum
+{
+	evilhuman i25143257
+	forestanimalst2a i25143258
+	healer i25143258
+	randomother i25143258
+	stronghumanoids i25143258
+}
+
+Element trinsic
+{
+	towncreatures i25143258
+	townies i25143258
+}
+
+Element vesper
+{
+	townies i25143258
+}
+
+Element vesper-minoc woods
+{
+	domestic i25143258
+	forestanimals i25143258
+	healer i25143258
+}
+
+Element vesper_graveyard
+{
+	weakundead i25143438
+}
+
+Element w of brit
+{
+	forestanimals i25143258
+	healer i25143258
+	strongforestmonsters i25143258
+	weakforestmonsters i25143258
+}
+
+Element w of magincia
+{
+	domestic i25143258
+	healer i25143258
+	jungleanimals i25143258
+}
+
+Element w of minoc
+{
+	forestanimals i25143258
+	healer i25143258
+	strongforestmonsters i25143258
+	weakforestmonsters i25143258
+}
+
+Element w of occlo
+{
+	forestanimals i25143258
+	healer i25143259
+	weakforestmonsters i25143259
+}
+
+Element w of trinsic
+{
+	forestanimals i25143259
+	healer i25143259
+	weakforestmonsters i25143259
+}
+
+Element w of trinsic, se of skara brae
+{
+	forestanimals i25143259
+	healer i25143259
+	strongforestmonsters i25143259
+	weakforestmonsters i25143259
+}
+
+Element wrong_lvl2_kitchen
+{
+	lesserorcs i25143379
+	ogrelord i25143559
+	trolls i25143319
+}
+
+Element yew_east
+{
+	forestanimals i25143559
+	healer i25144459
+}
+
+Element yew_graveyard
+{
+	weakundead i25143439
+}
+
+Element yew_orc_fort
+{
+	strongorcs i25143559
+	weakorcs i25143199
+}
+
+Element yew_south_west
+{
+	forestanimals i25143559
+	healer i25144459
+}
+
+Element yew_town_and_creature
+{
+	towncreatures i25143259
+	townies i25143559
+}
+
+Element yew_west
+{
+	forestanimals i25144159
+}
+

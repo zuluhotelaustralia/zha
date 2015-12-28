@@ -1,0 +1,370 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+include "include/yesno";
+include "../queststone/queststone";
+include "monsterDuelGate";
+include "include/areas";
+
+
+program monsterDuelController( who, monsterDuelController )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, monsterDuelController);
+
+endprogram
+
+function configGump(who, monsterDuelController)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 500, 530);
+		
+	var qname:=GetAssociatedQuestName(monsterDuelController);
+	if (qname)
+		qname:= " Currently: " + qname;
+	else
+		qname:="";
+	endif
+			
+	GFTextMid(10, 10, 440, 70, "Monster Duel Controller");
+	GFTextMid(10, 30, 440, 53, "Select any of the following options:");
+	GFTextLine(90, 60, 5, "Associate queststone (OPTIONAL)." + qname);
+	GFTextLine(90, 90, 5, "Add monster point");
+	GFTextLine(90, 120, 5, "List points");
+	GFTextLine(90, 150, 5, "Specify Monster Duel Gate Boundary");
+	GFTextLine(90, 180, 5, "Check Monster Duel Gate Boundary");
+	GFTextLine(90, 210, 5, "Link gates - if one is in use then neither can be used (OPTIONAL)");
+	GFTextLine(90, 240, 5, "Remove gate link");
+
+	GFTextLine(90, 370, 5, "README!!!");
+	GFTextLine(90, 400, 5, "Reset all");
+	GFTextLine(90, 430, 5, "Exit");
+
+	var assocQueststone := GFButtonID( 60, 65, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var addPoint := GFButtonID( 60, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var listpoints := GFButtonID( 60, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var specbounds := GFButtonID( 60, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var checbounds := GFButtonID( 60, 185, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var linkgates := GFButtonID( 60, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var unlinkgates := GFButtonID( 60, 245, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var help := GFButtonID( 60, 375, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var resetallbtn := GFButtonID( 60, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+	
+	if(choice[assocQueststone.keyid])
+		associateQuestStone(who, monsterDuelController);
+	elseif(choice[addPoint.keyid])
+		addMonsterPointInput(who, monsterDuelController);
+	elseif(choice[listpoints.keyid])
+		MonsterPointsInfoGump(who, monsterDuelController);
+	elseif(choice[specbounds.keyid])
+		SpecifyGateBoundary(who, monsterDuelController);
+	elseif(choice[checbounds.keyid])
+		CheckBounds(who, monsterDuelController);
+	elseif(choice[linkgates.keyid])
+		linkDuelGates(who, monsterDuelController);
+	elseif(choice[unlinkgates.keyid])
+		unlinkDuelGates(who, monsterDuelController);
+	elseif(choice[help.keyid])
+		NoteFromBarns(who);
+	elseif(choice[resetallbtn.keyid])
+		ResetAllOpts(monsterDuelController);
+		SendSysMessage(who, "All points reset");
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+	configGump(who, monsterDuelController);
+endfunction
+
+function SpecifyGateBoundary(who, monsterDuelController)
+	SendSysMessage(who, "Specify the top north-west corner of the duel area (for all points)");
+	var loc1 := TargetCoordinates(who);
+
+	if (!loc1)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+	
+	SendSysMessage(who, "Specify the top south-east corner of the duel area (for all points)");
+	var loc2 := TargetCoordinates(who);
+
+	if (!loc2)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+
+	var bounds:=struct;
+	bounds.+x1:=loc1.x; 
+	bounds.+x2:=loc2.x; 
+	bounds.+y1:=loc1.y; 
+	bounds.+y2:=loc2.y; 
+	SetObjProperty(monsterDuelController, "BoundaryCoords", bounds);
+	SendSysMessage(who, "Monster Duel Gate boundary set");
+endfunction
+
+function CheckBounds(who, monsterDuelController)
+	var bounds := GetObjProperty(monsterDuelController, "BoundaryCoords");
+	if (!bounds || bounds==error)
+		SendSysMessage(who, "No boundary has been set");
+		return;
+	endif
+	//Broadcast(bounds);
+	//return;
+	MoveCharacterToLocation( who, bounds.x1, bounds.y1, who.z, MOVECHAR_FORCELOCATION);
+	SendSysMessage(who, "North-west boundary");
+	sleep(2);
+		
+	MoveCharacterToLocation( who, bounds.x2, bounds.y1, who.z, MOVECHAR_FORCELOCATION);
+	SendSysMessage(who, "North-east boundary");
+	sleep(2);
+
+	MoveCharacterToLocation( who, bounds.x1, bounds.y2, who.z, MOVECHAR_FORCELOCATION);
+	SendSysMessage(who, "south-west boundary");
+	sleep(2);
+
+	MoveCharacterToLocation( who, bounds.x2, bounds.y2, who.z, MOVECHAR_FORCELOCATION);
+	SendSysMessage(who, "south-east boundary");
+	sleep(2);
+	MoveCharacterToLocation( who, monsterDuelController.x, monsterDuelController.y+1, monsterDuelController.z, MOVECHAR_FORCELOCATION);
+
+	
+
+endfunction
+
+function addMonsterPointInput(who, monsterDuelController)
+	var currentPoints := GetAllMonsterPoints(monsterDuelController);
+	if (!currentPoints || currentPoints==error)
+		SetObjProperty(monsterDuelController, "monsterPoints",{});
+	endif
+	
+	if (len(GetAllMonsterPoints(monsterDuelController))>=20)
+		SendSysMessage(who, "Only up to 20 monster duels supported");
+		return;
+	endif
+	SendSysMessage(who, "Select the position the player will teleport to");
+	var loc := TargetCoordinates(who);
+	if (!loc)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+	if( ! (IsForbiddenAreaToRecallFrom( loc ) && IsForbiddenAreaToRecallFrom( loc )))
+		SendSysMessage( who, "Monster Duel locations must be in 'no recall in' and 'no recall out' areas" );
+		return 0;
+	endif
+	var mtemp := SendTextEntryGump( who, "Enter Monster Template. Assumes valid template");
+	if (! mtemp)
+		return;
+	endif
+	SendSysMessage(who, "Select the position the monster will spawn at");
+	var mloc := TargetCoordinates(who);
+	if (!mloc)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+	if( ! (IsForbiddenAreaToRecallFrom( mloc ) && IsForbiddenAreaToRecallFrom( mloc )))
+		SendSysMessage( who, "Monster Duel locations must be in 'no recall in' and 'no recall out' areas " );
+		return 0;
+	endif
+
+	var worthQPs:=1;
+	if (GetObjProperty (monsterDuelController, "AssocQuestStoneSer"))
+		worthQPs:=(YesNo(who,"Is this monster worth questpoints?"));
+	endif
+
+	AddMonsterPoint(monsterDuelController, loc, mtemp, mloc, worthQPs);
+endfunction
+
+function AddMonsterPoint(monsterDuelController, playerlocation, npctemplate, monsterlocation, boolqps)
+	var mps := GetAllMonsterPoints(monsterDuelController);
+	var tempmps:=makeMonsterPointStruct(playerlocation, npctemplate, monsterlocation, boolqps);
+	mps.append(tempmps);
+	SetObjProperty(monsterDuelController, "monsterPoints", mps);
+endfunction
+
+
+function DeleteMonsterPoint(monsterDuelController, index)
+	var tempMPs:=array;
+	var mps := GetAllMonsterPoints(monsterDuelController);
+	var i:=1;
+	while (i<=len(mps))
+		if (i!=index)
+			tempMPs.append(mps[i]);	
+		endif
+		i:=i+1;
+	endwhile
+	SetObjProperty(monsterDuelController, "monsterPoints", tempMPs);
+endfunction
+
+function makeMonsterPointStruct(playerlocation, npctemplate, monsterlocation, boolqps)
+	var monsterstr:=struct;
+	monsterstr.+playerlocation:=playerlocation;
+	monsterstr.+npctemplate:=npctemplate;
+	monsterstr.+monsterlocation:=monsterlocation;
+	monsterstr.+boolqps:=boolqps;
+	return monsterstr;
+endfunction
+
+function ResetAllOpts(monsterDuelController)
+	EraseObjProperty (monsterDuelController, "AssocQuestStoneSer");
+	SetObjProperty(monsterDuelController, "monsterPoints",{});
+endfunction
+
+
+function MonsterPointsInfoGump(who, monsterDuelController)
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SCROLL, 400, 530);
+	GFTextMid(100, 10, 200, 10, "Monster Points on Monster Duel Controller");
+	
+	
+	var mps := GetAllMonsterPoints(monsterDuelController);
+	var i;
+	var y := 40;
+	
+	var hButton:=array;	var tempstr;
+	for(i:=1;i<=len(mps);i:=i+1)	
+		GFTextLine(50, y, 5, i +": " + mps[i].npctemplate + " - " + mps[i].playerlocation.x + ", " + mps[i].playerlocation.y + ", " + mps[i].playerlocation.z);
+		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		y:=y+20;
+	endfor
+		
+	var choice := GFSendGump(who);
+	
+	//return values	
+	var counter:=0;
+	
+	foreach b in hButton
+		counter:=counter+1;
+   	if (choice[b.keyid])
+			FurtherMonsterPointInfo(who, monsterDuelController, counter);
+		endif
+	endforeach
+	return 0;
+endfunction
+
+
+function FurtherMonsterPointInfo(who, monsterDuelController, index)
+	var mps := GetAllMonsterPoints(monsterDuelController);
+	var monsterpoint := mps[index];
+	
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 440, 530);
+	
+	var qpstr;
+	if(monsterpoint.boolqps) 
+		qpstr:="Yes";
+	else 
+		qpstr:="No";
+	endif
+	
+	GFTextMid(10, 10, 440, 70, "Monster Point " + index);
+	GFTextLine(90, 50, 53, "Player start location: " + monsterpoint.playerlocation.x + ", " + + monsterpoint.playerlocation.y + ", " + monsterpoint.playerlocation.z);
+	GFTextLine(90, 80, 53, "NPC template: " + monsterpoint.npctemplate);
+	GFTextLine(90, 110, 53, "Monster start location: " + monsterpoint.monsterlocation.x + ", " + + monsterpoint.monsterlocation.y + ", " + monsterpoint.monsterlocation.z);
+	if (GetObjProperty (monsterDuelController, "AssocQuestStoneSer"))
+		GFTextLine(90, 140, 53, "Are Quest points awarded? " + qpstr);
+	endif
+	GFTextLine(90, 400, 53, "Delete point");
+	GFTextLine(90, 430, 53, "Exit");
+
+	var deletePoint := GFButtonID( 60, 405, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var exitButton := GFButtonID( 60, 435, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );  
+
+	var choice := GFSendGump(who);
+
+	if (choice[deletePoint.keyid])
+		DeleteMonsterPoint(monsterDuelController, index);
+		SendSysMessage(who, "deleted");
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+
+
+endfunction
+
+function associateQuestStone(who, monsterDuelController)
+	SendSysMessage( who, "Select Queststone." );
+	var qstone := Target( who );
+	
+   if( !qstone || qstone.objtype != 41762) // queststone objtype
+   	SendSysMessage( who, "canceled." );
+     	return;
+   endif
+
+	SetObjProperty (monsterDuelController, "AssocQuestStoneSer", qstone.serial);
+	SendSysMessage( who, "Duel controller associated with queststone." );
+
+endfunction
+
+function linkDuelGates(who, monsterDuelController)
+	if (GetObjProperty (monsterDuelController, "LinkedDuelGateSer"))
+		SendSysMessage( who, "This monster duel gate already has a linked monster duel gate. Remove that one first." );
+		return;
+	endif
+
+	
+	SendSysMessage( who, "Select another monster duel gate." );
+	var mdgate := Target( who );
+	
+   if( !mdgate || mdgate.objtype != 0x1a) // queststone objtype
+   	SendSysMessage( who, "canceled." );
+     	return;
+   endif
+
+	if (GetObjProperty (mdgate, "LinkedDuelGateSer"))
+		SendSysMessage( who, "This monster duel gate already has a linked monster duel gate. Remove that one first." );
+		return;
+	endif
+
+	SetObjProperty (monsterDuelController, "LinkedDuelGateSer", mdgate.serial);
+	SetObjProperty (mdgate, "LinkedDuelGateSer", monsterDuelController.serial);
+
+	SendSysMessage( who, "Duel gate has been linked." );
+
+endfunction
+
+function unlinkDuelGates(who, monsterDuelController)
+	var linkedgateser := Cint(GetObjProperty (monsterDuelController, "LinkedDuelGateSer"));
+	if (!linkedgateser)
+		SendSysMessage( who, "This monster duel has no linked gate." );
+		return;
+	endif
+	
+	var linkedgate:=SystemFindObjectBySerial(linkedgateser);
+	EraseObjProperty (linkedgate, "LinkedDuelGateSer");
+	EraseObjProperty (monsterDuelController, "LinkedDuelGateSer");
+
+	SendSysMessage( who, "Link has been removed." );
+
+endfunction
+
+
+
+
+function NoteFromBarns(who)
+	var helpstring:= "Notes on using the Monster Duel Gate: "+
+	"You can associate a queststone with a Monster Duel Gate but you dont have to. If you do you can determine at each"+
+	" monster point which give quest points (defaults to all 'yes'). All Monster Points have to be within no recall in or out areas."+
+	" This is because if people can move out of your duel area the gate will still be reserved for them... and will be tied up until "+
+	"that player goes off-line. Please ensure that each Monster Point is in an enclosed non-recallable to or from place. I have "+
+	"tried to force this with scripts but if your area isnt enclosed then this will be a problem. You can specify that a Monster Point "+
+	"spawns a random template from a short list. To do this, when entering the npctemplate for a Point simply add more templates on the line. "+
+	"E.g. orc1 skeleton ogre dragon1 . Note there should be a space between each template name, and all need to be valid templates! "+
+	"Boundary checking: each gate must have its AREA specified... if you don't do this then it wont work. The area should contain "+ 
+	"all the monster duel points you have specified. The way this works is - while someone is using the gate it will check that that person " +
+	"is within that area. If they leave it somehow then the duel gate will end the duel... had to do this cos of a nasty teleporting exploit." +
+	"Link gates - will link gates together...if 1 is in use then both will be. Automatically reciprocally links gates (i.e. both have reference to each other). Only 2 gate linking allowed." +
+	"Useful if u want to monster duel gates to use the same physical area."+
+	"Please test your Monster Duel Gate after you've set it up. Have fun - Barns 23/10/03";
+	SendStringAsTipWindow( who, helpstring );
+endfunction

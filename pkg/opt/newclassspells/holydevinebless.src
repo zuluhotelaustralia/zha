@@ -1,0 +1,55 @@
+/* Holy Spell - Devine Bless  **
+** Blesses target             **
+** Seravy - seravy@gmail.com  */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_DEVINEBLESS;
+
+program cast_devinebless(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var mod_amount := CInt( GetModAmount( caster, 1, SKILLID_PIETY) );
+  if (cast_on==caster)
+  	mod_amount:=CInt(mod_amount* 2.0);
+  else
+  	mod_amount:=CInt(mod_amount* 1.5);
+  endif
+  var duration := CInt( GetModDuration( caster, SKILLID_PIETY) * 1.0 );
+
+  if( CanMod( cast_on, "all" ) )
+    DoTempMod( cast_on, "all", mod_amount, duration );
+  endif
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_DEVINEBLESS, SPEED_SPELL_DEVINEBLESS, LOOP_SPELL_DEVINEBLESS);
+  PlaySoundEffect(cast_on, SFX_SPELL_DEVINEBLESS);
+  EraseObjProperty( caster, "#Casting");
+ 
+endprogram

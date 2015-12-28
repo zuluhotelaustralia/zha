@@ -1,0 +1,69 @@
+use uo;
+
+include "include/client";
+include "include/attributes";
+include "include/spelldata";
+include "include/npcbackpacks";
+include "include/hitscriptinc";
+
+program banishdust(who, dust)
+
+	if(!ReserveItem(dust))
+		return;
+	endif
+	
+	if(!IsNinja(who))
+		SendSysMessage(who, "Only a Ninja knows the use of this item.");
+		return;
+	endif
+
+	SendSysMessage(who, "Select a Target.");
+	var summon := TargetCoordinates(who);
+	Detach();
+
+	if (!summon)
+		SendSysMessage(who, "canceled.");
+		return;
+	endif
+	if(PreventedCastInGuardedArea(summon))
+		SendSysMessage(who, "You can't throw this in town.");
+		Return;
+	endif
+	PlayMovingEffectXYZ( who.x, who.y, who.z, summon.x, summon.y, summon.z, 6195, 10, loop := 0, explode:= 0 );
+	var range := GetObjProperty(dust, "ByTrueMage");
+	
+
+	
+	Sleep(1);
+	if( range )
+		range := CInt( range )+2;
+	else
+		range := 1;		
+	endif
+	var bomb:= CreateItemAtLocation(summon.x, summon.y, summon.z, dust.objtype);
+	DestroyItem(dust);
+	bomb.moveable := 0;
+	SetObjProperty(bomb, "NoLoot", CInt(1));
+	PrintTextAbove(bomb, "3");
+	sleep(1);
+	PrintTextAbove(bomb, "2");
+	sleep(1);
+	PrintTextAbove(bomb, "1");
+	sleep(1);
+
+	var victims := ListMobilesNearLocation( CInt(bomb.x), CInt(bomb.y), CInt(bomb.z), range);
+	PlayObjectCenteredEffect(bomb, 0x36b0, 1, 0x10);
+	Foreach victim in victims
+		if(victim.ISA(POLCLASS_NPC))
+		PlaySoundEffect(bomb, SFX_SPELL_EXPLOSION);
+		PlayMovingEffect( bomb, victim, 0x36b0, 15, loop := 0, explode:= 0 );
+		ApplyElementalDamage(who, victim, 10, range*100, DMGID_FIRE );
+		elseif(victim.ISA(POLCLASS_MOBILE))
+		PlaySoundEffect(bomb, SFX_SPELL_EXPLOSION);
+		PlayMovingEffect( bomb, victim, 0x36b0, 15, loop := 0, explode:= 0 );
+		ApplyElementalDamage(who, victim, 10, range*7, DMGID_FIRE );
+		endif
+	endforeach
+	DestroyItem(bomb);
+
+endprogram

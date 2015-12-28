@@ -1,0 +1,18 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program listnear( character )
+	if (!checkStaff(character, "listmobnear", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    var coords := TargetCoordinates( character );
+   
+    if (coords)
+        foreach mobile in ListMobilesNearLocation( coords.x, coords.y, coords.z, 4 )
+            SendSysMessage( character, mobile.name + " (" + mobile.serial + ")" );
+            print(mobile.name);
+        endforeach
+    endif
+endprogram

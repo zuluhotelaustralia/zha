@@ -1,0 +1,56 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/dotempmods";
+include "include/random";
+include "pickdoor";
+
+program removetrappickdoor( params )
+	var character :=  params[1];
+	var door :=  params[2]; 
+	
+	if (!DoorTrapReady(door))
+		SendSysMessage( character, "That may not be trapped" );
+		return;
+	endif
+	
+	var oldx := character.x;
+	var oldy := character.y;
+
+	var diff := GetObjProperty(door, "LockDifficulty");
+	
+	var thief  := GetObjProperty( character, CLASSEID_THIEF );
+	PlaySoundEffect(character, 0x4A);
+	if (!thief)
+		sleep(5);
+	else
+		if (thief<5)
+			sleep(5-thief);
+		else
+			sleep(1);
+		endif
+	endif
+	if (character.x!=oldx || oldy != character.y)
+		SendSysMessage(character,"You have moved");
+		return 0;
+	endif
+
+	PlaySoundEffect(character, 0x4A);
+	
+	
+	if( CheckSkill( character, SKILLID_REMOVETRAP, diff, diff*4 ) )
+		SendSysMessage( character, "You sucessfully removed the trap." );
+		TempDisableDoorTrap(door);
+		PlaySoundEffect(character, 0x34);
+	else
+		if (Random(2))
+			SendSysMessage( character, "You slip at a very bad moment!" );
+			FireTrapIfPresent(character,door);
+		else
+			SendSysMessage( character, "That may not be trapped" );
+		endif
+	endif
+		
+endprogram

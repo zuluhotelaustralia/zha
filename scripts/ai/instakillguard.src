@@ -1,0 +1,120 @@
+//////////////////////////////////////////////////////////
+//Instant kill Guards	 			  	//
+//Revised by Louds					//
+//						 	//
+//							//
+//							//
+//							//
+//////////////////////////////////////////////////////////
+
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventid";
+include "include/attributes";
+include "include/randname";
+include "include/client";
+include "include/spawnnet";
+include "ai/setup/modsetup";
+
+var me := Self();
+
+sleepms(20);
+
+var targ := GetProperty("target");
+
+program Instakill_guards()
+
+set_priority(20);
+DisableEvents(SYSEVENT_SPEECH);
+
+targ := SystemFindObjectBySerial(targ);
+if(!targ)
+	ClearGuard();
+	syslog("logouted dood");
+	return;
+endif
+
+if( targ.cmdlevel )
+	ClearGuard();
+	syslog("guards called on staff.");
+	return;
+endif
+
+SetOpponent(targ);
+targ.hidden := 0;
+Fight();
+
+var i;
+for(i:=0;i<6;i:=i+1)
+	wander();
+	sleep(1);
+endfor
+
+ClearGuard();
+
+endprogram
+
+
+
+function Fight()
+set_priority(50);
+EnableEvents(SYSEVENT_OPPONENT_MOVED, 15);
+EnableEvents(SYSEVENT_OPPONENT_MOVED);
+var ev;
+
+if (!targ.acctname)
+  SetObjProperty(targ, "guardkill", 1);
+endif
+
+while(targ &&  (!targ.dead || targ.hidden ) )
+	if( targ.hidden )
+		targ.hidden := 0;
+	endif
+
+	ev := wait_for_event( Closedistance()*10 );
+	repeat
+		case(ev.type)
+			SYSEVENT_OPPONENT_MOVED:
+				Closedistance();
+				break;
+		endcase
+	until (!(ev := wait_for_event(0)));
+endwhile
+
+set_priority(20);
+SetWarMode(0);
+
+endfunction
+
+function ClearGuard()
+
+	PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
+	//MoveCharacterToLocation(me, 5283,1184,0, MOVECHAR_FORCELOCATION);
+	sleepms(500);
+	me.hidden := 1;
+	sleepms(500);
+	SetObjProperty(me,"guardkill", 1);
+	RevokePrivilege( me, "invul" );
+	Damage( me, GetMaxHp(me) + 3 );
+
+endfunction
+
+
+function Closedistance()
+case Distance( me, targ )
+	1: return 1;
+        2: RunToward( targ );
+ 	   return 0;
+	0: return 1;
+	default:
+		PlayStationaryEffect( CInt(me.x), CInt(me.y), CInt(me.z), FX_SMOKE, 0xa, 0xa );
+		MoveCharacterToLocation(me, CInt(targ.x), CInt(targ.y), CInt(targ.z));
+		PlayStationaryEffect( CInt(me.x), CInt(me.y), CInt(me.z), FX_SMOKE, 0xa, 0xa );
+		return 0;
+endcase
+
+endfunction

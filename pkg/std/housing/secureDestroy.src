@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+include "securechests";
+
+program securechest_destroy(chest)
+	WipeSecureChest( chest.serial );
+	var hserial :=  GetObjProperty(chest, "houseserial");
+	if (hserial)
+		var house := SystemFindObjectBySerial(hserial);
+		if (house)
+			SetObjProperty( house, "numsecure", CInt(GetObjProperty( house, "numsecure") + 1) );
+		endif
+	endif
+endprogram
+

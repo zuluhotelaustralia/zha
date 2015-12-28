@@ -1,0 +1,105 @@
+use uo;
+use cfgfile;
+include "unleashmap";
+
+program unleash_map(parms)
+	
+	var who := parms[1];
+	var map := parms[2];
+	var maptype := GetObjProperty(map, "MapNumber");
+	var cfgfile := ReadConfigFile( "specialmaps" );
+  	var elem := FindConfigElem( cfgfile, maptype );
+	//get variables for monster and item creations
+	var total	:= GetConfigString( elem, "total" );
+	var mnum	:= GetConfigInt( elem,"mnum" );
+	var loot := GetConfigInt( elem,"lootgroupnumber");
+	var title := GetConfigString( elem, "Tomb");
+	var colour := GetConfigInt( elem, "Colour");
+	
+   var x := GetConfigInt( elem, "X" );
+   var y := GetConfigInt( elem, "Y" );
+   var z := GetConfigInt( elem, "Z" );
+	var rand;
+	var template;
+	var i;
+	var difficulty := Cint(GetObjProperty(map, "difficulty"));
+	
+	if (!difficulty)
+		difficulty:=1;
+	endif	
+	var limit	:= RandomDiceStr( total ) + (difficulty *3);
+	If (!GetGlobalProperty(title) || GetGlobalProperty(title)<CInt(ReadGameClock()))
+		SetGlobalProperty(title, CInt(ReadGameClock()) + 1680); //28 mins til map can be activated here again
+		SendSysMessage( who, "You have activated the map, summoning forth the tomb that was trapped within! Kill the tombs guardians within " + CStr(Cint(MAP_TIME/60)) + " minutes to obtain their treasure",3,53 );
+		PlaySoundEffect( who, SFX_SPELL_GATE_TRAVEL );
+	else
+		SendSysMessage( who, "This tomb cannot be summoned at this time." );
+		return; //only one instance of a tomb map allowed to run at a time
+	endif
+	
+	var chief := GetConfigString( elem, ("Chief") );
+	var monsters := array;
+	
+	//testing
+	//Broadcast("moving u to map!");
+	//MoveCharacterToLocation( who, x, y, z, MOVECHAR_FORCELOCATION);
+	//
+
+	//Broadcast("limit: " + limit);	
+	for( i := 1; i <= limit; i := i + 1 )
+  		rand := Random( mnum ) + 1;
+		template := GetConfigString( elem, ("creature" + rand) );
+		monsters.append(template);
+	endfor
+	//Broadcast("monsters: " + monsters);	
+	//SetObjProperty( map, "monsters", monsters );
+	var itemnum	:= GetConfigInt( elem,"itemnum" );
+	var items := array;
+	//Broadcast("itemnum: " + itemnum);	
+	for( i := 1; i <= itemnum; i := i + 1 )
+		items.append(createItemStruct(GetConfigString( elem, ("itemtemplate" + i) ), 
+		GetConfigInt( elem, ("itemx" + i)),
+		GetConfigInt( elem, ("itemy" + i)),
+		GetConfigInt( elem, ("itemz" + i))));
+  	endfor
+
+	//Broadcast("items: " + items);	
+	DestroyItem(map);
+	//creating monsters and items
+	var spawnedmonsters := MakeMonsters(difficulty, chief, monsters, x,y,z);
+	//Broadcast(spawnedmonsters);
+	//Broadcast(len(spawnedmonsters));
+	var monst;
+	var monstcounter :=0;
+	foreach m in spawnedmonsters
+		monst := SystemFindObjectBySerial(m);
+		if (monst || GetHP(monst))
+			monstcounter:=monstcounter+1;
+		endif
+	endforeach
+	if(! monstcounter)
+		SendSysMessage(who, "There are distant screaming sounds but nothing appears!",3,50);
+		sleep(3);
+		PlaySoundEffect( who, 0x025b );
+		sleep(1);
+		PlaySoundEffect( who, 0x015c );
+		sleep(1);
+		PlaySoundEffect( who, 0x015d );
+		sleep(1);
+		PlaySoundEffect( who, 0x015e );
+		sleep(1);
+		PlaySoundEffect( who, 0x025c );
+		sleep(1);
+		EraseGlobalProperty(title);
+		return;
+	endif
+
+	//Broadcast("spawnedmonsters: " + spawnedmonsters);	
+	var spawneditems := MakeItems(items);
+	//Broadcast("spawneditems: " + spawneditems);	
+		
+	//create place holder that remembers this information in case of server restart
+	//it handles it all from here
+	var mylevel6mapplaceholder := MakeMapPlaceHolder(spawnedmonsters, spawneditems, difficulty, title, loot, colour, who, x, y, z);
+	//RunPlaceHolderMapCheck(mylevel6mapplaceholder);
+endprogram

@@ -1,0 +1,32 @@
+use basic;
+use os;
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_listcprops( who )
+	if (!checkStaff(who, "listcprops", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	var object := Target(who);
+	if( object.isA(POLCLASS_UOBJECT) )
+		var descriptor := object.name;
+		if (!descriptor)
+			descriptor := object.desc;
+		endif
+		SendSysMessage(who, "CPROPS for " + descriptor);
+		foreach cprop_name in GetObjPropertyNames(object)
+			if( object )
+				SendSysMessage(who, "\"" + cprop_name + "\" = " + GetObjProperty(object, cprop_name) + ".");
+//				sleep(1);
+			else
+				SendSysMessage(who, "The object is no longer existing.");
+				return 0;
+			endif
+		endforeach
+		SendSysMessage(who, "End of CPROPS");
+	else
+		SendSysMessage(who, "This isn't a valid object.");
+	endif
+endprogram

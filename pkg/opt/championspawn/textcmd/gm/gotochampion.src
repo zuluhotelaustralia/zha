@@ -1,0 +1,46 @@
+/* Goto Champion Spawns      **
+** Used to goto spawns       **
+** Seravy - seravy@gmail.com */
+
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_gotochampion(who, number)
+
+  if( who.cmdlevel < CMDLEVEL_GAME_MASTER )
+    SendSysMessage( who, "Only Gamemasters can make champion spawnpoints." );
+    return 0;
+  endif
+
+
+  number := CInt(number);
+
+  var spawns := GetGlobalProperty("championSpawns");
+  if (!spawns)
+    spawns := {};
+  endif
+
+  if (spawns.size() < 1)
+    SendSysMessage(who, "There are no champion Spawns Registered.");
+    return 1;
+  endif
+    
+  if (!number)
+    SendSysMessage(who, "There are "+spawns.size()+" Spawns.");
+    SendSysMessage(who, "Type .gotochampion <number>");
+  else
+    if (number > 0 && number <= spawns.size())
+      var spawn := SystemFindObjectBySerial(spawns[number]);
+      if (spawn)
+        MoveCharacterToLocation( who, spawn.x, spawn.y, spawn.z, MOVECHAR_FORCELOCATION );
+      else
+        SendSysMessage(who, "Error finding spawn. Contact a dev.");
+      endif
+    else
+      SendSysMessage(who, number+ " is an Invalid number. Accepted numbers are between 1 and "+spawns.size()+".");
+    endif    
+  endif
+
+  return 1;
+endprogram

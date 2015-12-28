@@ -1,0 +1,16 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_corpsetype( who )
+	if (!checkStaff(who, "corpsetype", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    SendSysMessage( who, "Show me the corpse." );
+
+    var corpse := Target( who );
+    if (corpse)
+        SendSysMessage( who, "Corpse Type is " + corpse.corpseType );
+    endif
+endprogram

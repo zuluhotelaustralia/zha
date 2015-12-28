@@ -1,0 +1,315 @@
+use uo;
+use os;
+
+include "include/gumps";
+include "include/constants/multiids";
+include "include/cmdlevel_check";
+
+
+program textcmd_shipshower (who, text)
+	if (!checkStaff(who, "showships", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+	var page:=0;
+	var start:=1;
+	var retrieve:=21;//retrieves 21 max.. displays 20
+	//if 21 available it will allow next to be available
+	//for retrieval of next 20 records
+	var mode, title;
+	var parms := SplitWords (text);
+	if (parms[1])
+		if (parms[1]=="-player")
+			mode:=1;
+		elseif (parms[1]=="-account")
+			mode:=2;
+		elseif (parms[1]=="-all")
+			mode:=3;
+		elseif (parms[1]=="-error")
+			mode:=4;
+		else
+			SendSysMessage(who, "Invalid parameter: .showships[-player|-account|-all|-error]");
+			SendSysMessage(who, "eg. .showhouses -player");
+			return 0;
+		endif	
+	else
+		SendSysMessage(who, "Invalid parameter: .showships[-player|-account|-all|-error]");
+		SendSysMessage(who, "eg. .showhouses -player");
+		return 0;
+	endif
+
+	SendSysMessage(who, "Showships may take a moment to search through all ships on the shard. Please be patient.");
+
+	var player, ships;	
+ 	case (mode)
+ 		1:
+ 			SendSysMessage(who, "Target a player to find all ships for.");
+ 			player:= Target(who);
+ 			if (!player) return 0; endif
+ 			title:="Ships for " + player.name;
+ 			ships:=EnumeratePlayerShips(start, retrieve, player);
+ 			break;
+ 		2:
+ 			
+ 			SendSysMessage(who, "Target a player to find ships for that account.");
+ 			player:= Target(who);
+ 			if (!player) return 0; endif
+ 			title:="Ships for account " + player.acct.name;
+ 			ships:=EnumerateAccountShips(start, retrieve, player.acct);
+ 			break;
+ 		3:
+ 			title:="ALL SHIPS ON ZHA";
+ 			ships:=EnumerateAllShips(start, retrieve);
+ 			break;
+ 		4:
+ 			title:="ALL ERROR SHIPS ON ZHA";
+ 			ships:=EnumerateAllErrorShips(start, retrieve);
+ 			break;
+ 		default:
+ 			return 0;
+ 	endcase
+	
+	
+	
+	var res:=shipgump(who, ships, page, title);
+	
+	while (res)
+		if (res<=20)
+		//move char to location
+			SendSysMessage(who, "Ship " + ships[res].x + ", " + ships[res].y + ", " + ships[res].z);
+			MoveCharacterToLocation(who, ships[res].x, ships[res].y, ships[res].z+10, MOVECHAR_FORCELOCATION);
+			res:=shipgump(who, ships, page, title);
+		endif
+		if (res==21)//prev
+			if (page>0)
+				page:=page-1;
+				start:=start-(retrieve-1);
+				
+				case (mode)
+ 				1:	ships:=EnumeratePlayerShips(start, retrieve, player);
+ 					break;
+ 				2:		
+ 					ships:=EnumerateAccountShips(start, retrieve, player.acct);
+ 					break;
+ 				3:
+ 					ships:=EnumerateAllShips(start, retrieve);
+ 					break;
+ 				4:
+ 					ships:=EnumerateAllErrorShips(start, retrieve);
+ 					break;
+ 				default:
+ 					return 0;
+ 				endcase
+				
+				
+				res:=shipgump(who, ships, page, title);
+			endif
+		elseif (res==22) //next
+			if (ships.size()>20) 
+				page:=page+1;
+				start:=start+(retrieve-1);
+				case (mode)
+ 				1:	ships:=EnumeratePlayerShips(start, retrieve, player);
+ 					break;
+ 				2:		
+ 					ships:=EnumerateAccountShips(start, retrieve, player.acct);
+ 					break;
+ 				3:
+ 					ships:=EnumerateAllShips(start, retrieve);
+ 					break;
+ 				4:
+ 					ships:=EnumerateAllErrorShips(start, retrieve);
+ 					break;
+ 				default:
+ 					return 0;
+ 				endcase	
+				res:=shipgump(who, ships, page, title);
+			endif
+		endif
+	endwhile
+	SendSysMessage(who, "Cancelled");
+
+endprogram
+
+function shipgump(who, ships, page, title)
+	
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_SCROLL, 400, 500);
+	GFTextMid(100, 10, 200, 10, title);
+	
+	var i;
+	var y := 40;
+	
+	//because 21 max are taken but 20 only are to be displayed
+	//21st indicates more available for next gump
+	//so:
+	var sSize;
+	if (ships.size()>20)
+		sSize:=20;
+	else
+		sSize:=ships.size();
+	endif
+	
+	
+	var outString;
+	var hButton:=array;
+	
+	for(i:=1;i<=sSize;i:=i+1)
+		outString := GetShipTypeString(ships[i].objtype)+": "+ ships[i].x + ", " + ships[i].y + ", " + ships[i].z;
+		GFTextLine(50, y, 5, outString);
+		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		y:=y+20;
+	endfor
+	
+	//prev and next page buttons
+	var prevButton, nextButton;
+	
+	if (page>0)
+		GFTextLine(20, 480, 4, "PREVIOUS" );
+		prevButton := GFButtonID(10, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+	
+	if (ships.size()>20)
+		GFTextLine(280, 480, 4, "NEXT" );
+		nextButton := GFButtonID(270, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	endif
+	
+	var choice := GFSendGump(who);
+	
+	
+	
+	//return values
+	
+	if (choice[prevButton.keyid])
+		return 21;
+	endif
+	
+	if (choice[nextButton.keyid])
+		return 22;
+	endif
+	
+	var counter:=0;
+	
+	foreach b in hButton
+		counter:=counter+1;
+    		if (choice[b.keyid])
+			return counter;
+		endif
+	endforeach
+	return 0;
+	
+endfunction
+
+function EnumerateAllShips(start, returnSize)
+	var holds := GetGlobalProperty("holds");
+	
+	var maxShips:=holds.size();
+	
+	var i:=1;
+	var ship, ownerserial, owneracct, acct, hold;
+	var hisShips:=array;
+	
+	for(i:=start;i<=maxShips&&hisShips.size()<returnSize;i:=i+1)
+		hold:=SystemFindObjectBySerial(CInt(holds[i]));
+		ship := SystemFindObjectBySerial(CInt(hold.multi.serial));
+		hisShips.append(ship);
+	endfor
+	return hisShips;
+endfunction
+
+function EnumerateAllErrorShips(start, returnSize)
+	var holds := GetGlobalProperty("holds");
+	
+	var maxShips:=holds.size();
+	
+	var i:=1;
+	var ship, hold, ownerSer, ownerPlayer;
+	
+	var hisShips:=array;
+	
+	for(i:=start;i<=maxShips&&hisShips.size()<returnSize;i:=i+1)
+		hold:=SystemFindObjectBySerial(CInt(holds[i]));
+		ownerSer := GetObjProperty(hold,"owner");
+		ownerPlayer := SystemFindObjectBySerial(ownerSer);
+		if (!ownerPlayer||!ownerSer)
+			ship := SystemFindObjectBySerial(CInt(hold.multi.serial));
+			hisShips.append(ship);
+		endif
+	endfor
+	return hisShips;
+endfunction
+
+function EnumerateAccountShips(start, returnSize, account)
+	var holds := GetGlobalProperty("holds");
+	
+	var maxShips:=holds.size();
+	
+	var i:=1;
+	var ship, hold, ownerSer, ownerPlayer;
+	
+	var hisShips:=array;
+	
+	for(i:=start;i<=maxShips&&hisShips.size()<returnSize;i:=i+1)
+		hold:=SystemFindObjectBySerial(CInt(holds[i]));
+		ownerSer := GetObjProperty(hold,"owner");
+		ownerPlayer := SystemFindObjectBySerial(ownerSer);
+		if (ownerPlayer.acct.name==account.name)
+			ship := SystemFindObjectBySerial(CInt(hold.multi.serial));
+			hisShips.append(ship);
+		endif
+	endfor
+	return hisShips;
+
+endfunction
+
+function EnumeratePlayerShips(start, returnSize, player)
+	var holds := GetGlobalProperty("holds");
+	
+	var maxShips:=holds.size();
+	
+	var i:=1;
+	var ship, ownerSer, hold;
+	
+	var hisShips:=array;
+	
+	for(i:=start;i<=maxShips&&hisShips.size()<returnSize;i:=i+1)
+		hold:=SystemFindObjectBySerial(CInt(holds[i]));
+		ownerSer := GetObjProperty(hold,"owner");
+		if (ownerSer==player.serial)
+			ship := SystemFindObjectBySerial(CInt(hold.multi.serial));
+			hisShips.append(ship);
+		endif
+	endfor
+	return hisShips;
+endfunction
+
+function GetShipTypeString (shiptype)
+	//returns the string corresponding to the ships type
+	
+	var shipTypeStr;
+	case (shiptype)
+		MULTIID_SMALL_BOAT:
+			shipTypeStr :="Small boat";
+			break;
+		MULTIID_SMALL_DRAGON_BOAT:
+			shipTypeStr :=	"Small dragon boat";
+			break;
+		MULTIID_MEDIUM_BOAT:
+			shipTypeStr := "Medium boat";
+			break;
+		MULTIID_MEDIUM_DRAGON_BOAT:
+			shipTypeStr := "Medium dragon boat";
+			break;
+		MULTIID_LARGE_BOAT:
+			shipTypeStr := "Large boat";
+			break;
+		MULTIID_LARGE_DRAGON_BOAT:
+			shipTypeStr := "Large dragon boat";
+			break;
+		default:
+			shipTypeStr := "Ship";
+	endcase
+	return shipTypeStr;
+endfunction
+

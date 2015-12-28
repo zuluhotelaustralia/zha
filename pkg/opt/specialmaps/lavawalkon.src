@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+program walkon_lava( who, lavatile )
+	if (who.dead || !who.acct)
+		return;
+	endif
+	PlaySoundEffect(who, 0x0160);
+	PlayStationaryEffect( CInt(who.x),CInt(who.y),CInt(who.z), 
+					FX_SPELL_EXPLOSION, SPEED_SPELL_EXPLOSION, LOOP_SPELL_EXPLOSION );
+	ApplyElementalDamage( lavatile, who, 0, 160, 0x01 );
+endprogram

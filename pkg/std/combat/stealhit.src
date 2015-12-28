@@ -1,0 +1,179 @@
+use uo;
+use os;
+
+include "include/dotempmods";
+include "include/hitscriptinc";
+
+
+program stealhit(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+	snoopSteal(attacker, defender);
+	
+	rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage );
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+
+endprogram
+
+function snoopSteal(who, victim)
+	//check snoop against players INT
+	//if successfull	//select a random item that is not new or a container
+	//check stealing
+	//if successful 
+	//move to thiefs backpack
+	//return//
+	////not successful
+	//message that youre noticed
+	//send sys message to player that theyre being attacked
+	
+	if (victim.cmdlevel)
+		return 0;
+	endif
+	
+	if (GetObjProperty(who, "snooping")>ReadGameClock())
+		//Broadcast("not yet!");
+		return 0;
+	endif
+	SetObjProperty(who, "snooping", ReadGameClock()+10);
+	
+	//Broadcast("Attempting theft!");
+	var thiefLevel := GetObjProperty( who, CLASSEID_THIEF );
+	
+	if (thiefLevel<3 || !thiefLevel)
+		SendSysMessage(who, "Only adept thieves can steal.");
+		return 0;
+	endif
+
+	var victimInt := GetIntelligence(victim);
+	var difficulty := CInt(victimInt*4.5/thiefLevel+1);
+	//if (who.npctemplate && !victim)
+	//	difficulty := CInt(difficulty*13.5);
+	//endif
+	Broadcast("difficulty: " + difficulty);
+	var points:= difficulty*40;
+	//e.g. a level 3 thief snooping a mage with 100 INT would have a difficulty of
+	// 450/4 = 112
+	var notcrimbefore:=0;
+	if (who.criminal==0 && victim.criminal!=1) 	//it will make thief go grey during snoop only if theyre not grey	
+		notcrimbefore:=1;			//already and victim is not crim
+	endif
+	
+	if (notcrimbefore)
+		who.setCriminal(1);
+	endif
+
+	SendSysMessage(who, "The magic of the weapon allow you to attempt to steal from the backpack of " + victim.name);
+	sleep(5);
+	if(Distance(who, victim)>1)
+		SendSysMessage(who, "You need to stay close to " + victim.name);
+		if (notcrimbefore)
+			who.setCriminal(0);
+		endif
+		return;
+	endif
+	
+	if(CheckSkill(who, SKILLID_SNOOPING, difficulty, points))
+		//Broadcast("SNOOPED!");
+		var stealitem := GetRandomItemFromBackpack(victim.backpack);
+		//roadcast("trying for item " + stealitem.name);
+		if (!stealitem.desc)
+			SendSysMessage(who, "You feel around in the backpack but it appears empty");
+			sleep(5);
+			if (notcrimbefore)
+				who.setCriminal(0);
+			endif
+			return 0;
+		endif
+		
+		var stealamount:=1;
+		if (stealitem.amount>1)
+			var snoopingskill:=GetEffectiveSkill(who, SKILLID_SNOOPING);
+
+			stealamount:=snoopingskill+Random(snoopingskill/2);
+			
+			if (stealamount>stealitem.amount)
+				stealamount:=stealitem.amount;
+			endif
+		endif
+		//Broadcast("Your hand grips an object in the backpack");
+		SendSysMessage(who, "Your hand grips an object in the backpack");
+		sleep(5);
+		if(Distance(who, victim)>1)
+			SendSysMessage(who, "You need to stay close to " + victim.name);
+			sleep(3);
+			if (notcrimbefore)
+				who.setCriminal(0);
+			endif
+			return;
+		endif
+		//Broadcast("ABOUT TO CHECK IF STEAL");
+		if (CheckSkill(who, SKILLID_STEALING, difficulty, points))
+			Broadcast("STOLEN! from " + victim.name + " to " + who.name);
+
+			SendSysMessage(who, "You nonchalantly slip " + stealitem.desc + " into your backpack");
+			MoveItemToContainer(stealitem, who.backpack);
+			sleep(4);
+			if (notcrimbefore)
+				who.setCriminal(0);
+			
+			endif
+
+			if (!victim.criminal)//only loose karma for stealing from the innocent!
+				var karma:=GetKarma(who);
+				var losskarma:=0;
+			
+				if (karma>-400)
+					losskarma:=0-(Random(80)+1);
+				endif
+				AwardKarma(who, losskarma);
+			endif
+			return 1;
+		else
+			SendSysMessage(who, "Oops! You slipped!");
+		endif		
+	endif
+	//Broadcast("Oops! You slipped!");
+	//happens if snooping fails or stealing fails following snoop
+	PlaySoundEffect( who, SFX_58);
+	tellplayers(who, victim);
+	sleep(6);
+	if (notcrimbefore)
+		who.setCriminal(0);
+	endif
+endfunction
+
+
+function tellplayers(who, victim)
+	//Broadcast("telling players!");
+	var targets:=ListMobilesNearLocation(who.x, who.y, who.z, 10);
+	
+	foreach mobile in targets
+		if ((mobile.serial!=who.serial) && (mobile.dead==0) && (mobile.serial!=victim.serial))
+			SendSysMessage(mobile, "You notice "+who.name+" snooping "+victim.name+"'s backpack!");
+		endif
+	endforeach
+	SendSysMessage(who, "You are noticed snooping in the backpack!");
+	SendSysMessage(victim, "You notice " + who.name + " snooping in your backpack!");
+endfunction
+
+function GetRandomItemFromBackpack(backpack)
+	var validitems :=array;
+	foreach item in EnumerateItemsInContainer(backpack)
+		if (!(item.newbie&&item.isA(POLCLASS_CONTAINER)&&GetObjProperty(item, "noloot")))
+			validitems.append(item);
+		endif
+	endforeach
+	//Broadcast (validitems);
+	var arrlen := validitems.size();
+	return validitems[Random(arrlen)+1];
+endfunction

@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+program slavergatewalkon( who, gate )
+
+	if (who.dead || !who.acct)
+		return;
+	endif
+	if (HasSlaveTimeElapsed(who))
+		MoveCharacterToLocation(who, 1475, 1645, 20, MOVECHAR_FORCELOCATION); //brit start
+		EraseObjProperty(who, "#cantLeaveSlaversBefore");	
+	endif
+	SendSysMessage(who, "You must still wait " + CInt(CInt(GetObjProperty(who, "#cantLeaveSlaversBefore")-ReadGameClock())/60) + " minutes before you can pass through this gate to freedom.");
+	
+endprogram
+
+function HasSlaveTimeElapsed(who)
+	//returns true if time elapsed
+	var slavetime := CInt(GetObjProperty(who, "#cantLeaveSlaversBefore"));
+	if (!slavetime)
+		return 1;
+	endif
+	if (ReadGameClock()>slavetime) //that is current time is greater than reserved time
+		return 1;
+	endif
+	return 0;
+endfunction
+
+

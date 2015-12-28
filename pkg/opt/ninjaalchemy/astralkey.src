@@ -1,0 +1,86 @@
+use uo;
+
+include "include/objtype";
+include "include/spelldata";
+include "include/areas";
+include "include/client";
+include "include/recalling";
+include "../pkg/std/housing/utility";
+
+program recall( who, astralkey )
+
+	if (!IsNinja(who))
+		SendSysMessage(who, "Only a Ninja knows the use of this item.");
+		return;
+	endif
+
+	if( IsForbiddenAreaToRecallFrom( who ) )
+		SendSysMessage( who, "The Astral Plane is blocked in this place." );
+		return 0;
+	endif
+
+	SendSysMessage( who, "Select a location to travel to." );
+
+	var cast_on := CanTargetThing(who, TGTOPT_CHECK_LOS );
+	If( getobjproperty( astralkey, "ByTrueMage") )
+		releaseitem( AstralKey );
+		eraseobjproperty( astralkey, "ByTrueMage" );
+		SendSysMessage( who, "The Key contains enough energy for a second use.");
+	else
+		DestroyItem( astralkey );
+	endif
+	if(!cast_on)
+		return;
+	elseif( !Accessible( who, cast_on ) )
+		SendSysMessage( who, "You can't reach that." );
+		return 0;
+	elseif( cast_on.objtype != UOBJ_RUNE && cast_on.objtype != 0x6100 )
+		SendSysMessage( who, "You can only travel to a place marked on a recall rune or a runebook!" );
+		return 0;
+	elseif( !ReserveItem( cast_on ) )
+		return 0;
+	endif
+
+	var tox := CInt( GetObjProperty( cast_on, "x" ) );
+	var toy := CInt( GetObjProperty( cast_on, "y" ) );
+	var toz := CInt( GetObjProperty( cast_on, "z" ) );
+
+
+	if( !tox && !toy && !toz )
+		SendSysMessage( who, "This is a blank rune!");
+		return 0;
+	
+	elseif( IsForbiddenAreaToRecallTo( who, tox, toy, toz ) )
+		SendSysMessage( who, "You can't Travel to this place." );
+		if( cast_on.objtype == UOBJ_RUNE )
+			DestroyItem(cast_on);
+		endif
+		return 0;
+	endif
+
+	var multi := GetStandingHeight( tox, toy, toz ).multi;
+	if( multi )
+		if( !IsOwner( who, multi )  )
+			if( !IsFriend( who, multi ) )
+				SendSysMessage( who, "You can't travel to this house." );
+				return;
+			endif
+		endif
+	endif
+
+	SendSysMessage(who, "You begin to travel through the Astral Plane.");
+
+
+	PlaySoundEffect( who, 0x469 );
+	sleepms(6000);
+
+	if(!who.dead)
+	PlaySoundEffect( who, SFX_SPELL_EXPLOSION );
+	PlayStationaryEffect( who.x, who.y, who.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
+	MoveCharacterToLocation( who, tox, toy, toz );
+	SendSysMessage(who, "You arrive safely at your destination.");
+	else
+	SendSysMessage(who, "You have died.");
+	endif
+
+endprogram

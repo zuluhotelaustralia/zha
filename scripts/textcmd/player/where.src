@@ -1,0 +1,17 @@
+// command .where  started June 19, 2000
+// Zulu (zulu@zuluhotel.com)
+// last updated June 25, 2000
+
+use uo;
+
+include "include/findcity";
+include "include/areas";
+
+program textcmd_where( who )
+
+    PrintTextAbovePrivate(who, "I am in " + findcity(who) + " Territory ("+who.x+","+who.y+","+who.z+")", who);
+    if (IsInGuardedArea(who))
+    	PrintTextAbovePrivate(who, "This is a guarded area.", who);
+    endif
+
+endprogram

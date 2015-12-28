@@ -1,0 +1,17 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_findserial( who, text )
+	if (!checkStaff(who, "findserial", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+    var f := SystemFindObjectBySerial( CInt(text) );
+    if (f)
+        if (f.name)
+            SendSysMessage( who, "Found: " + f.name );
+        else
+            SendSysMessage( who, "Found: " + f.desc );
+        endif
+    endif
+endprogram

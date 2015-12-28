@@ -1,0 +1,81 @@
+/* Druid Spell - Personalize Mount     **
+** Colours casters mount random color. **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/packets";
+
+const SPELL_ID := SPELL_ID_PERSONALIZEMOUNT;
+
+program cast_personalizemount(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+
+  if (parms[1] == "#MOB")
+    EraseObjProperty( caster, "#Casting");
+    return;
+  else
+    caster := parms;
+    cast_on := CanTargetSpell(caster, circle, TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var gfxtypes := {0xcc, 0xc8, 0xe2, 0xe4, 0xdc, 0xd2, 0xda, 0xdb, 177, 117, 114, 115, 170, 170, 0xC3, 0xC2, 0xC1, 0xBE, 0xBF, 0xC0, 0xC8, 120, 121, 119, 144, 116, 178, 132, 118, 122, 116, 179, 187, 188, 793, 791, 794, 799};
+  var class:=GetClass(caster);
+  if(class != CLASSEID_DRUID && class != CLASSEID_RANGER)
+    SendSysMessage(caster, "You could never understand the true meaning of this spell like a true druid would.");
+  elseif(!(cast_on.isA(POLCLASS_NPC) && cast_on.script == "tamed" && cast_on.master.serial == caster.serial))
+    SendSysMessage(caster, "You can only personalize tamed mounts.");
+  elseif(!(cast_on.graphic in gfxtypes))
+    SendSysMessage(caster, "The target must be a mount. (Able to ride it)");
+  elseif(GetObjProperty(cast_on, "PersonalizedMount"))
+    SendSysMessage(caster, "The animal can only be personalized once.");
+  else
+    setobjproperty(cast_on, "PersonalizedMount", cast_on.color);
+    if (cast_on.color == 0)
+      setobjproperty(cast_on, "PersonalizedMount", 1);
+    endif
+    var newColour := MakeFunkyColor();
+    PlayMovingEffectHuefx(caster, cast_on, FX_SPELL_PERSONALIZEMOUNT, SPEED_SPELL_PERSONALIZEMOUNT, LOOP_SPELL_PERSONALIZEMOUNT, 0, (newColour - 1));
+    PlaySoundEffect(caster, SFX_SPELL_PERSONALIZEMOUNT);
+
+    sleepms(250);
+    cast_on.color := newColour;
+  endif
+
+  EraseObjProperty( caster, "#Casting");
+endprogram
+
+function MakeFunkyColor()
+var ranges := {
+{1150, 1200},
+{1280, 1306},
+{1379, 1400},
+{1455, 1500},
+{1555, 1600},
+{1655, 1700}
+};
+  var rangeNumbers := {};
+  var totalNumbers := 0;
+  foreach range in ranges
+    rangeNumbers.append(range[2]-range[1]);
+    totalNumbers := totalNumbers + (range[2]-range[1]);
+  endforeach
+
+  var randomNumber := Random(totalNumbers)+1;
+  var i, numTally := 0;
+  for (i := 1; i <= ranges.size(); i := i + 1)
+    numTally := numTally + rangeNumbers[i];
+    if (randomNumber <= numTally)
+      return (Random(rangeNumbers[i])+1+ranges[i][1]);
+    endif
+  endfor
+endfunction

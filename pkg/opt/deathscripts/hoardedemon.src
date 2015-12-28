@@ -1,0 +1,32 @@
+use uo;
+
+program hoarde_demon_death(corpse)
+	if (GetObjProperty(corpse, "guardkill"))
+		return;
+	endif
+	var targettemplate;
+	case (GetObjProperty(corpse, "npctemplate"))
+		"mediumhoardedemon":
+			CreateSeveralMonsters("smallhoardedemon", corpse, 1);
+		"largehoardedemon":
+			CreateSeveralMonsters("smallhoardedemon", corpse, 2);
+		"multicolouredhoardedemon":
+			CreateSeveralMonsters("smallhoardedemon", corpse, 4);
+		default:
+			return 0;
+	endcase
+endprogram
+
+
+function CreateSeveralMonsters(template, corpse, number)
+		
+	PlaySoundEffect(corpse, 0x305);
+	PlayObjectCenteredEffect(corpse, 0x3709, 3, 0);
+
+	while (number >0)
+		CreateNpcFromTemplate(template, corpse.x, corpse.y, corpse.z);
+		number:=number-1;
+	endwhile
+
+
+endfunction

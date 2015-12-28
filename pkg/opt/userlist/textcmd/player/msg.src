@@ -1,0 +1,19 @@
+use uo;
+
+include "../../userlist";
+
+program textcmd_goto(character, whom)
+
+	if(!whom)
+		UserList(EVID_USERLIST_MSGBYGUMP, character);
+	elseif(upper(whom)=="ON")
+		EraseObjProperty(character, "Messages");
+		SendSysMessage(character, "Messages have been turned on");
+	elseif(upper(whom)=="OFF")
+		SetObjProperty(character, "Messages", 1);
+		SendSysMessage(character, "Messages have been turned off");
+	else
+		UserList(EVID_USERLIST_MSGBYNAME, character, whom);
+	endif
+
+endprogram

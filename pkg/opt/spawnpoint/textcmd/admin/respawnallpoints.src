@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+include "include/managers";
+include "include/cmdlevel_check";
+
+program respawn_all_points( who )
+	if (!checkStaff(who, "respawnallpoints", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	SendSpawnPointEvent(EVID_SPAWNPOINT_SPAWN_ALL);
+
+endprogram

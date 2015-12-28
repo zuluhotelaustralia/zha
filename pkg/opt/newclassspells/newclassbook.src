@@ -1,0 +1,245 @@
+include "newclassbook";
+include "include/stringarrays";
+
+
+const XOFFSET:=45;
+const YOFFSET:=45;
+
+
+program open_newspellbook( who, book )
+	//get array of spell ids
+	//get type
+	//show list of spells gump	
+
+	ShowBook(who, book );
+endprogram
+
+function ShowBook(who, book)
+
+
+	if( !ReserveItem(book) )
+		return 0;
+	endif	
+	
+	var booktype := GetBookType(book);
+	if (booktype==SPELLBOOK_TYPE_PSIONICS && !BookIsEquipped(who, book))
+		SendSysMessage(who, "You must equip this to use it.");
+		return 0;
+	endif
+	if (book.container != who.backpack && !BookIsEquipped(who, book))
+		SendSysMessage(who, "The book must be in your backpack or wielded to use.");
+		return 0;
+	endif
+	
+	var spellid_array := GetObjProperty(book, "storedspells");
+	spellid_array.sort();
+	var bookgump := GetBookGump(book);
+	var title:=GetBookTitle(book);
+	
+	GFInitGump();
+	GFPage(1);
+	GFGumpPic( XOFFSET-25, YOFFSET-10, bookgump );
+	GFTextLine(XOFFSET+30, YOFFSET+10, 53, title);
+
+	var addNewSpell := GFButtonID(XOFFSET+190, YOFFSET+15, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 );
+	GFTextLine(XOFFSET+205, YOFFSET+10, 50, "Add Spell");
+
+	var y:=30+YOFFSET;
+	var x:=40+XOFFSET;
+	var hButton:=array;
+	var aButton:=array;
+	var i:=1;
+	
+	//i think it looks better if their are gaps where missing spells are ... so doing it this way
+	
+	var bookspells := GetBookTypeSpellIDs(booktype);
+	foreach btspellid in bookspells
+		if (SpellIDAlreadyStored(btspellid, spellid_array))
+			var stringname := GetSpellName(btspellid);
+				
+			GFTextLine(x, y, 0, stringname);
+			hButton.append(GFButtonID(x-10, y+5, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+			aButton.append(GFButtonID(x+110, y, G_MINI_SCROLL_1, G_MINI_SCROLL_0, 1 ));	
+		endif
+		y:=y+20;
+		i:=i+1;
+			
+		if (i>8)
+			x:=x+160;
+			y:=30+YOFFSET;
+			i:=1;
+		endif
+		
+	endforeach
+	
+	var choice := GFSendGump(who);
+	//ReleaseItem(book);
+	var counter:=0;
+
+	if (!choice)
+		return;
+	endif
+
+	if (choice[addNewSpell.keyid])
+		AddNewScroll(who, book);
+		return;
+	endif
+
+
+	foreach a in aButton
+		counter:=counter+1;
+
+   		if (choice[a.keyid])
+			DisplaySpellDescrptionPage(who, book, spellid_array[counter]);
+			ShowBook(who, book);
+			return 0;
+		endif
+	endforeach
+		
+	counter:=0;	
+	foreach b in hButton
+		counter:=counter+1;
+		
+   		if (choice[b.keyid])
+   			
+			if (NewClassSpellCast( who, spellid_array[counter], GetBookTypeSkillID(booktype))!=SUCCESS)
+				return 0;
+			endif
+			break;
+		endif
+	endforeach
+	
+			
+
+
+	var spell := GetScript( spellid_array[counter] );
+	
+
+	if( GetObjProperty( book, "CastingOpts" ) )
+		SetObjProperty( who, "CastingOpts", GetObjProperty( book, "CastingOpts" ) );
+	endif
+
+	SetObjProperty( who, "#Casting", 1 );
+	ReleaseItem(book);
+	start_script( spell, who );
+	
+	while( GetObjProperty( who, "#Casting" ) )
+		sleepms( 300 );
+	endwhile
+
+endfunction
+
+
+function AddNewScroll(who, book)
+	SendSysMessage( who, "Select the spell you wish to add to the book");
+	var scroll := Target( who);
+
+	if (!scroll)
+		SendSysMessage( who, "You must target a Spell." );
+		return;
+	endif		
+
+	if(!Accessible(who, scroll))
+		SendSysMessage( who, "You can't reach that!" );
+		return;
+	endif
+
+	if(distance(who, scroll) > 3)
+		SendSysMessage( who, "This is too far away!" );
+		return;
+	endif
+
+	if(!scroll.movable)
+		SendSysMessage( who, "You can't pick this up!" );
+		return;
+	endif
+
+	if(scroll.objtype != 0xa5b)
+		SendSysMessage( who, "You can only put spells into the spellbook." );
+		return;
+	endif
+
+	var spellid := GetObjProperty(scroll, "SpellID");
+	var booktype:= GetBookType(book);
+	if (!SpellIDInBookTypeSpellIDs(spellid, booktype))
+		SendSysMessage( who, "This spell does not belong to this book." );
+		return 0;
+	endif
+
+	var spellsstored:=GetObjProperty(book, "storedspells"); 
+	if (SpellIDAlreadyStored(spellid, spellsstored))
+		SendSysMessage( who, "This spell is already stored in the book" );
+		return 0;
+	endif
+
+
+	if (!spellsstored || spellsstored ==error)
+		spellsstored:=array;
+	endif
+	spellsstored.append(spellid);
+	SetObjProperty(book, "storedspells", spellsstored);
+	SendSysMessage(who, GetSpellName(spellid) + " has been added to the spellbook.");
+	DestroyItem(scroll);
+endfunction
+
+function DisplaySpellDescrptionPage(who, book, spell)
+	var booktype := GetBookType(book);
+	var bookgump := GetBookGump(book);
+	var conf	 := ReadConfigFile( ":*:spells" );
+	var elem	 := FindConfigElem( conf, spell );
+	var descstr := GetConfigString( elem, "Description" );
+	var reagents := GetConfigStringArray(elem,"Reagent");
+	if (!descstr)
+		return;
+	endif
+	var regstring:="";//"Reagents: ";
+	foreach reg in reagents
+		regstring := regstring + " " +reg;
+	endforeach
+	var reagentsarray:=MakeBookContentsArray(regstring);
+	
+	var contentarray:=MakeBookContentsArray(descstr);
+	var descpic := GetConfigInt( elem, "DescriptionPic" );
+	GFInitGump();
+	GFPage(1);
+	//GFResizePic(0, 0, BKGND_PAPER_EX, 350, 250);
+	GFGumpPic( XOFFSET-25, YOFFSET-10, bookgump );
+	GFTextLine(XOFFSET+35, YOFFSET+10, 53, GetSpellName(spell)+ " ("+spell+")");
+	if (descpic)
+		GFTilePic(XOFFSET+210, YOFFSET+130, descpic);
+	endif
+	//GFTilePic(20, 10, 0x20a7);
+
+	var y:=30+YOFFSET;
+	var x:=30+XOFFSET;
+	var i:=1;
+	
+	while(i<=reagentsarray.size())
+		GFTextLine(x,y , 388, reagentsarray[i]);
+		i:=i+1;	
+		y:=y+20;
+
+	endwhile
+	
+	y:=y+10;	
+	i:=1;
+		
+	while (i<=contentarray.size())
+		GFTextLine(x,y , 0, contentarray[i]);
+		i:=i+1;	
+		y:=y+20;
+		if (y>180+YOFFSET)
+			x:=x+160;
+			y:=15+YOFFSET;
+		endif
+	endwhile
+	
+	var choice := GFSendGump(who);
+	//ReleaseItem(book);
+	var counter:=0;
+
+	if (!choice)
+		return;
+	endif
+
+endfunction

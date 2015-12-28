@@ -1,0 +1,11 @@
+use uo;
+
+program guilduni_equip(who, guilduni, startup)
+	if (who.guildid != GetObjProperty(guilduni, "guild_id"))
+ 		  SendSysMessage(who, "Only a member of the guild can wear its guild uniform");
+	     return 0;
+   else
+		  guilduni.hp:=700; //makes it refresh
+        return 1;
+	endif
+endprogram

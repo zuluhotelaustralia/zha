@@ -1,0 +1,57 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program squelch( user, duration )
+
+	var squelchtext:="";
+	if (!checkStaff(user, "squelch", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+	if (duration=="")
+		SendSysMessage(user, "Usage: .squelch [minutes] (-1 for perma, 0 for unsquelch)");
+		return;
+	endif
+	duration := CInt( duration );
+	var who := Target( user );
+
+	if( !who.isa(POLCLASS_MOBILE) )
+		SendSysMessage(user, "Cancelled");
+		return;
+	elseif (user.cmdlevel <= who.cmdlevel)
+		SendSysMessage(who, user.name+" tried to squelch you!", 3, 38);
+		return;
+	endif
+	if (duration==-1)
+		who.squelch(-1);
+		squelchtext:=who.name+" was squelched by "+user.name+" until further notice";
+		if (user.cmdlevel < 3)
+			SendSysMessage(who, "You have been squelched until further notice by "+user.name, 3, 38);
+		endif
+	elseif(duration==0)
+		who.squelch(0);
+		SendSysMessage(who, "You can talk again");
+		SendSysMessage(user, who.name +" can talk again");
+		return;
+	else
+		squelchtext:=who.name+" was squelched by "+user.name+" for "+duration+" minutes";
+		if (user.cmdlevel < 3)
+			SendSysMessage(who, "You have been squelched by "+user.name+" for "+duration+" minutes", 3, 38);	
+		endif
+		who.squelch(duration*60);
+	endif
+
+	if (user.cmdlevel < 3)
+		foreach mobile in EnumerateOnlineCharacters()
+			if (mobile.cmdlevel)
+				SendSysMessage(mobile, squelchtext, 3, 38);
+			endif
+		endforeach	
+	else
+		SendSysMessage(user, squelchtext, 3, 38);
+	endif
+	
+	SetObjProperty(who, "LastSquelchBy", user.name+" "+user.serial);
+	
+endprogram

@@ -1,0 +1,7 @@
+use uo;
+
+include "include/client";
+
+program console_bcastshutdown()
+    Broadcast( "SYSTEM: The shard is shutting down for 20 minutes.", FONT_BOLD, 33 );
+endprogram

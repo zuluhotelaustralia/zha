@@ -1,0 +1,70 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<!-- saved from url=(0022)http://internet.e-mail -->
+<html>
+<head>
+  <title>Zulu Australia AddUser</title>
+<script language="javascript">
+function validation() 
+{
+  document.signupfrm.account.value = document.signupfrm.account.value.replace(" ", "");
+
+  /* Check if sitename is put in */
+  if (document.signupfrm.account.value == "") 
+  {
+    alert("username not entered.");
+    return false;
+  }
+  
+  /* Check if password is typed in */
+  if (document.signupfrm.password.value == "")
+  {
+    alert("password not entered.");
+    return false;
+  }
+
+  if (document.signupfrm.email.value == "" || 
+  document.signupfrm.email.value.indexOf("@") == -1 || 
+  document.signupfrm.email.value.indexOf(".") == -1)
+  {
+    alert("Email field blank or invalid.. ")
+    return false;
+  }
+  var str = document.signupfrm.account.value;
+  for (var i=0;i<str.length;i++) {
+    if (((str.charAt(i) >="A") && (str.charAt(i) <="Z")) || ((str.charAt(i) >="a") && (str.charAt(i) <="z")) || ((str.charAt(i) >="0") && (str.charAt(i) <="9"))) {
+    } else {
+	alert("Please entry only characters and number for your account")
+	return false;
+    }
+  }
+}
+
+function checkspace(me) 
+{
+  me.value = me.value.replace(" ", "");
+}
+</script>
+</head>
+<body>
+<form method="get" action="zhoz_adduser.ecl" name="signupfrm" onSubmit="return validation()">
+<table>
+<tr>
+  <td>Username</td>
+  <td><input type="text" name="account" onkeypress="checkspace(this)"></td>
+</tr>
+<tr>
+  <td>Password</td>
+  <td><input type="password" name="password" onkeypress="checkspace(this)"></td>
+</tr>
+<tr>
+  <td>Email Address</td>
+  <td><input type="text" name="email"></td>
+</tr>
+<tr>
+  <td><input type="submit" name="submit" value="Submit"></td>
+  <td><input type="reset" name="reset" value="Clear"></td>
+</tr>
+</table>
+</form>
+</body>
+</html>

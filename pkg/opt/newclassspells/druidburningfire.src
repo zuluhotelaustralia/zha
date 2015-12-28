@@ -1,0 +1,98 @@
+/* Druid Spell - Burning Fire    **
+** Fire damage to target         **
+** Seravy - seravy@gmail.com     */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_BURNINGFIRE;
+// For Resisted()
+const SPELL_EFFECT_TYPE_MOVING := FX_SPELL_BURNINGFIRE2;
+const SPELL_EFFECT_ID		 := FX_SPELL_BURNINGFIRE2;
+const SPELL_EFFECT_SPEED	 := SPEED_SPELL_BURNINGFIRE2;
+const SPELL_EFFECT_LOOP		 := LOOP_SPELL_BURNINGFIRE2;
+
+program cast_burningfire( parms )
+  var circle := GetCircle( SPELL_ID);
+  var element := FIRE;
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+    if (AutoCallGuardCheck(caster, cast_on))
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+
+  if( !fromhit )
+    cast_on := Reflected( caster, cast_on, circle);
+  endif
+  PlayMovingEffect( caster, cast_on, FX_SPELL_BURNINGFIRE2, SPEED_SPELL_BURNINGFIRE2, LOOP_SPELL_BURNINGFIRE2);
+  PlaySoundEffect( cast_on, SFX_SPELL_BURNINGFIRE2 );
+
+  var immunity := IsProtected(caster, cast_on, circle);
+  if( immunity == IMMUNED )
+    EraseObjProperty(caster, "#Casting");
+    return;
+  endif
+  if( immunity == CURSED )
+    circle := circle * 2;
+  endif
+
+  var dmg := CInt(CalcSpellDamage(caster, cast_on, circle, SINGLE_TARGET_SPELL, SKILLID_NATURELORE)/1.5);
+  ApplyElementalDamage(caster, cast_on, circle, dmg, element);
+  EraseObjProperty( caster, "#Casting");
+
+  var clevel := CInt(GetClasseLevel(caster));
+  dmg := clevel;
+  var duration := 2*clevel;
+  var durationAttack := 9-clevel;
+  var durtaionAttackTimer;
+  var victomLocation := {cast_on.x, cast_on.y, cast_on.z};
+  if(GetClass(caster) == CLASSEID_DRUID)
+    duration := duration * 2;
+  elseif(GetClass(caster) == CLASSEID_RANGER)
+    duration := CInt(duration * 1.5);
+  endif
+  duration := ReadGameClock()+duration;
+
+  while (ReadGameClock() < duration && !cast_on.dead)
+    ApplyElementalDamage(caster, cast_on, circle, dmg, element);
+    PlayObjectCenteredEffect( cast_on, FX_SPELL_BURNINGFIRE, SPEED_SPELL_BURNINGFIRE, LOOP_SPELL_BURNINGFIRE);
+    PlaySoundEffect( cast_on, SFX_SPELL_BURNINGFIRE );
+    durtaionAttackTimer := ReadGameClock()+durationAttack;
+
+    while (ReadGameClock() < durtaionAttackTimer && !cast_on.dead)
+      victomLocation := {cast_on.x, cast_on.y, cast_on.z};
+      sleepms(200);
+      if (cast_on.x != victomLocation[1] || cast_on.y != victomLocation[2] || cast_on.z != victomLocation[3])
+        ApplyElementalDamage(caster, cast_on, circle, dmg, element);
+        PlayObjectCenteredEffect( cast_on, FX_SPELL_BURNINGFIRE, SPEED_SPELL_BURNINGFIRE, LOOP_SPELL_BURNINGFIRE);
+        PlaySoundEffect( cast_on, SFX_SPELL_BURNINGFIRE );
+      endif
+    endwhile
+  endwhile  
+  
+endprogram

@@ -1,0 +1,34 @@
+//GM Barnabus 2/2/2003
+//Reports which accounts are in jail, for how long, whether the account is online,
+//which player of that account is online, and whether they are in jail or not.
+//I plan to extend this as a prop so that u can view the account notes from this.
+
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+
+program textcmd_whowall( who )
+	if (!checkStaff(who, "whowall", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+	
+	SendSysMessage(who, ".whowall tells you who cast Wall of Stone.");
+	SendSysMessage(who, "Select a Wall of Stone:", 3, 53);
+	var wall:= Target(who);
+   var creatorser := GetObjProperty(wall, "Creator");
+	if (creatorser)
+		var creator:= SystemFindObjectBySerial( creatorser, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		if (creator)
+			SendSysMessage(who, "Wall of Stone cast by " + creator.name, 3, 53);
+		else
+			SendSysMessage(who, "Wall of Stone cast by unknown player",3,70);
+		endif
+	else
+		SendSysMessage(who, "Invalid selection",3,70);
+	endif
+	
+endprogram
+
+

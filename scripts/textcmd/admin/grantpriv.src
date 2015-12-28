@@ -1,0 +1,18 @@
+//
+// Cause another to perform an action by number
+//
+
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_grantpriv( who, priv )
+	if (!checkStaff(who, "grantpriv", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+    SendSysMessage( who, "To whom do you want to grant the '" + priv + "' privilege?" );
+    
+    var subject := Target( who, TGTOPT_NOCHECK_LOS );
+    if (subject)
+        GrantPrivilege( subject, priv );
+    endif
+endprogram

@@ -1,0 +1,94 @@
+//GM Barnabus 2/2/2003
+//Reports which accounts are in jail, for how long, whether the account is online,
+//which player of that account is online, and whether they are in jail or not.
+//I plan to extend this as a prop so that u can view the account notes from this.
+
+use uo;
+use os;
+include "include/cmdlevel_check";
+include "include/gumps";
+include "../pkg/opt/queststone/queststone";
+
+
+
+program textcmd_showquests( who )
+	if (!checkStaff(who, "showquests", CMDLEVEL_SEER))
+		return 0;
+	endif
+	
+	SendSysMessage(who, "Select a player to see quests:", 3, 53);
+	var player:= Target(who);
+	if (player.acct)
+		questGump(who, player);
+	else
+		SendSysMessage(who, "Invalid selection",3,70);
+	endif
+	
+endprogram
+
+
+
+
+function questGump(who, quester)
+	var quests := GetObjProperty(quester, "Quester");
+	if (!quests)
+		SendSysMessage(who, "They are not currently registered for any quests", 3, 70);
+		return;
+	endif
+
+	//handle case where player has old Quester prop which wasnt an array
+	if (TypeOf(quests) != "Array")
+		//Broadcast("not type of array");
+		var temparray := {quests};
+		quests := temparray;
+		SetObjProperty(quester, "Quester", {quests});
+	endif
+	
+	
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 750, 250);
+	var myname := quester.name;
+	if (quester.title_suffix)
+		myname := myname + quester.title_suffix;
+	endif
+	GFTextLine(40, 10, 53, "QUESTS SUMMARY");
+	GFTextLine(40, 40, 70, "The quests of " + myname);
+	var y:=20;
+	var i:=1;
+	var hButton:=array;
+	foreach q in quests
+		var questtitle:="Quest #" + i + ":   " + GetQuestTitle(q) + "   - points: " + GetPlayersQuestPoints(q, quester.serial);
+		GFTextLine(40, 50+y, 53, questtitle);
+		y:=y+20;
+		i:=i+1;
+	endforeach
+	
+	GFTextLine(70, 220, 5, "Close");
+
+	var closeButton := GFButtonID( 50, 225, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+	
+		var counter:=0;
+
+	if (choice[closeButton.keyid])
+		return;
+	endif
+		
+	foreach b in hButton
+		counter:=counter+1;
+   	if (choice[b.keyid])
+			var stone := SystemFindObjectBySerial(quests[counter]);
+			if (stone)
+				myProgressGump(who, stone);
+			else
+				SendSysMessage(who, "Cannot find quest stone");
+			endif
+		endif
+	endforeach
+
+endfunction
+
+
+

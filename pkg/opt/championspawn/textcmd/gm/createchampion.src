@@ -1,0 +1,129 @@
+/* Create Champion Spawn     **
+** Used to create the spawn  **
+** Seravy - seravy@gmail.com */
+
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+
+program textcmd_createchampion(who)
+
+  if( who.cmdlevel < CMDLEVEL_GAME_MASTER )
+    SendSysMessage( who, "Only Gamemasters can make champion spawnpoints." );
+    return 0;
+  endif
+
+  SendSysMessage(who, "Where do you want to place it?");
+  var targ := targetCoordinates(who);
+
+    if (!targ)
+      SendSysMessage( who, "Canceled.");
+    else
+
+      CreateLayout(targ, who);
+
+    endif
+
+endprogram
+
+function CreateLayout(targ, who)
+
+
+      CreateBlock(targ.x, targ.y+1, targ.z, 0x071E, 1); // Main Blocks
+      CreateBlock(targ.x, targ.y+1, targ.z+5, 0x0FEC, 1); // pent peice
+      CreateBlock(targ.x, targ.y, targ.z, 0x071E, 1);
+      CreateBlock(targ.x, targ.y, targ.z+5, 0x0FEA, 1); // pent peice
+      CreateBlock(targ.x, targ.y-1, targ.z, 0x071E, 1);
+      CreateBlock(targ.x, targ.y-1, targ.z+5, 0x0FE8, 1); // pent peice
+      CreateBlock(targ.x+1, targ.y+1, targ.z, 0x071E, 1);
+      CreateBlock(targ.x+1, targ.y+1, targ.z+5, 0x0FED, 1); // pent peice
+      CreateBlock(targ.x+1, targ.y, targ.z, 0x071E, 1);
+      CreateBlock(targ.x+1, targ.y, targ.z+5, 0x0FEE, 1); // pent peice
+      CreateBlock(targ.x+1, targ.y-1, targ.z, 0x071E, 1);
+      CreateBlock(targ.x+1, targ.y-1, targ.z+5, 0x0FEB, 1); // pent peice
+      CreateBlock(targ.x-1, targ.y+1, targ.z, 0x071E, 1);
+      CreateBlock(targ.x-1, targ.y+1, targ.z+5, 0x0FE9, 1); // pent peice
+      CreateBlock(targ.x-1, targ.y, targ.z, 0x071E, 1);
+      CreateBlock(targ.x-1, targ.y, targ.z+5, 0x0FE6, 1); // pent peice
+      CreateBlock(targ.x-1, targ.y-1, targ.z, 0x071E, 1);
+      CreateBlock(targ.x-1, targ.y-1, targ.z+5, 0x0FE7, 1); // pent peice
+
+      CreateBlock(targ.x+2, targ.y-2, targ.z, 0x0783, 1); // NE Block
+      CreateBlock(targ.x+2, targ.y+2, targ.z, 0x074F, 1); // SE Block
+      CreateBlock(targ.x-2, targ.y+2, targ.z, 0x0782, 1); // SW Block
+      CreateBlock(targ.x-2, targ.y-2, targ.z, 0x074E, 1); // NW Block
+
+      CreateBlock(targ.x+2, targ.y+1, targ.z, 0x0736, 1); // East Blocks
+      CreateBlock(targ.x+2, targ.y, targ.z, 0x0736, 1);
+      CreateBlock(targ.x+2, targ.y-1, targ.z, 0x0736, 1);
+
+      CreateBlock(targ.x+1, targ.y+2, targ.z, 0x071F, 1); // South Blocks
+      CreateBlock(targ.x, targ.y+2, targ.z, 0x071F, 1);
+      CreateBlock(targ.x-1, targ.y+2, targ.z, 0x071F, 1);
+
+      CreateBlock(targ.x-2, targ.y+1, targ.z, 0x0749, 1); // West Blocks
+      CreateBlock(targ.x-2, targ.y, targ.z, 0x0749, 1);
+      CreateBlock(targ.x-2, targ.y-1, targ.z, 0x0749, 1);
+
+      CreateBlock(targ.x+1, targ.y-2, targ.z, 0x0737, 1); // North Blocks
+      CreateBlock(targ.x, targ.y-2, targ.z, 0x0737, 1);
+      
+      var block := CreateBlock(targ.x-1, targ.y-2, targ.z, 0x0737, 1);
+
+      var cspawnpoint := CreateItemAtLocation(targ.x, targ.y, targ.z+5, "championspawnpoint", 1);
+
+      if (!cspawnpoint)
+        SendSysMessage( who, "ERROR: The Spawn has NOT been Created."); 
+        return 0;
+      endif
+
+      var spawns := GetGlobalProperty("championSpawns");
+      if (!spawns)
+        spawns := {};
+      endif
+      spawns.append(cspawnpoint.serial);
+      SetGlobalProperty( "championSpawns", spawns );
+
+      var skulls := {};
+
+      skulls.append(CreateSkull(targ.x-1, targ.y+1, targ.z+5, 0x1854, 1).serial);
+      skulls.append(CreateSkull(targ.x, targ.y+1, targ.z+5, 0x1854, 1).serial);
+      skulls.append(CreateSkull(targ.x+1, targ.y, targ.z+5, 0x1858, 1).serial);
+      skulls.append(CreateSkull(targ.x+1, targ.y-1, targ.z+5, 0x1858, 1).serial);
+      skulls.append(CreateSkull(targ.x-1, targ.y-1, targ.z+5, 0x1854, 1).serial);
+
+      SetObjProperty(cspawnpoint, "skulls", skulls);
+      SetObjProperty(cspawnpoint, "radius", 3);
+      SetObjProperty(cspawnpoint, "dispel", 10);
+
+      if (!block || !skulls || !cspawnpoint)
+        SendSysMessage( who, "ERROR: The Spawn has NOT been Created."); 
+      else
+        SendSysMessage(who, "The Spawn has been Created.");
+      endif
+
+endfunction
+
+function CreateBlock( xval, yval, zval, itemidval, numberval)
+  var block;
+
+  block := CreateItemAtLocation(xval, yval, zval, itemidval, numberval);
+  block.color := 1488;
+  block.movable := 0;
+
+  return block;
+endfunction
+
+
+function CreateSkull( xval, yval, zval, itemidval, numberval)
+  var skull;
+
+  skull := CreateItemAtLocation(xval, yval, zval, itemidval, numberval);
+  skull.movable := 0;
+  skull.usescript := "Nothing";
+
+  return skull;
+endfunction
+

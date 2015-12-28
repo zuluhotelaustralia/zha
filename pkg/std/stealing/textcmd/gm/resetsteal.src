@@ -1,0 +1,21 @@
+// Developer Omero - ZuluHotel Italia
+// Thief Gloves package - they are needed to snoop and steal
+// based on a previous Zulu package
+
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program reset_steal(who, parms)
+	if (!checkStaff(who, "resetsteal", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+
+	var storage:= FindStorageArea("Merchant Storage");
+
+	DestroyRootItemInStorageArea(storage, "temp storage of " + who.serial);
+
+	MoveCharacterToLocation( who, who.x, who.y, who.z+1 );
+	EraseObjProperty(who, "#snooper");
+
+endprogram

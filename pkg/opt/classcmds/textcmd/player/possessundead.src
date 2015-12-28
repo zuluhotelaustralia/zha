@@ -1,0 +1,46 @@
+use uo;
+use os;
+
+include "include/classes";
+include "include/res";
+include "include/all";
+
+program possess_undead(who)
+
+	var class:= GetClass(who);
+	var level:= GetClasseLevel(who);
+	if (class!=CLASSEID_NECROMANCER && level < GET_POSSESS_UNDEAD_AT_LEVEL)
+		return;
+	endif
+	if (!who.dead)
+		SendSysMessage(who, "You can only use this power when dead");
+	endif
+
+	var name;
+	foreach mob in ListMobilesInLineOfSight( who, 2 )
+		if (mob.script == "tamed" && GetObjProperty(mob, "Type") == "Undead" && mob.master.serial == who.serial)	
+			name := mob.name;
+			PlaySoundEffect(who, 0x485);
+			sleep(1);
+			mob.hidden:=1;
+			MoveCharacterToLocation(who, mob.x, mob.y, mob.z, MOVECHAR_FORCELOCATION );
+			ResurrectMobile(who);
+			who.graphic := mob.graphic;
+			who.color := mob.color;
+			SetObjProperty(who, "possessed_res",1);
+			SetObjProperty(mob, "summoned",1);
+			KillMobile(mob);
+			sleep(1);
+			PlaySoundEffect(who, 0x486);
+			SendSysMessage(who, "You inhabit the body of " + name);
+			SetObjProperty(who, "hunger",9);
+			return;
+		endif
+	endforeach
+
+	
+	
+	
+endprogram
+	
+	

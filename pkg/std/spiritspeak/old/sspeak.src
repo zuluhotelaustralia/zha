@@ -1,0 +1,267 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/attributes";
+include "include/eventid";
+include "include/dotempmods";
+include "include/random";
+
+program spiritspeak( me )
+
+	//first see if they are "already under the influence"
+	if (!CanMod(me,"spiritspeak",1))
+		SendSysMessage( me, "You are already in contact with the netherworld.");
+		return;
+	endif
+
+	if (!CheckSkill( me, SKILLID_SPIRITSPEAK, -3, 250 ))
+		SendSysMessage( me, "You fail to communicate with the netherworld." );
+		return;
+	endif
+
+	SendSysMessage( me, "You contact the netherworld." );
+	PlaySoundEffect( me, SFX_SKILL_SPIRITSPEAK );
+
+	DoPersistedMod(me, "spiritspeak", 1, me.enabled( "hearghosts" ), 120);
+
+	//now see if they are near a necro gravestone:
+	var stonelevel := FindNecroGravestone(me);
+	if (stonelevel)
+		ContactUndead( me, SKILLID_SPIRITSPEAK, stonelevel );
+	endif
+
+endprogram
+
+function FindNecroGravestone(me)
+
+	//create item 0xED6 and set it in a graveyard
+	//set cprop "necro" to the highest level scroll (1 through 16) that can be found
+
+	foreach stone in ListItemsNearLocationOfType(me.x, me.y, me.z, 15, 0xed6 );
+		if( GetObjProperty( stone, "necro" ) )
+			var level := CInt( GetObjProperty( stone, "necro" ) );
+			EraseObjProperty( stone, "necro" );
+			return level;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+
+function IsGraveStone( use_on )
+
+	var objtype := use_on.objtype;
+
+	case( objtype )
+
+		GSTONE1:
+		GSTONE2:
+		GSTONE3:
+		GSTONE4:
+		GSTONE5:
+		GSTONE6:
+		GSTONE7:
+		GSTONE8:
+		GSTONE9:
+		GSTONE10:
+		GSTONE11:
+		GSTONE12:
+		GSTONE13:
+		GSTONE14:
+		GSTONE15:
+		GSTONE16:	return 1;
+				break;
+			
+		default:	return 0;
+	
+	endcase
+
+endfunction
+
+
+
+function ContactUndead( caster, skillid, level )
+
+	PrintTextAbovePrivate( caster, "*What's this?*", caster );
+        PlaySoundEffect( caster, 0x0058 );
+	PerformAction( caster, ACTION_BOW );
+	sleep(3);
+	PlaySoundEffect( caster, 0x0108 );
+
+	level := RandomDiceStr("1d"+level);
+	if( !CheckSkill( caster, skillid, (level * 6), 0 ) )
+		SendSysMessage( caster, "You find nothing of interest..." );
+		return;
+	endif
+
+	PlaySoundEffect( caster, 0x0108 );
+
+	var npctemplate := GetUndeadType( level );
+
+	var mobile;
+	var tries := 1;
+	while ( (!mobile) && (tries <= 10) )
+
+		var x := caster.x + ( Random(5) - 2 );
+		var y := caster.y + ( Random(5) - 2 );
+	
+		if ( (x == caster.x) || (y == caster.y) )
+			mobile := CreateNpcFromTemplate( npctemplate, x, y, caster.z,0 );
+		endif
+	
+		if (!mobile)
+			tries := tries + 1;
+		endif
+	
+	endwhile
+
+	if( !mobile )
+		SendSysMessage( caster, "You find nothing of interest..." );
+		return;
+	endif
+
+	mobile.name := "a conjured " + ExtractName( mobile.name );
+	mobile.frozen := 1;
+	SetObjProperty( mobile, "noloot", 1 );
+	SetObjProperty( mobile, "killme", 1 );
+
+	PrintTextAbove( mobile, "You disturb me in search for knowledge..." );
+
+	PerformAction( caster, ANIM_CAST_DIR );
+	PlaySoundEffect( caster, SFX_SKILL_SPIRITSPEAK );
+
+	sleep(1);
+
+	var ev := {};
+	ev.+type := EVID_PEACEMADE;
+	ev.+source := caster;
+	SendEvent( mobile, ev );
+
+	sleep(2);
+
+
+	if( !CheckSkill( caster, skillid, (level * 8), 0 ) )
+	
+		PrintTextAbove( mobile, "I give you only death!" );
+		mobile.frozen := 0;
+		EraseObjProperty( mobile, "killme" );
+	
+		sleep(1);
+	
+		SendEvent( mobile, ev );
+	
+		ev.type := SYSEVENT_DAMAGED;
+		SendEvent( mobile, ev );
+	
+	else
+	
+		PrintTextAbove( mobile,"I give you only this!" );
+	
+		var scroll := GetScrollType( level );
+		if ( RandomDiceStr("1d10") == 1 )
+			CreateItemAtLocation( mobile.x, mobile.y, mobile.z, CInt(scroll), 1 );
+		endif
+	
+		CreateDonation( mobile, level );
+	
+		sleep(2);
+	
+		SetObjProperty( mobile, "guardkill", 1 );
+	
+		PlaySoundEffect( caster, SFX_SPELL_DISPEL );
+	
+		PlayStationaryEffect( mobile.x, mobile.y, mobile.z, 0x3728, 0xa, 0xa );
+		mobile.frozen := 0;
+		MoveCharacterToLocation( mobile, 0, 0, 0, MOVECHAR_FORCELOCATION );
+		ApplyRawDamage( mobile, GetMaxHp(mobile) + 3 );
+	endif
+
+	return;
+
+endfunction
+
+
+
+function GetUndeadType( level )
+
+	case( level )
+	 	1: 	 return "skeleton";
+	 	2: 	 return "skeletonarcher";
+	 	3: 	 return "ghost";
+	 	4: 	 return "boneknight";
+	 	5: 	 return "shade";
+	 	6: 	 return "wraith";
+	 	7: 	 return "bonemage";
+	 	8: 	 return "spectre";
+	 	9: 	 return "flamingskeleton";
+		10: 	 return "iceskeleton";
+		11: 	 return "darkspawn";
+		12: 	 return "daemonspawn";
+		13: 	 return "liche";
+		14: 	 return "daemon";
+		15: 	 return "bloodliche";
+		default: return "daemonlieutenant";
+	endcase
+
+endfunction
+
+
+
+function GetScrollType( level )
+
+	case( level )
+		1:	 return CInt( 0xa101 );	// Animate Dead Scroll
+		2:	 return CInt( 0xa102 );	// Commune Scroll
+		3:	 return CInt( 0xa103 );	// Control Undead Scroll
+		4:	 return CInt( 0xa104 );	// Darkness Scroll
+		5:	 return CInt( 0xa105 );	// Sacrifice Scroll
+		6:	 return CInt( 0xa106 );	// Spectre's Touch Scroll
+		7:	 return CInt( 0xa107 );	// Wraith's Breath Scroll
+		8:	 return CInt( 0xa108 );	// Wyvern Strike Scroll
+		9:	 return CInt( 0xa109 );	// Raise Dead Scroll
+		10:	 return CInt( 0xa10a );	// Release Scroll
+		11:	 return CInt( 0xa10b );	// Summon Spirit Scroll
+		12:	 return CInt( 0xa10c );	// Wraithform Scroll
+		13:	 return CInt( 0xa10d );	// Kill Scroll
+		14:	 return CInt( 0xa10e );	// Liche Scroll
+		15:	 return CInt( 0xa10f );	// Plague Scroll
+		default: return CInt( 0xa110 );	// Spellbind Scroll
+	endcase
+
+endfunction
+
+
+
+function CreateDonation( mobile, level )
+
+	var i;
+	var stacks := RandomDiceStr( "1d" + level );
+	for( i := 1; i <= stack; i := i + 1 )
+		var stuff;
+		var amt := 3;
+		case( RandomDiceStr( "1d" + level ) )
+			1: 	 stuff 	:= 0x0f78;	//BatWing
+			2: 	 stuff 	:= 0x0f79;	//BlackMoor
+			3: 	 stuff 	:= 0x0f7c;	//BloodSpawn
+			4: 	 stuff 	:= 0x0f7d;	//BloodReagent
+			5: 	 stuff 	:= 0x0f7e;	//Bone
+			6: 	 stuff 	:= 0x0f7f;	//Brimstone
+			7: 	 stuff 	:= 0x0f80;	//DaemonBone
+			8: 	 stuff 	:= 0x0f81;	//FertileDirt
+			9: 	 stuff 	:= 0x0f82;	//DragonBlood
+			10: 	 stuff 	:= 0x0f83;	//ExecutionersCap
+			11: 	 stuff 	:= 0x0f87;	//EyeOfNewt
+			12: 	 stuff 	:= 0x0f89;	//Obsidian
+			13: 	 stuff 	:= 0x0f8a;	//PigIron
+			14: 	 stuff 	:= 0x0f8b;	//Pumice
+			15:	 stuff	:= 0x0f8e;	//SerpentScale
+			16:	 stuff	:= 0x0f90;	//Deadwood
+			default: stuff 	:= 0x0f80;	//WormHeart
+		endcase
+	
+		CreateItemAtLocation(mobile.x, mobile.y, mobile.z, CInt(stuff), amt );
+	endfor
+
+endfunction

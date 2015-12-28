@@ -1,0 +1,32 @@
+use uo;
+use boat;
+
+program destroy_boat( who )
+    SendSysMessage( who, "Target the mast" );
+    var mast := Target( who );
+    if (!mast)
+        return;
+    endif
+
+    var boat := BoatFromItem(mast);
+
+var boattag := boat.multi;
+
+if (boattag.has_offline_mobiles)
+boattag.move_offline_mobiles( 1475, 1645, 20 );
+endif
+
+var oldhatch := boat.serial;
+foreach item in EnumerateItemsInContainer( oldhatch );
+DestroyItem(item);
+endforeach
+
+foreach item in (boattag.items)
+DestroyItem(item);
+endforeach
+
+    var res := DestroyMulti( boat );
+    if (!res)
+        SendSysMessage( who, "Can't delete: " + res.errortext );
+    endif
+endprogram

@@ -1,0 +1,53 @@
+/* Psionics Spell - Break Wall    **
+** Dispells a summoned Wall block **
+** Seravy - seravy@gmail.com      */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_BREAKWALL;
+
+program cast_breakwall( parms )
+  var caster;
+  var targ;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    targ := parms[3];
+  else
+    caster := parms;
+    SendSysMessage(caster, "Select the summoned wall you wish to break");
+    targ := Target(caster, TGTOPT_CHECK_LOS );
+  endif
+
+       
+
+  if ((targ.objtype == 0x5F || targ.objtype == 0x57) && GetObjProperty(targ, "f"))
+    if (!((targ.x == caster.x+1 || targ.x == caster.x || targ.x == caster.x-1) && 
+          (targ.y == caster.y+1 || targ.y == caster.y || targ.y == caster.y-1)))
+      SendSysMessage(caster, "You are not close enough to this wall.");
+    else
+
+      PlaySoundEffect(targ, SFX_SPELL_BREAKWALL);
+      SendSysMessage(caster, "Your lighting fast fist has destroyed the wall!");
+
+      var i;
+      for (i := 1; i <= 5; i := i + 1)
+        targ.movable := 1;
+        MoveItemToLocation(targ, targ.x, targ.y, targ.z - 2, MOVEITEM_FORCELOCATION);
+        targ.movable := 0;
+        sleepms(200);
+      endfor
+
+      DestroyItem(targ);
+    endif
+  else
+    SendSysMessage(caster, "This is not a summoned wall.");
+  endif
+
+  
+
+  EraseObjProperty( caster, "#Casting");
+endprogram

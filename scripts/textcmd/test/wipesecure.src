@@ -1,0 +1,63 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+
+program wipe_objtype( who )
+	if (!checkStaff(who, "wipesecure", CMDLEVEL_DEVELOPER))
+		return 0;
+	endif
+
+	var count		:= 0;
+	var count2		:= 0;
+	var count3		:= 0;
+	var timer		:= 0;
+	var clock		:= ReadGameClock();
+	var boxs;
+	var boxo;
+
+	SendSysMessage( who, "Starting secure container wipe, please wait..." );
+
+	foreach obj in ListObjectsInBox(0, 0, -128, 6142, 4094, 128)
+		if( obj.objtype == 0xe40 || obj.objtype == 0xe41 )
+			if (obj.usescript == ":housing:securecont")
+
+	boxs := CInt( GetObjProperty( obj, "boxserial" ) );
+	boxo := SystemFindObjectBySerial( boxs );
+
+	foreach item in EnumerateItemsInContainer(obj)
+		if (item.serial != boxs)
+			if (item.container.serial == obj.serial)
+				MoveItemToContainer(item, boxo);
+				count:=count+1;
+			else
+				count3:=count3+1;
+			endif
+		else
+			// destroyitem(item);
+			count2:=count2+1;
+		endif
+	endforeach
+
+			endif
+		endif
+	
+		sleepms( 5 );
+		timer := timer + 5;
+	
+		if( timer >= 30000 )
+			timer := timer - 30000;
+			SendSysMessage( who, "Wiping is still in progress, be patient..." );
+		endif
+	endforeach
+
+	if( count )
+		SendSysMessage( who, "Wiping completed, took " + CStr( ReadGameClock() - clock ) + " seconds to complete." );
+		SendSysMessage( who, "A total of " + count + " items." );
+		SendSysMessage( who, "A total of " + count2 + " items have been wiped." );
+		SendSysMessage( who, "A total of " + count3 + " items have been wiped." );
+	else
+		SendSysMessage( who, "Wiping failed or no item were found to be destroyed." );
+	endif
+
+endprogram

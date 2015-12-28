@@ -1,0 +1,22 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+
+program destroyradius( who, text )
+	if (!checkStaff(who, "destroyradius", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	var ranget := CInt( text );
+
+	foreach thingie in ListItemsNearLocation( who.x, who.y, who.z, ranget );
+		if( thingie.objtype != 0xa301 )
+			DestroyItem( thingie );
+		endif
+	endforeach
+
+	SendSysMessage(who, "Destroyed everything in a radius of " + ranget);
+	
+endprogram

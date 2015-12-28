@@ -1,0 +1,20 @@
+//
+// Cause another to perform an action by number
+//
+
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_action( who, template )
+	if (!checkStaff(who, "equipt", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+    SendSysMessage( who, "Whom do you want equip from " + template + "?" );
+
+    var subject := Target( who );
+    if (subject)
+        EquipFromTemplate( subject, template );
+    endif
+endprogram

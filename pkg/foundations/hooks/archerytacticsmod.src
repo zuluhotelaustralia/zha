@@ -1,0 +1,13 @@
+use uo;
+
+include "include/attributes";
+
+program BriefTacticsIncrease(who)
+
+	if (CDbl(GetEffectiveSkill(who,SKILLID_TACTICS))==0.0) //rangers get bonus to tactics if have 0 tactics
+		var mod := GetEffectiveSkill(who,SKILLID_ARCHERY);
+		AlterSkillTemporaryMod( who, SKILLID_TACTICS, mod );
+		sleep(3);
+		AlterSkillTemporaryMod( who, SKILLID_TACTICS, -mod );
+	endif
+endprogram

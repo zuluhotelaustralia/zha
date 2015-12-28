@@ -1,0 +1,28 @@
+// Sno - Creates pending accounts every 1 hour
+
+use uo;
+use os;
+
+program account_activator()
+	syslog(  "Account activator started." );
+
+	var pendingAccounts;
+
+	while (1)
+		pendingAccounts := GetGlobalProperty("pendingAccounts");
+		if (pendingAccounts)
+			pendingAccounts := Unpack(pendingAccounts);
+			foreach pendingAccount in pendingAccounts
+				pendingAccount := Unpack(pendingAccount);
+				var account := FindAccount(pendingAccount.username);
+				if (account)
+					account.enable();
+				endif
+			endforeach
+			
+			EraseGlobalProperty("pendingAccounts");
+		endif
+		
+		sleep(3600); // Sleep for 1 hour
+	endwhile
+endprogram

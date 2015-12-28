@@ -1,0 +1,35 @@
+/* Gate Warning Command.
+** Will warn user when walking through non guarded
+** and houses, and can be turned off 
+** noGateWarning 0 = Both, 1 = Unguarded, 2 = Houses, 3 = All, 4 = None
+** By Seravy - seravy@gmail.com */
+use uo;
+
+program textcmd_gatewarning( who, text )
+
+  var params := SplitWords( text );
+
+  if (len(params)<1)
+    SendSysMessage( who, "<Usage> .gatewarning <None|Unguarded|Houses|Both|All" );
+    return;
+  endif
+
+  if (lower(params[1])==lower("none"))
+    SetObjProperty(who, "GateWarnings", 4);
+    SendSysMessage( who, "There will be no gate warnings given." );
+  elseif (lower(params[1])==lower("unguarded"))
+    SetObjProperty(who, "GateWarnings", 1);
+    SendSysMessage( who, "Warnings will be given to gates to unguarded places only." );
+  elseif (lower(params[1])==lower("houses"))
+    SetObjProperty(who, "GateWarnings", 2);
+    SendSysMessage( who, "Warnings will be given to gates to houses only." );
+  elseif (lower(params[1])==lower("all"))
+    SetObjProperty(who, "GateWarnings", 3);
+    SendSysMessage( who, "Warnings will be given to all gates." );
+  elseif (lower(params[1])==lower("both"))
+    SetObjProperty(who, "GateWarnings", 5);
+    SendSysMessage( who, "Warnings will be given to gates to both unguarded places and houses." );
+  else
+    SendSysMessage( who, "<Usage> .gatewarning <None|Unguarded|Houses|Both|All" );
+  endif
+endprogram

@@ -1,0 +1,16 @@
+use uo;
+use os;
+include "include/cmdlevel_check";
+
+program unload( who, text )
+	if (!checkStaff(who, "unload", CMDLEVEL_ADMINISTRATOR))
+		return 0;
+	endif
+
+	if( !text )
+		unload_scripts();
+	else
+		unload_scripts( text );
+	endif
+
+endprogram

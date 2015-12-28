@@ -1,0 +1,40 @@
+use uo;
+
+include "../../userlist";
+
+program replymsg(who, themessage)
+
+	if(!themessage)
+		SendSysMessage(who, "Canceled.");
+		return;
+	endif
+
+	var mobile:=CInt(GetObjProperty(who, "#msgfrom"));
+	if(mobile)
+		mobile:=OnlineFind(mobile);
+	endif
+	if(!mobile)
+		SendSysMessage(who, "No one's here to hear you.");
+		EraseObjProperty(who, "#msgfrom");
+		return;
+	endif
+	if((who.cmdlevel==0)&&(mobile.cmdlevel>0))
+		SendSysMessage(who, "You cannot reply to that person.");
+		return;
+	endif
+	SendSysMessage(mobile, who.name+": "+themessage, color:=0x36);
+	SendSysMessage(who, "Your message has been sent to "+mobile.name);
+	SetObjProperty(mobile, "#msgfrom", who.serial);
+
+endprogram
+
+function OnlineFind(serial)
+
+	foreach chr in EnumerateOnlineCharacters()
+		if(chr.serial==serial)
+			return(chr);
+		endif
+	endforeach
+	return(error);
+
+endfunction

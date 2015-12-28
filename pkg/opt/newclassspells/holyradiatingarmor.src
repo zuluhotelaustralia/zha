@@ -1,0 +1,49 @@
+/* Holy Spell - Radiating Armor        **
+** Gives armour to the selected target **
+** Seravy - seravy@gmail.com           */
+
+use uo;
+use os;
+
+include "newclassbook";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_RADIATINGARMOR;
+
+program cast_radiatingarmor(parms)
+  var circle := GetCircle( SPELL_ID);
+  var caster;
+  var cast_on;
+  var fromhit;
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+    if (parms[5])
+      fromhit := parms[5];
+    endif
+    Send_Attack( cast_on, caster, SPELL_ID);
+  else
+    caster := parms;
+    cast_on := CanTargetSpell( caster, circle, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+      EraseObjProperty( caster, "#Casting");
+      return;
+    endif
+  endif
+
+  var mod_amount := CInt( GetModAmount( caster, 1, SKILLID_PIETY ) * 0.9 );
+  var duration := CInt( GetModDuration( caster, SKILLID_PIETY ));
+
+  if( CanMod( cast_on, "ar" ) )
+    DoTempMod( cast_on, "ar", CInt(mod_amount)+1, duration);
+  endif
+
+  PlayObjectCenteredEffect(cast_on, FX_SPELL_RADIATINGARMOR, SPEED_SPELL_RADIATINGARMOR, LOOP_SPELL_RADIATINGARMOR);
+  PlaySoundEffect(cast_on, SFX_SPELL_RADIATINGARMOR);
+  EraseObjProperty( caster, "#Casting");
+endprogram

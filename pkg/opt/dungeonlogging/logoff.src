@@ -1,0 +1,16 @@
+use uo;
+include "dungeon";
+
+program logoff( character )
+	//print("running dungeon logoff " + character.name);
+	var InDungeon := IsInDungeonArea(character);
+	if (InDungeon)
+		SetObjProperty(character, "LoggedOffInDungeon", {InDungeon, CInt(ReadGameClock())});
+	endif
+	//easy to put this here for bard items
+	EraseObjProperty(character, "UsingBardInstrument");
+endprogram
+
+
+
+

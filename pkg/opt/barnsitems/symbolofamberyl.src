@@ -1,0 +1,42 @@
+use uo;
+use os;
+
+include "possessedgenerator";
+
+program symbolofamberyl(who, item)
+	//Broadcast(who.name + " " +item.name);
+	if (who.title_race != "human")
+		SendSysMessage( who, "Only a human can use this properly");
+		return;
+	endif
+	var sacreduser := GetObjProperty(item, "FirstUserSer");
+	if (sacreduser)
+		if (who.serial != sacreduser)
+			SendSysMessage( who, "The Symbol of Amberyl speaks:",3,53);
+			SendSysMessage( who, "You are not my true master. Return me to them and seek your own path to Amberyl.",3, 53);
+			return;
+		endif
+	else
+		SetObjProperty(item, "FirstUserSer", CInt(who.serial));
+	endif
+	
+	SendSysMessage( who, "Select Cure Potion." );
+	var potcure := Target( who );
+	
+   if( !potcure || !(potcure.objtype == 0x0DC14 || potcure.objtype == 0x0DC15))
+   	SendSysMessage( who, "canceled." );
+     	return;
+   endif
+	
+	if(! DestroyItem(potcure))
+		return;
+	endif
+	PlaySoundEffect(who, 0x51);
+	SendSysMessage( who, "You infuse the wand with the power of Amberyl" );
+	sleep(1);
+	PerformAction(who, 0x0011);
+	PlaySoundEffect(who, 0x1f8);
+	SendSysMessage( who, "You search the minds of nearby humans!!!" );
+	DetectPossessedPerson(who);
+
+endprogram

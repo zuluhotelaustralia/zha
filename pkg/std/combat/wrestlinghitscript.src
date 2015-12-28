@@ -1,0 +1,123 @@
+use uo;
+use os;
+use cfgfile;
+include "include/hitscriptinc";
+
+var speech;
+
+program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
+	
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+	var tempweap:=GetEquipmentByLayer(attacker, LAYER_GLOVES);
+	
+	if (tempweap.isa(POLCLASS_WEAPON))
+		weapon:=tempweap;
+		rawdamage:=rawdamage+weapon.dmg_mod;
+		if (weapon.hitscript && weapon.hitscript != "wrestlinghitscript")
+			broadcast("gloves have hitscript");
+			start_script( weapon.hitscript, {attacker, defender, weapon, armor, basedamage, rawdamage} );
+		endif
+	endif
+
+
+	var mlevel := GetObjProperty(attacker, CLASSEID_MONK);
+	// !(defender.npctemplate) taken out, dmg done to npcs now
+	if (mlevel>0 && !GetObjProperty(attacker, "#casting"))
+		rawdamage:=rawdamage+(MONK_BONUS_DAMAGE*mlevel);
+		// broadcast("After monk bonus: "+rawdamage);
+		if (GetObjProperty (attacker, "DisarmMode") && !GetObjProperty(defender, "disarmed"))
+			if (!(defender.npctemplate))
+				if (Random(100)+1 <= mlevel * MONK_DISARM_CHANCE)
+					start_script("disarmer", {attacker, defender});
+				endif
+			endif
+		elseif (GetObjProperty (attacker, "StunMode") && !GetObjProperty(defender, "stunned"))
+			if (Random(100)+1 <= mlevel * MONK_STUN_CHANCE)
+				start_script("stunner", {attacker, defender});
+			endif
+		endif				
+	endif 
+	//barns
+	rawdamage := RecalcDmg( attacker, defender, weapon, armor, rawdamage);
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+	//
+
+/* BARNABUS -  NO IDEA WHY THIS STUFF IS HERE....
+	if(!attacker.isA(POLCLASS_NPC))
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+    	        return;
+        endif
+
+  if(defender.isA(POLCLASS_NPC))
+    basedamage := basedamage * 2;
+    rawdamage := rawdamage * 2;
+  endif
+  var weaponhit := GetObjProperty(attacker, "OnHit");
+  var armorhit;
+  if (armor == 0)
+    armorhit := GetObjProperty(defender, "OnHit");
+  else
+    armorhit := GetObjProperty(armor, "OnHit");
+  endif
+  var x;
+  if (!weaponhit)
+    if (!armorhit)
+      start_script("reactivearmorhit", { attacker, defender, weapon, armor, basedamage, rawdamage } );
+      rawdamage := GetObjProperty(defender, "TempDamage");
+      if(rawdamage < 1)
+        rawdamage := 1;
+      endif
+      DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+      SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+      return;
+    else
+      SetObjProperty(defender, "TempDamage", rawdamage);
+      foreach x in armorhit
+        Detach();
+        set_critical(0);
+        start_script(x, { attacker, defender, weapon, armor, basedamage, rawdamage } );
+        rawdamage := CInt(GetObjProperty(defender, "TempDamage") );
+      endforeach
+      EraseObjProperty(defender, "TempDamage");
+      start_script("reactivearmorhit", { attacker, defender, weapon, armor, basedamage, rawdamage } );
+      rawdamage := GetObjProperty(defender, "TempDamage");
+      if(rawdamage < 1)
+        rawdamage := 1;
+      endif
+      DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+      SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+      return;
+    endif
+  else
+    SetObjProperty(defender, "TempDamage", rawdamage);
+    foreach x in weaponhit
+      Detach();
+      set_critical(0);
+      start_script(CStr(x), { attacker, defender, weapon, armor, basedamage, rawdamage } );
+      rawdamage := GetObjProperty(defender, "TempDamage");
+    endforeach
+    EraseObjProperty(defender, "TempDamage");
+    if (rawdamage < 1)
+      rawdamage := 1;
+    endif
+    start_script("reactivearmorhit", { attacker, defender, weapon, armor, basedamage, rawdamage } );
+    rawdamage := GetObjProperty(defender, "TempDamage");
+    if(rawdamage < 1)
+      rawdamage := 1;
+    endif
+    DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+    SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon});
+    return;
+  endif
+	*/
+endprogram

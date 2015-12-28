@@ -1,0 +1,9 @@
+use uo;
+include "include/cmdlevel_check";
+
+program textcmd_mycolor( who, color )
+	if (!checkStaff(who, "mycolor", CMDLEVEL_SEER))
+		return 0;
+	endif
+    who.color := CInt(color);
+endprogram

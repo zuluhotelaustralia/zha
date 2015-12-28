@@ -1,0 +1,13 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_setarmod( who, newmod )
+	if (!checkStaff(who, "setarmod", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+    newmod := CInt(newmod);
+
+    who.ar_mod     := newmod;
+endprogram

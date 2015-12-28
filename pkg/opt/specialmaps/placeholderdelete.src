@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+include "unleashmap";
+
+program placeholderdelete(placeholder)
+	var spawnedmonsters := GetObjProperty(placeholder, "spawnedMonsters");
+	var spawneditems := GetObjProperty(placeholder, "spawnedItems");
+	var title := GetObjProperty(placeholder, "title");
+	KillAllMonsters(spawnedmonsters);
+	DestroyAllItems(spawneditems);
+	EraseGlobalProperty(title);
+	start_script("::maindestroy");
+endprogram

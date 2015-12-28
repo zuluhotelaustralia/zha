@@ -1,0 +1,18 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program textcmd_unlock( who )
+	if (!checkStaff(who, "unlock", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+    SendSysMessage( who, "What do you wish to unlock?" );
+
+    var what := Target( who );
+    if (what)
+        what.locked := 0;
+    endif
+
+endprogram

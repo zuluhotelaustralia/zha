@@ -1,0 +1,71 @@
+use uo;
+include "include/random";
+include "include/attributes";
+program ostardeggs(who, item)
+
+if(!ReserveItem(item)) return; endif
+
+SendSysMessage( who, "The egg begins to move and " );
+
+var ostard, typeofostard :=Random(35), masteralone := Random(100);
+
+case (typeofostard)
+
+0: ostard := "goldenostard";
+1: ostard := "goldenostard";
+2: ostard := "goldenostard";
+3: ostard := "goldenostard";
+4: ostard := "plainsostard";
+5: ostard := "plainsostard";
+6: ostard := "plainsostard";
+7: ostard := "plainsostard";
+8: ostard := "mountainostard";
+9: ostard := "mountainostard";
+10: ostard := "mountainostard";
+11: ostard := "mountainostard";
+12: ostard := "swampostard";
+13: ostard := "swampostard";
+14: ostard := "swampostard";
+15: ostard := "swampostard";
+16: ostard := "highlandostard";
+17: ostard := "highlandostard";
+18: ostard := "highlandostard";
+19: ostard := "highlandostard";
+20: ostard := "shadowostard";
+21: ostard := "shadowostard";
+22: ostard := "vallyostard";
+23: ostard := "vallyostard";
+24: ostard := "stoneostard";
+25: ostard := "stoneostard";
+26: ostard := "emeraldostard";
+27: ostard := "emeraldostard";
+28: ostard := "rubyostard";
+29: ostard := "rubyostard";
+30: ostard := "tropicalostard";
+31: ostard := "snowostard";
+32: ostard := "iceostard";
+33: ostard := "fireostard";
+34: ostard := "heavenlyostard";
+
+
+endcase
+
+var newpet := CreateNpcFromTemplate( ostard, who.x, who.y, who.z );
+
+if (GetEffectiveSkill( who, 35 )>90)
+
+if (masteralone<70)
+ SendSysMessage( who, "A baby ostard appears and accepts you as his master!");
+ SetObjProperty (newpet, "master", who.serial);
+ SetObjProperty (newpet, "prevtamed", 1);
+ newpet.script := "tamed";
+ RestartScript (newpet);
+endif
+
+else
+SendSysMessage( who, "A baby ostard appears!");
+endif
+SubtractAmount( item, 1 );//destroyitem(item);
+
+endprogram
+

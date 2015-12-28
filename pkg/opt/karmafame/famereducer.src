@@ -1,0 +1,33 @@
+use os;
+use uo;
+include "karmafame";
+
+const MINS_BETWEEN_CHECKS	:= 60;
+const LOSS_PERCENTAGE		:= 2;
+
+program fameReducer()
+
+	while (1)
+		foreach chr in EnumerateOnlineCharacters()
+			set_critical(1);
+
+			var current_fame  := CInt( GetFame( chr ) );
+			var current_karma := CInt( GetKarma( chr ) );
+			if( current_fame || current_karma )
+				SendSysMessage( chr, "As the time pass, people slowly forget your past deeds." );
+				if( current_fame )
+					SetFame( chr, CInt( current_fame * (100-LOSS_PERCENTAGE) / 100 ) );
+				endif
+
+				if( current_karma )
+					SetKarma( chr, CInt( current_karma* (100-LOSS_PERCENTAGE) / 100 ) );
+				endif
+			endif
+
+			set_critical(0);
+		endforeach
+
+		sleep( MINS_BETWEEN_CHECKS * 60 );
+	endwhile
+
+endprogram

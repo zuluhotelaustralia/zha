@@ -1,0 +1,376 @@
+/*
+	Barnabus 7-10-03
+	Guild uniform script run from guildstone when gm chooses guild uniform management option
+	Done this way so I could use proper gump package :)
+*/
+
+use uo;
+use os;
+
+include "guilddata";
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+include "include/zhacolors";
+include "guilduniform";
+include "include/yesno";
+
+
+
+program guildUniforms( params)
+	//var gparams:={	guild,who,stone };
+	var stone:=params[3];
+	var who:= params[2];
+	var guild := params[1];
+	
+	configGump(who, guild, stone);
+
+endprogram
+
+function configGump(who, guild, stone)
+
+	GFInitGump();
+	GFPage(1);
+	GFResizePic(0, 0, BKGND_SCROLL, 440, 580);
+	
+	GFTextLine(70, 10, 73, guild.getprop("guildname") + " Uniform Management");
+	GFTextLine(70, 40, 73, "[You require 6+ members to buy guild uniforms]");
+	GFTextLine(90, 90, 53, "Select Guild Uniform Colour");
+	GFTextLine(90, 120, 53, "Currently set to: " + GetGuildColorString (who, guild));
+	GFTextLine(90, 170, 70, "Select Uniform Piece to Buy");
+	GFTextLine(90, 200, 53, "Buy guild robe (50k gp each)");
+	GFTextLine(90, 230, 53, "Buy guild cloak (50k gp each)");
+	GFTextLine(90, 280, 70, "Extra Management Options");
+	GFTextLine(90, 310, 53, "Bring all guild uniforms to me");
+	GFTextLine(90, 340, 53, "Browse available colours");
+	GFTextLine(90, 380, 70, "Note:");	
+	GFTextLine(90, 410, 53, "Number of uniform pieces: " + NumberGuildUnis(guild));
+	GFTextLine(90, 440, 53, "Max based on number of members " + CStr(2*NumberGuildMembers(guild)));
+	GFTextLine(90, 480, 53, "Change house colours to guild uniform colour?");
+	GFTextLine(90, 510, 53, "Restore previous house colours");
+	GFTextLine(90, 550, 53, "Exit");
+
+	var setcolor := GFButtonID( 60, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var buyrobe := GFButtonID( 60, 205, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var buycloak := GFButtonID( 60, 235, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	
+	var bringunis := GFButtonID( 60, 315, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var availcols := GFButtonID( 60, 345, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var housecols := GFButtonID( 60, 485, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	var restorhouse := GFButtonID( 60, 515, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var exitButton := GFButtonID( 60, 555, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+
+	if(choice[setcolor.keyid])
+		SetGuildColor (who, guild);
+	elseif(choice[buyrobe.keyid])
+		BuyGuildRobe (who, guild);
+	elseif(choice[buycloak.keyid])
+		BuyGuildCloak (who, guild);
+	elseif(choice[bringunis.keyid])
+		BringAllGuildUniformsToMe (who, guild);
+	elseif(choice[availcols.keyid])	
+		//AvailableColours(who);
+		showcolors(who);
+	elseif(choice[housecols.keyid])
+		ChangeHouseColours(stone, guild);
+	elseif(choice[restorhouse.keyid])
+		RestoreHouseColours(stone);
+	elseif(choice[exitButton.keyid])
+		return;
+	endif
+	configGump(who, guild, stone);
+endfunction
+
+function ColourAlreadyUsed(colour)
+	var othergcolor;
+	foreach g in ListGuilds()
+		othergcolor:=CInt(g.getprop("guildunicolour"));
+		if ((othergcolor>=1152 && othergcolor<=1183) ||
+		(othergcolor>=1280 && othergcolor<=1306))
+			if (colour == othergcolor)
+				return 1;
+			endif
+		else
+			if (colour < othergcolor+3 && colour > othergcolor-3)
+				return 1;
+			endif
+		endif
+	endforeach
+	return 0;
+endfunction
+
+function SetGuildColor (who, guild)
+
+	if (NumberGuildMembers(guild)<6)
+		SendSysMessage(who, "You require at least 6 members to have guild uniforms. Canceled.");
+		return;
+	endif
+
+	var newcolour := CInt( SendTextEntryGump(who, "Enter the number of the colour you wish to set for your guild (must be a number)") );
+	
+	if ( !newcolour || newcolour<1 || isIllegalColour(newcolour))
+		SendSysMessage(who, "This colour is invalid. Please choose another. Canceled.");
+		return;
+	endif
+	
+	if (ColourAlreadyUsed(newcolour))
+		SendSysMessage(who, "This colour is already in use by another guild.");
+		return;
+	endif
+	
+	if (CheckMoney(who)<300000)
+		SendSysMessage(who, "It costs 300k to purchase a guild colour.");
+		return;
+	endif
+	
+	if (!ConsumeSubstance(who.backpack, 0xeed, 300000))
+		SendSysMessage(who, "Error subtracting gold...");
+		return;
+	endif	
+	guild.setprop("guildunicolour", newcolour);
+	UpdateGuildUniformColours(guild);
+	SendSysMessage(who, "Changed guild uniform colour to " + CStr(newcolour) + ".");
+
+endfunction
+
+function GetGuildColorString (who, guild)
+	var guildcolstr := guild.getprop("guildunicolour");
+	if (!guildcolstr||guildcolstr==error)
+		 return "No colour specified";
+	endif
+	return  CStr(guildcolstr);
+endfunction
+
+function BuyGuildRobe (who, guild)
+	BuyGuildUniform (who, guild);
+endfunction
+
+
+function BuyGuildCloak (who, guild)
+	 BuyGuildUniform (who, guild, 1);
+endfunction
+
+function BuyGuildUniform (who, guild, clothingtype:=0)
+	/*if (NumberGuildMembers(guild)<6)
+		SendSysMessage(who, "You require at least 6 members to have guild uniforms. Canceled.");
+		return;
+	endif
+*/
+	//require abbrev and colour to be set
+	if (!guild.getprop("guildabv") || !guild.getprop("guildunicolour"))
+		SendSysMessage(who, "Before you can buy guild clothing you must specify your guild's abbreviation AND uniform colour!", 3, 33);
+		return ;	
+	endif
+	
+	if (NumberGuildUnis(guild) >= (2*NumberGuildMembers(guild)))
+		SendSysMessage(who, "You are permitted a maximum of 2 guild uniform items per guild member", 3, 33);
+		return ;	
+	endif
+
+	
+	//check for money in backpack
+	if ( CheckMoney(who) < 50000)
+		SendSysMessage(who, "You require 50000gps to purchase a guild uniform!", 3, 33);
+		return ;		
+	endif
+	//remove cash
+
+	RemoveMoney(who, 50000);
+
+	//create guild uni and set props
+	var guilduni;
+	
+	if (clothingtype==1) //robe
+		guilduni := CreateItemAtLocation( who.x, who.y, who.z, 0xa393);
+		guilduni.color := guild.getprop("guildunicolour");
+		guilduni.name := "a " + guild.getprop("guildabv") + " guild cloak";
+		SetObjProperty(guilduni, "guild_id", guild.guildid);
+	else	//cloak
+		guilduni := CreateItemAtLocation( who.x, who.y, who.z, 0xa392);
+		guilduni.color := guild.getprop("guildunicolour");
+		guilduni.name := "a " + guild.getprop("guildabv") + " guild robe";
+		SetObjProperty(guilduni, "guild_id", guild.guildid);
+	endif
+	
+	//add to guild's guilduni array
+	AddGuildUniformToGuild(guilduni, guild);
+	MoveItemToContainer( guilduni, who.backpack);
+	SendSysMessage(who, "You have purchased a " + guild.getprop("guildabv") + " guild uniform!", 3, 53);
+endfunction
+
+function CheckMoney(who)
+
+   var totalmoney := 0, backpack := EnumerateItemsInContainer(who.backpack);
+
+   foreach item in backpack
+      if (item.objtype == UOBJ_GOLD_COIN)
+        totalmoney := totalmoney + GetAmount(item);
+      endif
+   endforeach
+   return totalmoney;
+endfunction
+
+function RemoveMoney(who, removeamount)
+
+   var totalmoney := 0, backpack := EnumerateItemsInContainer(who.backpack);
+
+   foreach item in backpack
+      if (item.objtype == UOBJ_GOLD_COIN)
+        if (item.amount < removeamount)
+				removeamount:=removeamount-item.amount;
+				DestroyItem(item);
+			else
+				SubtractAmount(item, removeamount);
+				break;
+			endif
+      endif
+   endforeach
+   return totalmoney;
+endfunction
+
+function BringAllGuildUniformsToMe(who, guild)
+	SendSysMessage(who, "This will bring all guild uniforms to you. This may annoy your guild members if used irresponsibly", 3, 53);
+	if (YesNo(who, "Are you sure?"))
+		var gclothing := ListGuildUniforms(guild);
+		foreach g in gclothing
+			MoveItemToLocation( g, who.x, who.y, who.z);
+		endforeach
+	endif
+endfunction
+
+
+function NumberGuildMembers(guild)
+	return guild.members.size();
+endfunction
+
+function NumberGuildUnis(guild)
+	var gclothing := ListGuildUniforms(guild);
+	return gclothing.size();
+endfunction
+
+function AvailableColours(who, start)
+	//returns up to 60 colours for use in gump
+
+	if(!start || start <1 || start > 2431)
+		return;
+	endif
+	
+	var num:=0;
+	var i:=start;
+	
+	//SendSysMessage(who, "Currently available colours:");
+	var availcolors := array;
+	
+	while(i<=2431 && num<100)
+		if (! ColourAlreadyUsed(i))
+			availcolors.append(i);
+			num:=num+1;
+		endif
+		i:=i+1;
+	endwhile
+	return availcolors;
+endfunction
+
+
+function showcolors(who)
+  var basecolor:=CInt( SendTextEntryGump(who, "Enter the starting colour number (between 1-2431).") );
+  	
+  if(!basecolor || basecolor <1 || basecolor > 2431)
+    SendSysMessage(who, "Canceled.",3,34);
+    return;
+  endif  
+	
+	var mycolors := AvailableColours(who, basecolor);
+
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_STONESLAB, 530, 600);
+	GFTextMid(100, 10, 250, 53, "AVAILABLE GUILD UNIFORM COLOURS");
+	
+	var i;
+	var y := 40;
+	var x := 30;
+	var num:=0;
+	
+	var hButton:=array;
+	
+	foreach color in mycolors
+		num := num+1;
+		GFTextLine(x+10, y, color, "Colour " + color);
+		hButton.append(GFButtonID(x, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
+		y:=y+20;
+		if (num>=25)
+			x:=x+110;
+			num:=0;
+			y := 40;
+		endif
+	endforeach
+	
+	//return values
+	var counter:=0;
+	var choice := GFSendGump(who);
+	
+	
+	foreach b in hButton
+		counter:=counter+1;
+   	if (choice[b.keyid])
+			SendSysMessage(who, "You selected color no. " + mycolors[counter]);
+			SendSysMessage(who, "This colour looks like a bit like this (not accurate for speckled colours)",3,mycolors[counter]);
+			return;
+		endif
+	endforeach
+
+
+	return 0;
+
+endfunction
+
+function ChangeHouseColours(stone, guild)
+	var gcolor := CInt(guild.getprop("guildunicolour"));
+	if (!gcolor || gcolor ==error)
+		return;
+	endif
+	var house := stone.multi;
+	foreach item in (house.items)
+		if ((item.objtype == 0x7007 || item.objtype == 0xa390 || GetObjProperty(item, "houseserial")))
+			if (GetObjProperty(item, "oldcolour")==error)
+				SetObjProperty(item, "oldcolour", Cint(item.color));
+			endif
+			item.color:=gcolor;
+		endif
+	endforeach
+	
+	foreach item in (house.components)
+		if (GetObjProperty(item, "house_serial") && (item.objtype!=0xbd0 || item.objtype!=0xbd1 ||item.objtype!=0xbd2))
+			if (GetObjProperty(item, "oldcolour")==error)
+				SetObjProperty(item, "oldcolour", Cint(item.color));
+			endif
+			item.color:=gcolor;
+		endif
+	endforeach
+endfunction
+
+function RestoreHouseColours(stone)
+	var house := stone.multi;
+	foreach item in (house.items)
+		if ((item.objtype == 0x7007 || item.objtype == 0xa390 || GetObjProperty(item, "houseserial")))
+			var oldcolour:=CInt(GetObjProperty(item, "oldcolour"));
+			if (oldcolour!=error)
+				item.color:=oldcolour;;
+			endif
+		endif
+	endforeach
+	
+	foreach item in (house.components)
+		if (GetObjProperty(item, "house_serial") && (item.objtype!=0xbd0 || item.objtype!=0xbd1 ||item.objtype!=0xbd2))
+			var oldcolour:=CInt(GetObjProperty(item, "oldcolour"));
+			if (oldcolour!=error)
+				item.color:=oldcolour;;
+			endif
+		endif
+	endforeach
+endfunction

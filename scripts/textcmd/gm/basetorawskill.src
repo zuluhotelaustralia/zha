@@ -1,0 +1,27 @@
+use uo;
+include "include/cmdlevel_check";
+
+
+program base_to_rawskill( who, text )
+	if (!checkStaff(who, "basetorawskill", CMDLEVEL_GAME_MASTER))
+		return 0;
+	endif
+	
+
+	if( !text )
+		SendSysMessage( who, "Usage is : .basetorawskill <base skill>." );
+		return;
+	endif
+
+	text := CDbl( text );
+	if( !text )
+		SendSysMessage( who, "Usage is : .basetorawskill <base skill>." );
+		return;
+	endif
+
+	var base	:= CInt( text * 10 );
+	var rawskill	:= BaseSkillToRawSkill( base );
+
+	SendSysMessage( who, "A base skill of " + text + " represent " + rawskill + " raw skill points." );
+
+endprogram

@@ -1,0 +1,43 @@
+/////////////////////////////////////////
+// reply.src -- Send a message to another
+//
+// Usage: .reply [message]
+//
+// Updates: Zulu zuluhotel@hotmail.com
+// Created: April 10, 2000
+// Updated: July 19, 2000
+/////////////////////////////////////////
+
+use uo;
+
+program replymsg(who,themessage)
+
+
+  if (themessage=="") SendSysMessage(who, "Cancelled."); return; endif
+  var msglimiter:=GetGlobalProperty("msglimiter");
+  if (!msglimiter)
+  	msglimiter:=5;
+  endif
+  var nextmsg:=GetObjProperty(who, "nextmsg");
+  if (nextmsg && nextmsg > ReadGameClock())
+  	SendSysMessage(who, "You can only send one message every "+msglimiter+" seconds");
+  	return;
+  endif   
+  SetObjProperty(who, "nextmsg", ReadGameClock()+msglimiter);
+  
+  var mobileserial :=GetObjProperty(who, "#msgfrom");
+  var mobile:=SystemFindObjectBySerial(mobileserial);
+  
+  if (!mobile || (mobile.cmdlevel && who.cmdlevel==0))
+  	SendSysMessage(who, "Cannot send message");
+  	return;
+  endif
+  if (GetObjProperty(mobile, "Messages")== 1)
+  	SendSysMessage(who, "That person has messages turned off");
+  	return;
+  endif
+  SendSysMessage(mobile, who.name + " : " + themessage, 3, 6);
+  SendSysMessage(who, "Message sent to "+mobile.name);
+  SetObjProperty(mobile, "#msgfrom", who.serial);
+  SetObjProperty(who, "nextmsg", ReadGameClock()+msglimiter);
+endprogram

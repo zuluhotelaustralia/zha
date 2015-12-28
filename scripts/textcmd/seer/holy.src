@@ -1,0 +1,29 @@
+use uo;
+use os;
+
+include "include/spelldata";
+include "include/client";
+include "include/cmdlevel_check";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_ENERGY_BOLT;
+const SPELL_EFFECT_ID		:= FX_SPELL_ENERGY_BOLT;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_ENERGY_BOLT;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_ENERGY_BOLT;
+
+program flowstone( me )
+	if (!checkStaff(me, "holy", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+var tgt := TargetCoordinates(me);
+var cast_on := tgt.mobile;
+var ebolt1 := PlayMovingEffect(me, cast_on, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP, explode := 0);
+var dmg := (CalcSpellDamage( me,cast_on, 1 )/2 * 1.5);
+ebolt1.color := 1175;
+PlaySoundEffect( me, 519 );
+ApplyElementalDamage( me, cast_on, 1, dmg, HOLY );
+sleep(1);
+var ebolt2 := PlayMovingEffect(me, cast_on, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP, explode :=0);
+PlaySoundEffect( me, 519 );
+ApplyElementalDamage( me, cast_on, 1, dmg, HOLY );
+endprogram

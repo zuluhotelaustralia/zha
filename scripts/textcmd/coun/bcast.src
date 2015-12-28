@@ -1,0 +1,10 @@
+use uo;
+
+include "include/cmdlevel_check";
+
+program textcmd_bcast( who, text )
+	if (!checkStaff(who, "bcast", CMDLEVEL_COUNSELOR))
+		return 0;
+	endif
+    Broadcast( who.name + " : " + text );
+endprogram

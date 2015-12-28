@@ -1,0 +1,111 @@
+/* Psionics Spell - Evaluation                    **
+** Ultimate: tells stats about target **
+** Seravy - seravy@gmail.com                          */
+
+use uo;
+use os;
+
+include "newclassbook";
+
+const SPELL_ID := SPELL_ID_TIMEOUT;
+
+program cast_timeout(parms)
+  var caster;
+  var cast_on;
+  var circle := GetCircle( SPELL_ID);
+
+  if (parms[1] == "#MOB")
+    caster := parms[2];
+    cast_on := parms[3];
+    if (parms[4])
+      circle := parms[4];
+    endif
+  else
+    caster := parms;
+    cast_on := CanTargetSpell(caster, circle, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS);
+
+    if (!cast_on)
+      EraseObjProperty(caster, "#Casting");
+      return;
+    endif
+  endif
+
+  if (cast_on.isA(POLCLASS_NPC))
+    SendSysMessage(caster, "You cannot cast this on NPC's at this time.");
+    EraseObjProperty( caster, "#Casting");
+    return;
+  endif
+
+
+  var elements := {
+                   {0x36d4, 5, 1, 0x01ef}, //FIRE
+                   {0x379f, 0xa, 0x1e, 0x020b}, //AIR
+                   {0x3789, 0xa, 0xa, 0x020e}, //EARTH
+                   {0x3789, 30, 30, 0x0117}, //WATER
+                   {0x36D4, 5, 0, 0x2A2}, //NECRO
+                   {0x22C6, 20, 0, 0x55}, //HOLY
+                   {0x11AA, 10, 0, 0x28}, //ACID
+                   {8281, 30, 0, 0x11D} //Physical
+                  };
+
+  foreach element in elements
+    PlayMovingEffect(caster, cast_on, element[1], element[2], element[3]);
+    PlaySoundEffect( caster, element[4]);
+    sleepms(200);
+  endforeach
+
+  EraseObjProperty( caster, "#Casting");
+  SendGump(caster, cast_on);
+endprogram
+
+function SendGump(who, tgt)
+  var earth := GetObjProperty(tgt, "EarthProtection");
+  if (!earth) earth := 0; endif
+  var air := GetObjProperty(tgt, "AirProtection");
+  if (!air) air := 0; endif
+  var fire := GetObjProperty(tgt, "FireProtection");
+  if (!fire) fire := 0; endif
+  var water := GetObjProperty(tgt, "WaterProtection");
+  if (!water) water := 0; endif
+  var necro := GetObjProperty(tgt, "NecroProtection");
+  if (!necro) necro := 0; endif
+  var holy := GetObjProperty(tgt, "HolyProtection");
+  if (!holy) holy := 0; endif
+  var acid := GetObjProperty(tgt, "AcidProtection");
+  if (!acid) acid := 0; endif
+  var phys := GetObjProperty(tgt, "PhysicalProtection");
+  if (!phys) phys := 0; endif
+
+  var gumplayout := {
+                  "nodispose",
+                  "page 0",
+                  "resizepic 100 100 2600 250 250",
+                  "text 155 120 52 0",
+                  "page 1",
+                  "text 130 140 10 1", // Fire Protection
+                  "text 130 160 10 2", // Air Protection
+                  "text 130 180 10 3", // Earth Protection
+                  "text 130 200 10 4", // Water Protection
+                  "text 130 220 10 5", // Necro Protection
+                  "text 130 240 10 6", // Holy Protection
+                  "text 130 260 10 7", // Acid Protection
+                  "text 130 280 10 8", // Physical Protection
+
+                  "button 180 310 2130 2129 1 0 100" // Ok
+                  };
+
+  var gumpdata := {
+                "Protections of "+tgt.name,
+                "Fire Protection: "+fire,
+                "Air Protection: "+air,
+                "Earth Protection: "+earth,
+                "Water Protection: "+water,
+                "Necro Protection: "+necro,
+                "Holy Protection: "+holy,
+                "Acid Protection: "+acid,
+                "Physical Protection: "+phys,
+                0
+                };
+
+  SendDialogGump(who, gumplayout, gumpdata);
+endfunction

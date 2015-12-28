@@ -1,0 +1,33 @@
+///////////////////////////////////////////////////////////////////////////////////////
+// MoveCharacter is used to make the client refresh the screen once the packet is sent
+///////////////////////////////////////////////////////////////////////////////////////
+use uo;
+
+program toggle_lbr( who, text )
+
+if ((text == "") or (!text))
+  SendSysMessage( who, "usage .lbr <on> or <off>.");
+  return;
+endif
+
+var account := who.acct;
+
+if(account.getprop("AOS"))
+  SendSysMessage( who, "You cannot enable both AoS and LBR on your account at the same time!");
+  return;
+endif
+
+if (text == "on")
+  account.setprop("LBR", 1);
+  SendSysMessage( who, "You enabled Lord Blackthornes Return on your account.");
+  SendPacket(who, "B90003");
+  MoveCharacterTolocation(who, who.x, who.y, who.z);
+elseif (text == "off")
+  account.eraseprop("LBR");
+  SendSysMessage(who,"You disabled Lord Blackthornes Return on your account.");
+  // This packet sends the T2A Packet with Chat Button Disabled, change to B90001 To enable chat button
+  SendPacket(who, "B90000");
+  MoveCharacterTolocation(who, who.x, who.y, who.z);
+endif
+
+endprogram

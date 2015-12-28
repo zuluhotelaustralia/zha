@@ -1,0 +1,27 @@
+use uo;
+include "include/npcbackpacks";
+include "include/cmdlevel_check";
+
+program textcmd_showkeywords( who )
+	if (!checkStaff(who, "showkeywords", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+	SendSysMessage( who, "Show whose keywords?" );
+	var whom := Target( who );
+	if (!whom)
+		SendSysMessage( who, "canceled" );
+		return;
+	    endif
+
+	var mykeywords := {};
+	if ( GetObjProperty(whom,"mykeywords") )
+		mykeywords := GetObjProperty(whom,"mykeywords");
+	endif
+
+	SendSysMessage(who,"keywords: ");
+	foreach word in mykeywords
+		SendSysMessage(who, word + " : " + GetObjProperty(whom, word));
+	endforeach
+
+endprogram

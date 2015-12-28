@@ -1,0 +1,610 @@
+//script for when staff equipped
+
+use os;
+use uo;
+use basic;
+
+include "include/itemutil";
+include "include/eventid";
+include "include/objtype";
+include "include/client";
+include "include/spelldata";
+include "magestaff";
+
+var pcfg := ReadConfigFile(":barnsitems:powerwords");
+var attack_cast:=0;
+var autoloadscrolls:=0;
+
+const CAST_SELF:=1;
+const CAST_TARGET:=2;
+//const CAST_GUILD:=3;
+const CAST_ATTACKER:=4;
+
+program magestaff( staff )
+	detach();
+	RegisterForSpeechEvents(staff,1);
+	EnableEvents( SYSEVENT_SPEECH,1);
+	var ev;
+	var text;
+
+	while( staff )
+      ev := os::wait_for_event( 120 );
+
+	   if( ev )
+	        	case (ev.type)
+					SYSEVENT_SPEECH:		
+						if (StaffIsEquipped (ev.source, staff)) 
+    		 	       HandleSpeech (ev, staff);
+						 if (GetObjProperty(staff, "StaffTargetOption")==CAST_ATTACKER)
+						 	AutoCastOnAttackers(ev.source, staff);
+						 endif
+    			     	endif 
+				endcase
+		endif
+
+	endwhile
+
+endprogram
+
+
+
+/////////////////// 
+//  makes sure that the staff is equipped by the source of the event 
+/////////////////// 
+
+function HandleSpeech ( event, staff ) 
+	var text := lower( event.text ); 
+	var me := event.source; 
+	var pword;
+	var spellid;
+	if(text)
+		pword:=FindConfigElem( pcfg, text );
+		if (pword)
+			spellid:=CInt(GetConfigString( pword, "SpellID" ));
+			CastStaffSpell(me, staff, spellid);
+		elseif (text == "magestaff help")
+			SendSysMessage(me, "The staff speaks:",3,53);
+			SendSysMessage(me, "Master, I obey the following commands...",3,53);
+			SendSysMessage(me, "'magestaff absorb' - stores the power of a scroll in the staff. Initially a staff can store 10 charge worth of spells. Normal spells are worth 1 charge each, Earth/Necro spells are worth 2.",3,53);
+			SendSysMessage(me, "'magestaff auto absorb' - automatically absorbs from a stack of scrolls you choose when no charges left.",3,53);
+			SendSysMessage(me, "'magestaff cannabalise' - steals the essence from another staff (destroys it) of the magi, adding +5 charges to my maximum (40 max), and +3 spell power (15 max). ",3,53);
+			SendSysMessage(me, "Target staff must have at least 10 max charges fewer than I.",3,53);
+			SendSysMessage(me, "'magestaff cast guild' - Spells cast in order on guild members until all have been cast once on or no spells left.",3,53);
+			SendSysMessage(me, "'magestaff spells' - lists the spells stored, in order, by the staff, its current charges, max charges, and target option selected.",3,53);
+			SendSysMessage(me, "'magestaff target' - set a target that is automatically selected when I cast.",3,53);
+			SendSysMessage(me, "'magestaff target me' - set you as the auto target. Be careful with this!",3,53);
+			SendSysMessage(me, "'magestaff target attackers' - casts spells in order shown in 'magestaff spells' on hostile monsters in range.",3,53);
+			SendSysMessage(me, "Note: staff will keep casting til all hostiles are dead or all spells used. Hostiles include any NPC or player that is trying to attack you.",3,53);
+			SendSysMessage(me, "A staff will only check whether hostiles are in range immediately after you have spoken (anything). ",3,53);
+			SendSysMessage(me, "'magestaff untarget' - remove current auto target settings",3,53);
+			SendSysMessage(me, "To have me cast a spell simply speak aloud the Powerword of that spell.",3,53);
+			SendSysMessage(me, "For instance, 'In Vas Mani' will have me cast Greater Heal.",3,53);
+			SendSysMessage(me, "However to cast that spell I must have a scroll stored of that type.",3,53);
+		elseif (text == "magestaff absorb")
+			AbsorbScroll(me, staff);
+		elseif (text == "magestaff auto absorb")
+			AutoAbsorbScroll(me, staff);
+		elseif (text == "magestaff cannabalise")
+			CannabaliseStaff(me, staff);
+		elseif (text == "magestaff spells")
+			ListSpells(me, staff);
+		elseif (text == "magestaff target")
+			SetStaffAutoTarget(me,staff);
+		elseif (text == "magestaff target me")
+			SetStaffAutoTargetMe(me, staff);
+		elseif (text == "magestaff cast guild")
+			CastOnGuild(me, staff);
+		elseif (text == "magestaff target attackers")
+			SetStaffAutoTargetAttackers(me, staff);
+		elseif (text == "magestaff untarget")
+			UnSetStaffAutoTarget(me,staff);
+		endif
+	endif
+endfunction 
+
+function AbsorbScroll(who, staff, stackchosen:=0)
+	var scroll;
+	if (! stackchosen)
+		staff.color:=1155;
+		SendSysMessage( who, "Select a scroll to absorb." );
+		scroll := Target( who );
+
+	   if( !scroll)
+	   	SendSysMessage( who, "canceled." );	
+			staff.color:=53;
+	     	return;
+	   endif
+	else
+		scroll := stackchosen;
+	endif
+	
+	var newspellid:=FindSpellIdForObjType(scroll.objtype);
+	
+	while ( newspellid>0)
+			if (scroll.container!=who.backpack)
+			   SendSysMessage( who, "The scroll must be in your main backpack." );
+				staff.color:=53;
+ 	 	   	return;
+			endif
+	
+			//if >=10 scrolls absorbed then say soz
+			//if (len(GetSpellIdArray(staff))>=10)
+			if (GetMaxCharges(staff)-CalculateStoredCharges(staff)-GetSpellStoreCost(newspellid)<0)
+				SendSysMessage( who, "I am at maximum storage capacity, master." );
+				staff.color:=53;
+	 	    	return;
+			endif
+		
+				//scrolls are stackable :)
+			if (scroll.amount>1)
+			//just reduce the item stack
+				SubtractAmount( scroll, 1);
+			else
+				//equal to amount required so destroy the item
+				DestroyItem( scroll );
+			endif
+			PerformAction(who,ANIM_FIDGET_2);
+			PlaySoundEffect(who, 0xf8);
+			SendSysMessage( who, "The staff absorbed the " + GetSpellNameFromId(newspellid) + " spell.",3,53);
+			AddToSpellIdArray(staff, newspellid);
+			//add scroll to array of spellids
+		
+			if (stackchosen)
+				if (! scroll.amount)
+					SendSysMessage( who, "Scroll stack has been completely absorbed, master!",3,53);
+					autoloadscrolls:=0;
+				endif
+				break;
+			endif	
+			
+			scroll := Target( who );
+ 			if( !scroll)
+ 			  	SendSysMessage( who, "canceled." );	
+				staff.color:=53;
+ 		    	return;
+ 			endif
+			newspellid:=FindSpellIdForObjType(scroll.objtype);
+
+		endwhile
+		staff.color:=53;
+endfunction
+
+function AutoAbsorbScroll(who, staff)
+
+	staff.color:=1156;
+	SendSysMessage( who, "Select scroll(s) to automatically absorb from when out of charges, master. Hit escape to cancel." );
+	var scroll := Target( who );
+
+   if( !scroll)
+   	SendSysMessage( who, "Cancelled." );	
+		staff.color:=53;
+		autoloadscrolls:=0;
+     	return;
+   endif
+	
+	
+	var newspellid:=FindSpellIdForObjType(scroll.objtype);
+	if (!newspellid)
+		SendSysMessage( who, "Cancelled." );
+		staff.color:=53;
+		autoloadscrolls:=0;
+ 	  	return;
+	endif
+	
+	if (scroll.container!=who.backpack)
+	   SendSysMessage( who, "The scroll must be in your main backpack." );
+		staff.color:=53;
+		autoloadscrolls:=0;
+    	return;
+	endif
+	
+	SendSysMessage( who, "I will automatically absorb power from this stack of scrolls, master.",3,53 );
+	autoloadscrolls:=scroll;
+	staff.color:=53;
+endfunction
+
+
+function CannabaliseStaff(who, staff)
+
+	staff.color:=1158;
+	SendSysMessage( who, "Which staff of the magi's essence do you wish to incorporate into this one?" );
+	var stealstaff := Target( who );
+	
+   if( !stealstaff || stealstaff.objtype!=0x76b8) 
+   	SendSysMessage( who, "canceled." );	
+		staff.color:=53;
+     	return;
+   endif
+
+	if (stealstaff.container!=who.backpack)
+	   SendSysMessage( who, "The staff must be in your main backpack." );
+		staff.color:=53;
+     	return;
+	endif
+	
+	var currentMax:=GetMaxCharges(staff);
+	if (currentMax==40)
+		SendSysMessage( who, "Your staff of the magi already has the maximum number of charges." );
+		staff.color:=53;
+     		return;
+	endif
+
+	if (GetMaxCharges(stealstaff)<=currentMax-10)
+		SendSysMessage( who, "The staff of the magi you want to cannabalise is too weak to improve your equipped staff. It has more than 10 fewer maximum charges than the staff you want to enhance." );
+		staff.color:=53;
+		return;
+	endif
+	
+	if (! YesNo(who, "Destroy targeted staff?"))
+		staff.color:=53;
+		return;
+	endif
+
+	if (!DestroyItem(stealstaff))
+		staff.color:=53;
+		return;
+	endif
+	
+	PerformAction(who,ANIM_CAST_AREA);
+	PlayLightningBoltEffect( who );
+	sleep(1);
+	PlaySoundEffect(who, 0xf7);
+	SetObjProperty(staff, "MaxCharges", Cint(currentMax+5));
+	var magicpen := GetObjProperty(staff, "MagicPenalty");
+	if (!magicpen)
+		SetObjProperty(staff, "MagicPenalty", -3);
+	else
+		if (magicpen-3 > -16)
+			SetObjProperty(staff, "MagicPenalty", magicpen-3);
+		else
+			SetObjProperty(staff, "MagicPenalty", -15);
+		endif
+	endif
+	sleep(1);
+	staff.color:=53;
+endfunction
+
+function CalculateStoredCharges(staff)
+	//based on spell ids calculates current charges.
+	var spellarr := GetSpellIdArray(staff);
+	if (!spellarr || spellarr==error)
+		return 0;
+	endif
+	var storedcharges:=0;
+	foreach si in spellarr
+		storedcharges:=storedcharges+GetSpellStoreCost(si);
+	endforeach
+	return storedcharges;
+endfunction
+
+function GetSpellStoreCost(spellid)
+		if (spellid>64)
+			return 2;
+		endif
+		return 1;
+endfunction
+
+function GetMaxCharges(staff)
+	var maxcharges:=CInt(GetObjProperty(staff, "MaxCharges"));
+	if (!maxcharges||maxcharges==error)
+		return 10;
+	endif
+	return maxcharges;
+endfunction
+
+function SetStaffAutoTarget(who, staff)
+	staff.color:=38;
+	SendSysMessage( who, "Select an auto cast target." );
+	var targ := Target( who );
+	
+   if( !targ)
+   	SendSysMessage( who, "canceled." );	
+		staff.color:=53;
+     	return;
+   endif
+
+	SetObjProperty(staff, "StaffTargetSerial", CInt(targ.serial));
+	SendSysMessage( who, "I am now set to cast spells on this target, master",3,53);
+	SetObjProperty(staff, "StaffTargetOption", CAST_TARGET);
+
+endfunction
+
+function SetStaffAutoTargetMe(who, staff)
+	SendSysMessage( who, "I am now set to cast spells on you, master",3,53);
+	SetObjProperty(staff, "StaffTargetOption", CAST_SELF);
+endfunction
+
+function UnSetStaffAutoTarget(who, staff)
+	SendSysMessage( who, "Target options have been removed, master",3,53);
+	EraseObjProperty(staff, "StaffTargetOption");
+	EraseObjProperty(staff, "StaffTargetSerial");
+endfunction
+
+/*function SetStaffAutoTargetGuild(who, staff)
+	SendSysMessage( who, "I am now set to cast spells on your closest guild mate, master",3,53);
+	SetObjProperty(staff, "StaffTargetOption", CAST_GUILD);
+endfunction
+*/
+
+function SetStaffAutoTargetAttackers(who, staff)
+	SendSysMessage( who, "I am now set to cast spells on anything that attacks you, master",3,53);
+	SetObjProperty(staff, "StaffTargetOption", CAST_ATTACKER);
+endfunction
+
+
+function CastStaffSpell(who, staff, spellid, override_target:=0)
+
+	if (GetObjProperty(staff, "#magestaffcasting"))
+		return 0;
+	endif
+	
+	if(!ReserveItem(staff)) return; endif
+
+	if (autoloadscrolls && CalculateStoredCharges(staff)<=0)
+		SendSysMessage( who, "*Staff begins to absorb energy*",3,53); 
+		sleep(3);
+		AbsorbScroll(who, staff, autoloadscrolls);
+	endif
+
+			
+	if (!IsInSpellIdArray(staff, spellid))
+		SendSysMessage( who, "I do not have that spell stored, master",3,53); 
+		ReleaseItem(staff);
+		return 0; 
+	endif
+	
+	staff.color:=1156;
+
+	if (GetObjProperty(staff, "#magestaffcasting"))
+		ReleaseItem(staff);
+		staff.color:=53;
+		return 0;
+	endif
+
+
+	SetObjProperty(staff, "#magestaffcasting", 1);
+	RemoveFromSpellIdArray(staff, spellid);
+	
+	if (TryToCast( who, spellid,ANIM_CAST_AREA,1,1 )!=SUCCESS)
+		EraseObjProperty(staff, "#magestaffcasting");
+  	 	staff.color:=53;
+		ReleaseItem(staff);
+		return 0;
+	endif
+	if (override_target)
+		if (! GetHp(override_target))
+			EraseObjProperty(staff, "#magestaffcasting");
+  		 	staff.color:=53;
+			ReleaseItem(staff);
+			return 0;
+		endif
+		var params:=array;
+		params[1]:="#MOB";
+		params[2]:=who;
+		params[3]:=override_target;
+		start_script( GetScript( spellid ), params );
+	else
+		var sparams:=GetCastParams(who, staff);
+		if (sparams == error || !sparams)
+			EraseObjProperty(staff, "#magestaffcasting");
+  		 	staff.color:=53;
+			ReleaseItem(staff);
+			return 0;
+		endif
+		start_script( GetScript( spellid ), sparams );
+	endif	
+	EraseObjProperty(staff, "#magestaffcasting");
+   staff.color:=53;
+	ReleaseItem(staff);
+	
+	return 1;
+endfunction
+
+
+function ListSpells(who, staff)
+	var spellids:=GetSpellIdArray(staff);
+	if (!spellids[1])
+		SendSysMessage( who, "I have no spells stored, master",3,53);
+	else	
+		SendSysMessage( who, "My stored spells are...",3,53);
+		foreach si in spellids
+			SendSysMessage( who, GetSpellNameFromId(si),3,53);
+		endforeach
+	endif
+	
+	SendSysMessage(who, "Charges used: " + CalculateStoredCharges(staff) + " of maximum " + GetMaxCharges(staff),3,53);
+	var magicpen := GetObjProperty(staff, "MagicPenalty");
+	if (!magicpen||magicpen==error)
+		magicpen:=0;
+	else
+		magicpen:=abs(magicpen);
+	endif
+	SendSysMessage(who, "Spell power bonus: " + magicpen,3,53);
+	SendSysMessage(who, "Target option selected: ",3,53);
+	SendSysMessage(who, GetTargetOptionString(staff),3,53);
+endfunction
+
+function GetCastParams(who, staff)
+	//based on staff target option set params for casting
+	var targopt := GetObjProperty(staff, "StaffTargetOption");
+	if (!targopt || error)
+		return who;
+	endif
+	
+	var params:=array;
+	params[1]:="#MOB";
+	params[2]:=who;
+	
+	//params[3] is cast_on;
+	var targ;
+	case targopt
+		CAST_SELF:
+			params[3]:=who;
+			break;
+		CAST_TARGET:
+			var targeser:=Cint(GetObjProperty(staff, "StaffTargetSerial"));
+			if (!targeser||targeser==error)
+				params:=who; //i.e. no auto targ
+				//return;
+			endif
+				targ:=SystemFindObjectBySerial(targeser);
+			if (!targ||targ==error||!CheckLineOfSight(who, targ));
+				params:=who; //i.e. no auto targ
+				//return;
+			endif
+				params[3]:=targ;
+			break;
+		//CAST_GUILD:
+			//guild casting is handled separately... this will just cast normally
+		CAST_ATTACKER:
+			if (attack_cast==1)
+				var myclosestattacker:=GetClosestHostile(who);
+				params[3]:=myclosestattacker;
+				
+				/*if (!params[3] || params[3]==error)
+					params:=who;
+				endif
+				*/
+				break;
+			endif
+			params:=who;
+			break;
+		default:
+			params:=who;
+			break;
+	endcase
+	
+	return params;
+
+endfunction
+
+function ListGuildMembers(who)
+	var listguild:=array;
+	foreach mob in ListMobilesInLineOfSight( who, 15)
+		if (IsGuildMember(mob, who))
+			listguild.append( mob );
+		endif
+	endforeach
+	//add self
+	listguild.append(who);
+	return listguild;
+endfunction
+
+function IsGuildMember(mob, who)
+	if (! mob.acct)
+		return 0;
+	endif
+	if (GetObjProperty(mob, "guild_id")==GetObjProperty(who, "guild_id"))
+		return 1;
+	endif
+	return 0;	
+endfunction
+
+function GetTargetOptionString(staff)
+	var targopt := GetObjProperty(staff, "StaffTargetOption");	
+
+	case targopt
+		CAST_SELF:
+			return "Staff automatically casts spells on me.";
+			break;
+		CAST_TARGET:
+			return "Staff automatically casts spells on specific target.";
+			break;
+		//CAST_GUILD:
+		//	return "Staff automatically casts spells on nearby guild member.";
+		//	break;
+		CAST_ATTACKER:
+			return "Staff automatically casts spells on attackers.";
+			break;
+		default:
+			return "No target option selected.";
+			break;
+	endcase
+endfunction
+
+function CastOnGuild(who, staff)
+		if (GetObjProperty(staff, "#magestaffcasting"))
+			return 0;
+		endif
+
+
+		if (autoloadscrolls && CalculateStoredCharges(staff)<=0)
+			SendSysMessage( who, "*Staff begins to absorb energy*",3,53); 
+			sleep(3);
+			AbsorbScroll(who, staff, autoloadscrolls);
+		endif
+		
+		var spells:=GetSpellIdArray(staff);
+		var spellid;
+		var guildm;
+			
+		if (!spells[1])
+			return;
+		endif
+		foreach guildm in ListGuildMembers(who)
+			if (autoloadscrolls && CalculateStoredCharges(staff)<=0)
+				SendSysMessage( who, "*Staff begins to absorb energy*",3,53); 
+				sleep(3);
+				AbsorbScroll(who, staff, autoloadscrolls);
+			endif
+
+			CastStaffSpell(who, staff, spells[1], guildm);
+			sleep(1);
+
+			spells:=GetSpellIdArray(staff);
+			if (!spells[1])
+				return;
+			endif
+		endforeach
+
+endfunction
+
+function AutoCastOnAttackers(who, staff)
+	if (GetObjProperty(staff, "#magestaffcasting"))
+		return 0;
+	endif
+
+	if (autoloadscrolls && CalculateStoredCharges(staff)<=0)
+		SendSysMessage( who, "*Staff begins to absorb energy*",3,53); 
+		sleep(3);
+		AbsorbScroll(who, staff, autoloadscrolls);
+	endif
+
+	attack_cast:=1;
+	var spells:=GetSpellIdArray(staff);
+	var spellid;
+	var hostile;
+		
+	while (len(ListHostiles( who, 20, 1 ))>0 && spells[1])
+		if (autoloadscrolls && CalculateStoredCharges(staff)<=0)
+			SendSysMessage( who, "*Staff begins to absorb energy*",3,53); 
+			sleep(3);
+			AbsorbScroll(who, staff, autoloadscrolls);
+		endif
+			
+		if (! CastStaffSpell(who, staff, spells[1]))
+			break;
+		endif
+
+		sleep(1);
+		spells:=GetSpellIdArray(staff);
+	endwhile
+	attack_cast:=0;
+endfunction
+
+function GetClosestHostile(who)
+	var hosts := ListHostiles( who, 9, 1 );
+	//Broadcast(hosts);
+	var mind:=-1;
+	var closesthost;
+	foreach h in hosts
+		if (mind==-1)
+			mind:=Distance(h,who);
+			closesthost:=h;
+		elseif(Distance(h,who)<mind)
+			mind:=Distance(h,who);
+			closesthost:=h;
+		endif
+	endforeach
+	return closesthost;
+endfunction

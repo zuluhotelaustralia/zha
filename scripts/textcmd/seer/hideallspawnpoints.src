@@ -1,0 +1,39 @@
+use uo;
+
+include "include/constants/objtypes";
+include "include/cmdlevel_check";
+
+program textcmd_hidespawnpoints( who, range )
+	if (!checkStaff(who, "hideallspawnpoints", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+
+	if( !range )
+		range := 5;
+	endif
+
+	range := CInt(range);
+	if( !range )
+		SendSysMessage( who, "parameter must be a number" );
+		return 0;
+	endif
+
+	var counter :=0;
+	var z := 0;
+	while (z < 128)
+	z := z + 1;
+	foreach spawnpoint in ListItemsNearLocationOfType( who.x, who.y, z, range, UOBJ_SPAWNPOINT )
+		if( !spawnpoint.invisible )
+			spawnpoint.invisible := 1;
+			counter	:= counter + 1;
+		endif
+	endforeach
+
+	SendSysMessage(who, "changing z to " + z);
+	endwhile;
+
+	SendSysMessage( who,"A total of " + counter + " spawnpoints have been hidden." );
+
+endprogram
+

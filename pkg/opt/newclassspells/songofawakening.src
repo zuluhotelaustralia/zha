@@ -1,0 +1,75 @@
+//Spell of awakening...
+//gives bard and nearby same guild and allied guild players +2 per bard level stamina, and cancels sleep effects
+
+use uo;
+use os;
+
+include "newclassspelldata";
+include "include/client";
+include "include/dotempmods";
+
+const SPELL_ID := SPELL_ID_SONGAWAKENING;
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_SONGAWAKENING;
+const SPELL_EFFECT_ID		:= FX_SPELL_SONGAWAKENING;
+
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_SONGAWAKENING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_SONGAWAKENING;
+
+program cast_songofawakening( parms )
+	
+	
+	var caster;
+	var fromhit;
+	var circle:=GetCircle( SPELL_ID_SONGAWAKENING );
+	
+	if (parms[1] == "#MOB") //npc cast it
+		caster := parms[2];
+	else
+		caster := parms;
+	endif
+
+		
+	var modamount := CInt(GetObjProperty(caster, "IsBard")*2);
+	var cx := caster.x;
+	var cy := caster.y;
+	if (caster.acct)
+		while((caster.x == cx) && (caster.y == cy) && (!caster.dead))
+			PlaySoundEffect(caster, SFX_SPELL_SONGAWAKENING);
+			//SetStamina(caster, CInt(GetStamina(caster)+modamount));
+			SetStamina(caster, GetStamina(caster)+modamount);
+			PlayObjectCenteredEffect(caster, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP);
+			foreach mob in ListMobilesInLineOfSight( caster, 12)
+				if (IsGuildMemberOrAlly(mob, caster))
+					SetStamina(mob, CInt(GetStamina(mob)+modamount));
+					PlayObjectCenteredEffect(mob, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP);
+					if (GetObjProperty(mob, "asleep"))
+						EraseObjProperty(mob, "asleep");
+						SendSysMessage(mob, "You have been awakened!", 3,53);
+						mob.paralyzed:=0;
+					endif
+				endif
+			endforeach
+			sleep(5);
+		endwhile
+	else  //npcs
+		while((caster.x == cx) && (caster.y == cy) && (!caster.dead))
+			PlaySoundEffect(caster, SFX_SPELL_SONGAWAKENING);
+			SetStamina( caster, CInt(GetStamina(caster)+modamount));
+			PlayObjectCenteredEffect(caster, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP);
+			foreach mob in ListMobilesInLineOfSight( caster, 12)
+				if (mob.npctemplate && (mob.script=="killpcs"||mob.script=="killpcsTeleporter"||mob.script=="spellkillpcs"||mob.script=="spellkillpcsTeleporter" ))
+					SetStamina( mob, CInt(GetStamina(caster)+modamount));
+					PlayObjectCenteredEffect(mob, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP);
+					if (GetObjProperty(mob, "asleep"))
+						EraseObjProperty(mob, "asleep");
+						mob.paralyzed:=0;
+					endif
+				endif
+			endforeach
+			sleep(5);
+		endwhile
+
+	endif
+	
+	EraseObjProperty( caster, "#Casting");
+endprogram

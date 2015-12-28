@@ -1,0 +1,71 @@
+use uo;
+use os;
+
+//include "include/constants/sfxs";
+include "include/skillpoints";
+
+program trypickdoor( params )
+
+	var me :=  params[1];
+	var door :=  params[2]; 
+	var lockpick:=  params[3];
+
+	if (door.isopen)
+		SendSysMessage(me,"The door is already open!");
+		return;
+	endif
+	
+	var thief  := GetObjProperty( me, CLASSEID_THIEF );
+	var oldx := me.x;
+	var oldy := me.y;
+	
+	PlaySoundEffect(me, 0x4B);
+	if (!thief)
+		sleep(5);
+	else
+		if (thief<5)
+			sleep(5-thief);
+		else
+			sleep(1);
+		endif
+	endif
+	
+	if (me.x!=oldx || oldy != me.y)
+		SendSysMessage(me,"You have moved");
+		return 0;
+	endif
+	
+
+	var diff := GetObjProperty(door, "LockDifficulty");
+
+	PlaySoundEffect(door,SFX_242);
+	sleep(2);
+
+	var mobs:=ListHostiles(me,4);
+	if (len(mobs))
+		SendSysMessage(me,mobs[1].name+" breaks your concentration!");
+		return 0;
+	endif
+
+	var skillpoints := get_default_points(SKILLID_LOCKPICKING);
+
+	if ( CheckSkill(me,SKILLID_LOCKPICKING,diff,skillpoints) )
+		PlaySoundEffect(door,SFX_200);
+		PrintTextAbovePrivate(door,"*Opens*",me);
+		sleep(1);
+		var params:= {me, door};
+		start_script("openpickdoor", params);
+		return 1;
+	else
+		PrintTextAbovePrivate(door,"You fail to pick the lock.",me);
+		if (!CheckSkill(me,SKILLID_LOCKPICKING,diff,skillpoints) )
+			PlaySoundEffect(me,0xef);
+			SendSysMessage(me,"Your pick breaks!");
+			SubtractAmount(lockpick,1);
+		else
+			PlaySoundEffect(door,SFX_11F);
+		endif
+		return 0;
+	endif
+
+endprogram

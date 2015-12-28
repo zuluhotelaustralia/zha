@@ -1,0 +1,27 @@
+use os;
+use uo;
+
+include "include/cmdlevel_check";
+
+program lighting(who)
+	if (!checkStaff(who, "makelight", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  var targetitem :=Target(who);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  var oldgraphic := targetitem.graphic;
+  SetObjProperty(targetitem,"oldgraphic", oldgraphic);
+  var oldcolor := targetitem.color;
+  SetObjProperty(targetitem,"oldcolor", oldcolor);
+  var oldname := targetitem.name;
+  SetObjProperty(targetitem,"oldname", oldname);
+  targetitem.name    := "lighting crystal";
+  targetitem.graphic :=  7885;
+  targetitem.color   :=  0x455;
+  targetitem.usescript := ":zuluitems:lightingitem";
+  targetitem.newbie := 1;
+
+endprogram

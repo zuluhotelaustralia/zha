@@ -1,0 +1,19 @@
+
+use uo;
+
+include "util/bank";
+include "include/cmdlevel_check";
+
+program open_bank( who )
+	if (!checkStaff(who, "bank", CMDLEVEL_SEER))
+		return 0;
+	endif
+
+
+             var bankbox;
+           
+             bankbox := FindBankBox( who );
+
+             SendOpenSpecialContainer( who, bankbox );
+   
+endprogram

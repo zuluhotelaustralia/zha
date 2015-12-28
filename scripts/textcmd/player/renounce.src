@@ -1,0 +1,31 @@
+/* Renounce newbie status */
+use uo;
+use os;
+
+include "include/yesno";
+include "include/newbieprotection";
+
+program renounce(who)
+
+	var newbieflag := GetObjProperty(who, "newbie");
+	if (newbieflag==999 || newbieflag==0)
+		SendSysMessage(who, "You are no longer a [Young] player");
+		return 0;
+	endif
+
+	if (!who.title_race)
+		SendSysMessage(who, "You must have a race before you can renounce your [Young] status.");
+		return 0;
+	endif
+
+	var answer:=YesNo(who,"Renounce [Young] Status?");
+
+	if (!answer)
+		SendSysMessage(who,"canceled renounce, you are still a newbie");
+	else
+		RemoveNewbie(who);
+  		SendSysMessage(who,"[Young] status removed, you have lost newbie poison protection and can be killed by all players. When you die you will NOT be teleported to the healer in Wind.");
+		//assumes all newbies will be confined to Wind or leave via renounce gate... so this will tele to Brit
+		MoveCharacterToLocation(who,1475,1645,20); //brit starting area
+  	endif
+endprogram

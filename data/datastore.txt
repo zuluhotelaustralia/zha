@@ -1,0 +1,33 @@
+#
+#  DATASTORE.TXT: DataStore Data
+#
+
+DataFile
+{
+	Descriptor	::merchantEconomy
+	Name	merchantEconomy
+	Flags	0
+	Version	1419
+	OldVersion	1419
+}
+
+DataFile
+{
+	Descriptor	:namechange:nameChanges
+	Name	nameChanges
+	Package	namechange
+	Flags	1
+	Version	2
+	OldVersion	2
+}
+
+DataFile
+{
+	Descriptor	:sysbook:staticbooks
+	Name	staticbooks
+	Package	sysbook
+	Flags	1
+	Version	4
+	OldVersion	4
+}
+

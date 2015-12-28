@@ -1,0 +1,94 @@
+use uo;
+use os;
+
+include "include/gumps";
+
+program Vote_screen(who)
+
+	if (!GetGlobalProperty("vVoteActive"))
+		return;
+	elseif (GetGlobalProperty("vLegalvoters")=="Staff" && !who.cmdlevel)
+		return;
+	endif
+	var oldest:=0, charac;
+	for i:=1 to 5
+		charac := who.acct.getcharacter(i);
+		if (charac)
+			if (!oldest)
+				oldest:=GetObjProperty(charac, "onlinetimer");
+			else
+				if (GetObjProperty(charac, "onlinetimer") > oldest)
+					oldest:=GetObjProperty(charac, "onlinetimer");
+				endif
+			endif
+		endif
+	endfor
+	var vHoursreq:=GetGlobalProperty("vHoursreq");
+	
+	if (oldest < vHoursreq*3600) 
+		return;
+	endif
+	var vVoteper:=GetGlobalProperty("vVoteper");
+	var vVotenum:=GetGlobalProperty("vVotenum");
+	var voteinfo:=who.acct.getprop("voteinfo");
+	if (voteinfo)
+		if (voteinfo.lastpoll == vVotenum)
+			return;
+		endif
+	endif
+	
+	var vPollstring:=GetGlobalProperty("vPollstring");
+	var vOptions:= GetGlobalProperty("vOptions");
+	var vNumopts:= GetGlobalProperty("vNumopts");	
+	
+	var button1, button2, button3, button4, button5, button6;
+	GFInitGump();
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 300);
+	GFTextLine(40, 20, 38, "ONLINE VOTING SYSTEM");
+	GFTextLine(40, 50, 68, "Poll: "+vPollstring);
+	GFTextLine(60, 90, 5, vOptions[1]);
+	button1 := GFButtonID( 40, 95, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);	
+	GFTextLine(60, 110, 5, vOptions[2]);
+	button2 := GFButtonID( 40, 115, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	if (vNumopts>2)
+		GFTextLine(60, 130, 5, vOptions[3]);
+		button3 := GFButtonID( 40, 135, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	endif
+	if (vNumopts>3)
+		GFTextLine(60, 150, 5, vOptions[4]);
+		button4 := GFButtonID( 40, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	endif	
+	if (vNumopts>4)
+		GFTextLine(60, 170, 5, vOptions[5]);
+		button5 := GFButtonID( 40, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	endif
+	GFTextLine(60, 210, 68, "Vote later");
+	button6 := GFButtonID( 40, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
+	
+	var result := GFSendGump(who);
+
+	if (result[button1.keyid])
+		CastVote(who, 1);
+	elseif(result[button2.keyid])
+		CastVote(who, 2);
+	elseif(result[button3.keyid])
+		CastVote(who, 3);
+	elseif(result[button4.keyid])
+		CastVote(who, 4);
+	elseif(result[button5.keyid])
+		CastVote(who, 5);
+	endif
+
+	
+endprogram
+
+function CastVote(who, vote)
+
+	var voteinfo := struct;
+	voteinfo.+vote := vote;
+	voteinfo.+ip := who.acct.getprop("IP");
+	voteinfo.+lastpoll := GetGlobalProperty("vVotenum");
+	who.acct.setprop("voteinfo", voteinfo);
+	
+endfunction
