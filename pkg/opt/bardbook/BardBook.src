@@ -77,7 +77,7 @@ program BardBook( who, book )
 		return 0;
 	endif
 
-	var song := GetScript( songid );
+	var song := GetScriptBard( songid );
 
 	if( GetObjProperty( book, "CastingOpts" ) )
 		SetObjProperty( who, "CastingOpts", GetObjProperty( book, "CastingOpts" ) );

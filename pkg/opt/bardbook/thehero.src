@@ -6,18 +6,18 @@ include "include/client";
 
 program thehero( caster )
 
-	if(!TryToCast( caster, 11 ))
+	if(!TryToCastBard( caster, 11 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 	
-	var cast_loc := CanTargetArea( caster );
+	var cast_loc := CanTargetAreaBard( caster );
 	if (!cast_loc)
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 
 	EraseObjProperty( caster, "#Casting" );
-	SummonCreature( caster, "thehero", cast_loc );
+	SummonCreatureBard( caster, "thehero", cast_loc );
 
 endprogram

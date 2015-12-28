@@ -1,5 +1,5 @@
 set_critical(0);
-var me := self();
+var me := Self();
 
 var flee_point;
 
@@ -12,6 +12,6 @@ if (!me.backpack)
 	EquipItem(me, newbackpack);
 	if (!Random(100) )
 		me.color := 1109;
-		setobjproperty(me,"color",1109);
+		SetObjProperty(me,"color",1109);
 	endif
 endif

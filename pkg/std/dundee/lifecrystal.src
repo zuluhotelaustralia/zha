@@ -18,10 +18,7 @@ foreach cast_near in affected
 	EraseObjProperty(cast_near,"death");
 	SetObjProperty(cast_near,"freedeath",1);
 	SendSysMessage( cast_near, "Death pardons your next transgression into the nether realm..." );
-		if(manalevel > 0)
-			SetMana(cast_near, manalevel);
-			SendSysMessage( cast_near, "You were restored " + manalevel + " mana" );
-		endif
+		
 endforeach
 
 AwardKarma( character, 100 );

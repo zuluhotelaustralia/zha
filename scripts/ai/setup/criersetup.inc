@@ -1,8 +1,8 @@
 set_critical(0);
-var me := self();
-var npccfg := readconfigfile("npcdesc");
+var me := Self();
+var npccfg := ReadConfigFile("npcdesc");
 var speechelem := npccfg[me.npctemplate];
-var speech := getconfigstring(speechelem, "speech") ;
+var speech := GetConfigString(speechelem, "speech");
 var saywords := speechelem.saywords;
 var flee_point := speechelem.flee_point;
 if (!flee_point)

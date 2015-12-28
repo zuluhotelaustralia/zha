@@ -1,10 +1,10 @@
 set_critical(0);
-var me := self();
+var me := Self();
 drop_anchor();
 var questtype := 0;
-var npccfg := readconfigfile("npcdesc");
+var npccfg := ReadConfigFile("npcdesc");
 var speechelem := npccfg[me.npctemplate];
-var speech := getconfigstring(speechelem, "speech") ;
+var speech := GetConfigString(speechelem, "speech");
 var equipname := speechelem.equip;
 var saywords := speechelem.saywords;
 var flee_point := speechelem.flee_point;
@@ -22,7 +22,7 @@ if( me.name["<random>"] )
 	me.graphic := 400 + me.gender;
 	var title := Random(20);
 	var ttitle := "";
-	case (title) 
+	case (title)
           	0: ttitle := "";
           	1: ttitle := " the townsperson";
           	2: ttitle := " the farmer";
@@ -58,10 +58,11 @@ var slave;
 sleep(2);
 QuestieSetup();
 
+//include "include/attributes";
 function QuestieSetup()
 
 	var newtitle := "";
-	foreach word in splitwords(me.title_suffix)
+	foreach word in SplitWords(me.title_suffix)
 		newtitle := newtitle + " " + word;
 	endforeach
 	me.graphic := 400+me.gender;
@@ -69,22 +70,22 @@ function QuestieSetup()
 	master := 0;
 	slave := 0;
 
-	if (getobjproperty(me,"master"))
-		master := systemfindobjectbyserial(getobjproperty(me,"master"));
+	if (GetObjProperty(me,"master"))
+		master := SystemFindObjectBySerial(GetObjProperty(me,"master"));
 		if (!master)
 			//I should have a master but I don't!
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
 			// MoveCharacterToLocation(me,5288 , 1176 , 0,MOVECHAR_FORCELOCATION);
-			damage( me, me.maxhp + 3 );
+			Damage( me, GetMaxHp(me) + 3 );
 		endif
 	else
 		master := me;
 	endif
 
-	if (master.serial = me.serial)
-		if (getobjproperty(me,"slave"))
-			slave := systemfindobjectbyserial(getobjproperty(me,"slave"));
+	if (master.serial == me.serial)
+		if (GetObjProperty(me,"slave"))
+			slave := SystemFindObjectBySerial(GetObjProperty(me,"slave"));
 		endif
 		if (!slave)
 			slave := MakeSlave();
@@ -95,20 +96,20 @@ function QuestieSetup()
 		endcase
 	endif
 
-	setobjproperty(me,"master",master.serial);
+	SetObjProperty(me,"master",master.serial);
 
 endfunction
 
 function SetupMailboy()
 
-	foreach item in enumerateitemsincontainer(me.backpack)
-		if ( (getobjproperty(item,"slave")) and (getobjproperty(item,"slave") != slave.serial) )
+	foreach item in EnumerateItemsInContainer(me.backpack)
+		if ( (GetObjProperty(item,"slave")) && (GetObjProperty(item,"slave") != slave.serial) )
 			DestroyItem(item);
 		endif
 	endforeach
 
-	foreach item in enumerateitemsincontainer(me.backpack)
-		if ( getobjproperty(item,"slave") = slave.serial )
+	foreach item in EnumerateItemsInContainer(me.backpack)
+		if ( GetObjProperty(item,"slave") == slave.serial )
 			return;
 		endif
 	endforeach
@@ -129,7 +130,7 @@ function CreateQuestItem(mypack,slaveserial)
 
 	repeat
 		var itemobjtype := itemlist[Random(len(itemlist)+1)];
-		item := CreateItemInContainer(mypack,cint(itemobjtype));
+		item := CreateItemInContainer(mypack,CInt(itemobjtype));
 	until (item);
 
 	SetObjProperty(item,"slave",slaveserial);
@@ -242,12 +243,12 @@ function MakeSlave()
 	x := Random(x2-x1)+x1;
 	y := Random(y2-y1)+y1;
 	z := GetMapInfo(x,y).z;
-	newslave := CreateNPCfromtemplate("questiemail",x,y,z,0);
+	newslave := CreateNpcFromTemplate("questiemail",x,y,z,0);
 	until (newslave);
 
-	setobjproperty(newslave,"master",me.serial);
-	setobjproperty(me,"slave",newslave.serial);
-	setobjproperty(me,"slavetown",slavetown);
+	SetObjProperty(newslave,"master",me.serial);
+	SetObjProperty(me,"slave",newslave.serial);
+	SetObjProperty(me,"slavetown",slavetown);
 
 	return newslave;
 
@@ -269,7 +270,7 @@ function WhatTown(who)
 	y1 := 1045;
 	x1 := 4487;
 	y2 := 1178;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -278,7 +279,7 @@ function WhatTown(who)
 	y1 := 1530;
 	x2 := 1704;
 	y2 := 1758;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -287,7 +288,7 @@ function WhatTown(who)
 	y1 := 3664;
 	x2 := 1506;
 	y2 := 3886;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -296,7 +297,7 @@ function WhatTown(who)
 	y1 := 926;
 	x2 := 600;
 	y2 := 1034;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -305,7 +306,7 @@ function WhatTown(who)
 	y1 := 370;
 	x2 := 2624;
 	y2 := 632;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -314,7 +315,7 @@ function WhatTown(who)
 	y1 := 2638;
 	x2 := 2136;
 	y2 := 2902;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -323,7 +324,7 @@ function WhatTown(who)
 	y1 := 2106;
 	x2 := 686;
 	y2 := 2274;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -332,7 +333,7 @@ function WhatTown(who)
 	y1 := 2040;
 	x2 := 3814;
 	y2 := 2280;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -341,7 +342,7 @@ function WhatTown(who)
 	y1 := 2446;
 	x2 := 3762;
 	y2 := 2690;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -350,7 +351,7 @@ function WhatTown(who)
 	y1 := 1062;
 	x2 := 3808;
 	y2 := 1400;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -359,7 +360,7 @@ function WhatTown(who)
 	y1 := 634;
 	x2 := 3062;
 	y2 := 1000;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 
@@ -368,7 +369,7 @@ function WhatTown(who)
 	y1 := 1116;
 	x2 := 2290;
 	y2 := 1236;
-	if (x >= x1 and x <= x2 and y >= y1 and y <= y2)
+	if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
 		return town;
 	endif
 

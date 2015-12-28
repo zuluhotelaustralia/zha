@@ -1,6 +1,7 @@
 use uo;
 use basic;
 
+include "include/attributes";
 include "include/gumps";
 
 const EFFECT_BLUE_SPARKLE  := 0x373a;

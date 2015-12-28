@@ -10,7 +10,7 @@ program use_scroll( who, scroll )
 		var songid := GetObjProperty(scroll, "SongID");
 		songid := CInt(songid);
 			
-		var song := GetScript( songid );
+		var song := GetScriptBard( songid );
 		SetObjProperty( who, "#Casting", 1 );
 		SetObjProperty( who, "SongScroll", 1 );
 

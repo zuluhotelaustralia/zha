@@ -12,18 +12,18 @@ const SPELL_EFFECT_LOOP		:= LOOP_SPELL_SPECTER_TOUCH;
 
 program mesmerize( caster )
 
-	if(!TryToCast( caster, 15 ))
+	if(!TryToCastBard( caster, 15 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 
-	var cast_on := CanTargetSpell( caster );
+	var cast_on := CanTargetSpellBard( caster );
 	if( !cast_on )
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 	
-	Send_Attack( cast_on, caster );
+	Send_AttackBard( cast_on, caster );
 
 	PlayMovingEffect(caster,
                                  cast_on,
@@ -36,7 +36,7 @@ program mesmerize( caster )
 
 	var circle := 6;
 
-	var immunity := IsProtected( caster, cast_on, circle );
+	var immunity := IsProtectedBard( caster, cast_on, circle );
 	if( immunity == 1 )
 		EraseObjProperty( caster, "#Casting" );
 		return;

@@ -486,3 +486,22 @@ function DoSomething( character, tool )
 	endif
 
 endfunction
+function Move_Shit( who, byref shit )
+	shit := shit.item;
+	SendSysMessage( who, "Where would you like to move that to?");
+	var move_to := TargetCoordinates( who );
+	if( !move_to )
+		sendsysmessage( who, "Canceled.");
+		return;
+	endif
+	var distt := coordist( shit.x, shit.y, move_to.x, move_to.y );
+  if( distt > 3 )
+      PrintTextAbovePrivate(who,"How long do you think the handle of your shovel is?", who);
+      return;
+  endif
+  shit.movable := 1;
+	MoveItemToLocation( shit, cint(move_to.x), cint(move_to.y), cint(move_to.z), 0 );
+  shit.movable := 0;
+  PrintTextAbovePrivate(who,"Moved.", who);
+  return;
+endfunction

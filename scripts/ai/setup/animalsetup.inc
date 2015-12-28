@@ -1,22 +1,22 @@
 // include "include/starteqp";
 
 	set_critical(0);
-	var me := self();
+	var me := Self();
 	var flee_point := 10;
 	drop_anchor();
 
 	if (!me.backpack)
-		var npccfg := readconfigfile("npcdesc");
-		var newbackpack := CreateItemAtLocation(5288 , 1176 , 0, 0xe75,1);
+		var npccfg := ReadConfigFile("npcdesc");
+		var newbackpack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1);
 		EquipItem(me, newbackpack);
 		if (npccfg[me.npctemplate].colorrange)
-			var parms := splitwords(npccfg[me.npctemplate].colorrange);
-			me.color := Random(cint(parms[2]) - cint(parms[1]))+cint(parms[1]);
-			setobjproperty(me,"color",me.color);
+			var parms := SplitWords(npccfg[me.npctemplate].colorrange);
+			me.color := Random(CInt(parms[2]) - CInt(parms[1]))+CInt(parms[1]);
+			SetObjProperty(me,"color",me.color);
 		endif
 
 		if( me.name["<random>"] )
-			SetName ( me , RandomName( me ) );
+			SetName( me, RandomName( me ) );
 		endif
 
 		// MagicalEquip(me);

@@ -8,11 +8,11 @@ var theammo;
 
 var master;
 var spells := {};
-var me := self();
+var me := Self();
 
 var cast_pct;
 var num_casts;
-var count_casts ;
+var count_casts;
 var saywords := 1;
 var summons := 3;
 
@@ -24,9 +24,9 @@ var flee_point;
 
 	drop_anchor();
 
-var npccfg := readconfigfile("npcdesc");
+var npccfg := ReadConfigFile("npcdesc");
 var speechelem := npccfg[me.npctemplate];
-speech := getconfigstring(speechelem, "speech") ;
+speech := GetConfigString(speechelem, "speech");
 spells := GetConfigStringArray( speechelem, "spell" );
 cast_pct := speechelem.cast_pct;
 num_casts  := speechelem.num_casts;
@@ -43,7 +43,7 @@ endif
 var mybow := npccfg[me.npctemplate].missileweapon;
 if (!me.backpack)
 	if( me.name["<random>"] )
-		if ((me.graphic = 400) or (me.graphic = 401))
+		if ((me.graphic == 400) || (me.graphic == 401))
 			me.gender := Random(2);
 			me.graphic := 400 + me.gender;
 		endif
@@ -51,9 +51,9 @@ if (!me.backpack)
 	var newbackpack := CreateItemAtLocation(me.x, me.y, me.z, 0xe75,1);
 	EquipItem(me, newbackpack);
 	if (npccfg[me.npctemplate].colorrange)
-		var parms := splitwords(npccfg[me.npctemplate].colorrange);
-		me.color := Random(cint(parms[2]) - cint(parms[1]))+cint(parms[1]);
-		setobjproperty(me,"color",me.color);
+		var parms := SplitWords(npccfg[me.npctemplate].colorrange);
+		me.color := Random(CInt(parms[2]) - CInt(parms[1]))+CInt(parms[1]);
+		SetObjProperty(me,"color",me.color);
 	endif
 	if (npccfg[me.npctemplate].dress)
 		var parms := {};
@@ -63,19 +63,19 @@ if (!me.backpack)
 	elseif (npccfg[me.npctemplate].equip)
     		EquipFromTemplate(me, npccfg[me.npctemplate].equip);
 	elseif (equipname)
-        	equipfromtemplate(me, equipname);
+        	EquipFromTemplate(me, equipname);
 	elseif (npccfg[me.npctemplate].ammotype)
 		ammotype := npccfg[me.npctemplate].ammotype;
 		if (ammotype)
         		if (me.backpack)
-                		destroyitem(me.backpack);
+                		DestroyItem(me.backpack);
         		endif
-        		equipfromtemplate(me, mybow);
+        		EquipFromTemplate(me, mybow);
         		ammoamount := npccfg[me.npctemplate].ammoamount;
 			if (!ammoamount)
 				ammoamount := 30;
 			endif
-			theammo := createiteminbackpack(me, ammotype, ammoamount);
+			theammo := CreateItemInBackpack(me, ammotype, ammoamount);
 		endif
 	endif
 
@@ -87,7 +87,7 @@ if( me.name["<random>"] )
 		var title := Random(20);
 		var ttitle := "";
 
-		case (title) 
+		case (title)
           	0: ttitle := "";
           	1: ttitle := " the townsperson";
           	2: ttitle := " the farmer";
@@ -105,11 +105,11 @@ if( me.name["<random>"] )
 		me.name := tname;
 		me.title_suffix := ttitle;
 	else
-		me.name := RandomName(me);
+		me.name := randomname(me);
 	endif
 endif
 
-if ((me.graphic = 400) or (me.graphic = 401))
+if ((me.graphic == 400) || (me.graphic == 401))
 	me.graphic := 400 + me.gender;
 else
 	me.graphic := me.trueobjtype;

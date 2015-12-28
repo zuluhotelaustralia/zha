@@ -13,18 +13,18 @@ const SPELL_EFFECT_LOOP		:= LOOP_SPELL_ENERGY_BOLT;
 
 program soundwave( caster, cast_on )
 
-	if(!TryToCast( caster, 4 ))
+	if(!TryToCastBard( caster, 4 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 
-	cast_on := CanTargetSpell( caster );
+	cast_on := CanTargetSpellBard( caster );
 	if( !cast_on )
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 	
-	Send_Attack( cast_on, caster );
+	Send_AttackBard( cast_on, caster );
 
 	PlayMovingEffect(caster,
                                  cast_on,

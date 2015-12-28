@@ -6,11 +6,11 @@ var ammoamount;
 var theammo;
 
 var spells := {};
-var me := self();
+var me := Self();
 
 drop_anchor();
 
-var npccfg := readconfigfile("npcdesc");
+var npccfg := ReadConfigFile("npcdesc");
 var speechelem := npccfg[me.npctemplate];
 var flee_point := speechelem.flee_point;
 if (!flee_point)
@@ -23,9 +23,9 @@ if (!me.backpack)
 	var newbackpack := CreateItemAtLocation(me.x, me.y, me.z, 0xe75,1);
 	EquipItem(me, newbackpack);
 	if (npccfg[me.npctemplate].colorrange)
-		var parms := splitwords(npccfg[me.npctemplate].colorrange);
-		me.color := Random(cint(parms[2]) - cint(parms[1]))+cint(parms[1]);
-		setobjproperty(me,"color",me.color);
+		var parms := SplitWords(npccfg[me.npctemplate].colorrange);
+		me.color := Random(CInt(parms[2]) - CInt(parms[1]))+CInt(parms[1]);
+		SetObjProperty(me,"color",me.color);
 	endif
 	if (npccfg[me.npctemplate].dress)
 		var parms := {};
@@ -39,28 +39,28 @@ if (!me.backpack)
 	if (npccfg[me.npctemplate].ammotype)
 		ammotype := npccfg[me.npctemplate].ammotype;
 		if (ammotype)
-        		equipfromtemplate(me, mybow);
+        		EquipFromTemplate(me, mybow);
         		ammoamount := npccfg[me.npctemplate].ammoamount;
 			if (!ammoamount)
 				ammoamount := 30;
 			endif
-			theammo := createiteminbackpack(me, ammotype, ammoamount);
+			theammo := CreateItemInBackpack(me, ammotype, ammoamount);
 		endif
 	endif
 
 	if( me.name["<random>"] )
-		if ((me.graphic = 400) or (me.graphic = 401))
+		if ((me.graphic == 400) || (me.graphic == 401))
 			me.gender := Random(2);
 			me.graphic := 400 + me.gender;
 		endif
-		SetName ( me , RandomName( me ) );
+		SetName( me, RandomName( me ) );
 	endif
 
 	if ( npccfg[me.npctemplate].mount )
-		var mymount := CreateItemAtLocation(5288,1176,0,0xF021,1);
-		var mountparms := splitwords(npccfg[me.npctemplate].mount);
-		mymount.graphic := cint(mountparms[1]);
-		mymount.color := cint(mountparms[2]);
+		var mymount := CreateItemAtLocation(5288,1176,0,0xf021,1);
+		var mountparms := SplitWords(npccfg[me.npctemplate].mount);
+		mymount.graphic := CInt(mountparms[1]);
+		mymount.color := CInt(mountparms[2]);
 		EquipItem(me, mymount);
 	endif
 

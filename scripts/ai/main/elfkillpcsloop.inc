@@ -109,7 +109,7 @@ function elf_AI_loop()
 									// send warning message to questers
 									lastwarning := ReadGameClock();
 									if (lastwarning > GetObjProperty(me, "LastWarning")) 
-										QuestBroadcast(item.serial, me.name+": We are being attacked by "+ev.source.name+"!");
+										QuestBroadcast(item.serial, , , , me.name+": We are being attacked by "+ev.source.name+"!");
 										SetObjProperty(me, "LastWarning", lastwarning +SECS_BETWEEN_WARNINGS);
 									endif
 								endif

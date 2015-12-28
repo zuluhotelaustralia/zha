@@ -275,7 +275,6 @@ function CustomGate( caster, x, y, z )
 	sleepms(1500);
 
 	var gate1 := CreateItemAtLocation( caster.x, caster.y, caster.z, UOBJ_BLUE_MOONGATE, 1 );
-	var gate1 := CreateItemAtLocation( sx, sy, sz, UOBJ_BLUE_MOONGATE, 1 );
 	gate1.movable := 0;
 	gate1.facing := 1;
 	DestroyItem(pregate);

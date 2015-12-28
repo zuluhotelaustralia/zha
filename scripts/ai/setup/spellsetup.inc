@@ -49,7 +49,7 @@ if (!me.backpack)
 	endif
 
 	if( me.name["<random>"] )
-		if ((me.graphic == 400) or (me.graphic == 401))
+		if ((me.graphic == 400) || (me.graphic == 401))
 			me.gender := Random(2);
 			me.graphic := 400 + me.gender;
 		endif

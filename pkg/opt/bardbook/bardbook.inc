@@ -10,7 +10,7 @@ include "include/objtype";
 include "include/client";
 include "include/itemutil";
 
-function GetScript( songid )
+function GetScriptBard( songid )
 
 	var songcfg := ReadConfigFile( "songs" );
 	var script := songcfg[songid].script;
@@ -19,7 +19,7 @@ function GetScript( songid )
 
 endfunction
 
-function TryToCast( caster, song )
+function TryToCastBard( caster, song )
 	
 	//Variables declaration and initialisation
 	var conf	 := ReadConfigFile( "songs" );
@@ -129,7 +129,7 @@ function TryToCast( caster, song )
 endfunction
 
 
-function Send_Attack( ttarget, source )
+function Send_AttackBard( ttarget, source )
 
 	var ev := array;
 	ev.+type;
@@ -146,7 +146,7 @@ function Send_Attack( ttarget, source )
 endfunction
 
 
-function CanTargetArea( caster )
+function CanTargetAreaBard( caster )
 
 	var cx := caster.x;
 	var cy := caster.y;
@@ -184,7 +184,7 @@ function CanTargetArea( caster )
 endfunction
 
 
-function CanTargetSpell( caster )
+function CanTargetSpellBard( caster )
 
 	var cx := caster.x;
 	var cy := caster.y;
@@ -219,7 +219,7 @@ function CanTargetSpell( caster )
 endfunction
 
 
-function SummonCreature( caster, npctemplate, cast_loc, sfx := 0x5A8, delay := 2 )
+function SummonCreatureBard( caster, npctemplate, cast_loc, sfx := 0x5A8, delay := 2 )
 
 	var parms := {};
 
@@ -234,7 +234,7 @@ function SummonCreature( caster, npctemplate, cast_loc, sfx := 0x5A8, delay := 2
 endfunction
 
 
-function IsProtected( caster, cast_on, circle )
+function IsProtectedBard( caster, cast_on, circle )
 
 	var protserial := GetObjProperty( cast_on, "MagicImmunity" );
 	var protlvl	 := Cint(GetObjProperty( cast_on, "PermMagicImmunity" ));
@@ -257,7 +257,7 @@ function IsProtected( caster, cast_on, circle )
 					EraseObjProperty( cast_on, "MagicImmunity" );
 					EraseObjProperty( item, "MagicImmunity" );
 					PrintTextAbovePrivate(item, CStr(item.desc + " is out of charges!"), cast_on );
-					CheckForAnotherProtItem( cast_on, item, "MagicImmunity" );
+					CheckForAnotherProtItemBard( cast_on, item, "MagicImmunity" );
 				endif
 				break;
 			endif
@@ -288,7 +288,7 @@ function IsProtected( caster, cast_on, circle )
 endfunction
 
 
-function CheckForAnotherProtItem( who, item, prot )
+function CheckForAnotherProtItemBard( who, item, prot )
 
 	var prots := { "PoisonImmunity",
 			 "MagicImmunity",
@@ -311,7 +311,7 @@ function CheckForAnotherProtItem( who, item, prot )
 endfunction
 
 
-function DoTempMod( who, stat, amt, duration )
+function DoTempModBard( who, stat, amt, duration )
 
 	var parms := {};
 	parms[1] := who;

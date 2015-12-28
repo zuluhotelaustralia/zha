@@ -18,14 +18,14 @@ program cast_charm( caster )
 		mult := bard;
 	endif
 
-	if(!TryToCast( caster, 3 ));
+	if(!TryToCastBard( caster, 3 ));
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 
 	SendSysMessage( caster, "Charm what?" );
 
-	var npc := CanTargetSpell( caster );
+	var npc := CanTargetSpellBard( caster );
 
 	var npcstr := GetBaseStrength(npc);
 	var npcint := GetBaseIntelligence(npc);
