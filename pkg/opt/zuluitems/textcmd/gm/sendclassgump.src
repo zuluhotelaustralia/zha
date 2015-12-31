@@ -1,0 +1,8 @@
+use uo;
+include ":zuluitems:pickclass";
+
+program send_class_gump(who)
+
+sendclassgump(who, "Home");
+
+endprogram
