@@ -54,12 +54,12 @@ function sendclassgump(who, class);
 	GFNoMove();
 	GFResizePic(0, 0, BKGND_STONESLAB, 400, 500);
 	GFCheckerTrans(3, 3, 394, 20); // Top trans
-	GFCheckerTrans(3, 26, 195, 443); // Left Trans
-	GFCheckerTrans(201, 26 , 195, 443); // Right Trans
+	GFCheckerTrans(3, 26, 175, 443); // Left Trans
+	GFCheckerTrans(181, 26 , 216, 443); // Right Trans
 	GFCheckerTrans(3, 472, 394, 25); // Bottom Trans
 	GFTextMid(10, 1, 380, 5, "Please Select A Class");
 	var pageline := 50;
-	var bardButton,crafterButton,mageButton,rangerButton,thiefButton,warriorButton,druidButton,dkButton,ninjaButton,paladinButton,priestButton,monkButton,necromancerButton;
+	var bardButton,crafterButton,mageButton,rangerButton,thiefButton,warriorButton,druidButton,dkButton,ninjaButton,paladinButton,priestButton,monkButton,necromancerButton,ppButton;
 	//Left Menu
 	GFTextLine(35, pageline, 38+(25*excludelist[1]), "Bard");
 	if (excludelist[1] != 0) bardButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );endif
@@ -111,6 +111,10 @@ function sendclassgump(who, class);
 	
 	GFTextLine(35, pageline, 38+(25*excludelist[13]), "Necromancer");
 	if (excludelist[13] != 0) necromancerButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );endif
+	pageline := pageline+30;
+	
+	GFTextLine(35, pageline, 63, "Power Player");
+	ppButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	
 	//Bottom Menu
 	GFTextLine(315, 475, 63, "Confirm");
@@ -119,302 +123,326 @@ function sendclassgump(who, class);
 	//Right Text
 	var textline := 30;
 	if ( class == "Home")
-	GFTextMid(220, textline, 185, 53, "Use this page to select");
+	GFTextMid(210, textline, 185, 53, "Use this page to select");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "your class.");
+	GFTextMid(210, textline, 185, 53, "your class.");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Click a button on the");
+	GFTextMid(210, textline, 185, 53, "Click a button on the");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "left and read the info.");
+	GFTextMid(210, textline, 185, 53, "left and read the info.");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "When you've decided");
+	GFTextMid(210, textline, 185, 53, "When you've decided");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "click confirm down the bottom.");
+	GFTextMid(210, textline, 185, 53, "click confirm down the bottom.");
 	elseif ( class == "Bard" )
 		//Right Text - Bard
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Bard Class");
+	GFTextMid(210, textline, 185, 5, "Bard Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Begging");
+	GFTextMid(210, textline, 185, 53, "Begging");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Cartography");
+	GFTextMid(210, textline, 185, 53, "Cartography");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Enticement");
+	GFTextMid(210, textline, 185, 53, "Enticement");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Herding");
+	GFTextMid(210, textline, 185, 53, "Herding");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Musicianship");
+	GFTextMid(210, textline, 185, 53, "Musicianship");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Peacemaking");
+	GFTextMid(210, textline, 185, 53, "Peacemaking");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Provocation");
+	GFTextMid(210, textline, 185, 53, "Provocation");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Taste Identification");
+	GFTextMid(210, textline, 185, 53, "Taste Identification");
 	elseif ( class == "Crafter" )
 		//Right Text - Crafter
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Crafter Class");
+	GFTextMid(210, textline, 185, 5, "Crafter Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Arms lore");
+	GFTextMid(210, textline, 185, 53, "Arms lore");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Blacksmithy");
+	GFTextMid(210, textline, 185, 53, "Blacksmithy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Bowcraft and Fletching");
+	GFTextMid(210, textline, 185, 53, "Bowcraft and Fletching");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Carpentry");
+	GFTextMid(210, textline, 185, 53, "Carpentry");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Lumberjacking");
+	GFTextMid(210, textline, 185, 53, "Lumberjacking");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Mining");
+	GFTextMid(210, textline, 185, 53, "Mining");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tailoring");
+	GFTextMid(210, textline, 185, 53, "Tailoring");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tinkering");
+	GFTextMid(210, textline, 185, 53, "Tinkering");
 	elseif ( class == "Mage" )
 		//Right Text - Mage
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Mage Class");
+	GFTextMid(210, textline, 185, 5, "Mage Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Alchemy");
+	GFTextMid(210, textline, 185, 53, "Alchemy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Evaluate Intelligence");
+	GFTextMid(210, textline, 185, 53, "Evaluate Intelligence");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Inscription");
+	GFTextMid(210, textline, 185, 53, "Inscription");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Item Identification");
+	GFTextMid(210, textline, 185, 53, "Item Identification");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Magery");
+	GFTextMid(210, textline, 185, 53, "Magery");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Meditation");
+	GFTextMid(210, textline, 185, 53, "Meditation");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Magic Resistance");
+	GFTextMid(210, textline, 185, 53, "Magic Resistance");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Spirit Speak");
+	GFTextMid(210, textline, 185, 53, "Spirit Speak");
 	elseif ( class == "Ranger" )
 		//Right Text - Ranger
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Ranger Class");
+	GFTextMid(210, textline, 185, 5, "Ranger Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Animal Lore");
+	GFTextMid(210, textline, 185, 53, "Animal Lore");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Animal Taming");
+	GFTextMid(210, textline, 185, 53, "Animal Taming");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Archery");
+	GFTextMid(210, textline, 185, 53, "Archery");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Nature Lore");
+	GFTextMid(210, textline, 185, 53, "Nature Lore");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Cooking");
+	GFTextMid(210, textline, 185, 53, "Cooking");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Fishing");
+	GFTextMid(210, textline, 185, 53, "Fishing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tracking");
+	GFTextMid(210, textline, 185, 53, "Tracking");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Veterinary");
+	GFTextMid(210, textline, 185, 53, "Veterinary");
 	elseif ( class == "Thief" )
 		//Right Text - Thief
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Thief Class");
+	GFTextMid(210, textline, 185, 5, "Thief Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Detect Hidden");
+	GFTextMid(210, textline, 185, 53, "Detect Hidden");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Hiding");
+	GFTextMid(210, textline, 185, 53, "Hiding");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Lockpicking");
+	GFTextMid(210, textline, 185, 53, "Lockpicking");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Poisoning");
+	GFTextMid(210, textline, 185, 53, "Poisoning");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Remove Trap");
+	GFTextMid(210, textline, 185, 53, "Remove Trap");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Snooping");
+	GFTextMid(210, textline, 185, 53, "Snooping");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Stealing");
+	GFTextMid(210, textline, 185, 53, "Stealing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Stealth");
+	GFTextMid(210, textline, 185, 53, "Stealth");
 	elseif ( class == "Warrior" )
 		//Right Text - Warrior
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Warrior Class");
+	GFTextMid(210, textline, 185, 5, "Warrior Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Anatomy");
+	GFTextMid(210, textline, 185, 53, "Anatomy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Fencing");
+	GFTextMid(210, textline, 185, 53, "Fencing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Healing");
+	GFTextMid(210, textline, 185, 53, "Healing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Macefighting");
+	GFTextMid(210, textline, 185, 53, "Macefighting");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Parry");
+	GFTextMid(210, textline, 185, 53, "Parry");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Swordsmanship");
+	GFTextMid(210, textline, 185, 53, "Swordsmanship");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tactics");
+	GFTextMid(210, textline, 185, 53, "Tactics");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Wrestling");
+	GFTextMid(210, textline, 185, 53, "Wrestling");
 	elseif ( class == "Druid" )
 		//Right Text - Druid
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Druid Class");
+	GFTextMid(210, textline, 185, 5, "Druid Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Alchemy");
+	GFTextMid(210, textline, 185, 53, "Alchemy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Animal Lore");
+	GFTextMid(210, textline, 185, 53, "Animal Lore");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Herding");
+	GFTextMid(210, textline, 185, 53, "Herding");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Magery");
+	GFTextMid(210, textline, 185, 53, "Magery");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Nature Lore");
+	GFTextMid(210, textline, 185, 53, "Nature Lore");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Animal Taming");
+	GFTextMid(210, textline, 185, 53, "Animal Taming");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Veterinary");
+	GFTextMid(210, textline, 185, 53, "Veterinary");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Meditation");
+	GFTextMid(210, textline, 185, 53, "Meditation");
 	elseif ( class == "DK" )
 		//Right Text - Death Knight
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Deathknight Class");
+	GFTextMid(210, textline, 185, 5, "Deathknight Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Anatomy");
+	GFTextMid(210, textline, 185, 53, "Anatomy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Necromancy");
+	GFTextMid(210, textline, 185, 53, "Necromancy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Healing");
+	GFTextMid(210, textline, 185, 53, "Healing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Macefighting");
+	GFTextMid(210, textline, 185, 53, "Macefighting");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Parry");
+	GFTextMid(210, textline, 185, 53, "Parry");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Swordsmanship");
+	GFTextMid(210, textline, 185, 53, "Swordsmanship");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tactics");
+	GFTextMid(210, textline, 185, 53, "Tactics");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Meditation");
+	GFTextMid(210, textline, 185, 53, "Meditation");
 	elseif ( class == "Ninja" )
 		//Right Text - Ninja
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Ninja Class");
+	GFTextMid(210, textline, 185, 5, "Ninja Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Alchemy");
+	GFTextMid(210, textline, 185, 53, "Alchemy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Archery");
+	GFTextMid(210, textline, 185, 53, "Archery");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Fencing");
+	GFTextMid(210, textline, 185, 53, "Fencing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Hiding");
+	GFTextMid(210, textline, 185, 53, "Hiding");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Poisoning");
+	GFTextMid(210, textline, 185, 53, "Poisoning");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Stealth");
+	GFTextMid(210, textline, 185, 53, "Stealth");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Swordsmanship");
+	GFTextMid(210, textline, 185, 53, "Swordsmanship");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tactics");
+	GFTextMid(210, textline, 185, 53, "Tactics");
 	elseif ( class == "Paladin" )
 		//Right Text - Paladin
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Paladin Class");
+	GFTextMid(210, textline, 185, 5, "Paladin Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Anatomy");
+	GFTextMid(210, textline, 185, 53, "Anatomy");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Fencing");
+	GFTextMid(210, textline, 185, 53, "Fencing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Healing");
+	GFTextMid(210, textline, 185, 53, "Healing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Meditation");
+	GFTextMid(210, textline, 185, 53, "Meditation");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Parry");
+	GFTextMid(210, textline, 185, 53, "Parry");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Piety");
+	GFTextMid(210, textline, 185, 53, "Piety");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Swordsmanship");
+	GFTextMid(210, textline, 185, 53, "Swordsmanship");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tactics");
+	GFTextMid(210, textline, 185, 53, "Tactics");
 	elseif ( class == "Priest" )
 		//Right Text - Priest
 	textline := 30;
-	GFTextMid(220, textline, 185, 5, "Priest Class");
+	GFTextMid(210, textline, 185, 5, "Priest Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Healing");
+	GFTextMid(210, textline, 185, 53, "Healing");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Macefighting");
+	GFTextMid(210, textline, 185, 53, "Macefighting");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Magery");
+	GFTextMid(210, textline, 185, 53, "Magery");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Magic Resistance");
+	GFTextMid(210, textline, 185, 53, "Magic Resistance");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Meditation");
+	GFTextMid(210, textline, 185, 53, "Meditation");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Parry");
+	GFTextMid(210, textline, 185, 53, "Parry");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Piety");
+	GFTextMid(210, textline, 185, 53, "Piety");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Spirit Speak");
+	GFTextMid(210, textline, 185, 53, "Spirit Speak");
 	elseif ( class == "Monk" )
 		//Right Text - Monk
-	GFTextMid(220, textline, 185, 5, "Monk Class");
+	GFTextMid(210, textline, 185, 5, "Monk Class");
 	textline := textline +27;
-	GFTextMid(220, textline, 185, 5, "Skills:");
+	GFTextMid(210, textline, 185, 5, "Skills:");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Hiding");
+	GFTextMid(210, textline, 185, 53, "Hiding");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Macefighting");
+	GFTextMid(210, textline, 185, 53, "Macefighting");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Meditation");
+	GFTextMid(210, textline, 185, 53, "Meditation");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Parry");
+	GFTextMid(210, textline, 185, 53, "Parry");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Psionics");
+	GFTextMid(210, textline, 185, 53, "Psionics");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Stealth");
+	GFTextMid(210, textline, 185, 53, "Stealth");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Tactics");
+	GFTextMid(210, textline, 185, 53, "Tactics");
 	textline := textline +17;
-	GFTextMid(220, textline, 185, 53, "Wrestling");
+	GFTextMid(210, textline, 185, 53, "Wrestling");
 	elseif ( class == "Necromancer" )
 		//Right Text - Necromancer
 		textline := 30;
-		GFTextMid(220, textline, 185, 5, "Necromancer Class");
+		GFTextMid(210, textline, 185, 5, "Necromancer Class");
 		textline := textline +27;
-		GFTextMid(220, textline, 185, 5, "Skills:");
+		GFTextMid(210, textline, 185, 5, "Skills:");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Alchemy");
+		GFTextMid(210, textline, 185, 53, "Alchemy");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Evaluate Inteligence");
+		GFTextMid(210, textline, 185, 53, "Evaluate Inteligence");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Forensics");
+		GFTextMid(210, textline, 185, 53, "Forensics");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Magery");
+		GFTextMid(210, textline, 185, 53, "Magery");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Magic Resistance");
+		GFTextMid(210, textline, 185, 53, "Magic Resistance");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Meditation");
+		GFTextMid(210, textline, 185, 53, "Meditation");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Necromancy");
+		GFTextMid(210, textline, 185, 53, "Necromancy");
 		textline := textline +17;
-		GFTextMid(220, textline, 185, 53, "Spirit Speak");
+		GFTextMid(210, textline, 185, 53, "Spirit Speak");
+	elseif ( class == "PP" )
+		//Right Text - Necromancer
+		textline := 30;
+		GFTextMid(210, textline, 185, 5, "Power Player");
+		textline := textline +27;
+		GFTextMid(210, textline, 185, 5, "Skills:");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "All.");
+		textline := textline +27;
+		GFTextMid(210, textline, 185, 53, "Power players aren't a class");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "like other classes.");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "Their advantage is that");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "they don't receive any disadvantaged.");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "Their disadvantage however is that");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "they don't receive any advantages.");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "They make up for this by having");
+		textline := textline +17;
+		GFTextMid(210, textline, 185, 53, "access to all the skills.");
 	endif
 	var choice := GFSendGump(who);
 	if (choice[confirmButton.keyid])
@@ -445,6 +473,8 @@ function sendclassgump(who, class);
 		sendclassgump(who, "Monk");
 	elseif (choice[necromancerButton.keyid])
 		sendclassgump(who, "Necromancer");
+	elseif (choice[ppButton.keyid])
+		sendclassgump(who, "PP");
 	endif
 	
 	
@@ -474,10 +504,15 @@ function buffskills(who, class)
 		"Priest": skillarray := GetClasseSkills("IsPriest");break;
 		"Monk": skillarray := GetClasseSkills("IsMonk");break;
 		"Necromancer": skillarray := GetClasseSkills("IsNecromancer");break;
+		"PP": skillarray := GetClasseSkills("IsPowerPlayer");break;
 	endcase
+	var skill_amount := 75;
+	if (class == "PP")
+		skill_amount := 40;
+	endif
 	for skillid := 0 to SKILLID__HIGHEST
             if (skillid in skillarray)
-               SetBaseSkill(who, skillid, 75);
+               SetBaseSkill(who, skillid, skill_amount);
             endif
   endfor
   SetClasse(who);
