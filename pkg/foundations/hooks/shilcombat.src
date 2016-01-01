@@ -3,7 +3,8 @@ use os;
 
 include "include/attributes";
 include "include/skillpoints";
-include "../../pkg/opt/karmafame/karmafame"; //for fame exp system see FameExperiencePointModifier function
+include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
+include ":hooks:dksmod";
 
 
 program shilcombat()
@@ -15,15 +16,18 @@ endprogram
 
 
 exported function ShilCombatAdvancement( attacker, weapon, defender )
-
+	var skillid := FindSkillidByIdentifier(weapon.attribute);
+	var points := 20;
+	points:=FameExperiencePointModifier(attacker, skillid, points);
+	points:=DKSMod(attacker, skillid, points);
+	
 	if( weapon )
-		var skillid := FindSkillidByIdentifier(weapon.attribute);
-		AwardSkillPoints( attacker,skillid, FameExperiencePointModifier(attacker, skillid, 20));
+		AwardSkillPoints( attacker,skillid, points*3);
 	else
-		AwardSkillPoints( attacker, SKILLID_WRESTLING, FameExperiencePointModifier(attacker, SKILLID_WRESTLING, 20));
+		AwardSkillPoints( attacker, SKILLID_WRESTLING, points*3);
 	endif
 
-	AwardSkillPoints( attacker, SKILLID_TACTICS, FameExperiencePointModifier(attacker, SKILLID_TACTICS, 20) );
+	AwardSkillPoints( attacker, SKILLID_TACTICS, points*3 );
 
 endfunction
 
