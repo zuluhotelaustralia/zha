@@ -1,7 +1,10 @@
 use uo;
 use os;
 
+include "include/attributes";
 include "include/skillpoints";
+include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
+include ":hooks:dksmod";
 
 program newparry()
 
@@ -11,7 +14,11 @@ program newparry()
 endprogram
 
 exported function NewParryAdvancement( attacker, weapon, defender, shield )
-
-	AwardSkillPoints( defender, SKILLID_PARRY, 30 );
+	var points := 30;
+	var skillid := SKILLID_PARRY;
+	points:=FameExperiencePointModifier(attacker, skillid, points);
+	points:=DKSMod(attacker, skillid, points);
+	
+	AwardSkillPoints( defender, SKILLID_PARRY, points*2 );
 
 endfunction
