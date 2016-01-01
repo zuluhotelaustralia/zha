@@ -11,7 +11,7 @@ include "include/objtype";
 include "include/classes";
 include "include/itemutil";
 include "include/autoloop";
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 
 const STARTHAIR		:= 0x2006;
 const ENDHAIR		:= 0x2079;

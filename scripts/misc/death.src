@@ -5,7 +5,7 @@ use os;
 include "include/starteqp";
 include "include/npcbackpacks";
 include "include/eventid";
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 include "include/dismount";
 include "include/managers";
 include "include/queststone";

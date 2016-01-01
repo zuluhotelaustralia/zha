@@ -6,7 +6,7 @@ include "include/yesno";
 include "util/bank";
 include "../pkg/std/boat/setup";
 include "../pkg/std/housing/housemanagement";
-include "../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 
 var blankarray := {};
 var EquipLayers := Array 

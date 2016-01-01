@@ -2,7 +2,7 @@ use uo;
 
 include "include/objtype";
 include "include/client";
-include "../../opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 
 program use_crystal( character, crystal )
 

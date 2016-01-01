@@ -2,7 +2,7 @@ use uo;
 use os;
 use basic;
 
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 include "include/attributes";
 
 const MAX_LOSS_PERCENT	:= 0.5;
