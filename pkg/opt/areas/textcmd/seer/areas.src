@@ -68,7 +68,7 @@ function AreasInfoGump(who, areas, page, title)
 		sSize:=areas.size();
 	endif
 
-	var hButton:=array;
+	var hButton:=array{};
 	var tempstr;
 	for(i:=1;i<=sSize;i:=i+1)
 		
