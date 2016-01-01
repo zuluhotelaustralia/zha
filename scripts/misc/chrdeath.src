@@ -9,7 +9,7 @@ include "include/client";
 include "include/possess";
 include "include/reportmurder";
 include "include/yesno";
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 include "include/dismount";
 include "include/myutil";
 include "include/res";

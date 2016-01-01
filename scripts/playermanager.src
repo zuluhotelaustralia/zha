@@ -3,7 +3,7 @@ use os;
 
 include "include/time";
 include "include/classes";
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 include "include/dotempmods";
 include "include/constants/propids";
 include "include/jail";

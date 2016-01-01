@@ -7,7 +7,7 @@
 
 use uo;
 
-include "../../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 
 program ConsiderSins(who)
 	SendSysMessage(who, "Your current fame is " + GetFame(who), 3, 88);

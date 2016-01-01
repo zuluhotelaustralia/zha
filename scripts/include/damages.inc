@@ -16,7 +16,7 @@ const DMGID_NO_RESIST	:= 0x0800;
 
 include "include/constants";
 //include "include/attributes";
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 include "include/mobileutil";
 include "include/astralfights";
 include "include/newbieprotection";

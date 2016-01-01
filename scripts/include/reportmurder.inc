@@ -7,7 +7,7 @@
 
 use uo;
 
-include "../../pkg/opt/karmafame/karmafame";
+include ":karmafame:karmafame";
 
 const LONG_COUNT_DECAY_TIME := 144000; //40 hours
 const SHORT_COUNT_DECAY_TIME := 28800; //8 hours

@@ -6,7 +6,7 @@ use basic;
 include "include/client";
 include "include/random";
 include "include/itemutil";
-include "../karmafame/karmafame";
+include ":karmafame:karmafame";
 
 program trashcanofwonders( who, can, movetype, INSERT_ADD_ITEM, item)
 

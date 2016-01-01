@@ -1,6 +1,6 @@
 use uo;
 
-include "../../karmafame";
+include ":karmafame:karmafame";
 include "include/cmdlevel_check";
 
 program textcmd_updatekf( who )

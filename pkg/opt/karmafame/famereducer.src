@@ -1,6 +1,6 @@
 use os;
 use uo;
-include "karmafame";
+include ":karmafame:karmafame";
 
 const MINS_BETWEEN_CHECKS	:= 60;
 const LOSS_PERCENTAGE		:= 2;

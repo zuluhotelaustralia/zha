@@ -22,6 +22,8 @@ include "include/damages";
 include "include/areas";
 include "include/skillpoints";
 include "include/guardcall";
+include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
+include ":hooks:dksmod";
 
 
 ////////////////////////////////
@@ -989,6 +991,7 @@ function Resisted( caster, cast_on, circle, dmg )
 	var magery 	:= GetEffectiveSkill( caster, SKILLID_MAGERY );
 	var evalint 	:= GetEffectiveSkill( caster, SKILLID_EVALINT );
 	var resist 	:= GetEffectiveSkill( cast_on, SKILLID_MAGICRESISTANCE );
+	var skillid := SKILLID_MAGICRESISTANCE;
 	var chance 	:= CInt( resist / 6);
 	var chance2 	:= CInt( resist - ((magery / 4) + (circle * 6)) );
 
@@ -1011,9 +1014,10 @@ function Resisted( caster, cast_on, circle, dmg )
 		chance := CInt( chance * bonus * 2 );
 		resist := CInt( resist * bonus );
 	endif
-
+	points:=FameExperiencePointModifier(cast_on, skillid, points);
+	points:=DKSMod(cast_on, skillid, points);
 	if( resist < 25 )
-		AwardSkillPoints( cast_on, SKILLID_MAGICRESISTANCE, CInt( points / 3 ) );
+		AwardSkillPoints( cast_on, skillid, CInt( points / 3 ) *3);
 	endif
 
 	if( random(100)+1 <= chance )
@@ -1026,7 +1030,7 @@ function Resisted( caster, cast_on, circle, dmg )
 		endif
 	
 		if( !caster.multi && !cast_on.multi )
-			AwardSkillPoints( cast_on, SKILLID_MAGICRESISTANCE, points );
+			AwardSkillPoints( cast_on, SKILLID_MAGICRESISTANCE, points * 3 );
 		endif
 	endif
 
