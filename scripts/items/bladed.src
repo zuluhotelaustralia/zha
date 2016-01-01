@@ -99,9 +99,6 @@ function Carve_Corpse(character, cadaver)
 	endif
 
 	var key := GetObjProperty( cadaver, "npctemplate" );
-	if( !key )
-		key := "player";
-	endif
 
 	var cfg  := ReadConfigFile( "corpses" );
 	var elem := FindConfigElem( cfg, key );
