@@ -1,7 +1,7 @@
 @echo off
 :start
 
-rem del E:\ZHA\data\*.ndt
+rem del C:\ZHA\data\*.ndt
 
 pol.exe
 

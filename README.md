@@ -23,4 +23,4 @@
 ### Who do I talk to? ###
 
 * Jonathan Morland-Barrett (Dev GIB) - jmorland.barrett@gmail.com
-* Craig Bruce (Harlz) - irunapplestores@lackofdomain.com
+* Craig Bruce (Harlz) - craigbruce32@gmail.com
