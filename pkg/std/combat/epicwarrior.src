@@ -1,0 +1,48 @@
+use uo;
+use os;
+
+include "include/damages";
+include "include/random";
+include "include/hitscriptinc";
+
+program epicwarrior( attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+	var range := 2;
+	var victims := ListMobilesNearLocation( CInt(defender.x), CInt(defender.y), CInt(defender.z), range);
+	var targ := defender;
+	var dmg := Random(25)+25;
+	var okay;
+				
+	foreach mobile in victims
+		var amulti := attacker.serial;
+		var mmulti := mobile.serial;
+		var dmulti := defender.serial;
+		if(mmulti=amulti)
+			okay:=0;
+		elseif(mmulti=dmulti)
+			okay:=0;
+		elseif( mobile.isA(POLCLASS_NPC) )
+			okay:=1;
+			ApplyTheDamage( mobile, attacker, dmg, DMGID_PHYSICAL );
+		else
+			okay:=0;			
+		endif
+	endforeach
+			
+	PlaySoundEffect(targ, 0x51F); 
+	
+	rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage , 1 );
+	DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+
+endprogram

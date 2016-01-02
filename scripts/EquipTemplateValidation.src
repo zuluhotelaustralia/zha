@@ -15,6 +15,7 @@ program ValidateEquipFile()
 			var item_elem;
 			var objtype;
 			foreach key in GetConfigStringKeys(equip_cfg)
+			sleepms(500);
 				equip_elem := FindConfigElem(equip_cfg, key);
 				if( equip_elem )
 					foreach armor_type in GetConfigStringArray(equip_elem, "Armor")

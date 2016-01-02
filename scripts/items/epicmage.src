@@ -1,0 +1,38 @@
+use uo;
+use os;
+
+include "include/attributes";
+include "include/client";
+
+const SPELL_EFFECT_TYPE_MOVING 	:= MOVING_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_ID		:= FX_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_SPEED	:= SPEED_SPELL_EARTH_BLESSING;
+const SPELL_EFFECT_LOOP		:= LOOP_SPELL_EARTH_BLESSING;
+
+program songofendurance( caster )
+
+	var mana := GetMana(caster);
+	
+	if(mana<150)
+		SendSysMessage( caster, "You do not have the required mana!" );
+		return;
+	else
+		var newmana := mana - 150;
+		SetMana( caster, newmana );
+	endif
+
+	var amt := GetEffectiveSkill( caster, SKILLID_MAGERY );
+	amt := CInt(amt / 2);
+	var mage := GetObjProperty( caster, "IsMage" );
+	amt := amt + (mage*12);
+
+	SendSysMessage( caster, "You are being protected by a magical barrier" );
+	PlayObjectCenteredEffect(caster,
+       		SPELL_EFFECT_ID,
+	            SPELL_EFFECT_SPEED,
+                  SPELL_EFFECT_LOOP);
+	PlaySoundEffect( caster, 0x457 );
+	SetObjProperty( caster, "SBarrier", amt );
+	
+
+endprogram

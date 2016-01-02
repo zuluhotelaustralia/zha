@@ -289,7 +289,7 @@ function DestroyDone( who, magic_circle, item := 0 )
 		DestroyItem( item );
 	endif
 
-	PrintTextAbove( who, "*The mystic energy go out of control and unleash itself upon " + who.name + "!*" );
+	PrintTextAbove( who, "*The mystic energy goes out of control and unleashes itself on " + who.name + "!*" );
 	PlaySoundEffect( who, SFX_SPELL_LIGHTNING );
 	SetMana(who, 0);
 	ApplyRawDamage( who, amount * 2 + mana );
@@ -331,10 +331,13 @@ function ProcessRitual( who, item, byref magic_circle, the_ritual, keep_circ := 
 			elseif( crystal.objtype != MANA_CRYSTAL )
 				SendSysMessage( who, "You can only use mana crystal" );
 			elseif( !GetObjProperty( crystal, "ManaLevel" ) )
-				SendSysMessage( who, "This crystal have no mystic energy left to use." );
+				SendSysMessage( who, "This crystal has no mystic energy left to use." );
 			else
 				manapool := manapool + GetObjProperty( crystal, "ManaLevel" );
 				EraseObjProperty( crystal, "ManaLevel" );
+				DestroyItem( crystal );
+
+				PlaySoundEffect( who, SFX_SPELL_GREATER_HEAL );
 			endif
 		endwhile
 	endif
@@ -350,7 +353,7 @@ function ProcessRitual( who, item, byref magic_circle, the_ritual, keep_circ := 
 			elseif( !wizard.acctname )
 				SendSysMessage( who, "That isn't a wizard." );
 			elseif( !YesNo( wizard, "Agree to join?" ) )
-				SendSysMessage( who, "He don't want to join the ritual." );
+				SendSysMessage( who, "They don't want to join the ritual." );
 			elseif( !CheckRitualEquip( wizard ) )
 				SendSysMessage( who, "That wizard isn't wearing the required equipment to perform a ritual." );
 				SendSysMessage( wizard, "You aren't wearing the required equipment to perform a ritual." );
@@ -378,6 +381,7 @@ function ProcessRitual( who, item, byref magic_circle, the_ritual, keep_circ := 
 	SetName( manapile, "Mana Cloud" );
 	manapile.movable := 0;
 
+	PrintTextAbove( manapile, "*Every wizard gather in the circle as the magical ritual start*" );
 	SetObjProperty( captor, "RitualRunning", 1 );
 
 	var parms := {};
@@ -870,7 +874,7 @@ function EnergyDiruption( wizards, item, magic_circle, manapool )
 	var dmg := CInt(manapool+(amount*2) / len(wizards) );
 
 	foreach wizard in wizards
-		PrintTextAbove( wizard, "*The mystic energy goes out of control and unleashes itself " + wizard.name + "!*" );
+		PrintTextAbove( wizard, "*The mystic energy goes out of control and unleashes itself on " + wizard.name + "!*" );
 		PlaySoundEffect( wizard, SFX_SPELL_LIGHTNING );
 		ApplyRawDamage( wizard, dmg );
 	endforeach
@@ -951,7 +955,7 @@ function LookForTheCircle( who )
 		RegisterForSpeechEvents( captor, 6 );
 		EnableEvents( SYSEVENT_SPEECH, 6 );
 
-		PrintTextAbove( who, "*The sky darken*" );
+		PrintTextAbove( who, "*The sky darkens*" );
 		foreach mobile in ListMobilesNearLocation( who.x, who.y, who.z, 10 );
 			mobile.setlightlevel( 24, 600 );
 		endforeach
@@ -1196,6 +1200,7 @@ function EndRitual( who, captor )
 
 	EraseObjProperty( who, "#Casting" );
 	DisableEvents( SYSEVENT_SPEECH );
+	EraseObjProperty(who, "RitualTranced");
 	DestroyItem( captor );
 
 endfunction
