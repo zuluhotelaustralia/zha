@@ -17,7 +17,7 @@ function sendclassgump(who, class);
 		SendSysMessage(who, "You need to pick a race first.");
 		return;
 	endif
-	
+	dropallskills(who);
 	/* array{
 	bard 1
 	crafter 2
@@ -518,3 +518,15 @@ function buffskills(who, class)
   SetClasse(who);
 	
 endfunction
+
+function dropallskills(who)
+	
+	var skill_amount := 0;
+	
+	for skillid := 0 to SKILLID__HIGHEST
+            if (skillid in skillarray)
+               SetBaseSkill(who, skillid, skill_amount);
+            endif
+  endfor
+endfunction
+  
