@@ -34,7 +34,7 @@ var thepoints := get_default_points(SKILLID_REMOVETRAP);
      endif
 
 	if (GetObjProperty(item, "pickdoor"))
-		var dparams := {character, item};
+		var dparams := array{character, item};
 		start_script(":barnsitems:removetrappickdoor", dparams);
 		return;
 	endif

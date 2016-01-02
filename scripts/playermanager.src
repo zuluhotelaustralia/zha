@@ -57,6 +57,8 @@ program logon( who )
 		StartScripts(who);
 		AssignClasse(who);
 		ReleaseIfJailTimeUp(who);
+		EraseObjProperty(who, "dks");
+		EraseObjProperty(who, "tamed_serials");
 		//SetNewNotoName(who);
 		if (DetermineNewbie(who))
 			SendSysMessage(who, "You are no longer newbie!");

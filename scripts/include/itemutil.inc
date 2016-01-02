@@ -664,9 +664,9 @@ function IsStackable( item )
 
 /*	if( Cint(item.amount) > 1 )
 		return 1;
-	elseif( item.graphic = 0x09ea )
+	elseif( item.graphic == 0x09ea )
 		return 1;
-	elseif( item.graphic = 0x0f3f )
+	elseif( item.graphic == 0x0f3f )
 		return 1;
 	elseif( item.graphic >= 0x0e20 and item.graphic <= 0x0e21 )
 		return 1;
