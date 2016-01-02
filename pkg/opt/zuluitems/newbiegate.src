@@ -6,7 +6,7 @@ use os;
 use uo;
 include "include/attributes";
 
-const STATCAP := 60;
+const STATCAP := 95;
 
 program newbiegate (who)
 

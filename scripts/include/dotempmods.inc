@@ -196,7 +196,7 @@ function GetModDuration( who, skill:=SKILLID_MAGERY )
 		magery := GetEffectiveSkill( who, SKILLID_ENTICEMENT );
 	endif
 
-	var duration := magery * 4;
+	var duration := magery * 8;
 
 	duration := ModifyWithMagicEfficiency( who, duration );
 	var class:= GetClass(who);
@@ -434,6 +434,8 @@ function UndoTheMod( who, prop, amt )
 		"poison":
 			SetHpRegenRate(who , ( BaseRegenRate(who)) * 12);
 			who.SetPoisoned( 0 );
+			EraseObjProperty(who, "dks");
+	endcase
 	endcase
 
 	if( sound )

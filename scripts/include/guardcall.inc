@@ -24,6 +24,9 @@ function AutoCallGuardCheck(attacker, defender, melee_mode:=0)
 	//modified from pkg/opt/areas/callguards.src
 	//returns 1 if attack is by a crim in a guarded area and summons guard onto them
 	//otherwise 0		
+	if (getglobalproperty( "autoguardson") == 0)
+		return 0;
+	endif
 	if(attacker.IsA(POLCLASS_NPC) || defender.IsA(POLCLASS_NPC))
 		return 0;
 	endif
