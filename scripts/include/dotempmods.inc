@@ -436,7 +436,6 @@ function UndoTheMod( who, prop, amt )
 			who.SetPoisoned( 0 );
 			EraseObjProperty(who, "dks");
 	endcase
-	endcase
 
 	if( sound )
 		PlaySoundEffectPrivate(who, sound, who);

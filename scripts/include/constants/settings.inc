@@ -30,7 +30,7 @@ const SETTING_MAX_SKILL_FOR_SKILL_ITEM_LEVEL4	:= 1250;	// In base value for adep
 const SETTING_MAX_SKILL_FOR_SKILL_ITEM_LEVEL5	:= 1400;	// In base value for master items.
 const SETTING_MAX_SKILL_FOR_SKILL_ITEM_LEVEL6	:= 1500;	// In base value for grandmaster items.
 
-const SETTING_POISONING_SHOT_PER_PLVL		:= 2;		// Number of hits before reducing the plvl of a poisoned weapon.
+const SETTING_POISONING_SHOT_PER_PLVL		:= 4;		// Number of hits before reducing the plvl of a poisoned weapon.
 
 const SETTING_POTIONKEG_MAX_CAPACITY		:= 100;
 

@@ -1,0 +1,95 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/damages";
+include "include/random";
+include "include/hitscriptinc";
+include "../pkg/foundations/hooks/zhaArchery";
+include "include/classes";
+
+var cfg := ReadConfigFile(":combat:itemdesc");
+
+program epicranger( attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+	var victims := ListMobilesNearLocation( CInt(defender.x), CInt(defender.y), CInt(defender.z), 5);
+	var targ := defender;
+	var okay;
+	var weaponType := cfg[attacker.weapon.objtype];	
+
+	var wbasedamage:= RandomDiceRoll( weaponType.damage ); 
+	if (attacker.weapon.dmg_mod)
+		wbasedamage := (wbasedamage + attacker.weapon.dmg_mod);
+	endif
+	//further bonus damage based on archery skill - temporarily removed pending testing
+	var attackers_archery := GetEffectiveSkill(attacker,SKILLID_ARCHERY);
+	var dambonus := 1 + (attackers_archery/75);
+	wbasedamage := CInt(wbasedamage*dambonus);
+	
+	PlaySoundEffect( attacker, 1316);
+
+	foreach mobile in victims
+		var amulti := attacker.serial;
+		var mmulti := mobile.serial;
+		var dmulti := defender.serial;
+		if(mmulti=amulti)
+			okay:=0;
+		elseif( mobile.isA(POLCLASS_NPC) )
+			okay:=1;
+			//Broadcast("wbasedamage: " + wbasedamage);
+			DoEpicBowAttack(attacker, mobile, weaponType, SKILLID_ARCHERY, wbasedamage);
+			wbasedamage := CInt(wbasedamage*0.80);
+		else
+			okay:=0;			
+		endif
+		sleepms((200-weaponType.Speed)/10);
+	endforeach
+			
+endprogram
+
+function DoEpicBowAttack(attacker, mobile, weaponType, SKILLID_ARCHERY, wbasedamage)
+
+	PlayMovingEffectXYZ( attacker.x, attacker.y, attacker.z+9, mobile.x, mobile.y, mobile.z+5, weaponType.ProjectileAnim, 2, 0, 0  );
+	PerformAction( attacker, weaponType.Anim);
+	sleepms((100-weaponType.Speed)/10);
+	if (CheckArcheryHit(attacker, mobile, SKILLID_ARCHERY))
+		PlaySoundEffect( mobile, weaponType.hitSound );
+	else
+		PlaySoundEffect( attacker, weaponType.projectileSound );
+		return;
+	endif
+
+	//Broadcast("weaponType.hitscript : " + weaponType.hitscript + "  dmg mod: " +  attacker.weapon.dmg_mod);
+	var hitscript := attacker.weapon.hitscript;
+	//Broadcast("hitscript: " + hitscript);
+	if (!hitscript)
+		//Broadcast("cant fint it!");
+		return;
+	endif
+	
+	//find random piece of armor to hit -- need this for onhit script
+	var wornarmor := array;
+	foreach li in ListEquippedItems(mobile)
+		if (li.isA(POLCLASS_ARMOR) && GetObjProperty(li, "OnHitScript"))
+			wornarmor.append(li);
+		endif
+	endforeach
+	var def_armor;
+	if (len(wornarmor)>0)
+		def_armor:=wornarmor[RandomInt(len(wornarmor))+1];
+	endif
+
+	start_script (":combat:mainhit", {attacker, mobile, attacker.weapon, def_armor, wbasedamage, 0});
+
+endfunction

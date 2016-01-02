@@ -1,0 +1,59 @@
+use uo;
+use os;
+
+include "include/damages";
+include "include/random";
+include "include/hitscriptinc";
+
+program epicthief( attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (TypeOf(attacker) == "Array")
+	//required for archery sys hook handling
+		var temparr := attacker;	
+		attacker := temparr[1];
+		defender := temparr[2];
+		weapon := temparr[3];
+		armor := temparr[4];
+		basedamage := temparr[5];
+		rawdamage := temparr[6];
+	endif
+
+
+	var chance := 20;
+	if(RandomDiceStr("1d100") <= chance)
+		PrintTextAbove( attacker, "Flurry Attack!", 3, 5 );
+		
+		var count := Random(9)+1;
+		var i := 1;
+
+		var targ := defender;
+			
+		while (i<count)
+			var dmg := Random(10)+1;
+			
+			PlayStationaryEffect( targ.x, targ.y, targ.z, FX_GLOW, speed:=30, loop:=30);
+			
+			var sfx;
+			case (Random(4)+1)
+				1:	sfx:=SFX_136;
+				2:	sfx:=SFX_13B;
+				3:	sfx:=SFX_13D;
+				4:	sfx:=SFX_149;
+				5:	sfx:=SFX_139;
+			endcase
+
+			PlaySoundEffect( targ, sfx);
+		
+			ApplyTheDamage( attacker, defender, dmg, DMGID_PHYSICAL );
+
+			sleepms( 500 );
+		
+			i := i+1;
+		
+		endwhile
+	endif
+
+		rawdamage := RecalcDmg( attacker, defender, weapon, armor, basedamage , 1 );
+		DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage );
+
+endprogram
