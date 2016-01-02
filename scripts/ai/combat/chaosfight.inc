@@ -4,13 +4,13 @@ include "ai/main/npcinfo";
 
 function Fight( opponent )
 
-	if ((opponent.cmdlevel > 0) or (opponent.serial = me.serial))
+	if ((opponent.cmdlevel > 0) or (opponent.serial == me.serial))
         	setwarmode(0);
         	opponent := 0;
 		return;
 	endif
 
-	if (opponent.npctemplate = "humuc")
+	if (opponent.npctemplate == "humuc")
         	setwarmode(0);
         	opponent := 0;
 		return;
@@ -42,7 +42,7 @@ function Fight( opponent )
 	    (opponent.dead or opponent.hidden or opponent.concealed) and 
 	    (distance(me,opponent) < 20) ) 
 
-		if (Random(50) = 1)
+		if (Random(50) == 1)
 			PeaceMade();
 			look_around ();
 			return;
@@ -127,7 +127,7 @@ function Fight( opponent )
 			if (ev.source)
 			  process_combat_event(ev);
 			  if (Random(6)=1)
-				if ((!ev.source.npctemplate) or (ev.source.script = "tamed") )
+				if ((!ev.source.npctemplate) or (ev.source.script == "tamed") )
 					opponent := ev.source;
 			  		SetOpponent( opponent );
 					turntoward( opponent );
@@ -161,7 +161,7 @@ function flee(opponent)
 
 	EraseObjProperty(me,"killme");
 
-	if ( (me.script = "immobile") or (me.script = "immobilespell") or (me.frozen) or (me.paralyzed) )
+	if ( (me.script == "immobile") or (me.script == "immobilespell") or (me.frozen) or (me.paralyzed) )
 		sleep(1);
 		return;
 	endif
@@ -195,7 +195,7 @@ function flee(opponent)
 		in_combat_event_loop(opponent);
 		runs := runs +1;
 		ev := wait_for_event(0);
-		if (ev.type = SYSEVENT_DAMAGED)
+		if (ev.type == SYSEVENT_DAMAGED)
 			process_combat_event(ev);
 		endif
 	endwhile
@@ -206,7 +206,7 @@ endfunction
 
 function runrandom(opponent, numruns := 2)
 
-	if ( (me.script = "immobile") or (me.script = "immobilespell") )
+	if ( (me.script == "immobile") or (me.script == "immobilespell") )
 		sleep(1);
 		return 0;
 	endif
@@ -255,12 +255,12 @@ function runrandom(opponent, numruns := 2)
 			EVID_PEACEMADE: return 1;
 			SYSEVENT_DAMAGED:
 				process_combat_event(ev);
-				if (ev.source.serial = opponent.serial)
+				if (ev.source.serial == opponent.serial)
 					flee(opponent);
 				endif
 			endcase
 		endif
-		if ( (me.x = tox) and (me.y = toy) )
+		if ( (me.x == tox) and (me.y == toy) )
 			return 0;
 		endif
 	endwhile

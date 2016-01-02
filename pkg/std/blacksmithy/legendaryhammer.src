@@ -1,22 +1,6 @@
 /////////////////
-// make_blacksmith_items.src
-//
-// Use a smithy hammer to either repair arms & armor or
-// to work with metal to create new items. You need to be
-// skillful to work with the rarer metals.
-//
-// TODO: remove hardcoding of skill pointvalue
-//
-// Author: DreamWeaver:
-//	      original
-//	 Racalac:
-//	      colored items
-// Updates: Dream Weaver 6/3/99 handled item quality an HP to new specs
-//	  Ignatius     99/06/10 added name of maker to exceptional items.
-//
-// More Mods: DarkFyre 11/16/99 Added support for colored ores to be better/worse than normal
-//		     also added name of maker to normal items so people can laugh at the
-//		     really bad smiths ;)
+// LEGENDARY HAMMER - Redone version of normal hammer for added quality
+// - Renuo
 ////////////////
 
 use uo;
@@ -25,7 +9,6 @@ use os;
 use math;
 use basicio;
 
-include "util/repair";
 include "include/attributes";
 include "include/yesno";
 include "include/client";
@@ -176,14 +159,8 @@ function MakeBlacksmithItems( character, ingots )
 				var item_cfg	:= ReadConfigFile( ":*:itemdesc" );
 				var sell_price := CInt( item_cfg[what].VendorBuysFor );
 
-				var tempcprops:=cprops;
 				if( theitem.isA(POLCLASS_WEAPON) )
-					cprops:=array{};
-					for i:= 1 to len(tempcprops)
-						if (tempcprops[i]["OreES"])
-							cprops.append(tempcprops[i]);
-						endif
-					endfor
+					cprops := array{};
 				endif
 
 				theitem.quality := quality;
@@ -196,11 +173,46 @@ function MakeBlacksmithItems( character, ingots )
 					excep_diff	:= excep_diff + 40;
 				endif
 
-				if( excep_diff < 90 )
-					excep_diff := 90;
+				if( excep_diff < 95 )
+					excep_diff := 95;
 				endif
 
 				if ( (Random(100) < excep_ch) && CheckSkill( character, SKILLID_BLACKSMITHY, excep_diff, 0 ) )
+
+					var armslore := GetEffectiveSkill( character, SKILLID_ARMSLORE );
+					var multiplier := 5 + CInt( armslore / 10 );
+
+					if( GetObjProperty( character, CLASSEID_CRAFTER ) )
+						multiplier := CInt( multiplier * ClasseBonus( character, CLASSEID_CRAFTER ) );
+					endif
+
+					multiplier	:= 1.1 * (100 + multiplier);
+					var newquality := CInt(quality * multiplier);
+					newquality := CDbl(newquality);
+					newquality := newquality / 100;
+					theitem.quality := newquality;
+					itemname := "Legendary " + itemname;
+					itemname := itemname + " [Crafted by " + character.name + "]";
+					
+					if( sell_price )
+						theitem.buyprice := CInt( sell_price * 2 );
+						sell_price := CInt( sell_price * 2 );
+					endif
+
+					SendSysMessage( character, "You make a legendary item and put it in your pack." );
+					SetObjProperty( theitem, "IsLegendary", 1 );
+
+					if( excep_diff >= 130 )
+						SendSysMessage( character, "This legendary masterpiece will make you famous around the world." );
+						AwardFame( character, FAME_BONUS );
+					elseif( GetObjProperty( character, CLASSEID_CRAFTER ) && excep_diff >= 110 )
+						SendSysMessage( character, "This legendary masterpiece will make you famous around the world." );
+						AwardFame( character, FAME_BONUS );
+					endif
+				
+					excep_diff := 90;
+				
+					elseif ( (Random(100) < excep_ch) && CheckSkill( character, SKILLID_BLACKSMITHY, excep_diff, 0 ) )
 
 					var armslore := GetEffectiveSkill( character, SKILLID_ARMSLORE );
 					var multiplier := 5 + CInt( armslore / 10 );
@@ -215,13 +227,8 @@ function MakeBlacksmithItems( character, ingots )
 					newquality := newquality / 100;
 					theitem.quality := newquality;
 					itemname := "Exceptional " + itemname;
-
-					if (GetObjProperty(character, "BuilderMark") == 1)
-						itemname := itemname + " [Crafted by " + character.name + "]";
-					elseif( YesNo( character, "Add Builder Mark?" ) )
-						itemname := itemname + " [Crafted by " + character.name + "]";
-					endif
-
+					itemname := itemname + " [Crafted by " + character.name + "]";
+					
 					if( sell_price )
 						theitem.buyprice := CInt( sell_price * 2 );
 						sell_price := CInt( sell_price * 2 );
@@ -231,10 +238,10 @@ function MakeBlacksmithItems( character, ingots )
 					SetObjProperty( theitem, "IsExceptional", 1 );
 
 					if( excep_diff >= 130 )
-						SendSysMessage( character, "This masterpiece will make you famous around the world." );
+						SendSysMessage( character, "This exceptional masterpiece will make you famous around the world." );
 						AwardFame( character, FAME_BONUS );
 					elseif( GetObjProperty( character, CLASSEID_CRAFTER ) && excep_diff >= 110 )
-						SendSysMessage( character, "This masterpiece will make you famous around the world." );
+						SendSysMessage( character, "This exceptional masterpiece will make you famous around the world." );
 						AwardFame( character, FAME_BONUS );
 					endif
 				else
@@ -403,5 +410,94 @@ function CanMake( who, key, ingots, orediff )
 	endif
 
 	return 0;
+
+endfunction
+
+function repair_item( character, item, skillid )
+     
+	var damaged 	:= CInt( item.maxhp - item.hp );
+	var skill 	:= GetEffectiveSkill( character, skillid );
+	var armslore 	:= GetEffectiveSkill( character, SKILLID_ARMSLORE );
+	var diff 	:= CInt( damaged + 20 );
+	
+	// Begin changes to make repairing easier.
+	if (GetObjProperty(character, CLASSEID_CRAFTER))
+		diff := CInt(diff - GetObjProperty(character, CLASSEID_CRAFTER)* CRAFTER_REPAIR_DIFF_BONUS);
+	endif
+	if (diff < 0)
+		diff := 0;
+	elseif (diff > 160)
+		diff := 160;
+	endif
+	// End
+
+	armslore := CInt( armslore * ClasseBonus( character, CLASSEID_CRAFTER ) );
+
+	//The item should be broken already
+	if((item.hp < 1) || (item.hp > item.maxhp ) || (item.quality <= 0.1) || (!item.quality))
+		SendSysMessage(character, "The brittle material breaks when you handle it!");
+		DestroyTheItem( character, item );
+		return;
+	endif
+
+	//Check if the item is damaged
+	if( item.hp == item.maxhp )
+		SendSysMessage( character, "That item is in perfect condition already." );
+		return;
+	endif
+
+	//Check if you have a chance to repair it
+	if( armslore >= damaged )
+
+		//Check if he repair it
+		if( CheckSkill( character, skillid, diff, 0 ) )
+
+			//Check for a special effect
+			var chance := Random(100);				
+		
+			//Bad luck, the item get's weaker...
+			if( chance < 3 )
+				var maxhp_mod := item.maxhp_mod - CInt((item.maxhp - item.maxhp_mod) / 20); // reduce the maxhp by 5% of the original themax
+				if( (-maxhp_mod) > (item.maxhp - item.maxhp_mod) ) // if the maxhp falls below 1, set it to 1.
+					item.maxhp_mod := 1 - item.maxhp;
+				else
+					item.maxhp_mod := maxhp_mod;
+				endif
+				item.hp := item.maxhp;
+				
+				SendSysMessage( character, "You completely repair the item, but your careless work leaves it a little weaker." );
+				return;
+			
+			//Good luck, the item's quality improve
+			elseif( chance == 97 )
+				SendSysMessage( character, "Your chance and skill improved the quality of the item!" );
+				item.quality := CDbl(item.quality + 0.05);
+				item.hp := item.maxhp;
+				return;
+		
+			//You repair the item
+			else
+				var amount := CInt((Random(armslore)+1) / 2 );
+				if( amount >= damaged )
+					item.hp := item.maxhp;
+					SendSysMessage(character, "You repair the item completely.");
+				else
+					item.hp := item.hp + amount;
+					SendSysMessage(character, "You successfully repair some of the damage");
+				endif
+				return;
+			endif
+	
+		//You fail to repair it	
+		else
+			SendSysMessage( character, "You fail to repair any damage" );
+			return;
+		endif
+
+	//You don't even have a chance to repair it	
+	else	
+		SendSysMessage( character, "You don't even know where to start!" );
+		return;
+	endif
 
 endfunction

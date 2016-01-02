@@ -138,7 +138,7 @@ program begging ( character )
 		if (CInt(GetObjProperty( who,"Lastbegged"))>ReadGameClock())
 			if (targetIsAMonster)
 				PrintTextAbove( who,"Arr! You again?");
-				var ev := {};
+				var ev := array{};
 				ev.+source := character;
 				ev.+type := SYSEVENT_DAMAGED;
 				SendEvent(who,ev);
@@ -278,7 +278,7 @@ function begFromMonster(character, who)
 		sleep(2);
 		PrintTextAbove(who, "Foul beggar!");
 		SendSysMessage(character, "You receive nothing...");
-		var ev := {};
+		var ev := array{};
 		ev.+source := character;
 		ev.+type := SYSEVENT_DAMAGED;
 		SendEvent(who,ev);
