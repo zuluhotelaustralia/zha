@@ -79,7 +79,7 @@ function DetermineNewbie(player)
 endfunction
 
 function SetNewbieStatus(player)
-	const STATCAP := 80;
+	const STATCAP := 95;
 	
 	if (player.cmdlevel>0) 
 		return 0; 

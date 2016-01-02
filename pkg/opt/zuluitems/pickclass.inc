@@ -520,7 +520,7 @@ function buffskills(who, class)
 endfunction
 
 function dropallskills(who)
-	
+	var skillarray := GetClasseSkills("IsPowerPlayer");
 	var skill_amount := 0;
 	
 	for skillid := 0 to SKILLID__HIGHEST
