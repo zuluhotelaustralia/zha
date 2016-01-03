@@ -75,7 +75,8 @@ program CastleGuard()
 		endif
 
 		if (ev) ProcessEvents(ev, wanders, next_wander); endif
-
+		
+		RunRecall(me);
 	endwhile
 
 endprogram
@@ -86,6 +87,7 @@ function CloseDistance( opponent )
         0:
             return 1;
         default:
+						RunRecall(me);
             RunToward( opponent );
             return 0;
     endcase
@@ -96,10 +98,12 @@ function look_around()
 	foreach critter in ListMobilesNearLocation(me.x, me.y, me.z, 15)
 		if ((critter.npctemplate) && (critter.script != "tamed") )
 			if (!configfile[critter.npctemplate].guardignore)
+				RunRecall(me);
 				say("Ah ha! " + critter.name);
 				fight(critter);
 			endif
 		else
+			RunRecall(me);
 			CheckForCriminals(critter);
 		endif
 	endforeach
@@ -367,4 +371,31 @@ function Killme()
 	SetObjProperty(me,"guardkill",1);
 	ApplyRawDamage(me,GetMaxHp(me)+3);
 
+endfunction
+
+function RecallToSpawnPoint(spawnpoint)
+	say("Kal Ort Por");
+	PerformAction(me, 16);
+	sleepms(2500);
+	PlaySoundEffect(me, SFX_SPELL_RECALL1);
+	sleepms(250);
+	MoveCharacterToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z);
+	PlaySoundEffect(me, SFX_SPELL_RECALL2);
+	return;
+endfunction
+
+function RunRecall(me)
+var spawnpoint := 0;
+	var spawnpointserial := GetObjProperty(me, "SpawnPoint");
+	if (spawnpointserial)
+		spawnpoint := SystemFindObjectBySerial(spawnpointserial);
+	endif
+//Recalling only for healers with spawnpoints
+		if(spawnpoint != error)
+				//Recall if we are too far from spawn, or we are in a multi
+				if(Distance(me, spawnpoint) >= 30 || me.multi)
+					RecallToSpawnPoint(spawnpoint);
+					
+				endif
+			endif
 endfunction
