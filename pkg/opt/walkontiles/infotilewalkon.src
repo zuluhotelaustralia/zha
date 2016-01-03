@@ -1,0 +1,65 @@
+use uo;
+use os;
+
+include "include/spelldata";
+
+program ambushtilewalkon_lava( who, tile )
+
+	//done so that auxillary tiles can pass parameters in start_script
+	if (TypeOf(who) == "Array")
+		tile:= who[2];
+		who := who[1];
+	endif
+
+	var enabled				:=	getobjproperty(tile, "enabled");
+	var text					:=	getobjproperty(tile, "text");
+	var completed			:=	getobjproperty(tile, "completed");
+	var oneoff 				:=	getobjproperty(tile, "oneoff");
+	var displaymethod	:=	getobjproperty(tile, "displaymethod");
+	var color					:=	getobjproperty(tile, "color");
+	var item					:= 	SystemFindObjectBySerial(CInt(getobjproperty(tile, "item")));
+	var i := 1;
+	
+	if (!color)
+		color := 63;
+	endif
+	
+	if( enabled != 1 || text == "")
+		return;
+	endif
+
+	if (who.dead || !who.acct)
+		return;
+	endif
+	
+	/*if (who.cmdlevel >= 1)
+		return;
+	endif*/
+	
+	if (oneoff == 1)
+		for (i:=1;i<=completed.size();i:=i+1)
+			if ( completed[i] == who.serial)
+		 		return;
+			endif
+		endfor
+	endif
+	
+	case (displaymethod)
+	default:
+				1:PrintTextAbove(item, text,_DEFAULT_TEXT_FONT,color);break;				//saytile
+				
+				2:PrintTextAbove(who, text,_DEFAULT_TEXT_FONT,color);break;				//sayplayer
+				
+				3:PrintTextAbovePrivate(who, text, who,_DEFAULT_TEXT_FONT,color);break;	//sayplayerprivate
+				
+				4:Sendsysmessage(who, text,_DEFAULT_TEXT_FONT,color);break;				//sayprivatesystem
+				
+				5:PrintTextAbovePrivate(item, text, who,_DEFAULT_TEXT_FONT,color);break;	//saytileprivate
+	endcase
+	if (oneoff == 1)
+		completed.append(who.serial);
+		SetObjProperty(tile, "completed", completed);
+	endif
+	
+endprogram
+

@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+program infotilecreate(tile)
+	var completed := array{};
+	setobjproperty(tile, "text", "");
+	setobjproperty(tile, "enabled", 0);
+	setobjproperty(tile, "completed", completed);
+	setobjproperty(tile, "oneoff", 0);
+	setobjproperty(tile, "displaymethod", 1);
+	setobjproperty(tile, "item", tile.serial);
+	return 1;
+
+endprogram

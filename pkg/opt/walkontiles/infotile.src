@@ -1,0 +1,177 @@
+use uo;
+use os;
+
+
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+
+program infotile( who, item )
+	if (who.cmdlevel <2)
+		return;
+	endif
+	
+	configGump(who, item);
+
+endprogram
+
+function configGump(who, tile)
+
+	var enabled				:=	getobjproperty(tile, "enabled");
+	var text					:=	getobjproperty(tile, "text");
+	var completed			:=	getobjproperty(tile, "completed");
+	var oneoff 				:=	getobjproperty(tile, "oneoff");
+	var displaymethod	:=	getobjproperty(tile, "displaymethod");
+	var color					:=	getobjproperty(tile, "color");
+	var methodarray 	:=	array{1,0,0,0,0};
+	
+	if (!color)
+		color := 63;
+	endif
+	
+	case (displaymethod)
+	1: methodarray := {1,0,0,0,0};break;
+	2: methodarray := {0,1,0,0,0};break;
+	3: methodarray := {0,0,1,0,0};break;
+	4: methodarray := {0,0,0,1,0};break;
+	5: methodarray := {0,0,0,0,1};break;
+	default: methodarray := {1,0,0,0,0};
+	endcase
+
+	GFInitGump( 10 , 40 );
+	GFPage(0);
+	GFResizePic(0, 0, BKGND_STONESLAB, 400, 400);
+	GFCheckerTrans(3, 3, 394, 20); // Top trans
+	GFCheckerTrans(3, 26, 394, 343); // Middle
+	GFCheckerTrans(3, 372, 394, 25); // Bottom Trans
+	GFTextMid(10, 1, 380, 53, "Info File Config Gump");
+	
+	var line := 30;
+	var x := 35;
+
+	//Menu
+	GFTextLine(x, line, 63, "Enabled:");
+	var enableButton := GFCheckBox( x+45, line, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(enabled) );
+	line := line + 30;
+	
+		
+	
+	GFTextLine(x, line, 63, "Text:");
+	GFResizePic(x+35, line-7, BKGND_SILVERTRIM , 320, 35);
+	var newtext := GFTextEntry(x+45, line, 300, 20, 5, text);
+	line := line + 30;
+	
+	GFTextLine(x, line, 63, "Display Method:");
+	line := line + 17;
+	GFSetRadioGroup( 1 );
+	GFTextLine(x+12, line, 5, "Above Item");
+		var saytile := GFRadioButton( x, line+4, 0x938, 0x939, methodarray[1] );
+	line := line + 17;
+	GFTextLine(x+12, line, 5, "Above Player Public");
+		var sayplayer := GFRadioButton( x, line+4, 0x938, 0x939, methodarray[2] );
+	line := line + 17;
+	GFTextLine(x+12, line, 5, "Above Player Private");
+		var sayprivateplayer := GFRadioButton( x, line+4, 0x938, 0x939, methodarray[3] );
+	line := line + 17;
+	GFTextLine(x+12, line, 5, "Private Sys Message");
+		var sayprivatesystem := GFRadioButton( x, line+4, 0x938, 0x939, methodarray[4] );
+	line := line + 17;
+	GFTextLine(x+12, line, 5, "Above Item Private");
+		var sayprivatetile := GFRadioButton( x, line+4, 0x938, 0x939, methodarray[5] );
+	line := line + 30;
+	
+	GFTextLine(x, line, 63, "Once Off:");
+	var onceButton := GFCheckBox( x+60, line, G_GRAY_CHECKBOX_0, G_GRAY_CHECKBOX_1, cint(oneoff) );
+	line := line + 30;
+	
+	GFTextLine(x, line, 63, "Text Color:");
+	GFResizePic(x+75, line-7, BKGND_SILVERTRIM , 60, 35);
+	var newcolor := GFTextEntry(x+85, line, 40, 20, 5, color);
+	line := line + 30;	
+	GFTextLine(x, line, 53, "Say above item is set to the tile by default.");
+	line := line + 17;	
+	GFTextLine(x, line, 53, "As tile is hidden by default");
+	line := line + 17;	
+	GFTextLine(x, line, 53, "text will send as a message to player.");
+	line := line + 17;	
+	GFTextLine(x, line, 53, "Use the button below to set.");
+
+	//Bottom Menu
+	GFTextLine(x+12, 375, 63, "Add Aux Tile");
+	var auxbutton  := GFButtonID( x, 378, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(x+112, 375, 63, "Set Say Above Item");
+	var itembutton  := GFButtonID( x+100, 378, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+	GFTextLine(315, 375, 63, "Save");
+	var exitGMGumpbutton  := GFButtonID( 300, 378, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
+
+	var choice := GFSendGump(who);
+	
+	SetObjProperty(tile, "enabled", cInt(GFExtractData(enablebutton.keyid, choice)));
+	SetObjProperty(tile, "text", GFExtractData(newtext.keyid, choice));
+	SetObjProperty(tile, "oneoff", cInt(GFExtractData(oncebutton.keyid, choice)));
+	SetObjProperty(tile, "color", cInt(GFExtractData(newcolor.keyid, choice)));
+	
+	if( choice[saytile.keyid] == 1 )
+		SetObjProperty(tile, "displaymethod", 1);
+	elseif( choice[sayplayer.keyid] == 1 )
+		SetObjProperty(tile, "displaymethod", 2);
+	elseif( choice[sayprivateplayer.keyid] == 1 )
+		SetObjProperty(tile, "displaymethod", 3);
+	elseif( choice[sayprivatesystem.keyid] == 1 )
+		SetObjProperty(tile, "displaymethod", 4);
+	elseif( choice[sayprivatetile.keyid] == 1 )
+		SetObjProperty(tile, "displaymethod", 5);
+	else
+		SetObjProperty(tile, "displaymethod", 1);
+	endif
+	
+	if( choice[auxbutton.keyid])
+		sendAuxTilePrompt(who, tile);
+	endif
+	if( choice[itembutton.keyid])
+		additem(who, tile);
+	endif
+
+endfunction
+
+function sendAuxTilePrompt(who, tile)
+	SendSysMessage(who, "Select the position of the auxillary location tile");
+	var loc := TargetCoordinates(who);
+	if (!loc)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+
+	var assoctile := CreateItemAtLocation( loc.x, loc.y, loc.z, 0xF6FF);
+	if (!assoctile)
+		SendSysMessage(who, "Problems creating tile at that position. Cancelled");
+		return;
+	endif
+	
+	SetObjProperty(assoctile, "AssociatedLocationSer", tile.serial);
+	
+	//add to aux tile array
+	var auxtilearray := array;
+	auxtilearray := GetObjProperty(tile, "auxtilearray");
+	if (!auxtilearray[1])
+		SetObjProperty(tile, "auxtilearray",{assoctile.serial});
+	else
+		auxtilearray.append(assoctile.serial);
+		SetObjProperty(tile, "auxtilearray", auxtilearray);
+	endif
+configGump(who, tile);
+endfunction
+
+function additem(who,tile)
+	SendSysMessage(who, "Select the position of the auxillary location tile");
+	var loc := Target(who);
+	if (!loc || !loc.serial)
+		SendSysMessage(who, "Invalid selection");
+		return;
+	endif
+	setobjproperty(tile, "item", loc.serial);
+	configGump(who, tile);
+endfunction
+	
+	
+

@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+program gravestonedestroy(gravestone)
+	var gravemound:= SystemFindObjectBySerial(GetObjProperty(gravestone, "hauntedgrave1"));
+	var gravemound2:= SystemFindObjectBySerial(GetObjProperty(gravestone, "hauntedgrave2"));	
+	if (gravemound)
+		DestroyItem(gravemound);
+	endif
+	if (gravemound2)
+		DestroyItem(gravemound2);
+	endif
+	start_script("::maindestroy");
+
+endprogram
