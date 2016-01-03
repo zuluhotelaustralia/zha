@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+program walkon_auxquestLocationTile( who, item )
+	if (who.dead)
+		return;
+	endif
+	var associatedinfotileser := GetObjProperty(item, "AssociatedLocationSer");
+	if (!associatedinfotileser)
+		return;
+	endif
+	var associatedinfotile := SystemFindObjectBySerial(associatedinfotileser);
+	if (!associatedinfotile)
+		return;
+	endif
+	var params := {who, associatedinfotile};
+	start_script( "infotilewalkon", params );
+	
+endprogram
+
