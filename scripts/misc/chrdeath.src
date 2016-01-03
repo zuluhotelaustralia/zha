@@ -183,7 +183,7 @@ program chrdeath(corpse,ghost)
 		endforeach
 
 
-		if (newbie) //teleports newbie to wind healer
+		if (newbie && !inDuelGate) //teleports newbie to wind healer
 			SetSpeedCheckNote(ghost);
 			var newbie_res_pos := GetGlobalProperty("newbie_res_pos");
 			newbie_res_pos :=SplitWords(newbie_res_pos);
@@ -213,11 +213,11 @@ program chrdeath(corpse,ghost)
 			EndMonsterDuel(monsterDuelController, ghost);
 			SendSysMessage(ghost, "You have been defeated by the warriors within the Gate, and have been expelled!",3,53);
 			PlaySoundEffect(ghost, 0x217);	
-		elseif (autotelequest)//teleports quester to queststone
+		elseif (autotelequest && !inDuelGate)//teleports quester to queststone
 			SetSpeedCheckNote(ghost);
 			MoveCharacterToLocation( ghost, autotelequest.x, autotelequest.y, autotelequest.z, 	MOVECHAR_FORCELOCATION);
 			SendSysMessage(ghost, "You have been saved from annihilation by the power of the quest!",3,53);	
-		elseif (waractive && samewaroppteams) //teleports war people killed to war stone
+		elseif (waractive && samewaroppteams && !inDuelGate) //teleports war people killed to war stone
 			//Broadcast("warstone: "  + warstone);
 			if (warstone)
 				SetSpeedCheckNote(ghost);

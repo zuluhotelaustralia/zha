@@ -129,21 +129,22 @@ var racepicked := who.title_race;
 
 //	EraseObjProperty(who,"newbie");
 	
+
+
+				SetBaseStrength(who,90);
+        SetBaseIntelligence(who,90);
+        SetBaseDexterity(who,90);
+sendclassgump(who, "Home");
 //MOVE TO WIND STARTING POINT
 	var start_pos:=GetGlobalProperty("starting_position");
 		
-	/*if (start_pos)
+	if (start_pos)
 		start_pos := SplitWords(start_pos);
 		movecharactertolocation(who, Cint(start_pos[1]), Cint(start_pos[2]), Cint(start_pos[3]),MOVECHAR_FORCELOCATION);
 	else
 		movecharactertolocation(who, 5149, 59, 25, MOVECHAR_FORCELOCATION);
 	endif
-*/
-				SetBaseStrength(who,90);
-        SetBaseIntelligence(who,90);
-        SetBaseDexterity(who,90);
-sendclassgump(who, "Home");
-SendGateGump(who);
+//SendGateGump(who);
 
 endprogram
 
