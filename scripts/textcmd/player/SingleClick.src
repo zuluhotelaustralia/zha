@@ -1,7 +1,7 @@
 use uo;
 
 program SingleClick(who, singleSerial)
-	Broadcast("HI!");
+	Broadcast("HI! My name is "+who.name);
 	var singClObject := SystemFindObjectBySerial(CInt(singleSerial));
 	if (!who.cmdlevel && singClObject.cmdlevel && singClObject.concealed)
 		SendSysMessage(singClObject, "You are being detected by a player");
