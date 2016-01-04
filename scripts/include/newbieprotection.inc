@@ -98,7 +98,7 @@ function SetNewbieStatus(player)
 
 	if (((!gametime || gametime < 100000)) 
 		&& ((unmod_str < STATCAP) && (unmod_dex < STATCAP) && (unmod_int < STATCAP))
-		&& skilltotal < 300)
+		&& skilltotal < 760)
 		MakeNewbie(player);
 	else
 		RemoveNewbie(player);
