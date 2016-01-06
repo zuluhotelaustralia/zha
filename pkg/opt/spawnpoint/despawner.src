@@ -11,7 +11,7 @@ include "include/objtype"; // add start & end hair
 include "include/itemutil"; // added for getcursedlevel()
 
 program DeSpawner( point )
-	BRoadcast("running despawner!");
+	//BRoadcast("running despawner!");
 	var ptobj;
 	var spawno;
 	var pt_data := GetObjProperty( point, PROPID_SPAWNPOINT_SETTING );
