@@ -4,10 +4,16 @@ include "include/aoslbr";
 
 include "include/jail";
 include "include/classes";
+include "include/dotempmods";
+include ":logon:logon";
 
 program reconnect( who )
+	
+	set_critical(1);
 	enableAosLBRClient(who);
 	JailCheck(who);
+	CurePoison(who);
+	set_critical(0);
 	SendSysMessage( who, "Reconnected." );
 	if (who.acct.getprop("EmailPassword")!=error)
 		return;
@@ -15,4 +21,7 @@ program reconnect( who )
 		start_script(":email:message", who);
 	endif
 	SetClasse(who);
+	if (getexistinglogons(who) == 1)
+ 		DisconnectClient(who);
+ 	endif
 endprogram

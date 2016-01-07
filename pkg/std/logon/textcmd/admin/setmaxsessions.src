@@ -1,0 +1,14 @@
+use uo;
+
+program setmaxsessions(who, count)
+	if (!count)
+		sendsysmessage(who, "Count missing, Correct Use:");
+		sendsysmessage(who, ".setmaxsessions <number>");
+		return;
+	endif
+	
+	setglobalproperty("maxcharsperip", cint(count));
+	SendSysMessage(who, "Players can now have "+count+" sessions per ip.");
+	
+endprogram
+	

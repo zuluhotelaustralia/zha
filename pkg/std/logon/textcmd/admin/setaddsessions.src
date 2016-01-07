@@ -1,0 +1,19 @@
+use uo;
+
+program setaddsessions(who, account)
+	var targ, adds;
+	if(!account)
+		targ := Target(who);
+		account := targ.acct;
+	else
+		account := FindAccount(account);
+	endif
+	
+	
+	if( account)
+		adds := SendTextEntryGump( who, "How many extra sessions?");
+		account.setprop("moreips", adds);
+		SendSysMessage(who, "They now have an additional "+adds+" sessions.");
+	endif
+endprogram
+	

@@ -1,0 +1,18 @@
+use uo;
+
+program getaddsessions(who, account)
+	var targ, adds;
+	if(!account)
+		targ := Target(who);
+		account := targ.acct;
+	else
+		account := FindAccount(account);
+	endif
+	
+	
+	if( account)
+		adds:= account.getprop("moreips");
+		SendSysMessage(who, "They have an additional "+adds+" sessions.");
+	endif
+endprogram
+	
