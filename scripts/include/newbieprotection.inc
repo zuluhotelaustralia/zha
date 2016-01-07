@@ -96,9 +96,9 @@ function SetNewbieStatus(player)
 	//Broadcast("dex: " + unmod_dex);
 	//Broadcast("int: " + unmod_int);
 
-	if (((!gametime || gametime < 100000)) 
+	if (((!gametime || gametime < 150000)) 
 		&& ((unmod_str < STATCAP) && (unmod_dex < STATCAP) && (unmod_int < STATCAP))
-		&& skilltotal < 760)
+		&& skilltotal < 900)
 		MakeNewbie(player);
 	else
 		RemoveNewbie(player);

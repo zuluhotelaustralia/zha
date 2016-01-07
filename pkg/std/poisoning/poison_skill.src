@@ -83,16 +83,23 @@ endprogram
 
 function PoisonWeapon( character, potion, the_item )
 
+
+	var thief_level :=  Cint(GetObjProperty( character, CLASSEID_THIEF ));
+	var ninja_level :=  Cint(GetObjProperty( character, CLASSEID_NINJA ));
+	var diff := DIFF_MULTIPLIER;
+	if (thief_level || ninja_level)
+		diff := diff-2;
+	endif
 	var power := CInt( GetPotionStrength( potion ) );
-	var diff  := CInt( power * DIFF_MULTIPLIER );
+	diff  := CInt( power * diff );
 	var poisoning_skill := GetEffectiveSkill( character, SKILLID_POISONING );
 
 	if( GetObjProperty( the_item, "IsGMItem" ) )
 		diff := diff + 20;
 	endif
 
-	if( diff > 160 )
-		diff := 160;
+	if( diff > 150 )
+		diff := 150;
 	endif
 
 	SubtractAmount( potion, 1 );
@@ -111,10 +118,6 @@ function PoisonWeapon( character, potion, the_item )
 	if( power < 1 )
 		power := 1;
 	endif
-
-	var thief_level :=  Cint(GetObjProperty( character, CLASSEID_THIEF ));
-	var ninja_level :=  Cint(GetObjProperty( character, CLASSEID_NINJA ));
-	
 
 	if( CheckSkill( character, SKILLID_POISONING, diff, diff * POINT_MULTIPLIER ) )
 		if( thief_level || ninja_level  )

@@ -1,35 +1,10 @@
 use uo;
 use os;
 include "include/aoslbr";
+include ":logon:logon";
 
 program logon( who )
-/*
-var count:=0;
 
-  foreach character in EnumerateOnlineCharacters()
-   if( character.cmdlevel < 1)
-
-if( character.ip == who.ip )
-
-count:=count+1;
-endif
-
-
-   endif
-  endforeach
-
-if( count > 2 )
-
-foreach character in EnumerateOnlineCharacters()
-  if( character.cmdlevel < 1)
-if( character.ip == who.ip )
- DisconnectClient(character );
-endif
-  endif
- endforeach
-
-endif
-*/
 	print( "logon: " + who.name );
 	enableAosLBRClient(who);
 
@@ -39,5 +14,8 @@ endif
 	endif
 
 	start_script( "::playermanager", who );
-
+	if (getexistinglogons(who) == 1)
+ 		DisconnectClient(who);
+ 		return;
+ 	endif
 endprogram
