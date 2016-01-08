@@ -20,7 +20,9 @@ program angry_bees (bees)
 
 	repeat
 		foreach mobile in ListMobilesNearLocation( bees.x, bees.y, bees.z, 2 )
-			ApplyDamage(mobile, attack_damage);
+			if (mobile.multi.serial == bees.multi.serial)
+				ApplyDamage(mobile, attack_damage);
+			endif
 		endforeach
 		sleep(time_between_attacks);
 		current_time := ReadGameClock();

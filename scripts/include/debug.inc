@@ -1,9 +1,11 @@
 use uo;
 use os;
 //set to 1 to turn on or 0 to turn off.
-CONST DEBUG := 0;
+
+var DEBUG := getglobalproperty("debugenabled");
 
 function debugmessage( message )
+
 if ( DEBUG == 0)
 	return;
 endif
