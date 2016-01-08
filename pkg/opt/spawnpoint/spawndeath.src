@@ -24,16 +24,15 @@ program spawndeath( params )
 	if (queststoneserial)
 	//inform quest stone of npc death
 		var corpse_serial := params[3];
-		QuestAwardNPCDeath(queststoneserial, corpse_serial);
-		//Replace above line with below when quest points change.
-  /*
                 var corpse := SystemFindObjectBySerial( corpse_serial );
 	        var killerserial:=GetObjProperty(corpse,"KilledBySerial");
 		var monsterpoints:=GetObjProperty(corpse,"QuestPoints");
+
                 If(GetObjProperty(corpse, "SetQuestPointReward"))
                        monsterpoints := GetObjProperty(corpse, "SetQuestPointReward");
                 endif
-		QuestAwardNPCDeath(queststoneserial, corpse_serial, killerserial, point.serial, monsterpoints);*/
+                
+		QuestAwardNPCDeath(queststoneserial, corpse_serial, killerserial, point.serial, monsterpoints);
 	endif
 	
 

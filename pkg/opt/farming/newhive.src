@@ -9,6 +9,7 @@ use os;
 
 include "include/yesno";
 include "include/checkcity";
+include "include/statichouses";
 
 program harvest_honey (character, newbeehive)
 
@@ -33,6 +34,26 @@ program harvest_honey (character, newbeehive)
 	if (len( ListItemsNearLocationOfType( newbeehive.x, newbeehive.y, newbeehive.z, 1, 0x091a ) ) > 0 )
 		SendSysMessage(character, "There is another hive too close.");
 		return;
+	endif
+	var in_static := IsInStaticHouse( newbeehive.x, newbeehive.y, newbeehive.z );
+	if ( newbeehive.multi )
+	
+		if( (GetObjProperty( newbeehive.multi, "ownerserial" ) != character.serial) && !IsStaticOwner( character, in_static))
+			if( !IsStaticCoOwner( character, in_static))
+				var co_owners := {};
+				var i;
+				for( i := 1; i <= 5; i := i + 1 )
+					if( GetObjProperty( newbeehive.multi, "Co-owner" + i ) )
+						co_owners.append( GetObjProperty( newbeehive.multi, "Co-owner" + i ));
+					endif
+				endfor
+		
+				if( !( character.serial in co_owners ) )
+					SendSysMessage( character, "You can only place this item if you own or co-own the house!" );
+					return;
+				endif
+			endif
+		endif
 	endif
 
 	//ask the player if they're sure this is where they want it
