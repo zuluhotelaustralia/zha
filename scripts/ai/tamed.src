@@ -1038,6 +1038,9 @@ function ProcessSpeech(ev)
 				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
 					return;
 				endif
+				if (what.multi && (me.multi.serial != what.multi.serial))
+					return;
+				endif
 				following := what;
 			endif
 		endif
@@ -1050,6 +1053,9 @@ function ProcessSpeech(ev)
 			var what := Target( master, TGTOPT_CHECK_LOS );
 			if (what)
 				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
+					return;
+				endif
+				if (what.multi && (me.multi.serial != what.multi.serial))
 					return;
 				endif
 				AllCommand(EVID_ALL_FOLLOW_CMD, what);
@@ -1072,6 +1078,9 @@ function ProcessSpeech(ev)
 				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
 					return;
 				endif
+				if (what.multi && (me.multi.serial != what.multi.serial))
+					return;
+				endif
 				guarding := what;
 				PrintTextAbove(me,"*guarding " + guarding.name + "*");
 			endif
@@ -1085,6 +1094,9 @@ function ProcessSpeech(ev)
 			var what := Target( master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
 			if (GetHp(what))
 				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
+					return;
+				endif
+				if (what.multi && (me.multi.serial != what.multi.serial))
 					return;
 				endif
 				AllCommand(EVID_ALL_GUARD_CMD, what);

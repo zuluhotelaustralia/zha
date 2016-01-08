@@ -13,6 +13,7 @@ include "include/itemutil";
 include "include/string";
 include "include/random";
 include "include/debug";
+
 const DIFF_MULTIPLIER	:= 20;
 const POINT_MULTIPLIER	:= 20;
 const KARMA_PENALTY_FOR_FOOD_POISONING := -50;
@@ -88,11 +89,14 @@ function PoisonWeapon( character, potion, the_item )
 	var thief_level :=  Cint(GetObjProperty( character, CLASSEID_THIEF ));
 	var ninja_level :=  Cint(GetObjProperty( character, CLASSEID_NINJA ));
 	var diff := DIFF_MULTIPLIER;
+	debugmessage("DIFF_MU: "+diff);
 	if (thief_level || ninja_level)
-		diff := diff-2;
+		diff := diff-4;
 	endif
+	debugmessage("Post Class Mod: "+diff);
 	var power := CInt( GetPotionStrength( potion ) );
 	diff  := CInt( power * diff );
+	debugmessage("Post Power Mod: "+diff);
 	var poisoning_skill := GetEffectiveSkill( character, SKILLID_POISONING );
 
 	if( GetObjProperty( the_item, "IsGMItem" ) )
@@ -102,6 +106,7 @@ function PoisonWeapon( character, potion, the_item )
 	if( diff > 150 )
 		diff := 150;
 	endif
+	debugmessage("Post Cap: "+diff);
 
 	SubtractAmount( potion, 1 );
 	CreateItemInBackpack( character, UOBJ_EMPTY_BOTTLE, 1 );
@@ -120,6 +125,7 @@ function PoisonWeapon( character, potion, the_item )
 		power := 1;
 	endif
 
+	debugmessage("Pre Check Skill: "+diff);
 	if( CheckSkill( character, SKILLID_POISONING, diff, diff * POINT_MULTIPLIER ) )
 		if( thief_level || ninja_level  )
 			power := power + 1;
