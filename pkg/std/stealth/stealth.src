@@ -44,8 +44,9 @@ program skill_stealth( chr )
 
 	if (class==CLASSEID_THIEF || class==CLASSEID_NINJA)
 		steps := CInt(steps * ClasseBonusByLevel(GetClasseLevel(chr)));
-		var healed := (class*2)+10;
-		var duration := (class*2)+2;
+		var lvl := GetClasseLevel(chr);
+		var healed := (lvl*2)+10;
+		var duration := (lvl*2)+2;
 		var sleeptime := 3;
 		chr.stealthsteps := steps;
 		PrintTextAbovePrivate( chr, "You are now moving stealthily, recovering in the shadows", chr );

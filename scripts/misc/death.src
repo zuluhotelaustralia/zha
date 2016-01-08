@@ -135,18 +135,26 @@ program npcdeath(corpse)
 	endif
 
 	//check if monster was a quest objective
-	var quesstoneserial := GetObjProperty(corpse, "QuestStoneSerial");
-	if(quesstoneserial)
+	var queststoneserial := GetObjProperty(corpse, "QuestStoneSerial");
+	if(queststoneserial)
 		//Broadcast("monster objective - death.src");
 		var killerserial:=GetObjProperty(corpse,"KilledBySerial");
+                var spawnserial:= GetObjProperty(corpse, "SpawnPoint");
 		var monsterserial:=GetObjProperty(corpse,"AiSerial");
 		var monsterpoints:=GetObjProperty(corpse,"QuestPoints");
+  
+                If(GetObjProperty(corpse, "SetQuestPointReward"))
+                       monsterpoints := GetObjProperty(corpse, "SetQuestPointReward");
+                endif
+                
 		if (GetObjProperty(corpse,"RemoveFromQuestAfterDeath")==1)
-			MonsterObjectiveMet(quesstoneserial, killerserial, monsterserial, monsterpoints,1);
-			RemoveObjective(quesstoneserial, monsterserial);
+			MonsterObjectiveMet(queststoneserial, killerserial, monsterserial, spawnserial, monsterpoints);
+			RemoveObjective(queststoneserial, monsterserial);
 		else
-			MonsterObjectiveMet(quesstoneserial, killerserial, monsterserial, monsterpoints);
+			MonsterObjectiveMet(queststoneserial, killerserial, monsterserial, spawnserial, monsterpoints);
 		endif
+                    //I removed this to see if it fixes prob with returning 2 lots of quest points.
+                   // QuestNPCDeath(queststoneserial, monsterserial, killerserial, spawnserial, monsterpoints);
 	endif
 	
 	

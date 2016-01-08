@@ -12,6 +12,7 @@ include "include/classes";
 include "include/itemutil";
 include "include/string";
 include "include/random";
+include "include/debug";
 const DIFF_MULTIPLIER	:= 20;
 const POINT_MULTIPLIER	:= 20;
 const KARMA_PENALTY_FOR_FOOD_POISONING := -50;
@@ -138,7 +139,8 @@ function PoisonWeapon( character, potion, the_item )
 			poisoning_skill := ClasseBonus( character, CLASSEID_NINJA);
 		endif
 
-		if( Random(100) > poisoning_skill )
+		debugmessage("Poison Skill: "+poisoning_skill);
+		if( (poisoning_skill/2)+(poisoning_skill/4) < random(poisoning_skill) )
 			SetPoison( character, power, "You fail and poison yourself!" );
 		else
 			SendSysMessage( character, "You fail to apply the poison properly" );
@@ -184,8 +186,8 @@ function PoisonFood( character, potion, the_item )
 		if( class==CLASSEID_THIEF || class==CLASSEID_NINJA )
 			poisoning_skill := poisoning_skill * ClasseBonusByLevel( level );
 		endif
-
-		if( Random(100) > poisoning_skill )
+		debugmessage("Poison Skill: "+poisoning_skill);
+		if( (poisoning_skill/2)+(poisoning_skill/4) < random(poisoning_skill) )
 			SetPoison( character, power, "You fail and poison yourself!" );
 		else
 			SendSysMessage( character, "You fail to apply the poison properly" );

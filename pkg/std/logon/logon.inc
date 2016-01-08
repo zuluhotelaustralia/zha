@@ -11,11 +11,12 @@ function getexistinglogons(who)
 	var adds := account.getprop("moreips");
 	
 	foreach char in EnumerateOnlineCharacters()
-			if (char.ip == who.ip)
+			if ((char.ip == who.ip) && (!char.cmdlevel))
 				count := count + 1;
 			endif
-		endforeach
+	endforeach
 	var actual := cint(maxchars) + cint(adds);
+	print("["+account.name+"] count: "+cint(count)+" actual: "+cint(actual)+" maxchars: "+cint(maxchars)+" adds: "+cint(adds));
 	if( cint(count) > cint(actual))
 		return 1;
 	else
