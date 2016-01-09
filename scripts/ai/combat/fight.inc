@@ -40,7 +40,7 @@ function Fight( opponent )
 	var wasmoving:=1;
 
     while ( (opponent) && not
-	    (opponent.dead || opponent.hidden || opponent.concealed || opponent.multi) &&
+	    (opponent.dead || opponent.hidden || opponent.concealed || (opponent.multi.serial != me.multi.serial)) &&
 	    (Distance(me,opponent) < 20) )
 
 	cd := CloseDistance( opponent );
