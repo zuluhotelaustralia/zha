@@ -994,6 +994,12 @@ function ProcessSpeech(ev)
 	    evtext["all kill"] || evtext["all attack"] )
 		stopme();
 		var what := Target( master, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+				if (what.hidden == 1)
+					return;
+				endif
+				if (what.multi && (me.multi.serial != what.multi.serial))
+					return;
+				endif
 		if (what)
 			if (master.hidden)
 				master.hidden := 0;
@@ -1041,6 +1047,9 @@ function ProcessSpeech(ev)
 				if (what.multi && (me.multi.serial != what.multi.serial))
 					return;
 				endif
+				if (what.hidden == 1)
+					return;
+				endif
 				following := what;
 			endif
 		endif
@@ -1056,6 +1065,9 @@ function ProcessSpeech(ev)
 					return;
 				endif
 				if (what.multi && (me.multi.serial != what.multi.serial))
+					return;
+				endif
+				if (what.hidden == 1)
 					return;
 				endif
 				AllCommand(EVID_ALL_FOLLOW_CMD, what);
@@ -1081,6 +1093,9 @@ function ProcessSpeech(ev)
 				if (what.multi && (me.multi.serial != what.multi.serial))
 					return;
 				endif
+				if (what.hidden == 1)
+					return;
+				endif
 				guarding := what;
 				PrintTextAbove(me,"*guarding " + guarding.name + "*");
 			endif
@@ -1097,6 +1112,9 @@ function ProcessSpeech(ev)
 					return;
 				endif
 				if (what.multi && (me.multi.serial != what.multi.serial))
+					return;
+				endif
+				if (what.hidden == 1)
 					return;
 				endif
 				AllCommand(EVID_ALL_GUARD_CMD, what);
