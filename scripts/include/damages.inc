@@ -21,6 +21,7 @@ include "include/mobileutil";
 include "include/astralfights";
 include "include/newbieprotection";
 include "include/areas";
+include "include/log";
 
 const MAX_SERIAL_IN_HITLIST := 5;
 
@@ -70,14 +71,12 @@ function ApplyTheDamage( who, by_who, dmg, attack_type := DMGID_PHYSICAL )
 	else
 		if( GetObjProperty(who,PROPID_MOBILE_RISE) )
 			if( TryToInflictFinalDeath( who, attack_type ) )
-				SetObjProperty( who, PROPID_MOBILE_KILLED_BY, by_who.name );
-				SetObjProperty( who, PROPID_MOBILE_KILLED_BY_SERIAL, by_who.serial );
+                ProcessPlayerKill(who, by_who, dmg, attack_type);
 			else
 				factor := factor * VALUE_MULTIPLIER_FOR_ALLIES;
 			endif
 		else
-			SetObjProperty( who, PROPID_MOBILE_KILLED_BY, by_who.name );
-			SetObjProperty( who, PROPID_MOBILE_KILLED_BY_SERIAL, by_who.serial );
+            ProcessPlayerKill(who, by_who, dmg, attack_type);
 		endif
 	endif
 
@@ -391,4 +390,10 @@ function IsSummoned( byref mobile )
 
 	return GetObjProperty( mobile, PROPID_MOBILE_SUMMONED );
 
+endfunction
+
+function ProcessPlayerKill(byref victim, byref killer, dmg, attack_type)
+    SetObjProperty(victim, PROPID_MOBILE_KILLED_BY, killer.name);
+    SetObjProperty(victim, PROPID_MOBILE_KILLED_BY_SERIAL, killer.serial);
+    logKiller(victim, killer, dmg, attack_type);
 endfunction

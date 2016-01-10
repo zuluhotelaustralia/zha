@@ -25,14 +25,15 @@ orphans.txt
 
 # Log files (Or data based log files)
 log/
+config/log*.cfg
+**/*.log
 config/sell-logger.cfg
 config/servers.cfg
 config/createstack.cfg
 config/staffcommands - admin.cfg
 config/textcmd.res.cfg
-**/*.log
 
-
-# Misc
+# IDE
 2005-4-19 - ZHA.7z
+/.vscode/
 dev/

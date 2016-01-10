@@ -2,3 +2,8 @@ System
 {
 	CoreVersion	95
 }
+
+GlobalProperties
+{
+	CProp	maxcharsperip i3
+}
