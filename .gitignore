@@ -1,19 +1,39 @@
+## ZHA git ignore files.
+## Ignore any files that contain configuration or user generated data. 
+## Put a copy in \setup intead for inital setup.
+
+# System files
+/pol.cfg
+/POLHook.cfg
+/pol.exe
+/data/
+scripts/ecompile.cfg
+scripts/ECOMPILE.BAT
+
+# Misc pol generated files
+leftovers.txt
+objtypes.txt
+orphans.txt
+
+# Script objects
 *.dep
 *.lst
 *.ecl
 *.dbg
 *.dbg.txt
 *.dmp
+
+# Log files (Or data based log files)
 log/
+config/log*.cfg
+**/*.log
 config/sell-logger.cfg
 config/servers.cfg
 config/createstack.cfg
 config/staffcommands - admin.cfg
 config/textcmd.res.cfg
-scripts/ecompile.cfg
-scripts/ECOMPILE.BAT
-leftovers.txt
-objtypes.txt
-orphans.txt
-pol.cfg
+
+# IDE
 2005-4-19 - ZHA.7z
+/.vscode/
+dev/
