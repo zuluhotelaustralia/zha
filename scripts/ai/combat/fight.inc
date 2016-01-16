@@ -40,7 +40,7 @@ function Fight( opponent )
 	var wasmoving:=1;
 
     while ( (opponent) && not
-	    (opponent.dead || opponent.hidden || opponent.concealed || (opponent.multi.serial != me.multi.serial)) &&
+	    (opponent.dead || opponent.hidden || opponent.concealed) &&
 	    (Distance(me,opponent) < 20) )
 
 	cd := CloseDistance( opponent );
@@ -114,6 +114,9 @@ function Fight( opponent )
 		randomruns := 0;
 		waittime := 0;
 		wasmoving := 1;
+	4:
+		//closedistance returned 4, which means the opponent went onto a multi
+		DoRecall(me);
 	endcase
 
 	in_combat_event_loop(opponent);
@@ -278,4 +281,36 @@ function PeaceMade()
 	EnableMainEvents();
 	// EraseObjProperty(me,"#fighttime");
 
+endfunction
+
+function GoToSpawnPoint(spawnpoint)
+	say("Kal Ort Por");
+	PerformAction(me, 16);
+	sleepms(2500);
+	PlaySoundEffect(me, SFX_SPELL_RECALL1);
+	sleepms(250);
+	if (spawnpoint.isA(POLCLASS_ITEM))
+		MoveCharacterToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z);
+	else
+		MoveCharacterToLocation(me, spawnpoint[1], spawnpoint[2], spawnpoint[3]);
+	endif
+	PlaySoundEffect(me, SFX_SPELL_RECALL2);
+	return;
+endfunction
+
+function DoRecall(me)
+var spawnpoint := 0;
+	var spawnpointserial := GetObjProperty(me, "SpawnPoint");
+	if (GetObjProperty(me,"championSpawn"))
+		spawnpointserial := GetObjProperty(me,"championSpawn");
+	endif
+	if (spawnpointserial)
+		spawnpoint := SystemFindObjectBySerial(spawnpointserial);
+	elseif (GetObjProperty(me,"createdxyz"))
+		spawnpoint := GetObjProperty(me,"createdxyz");
+	endif
+//Recalling only for healers with spawnpoints
+		if(spawnpoint != error)
+			GoToSpawnPoint(spawnpoint);		
+		endif
 endfunction

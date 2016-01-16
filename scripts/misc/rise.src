@@ -26,6 +26,20 @@ program rise(corpse)
 				var newbackpack := CreateItemAtLocation(the_critter.x, the_critter.y, the_critter.z, 0xe75, 1 );
 				EquipItem( the_critter, newbackpack );
 			endif
+			var createdxyz := getobjproperty(corpse, "createdxyz");
+			if(createdxyz)
+				setobjproperty(the_critter, "createdxyz", createdxyz);
+			endif
+			
+			var championSpawn := getobjproperty(corpse, "championSpawn");
+			if(championSpawn)
+				setobjproperty(the_critter, "championSpawn", championSpawn);
+			endif
+			
+			var SpawnPoint := getobjproperty(corpse, "SpawnPoint");
+			if(SpawnPoint)
+				setobjproperty(the_critter, "SpawnPoint", SpawnPoint);
+			endif
 
 			foreach item in EnumerateItemsInContainer( corpse )
 				MoveItemToContainer( item, the_critter.backpack,1,1 );
