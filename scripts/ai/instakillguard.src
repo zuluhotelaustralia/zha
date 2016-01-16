@@ -105,6 +105,13 @@ endfunction
 
 
 function Closedistance()
+//  return 4 if they went onto a multi
+	
+	if  (targ.multi.serial != me.multi.serial)
+		return 4;
+	endif
+	
+	
 case Distance( me, targ )
 	1: return 1;
         2: RunToward( targ );

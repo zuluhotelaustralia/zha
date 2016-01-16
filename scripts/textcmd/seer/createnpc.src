@@ -26,10 +26,15 @@ program textcmd_createnpc( who, template )
 	endforeach
 
 	var props array;
+	var createdxyz := array{};
 	props.+facing := who.facing;
 	var loc := TargetCoordinates(who);
 
 	var result := CreateNpcFromTemplate( template, loc.x, loc.y, loc.z, props );
+	createdxyz[1] := loc.x;
+	createdxyz[2] := loc.y;
+	createdxyz[3] := loc.z;
+	SetObjProperty(result,"createdxyz", createdxyz);
 	var	gmdata := {	"createnpc", who.serial+ " / "+who.name+" / "+who.acctname, "x: "+loc.x+" y: "+loc.y+" z: "+loc.z,template , "x: "+who.x+" y: "+who.y+" z: "+who.z,"concealed: "+who.concealed , CInt(ReadGameClock())};
 	logcommand(who, gmdata);
 	if (!result)

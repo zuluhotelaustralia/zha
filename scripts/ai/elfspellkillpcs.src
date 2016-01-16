@@ -66,6 +66,12 @@ endprogram
 //
 /////////////////////////////////////////////////////////////////////////////
 function CloseDistance( opponent )
+//  return 4 if they went onto a multi
+	
+	if  (opponent.multi.serial != me.multi.serial)
+		return 4;
+	endif
+	
 
 //	return 1 if we DON'T need to move
 //	return 0 if we DO need to move

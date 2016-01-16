@@ -112,6 +112,11 @@ program CastleGuard()
 endprogram
 
 function CloseDistance( opponent )
+//  return 4 if they went onto a multi
+	
+	if  (opponent.multi.serial != me.multi.serial)
+		return 4;
+	endif
   case Distance( me, opponent )
     1:
     0:       return 1;

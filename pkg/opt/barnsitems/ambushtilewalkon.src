@@ -41,6 +41,11 @@ program ambushtilewalkon_lava( who, tile )
 			thecritter := CreateNpcFromGroup( tile, mtilestatus[1] );
 		endif
 		if (thecritter)
+			var createdxyz := array{};
+			createdxyz[1] := CInt(tile.x);
+			createdxyz[2] := CInt(tile.y);
+			createdxyz[3] := CInt(tile.z);
+			SetObjProperty(thecritter,"createdxyz", createdxyz);
 			PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa );
 			PlaySoundEffect( thecritter, 0x280 );
 		endif

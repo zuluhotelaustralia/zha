@@ -34,6 +34,12 @@ endprogram
 
 function CloseDistance( opponent )
 
+//  return 4 if they went onto a multi
+	
+	if  (opponent.multi.serial != me.multi.serial)
+		return 4;
+	endif
+	
     if ( (runaway < 100) or (!theammo) )
     	if (distance(me, opponent) <= 6)
 		RunAwayFrom(opponent);
