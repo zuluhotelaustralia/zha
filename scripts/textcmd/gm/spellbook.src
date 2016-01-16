@@ -1,5 +1,6 @@
 use uo;
 include "include/cmdlevel_check";
+include ":newclassspells:newclassbook";
 
 
 program textcmd_spellbook( who )
@@ -28,20 +29,24 @@ program textcmd_spellbook( who )
 	SetObjProperty( druid, "LFucker",who.serial + " - " + who.name);
 	SetObjProperty( druid, "Lesser", 255 );
 	SetObjProperty( druid, "Greater", 255 );
-	
+    
 	var bard := CreateItemInBackpack(who, 0xa5a, 1);
-	SetObjProperty( bard, "LFucker", who.serial + " - " + who.name);
+	SetObjProperty(bard, "LFucker", who.serial + " - " + who.name);
+	SetObjProperty(bard, "storedspells", { 129 });
 	
 	var nature:=CreateItemInBackpack(who, 0xa5c, 1);
 	SetObjProperty( nature, "LFucker", who.serial + " - " + who.name);
+	SetObjProperty(nature, "storedspells", { 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 });
 
 	var holy:=CreateItemInBackpack(who, 0xa5e, 1);
-	SetObjProperty( holy, "LFucker", who.serial + " - " + who.name);
-	
+	SetObjProperty(holy, "LFucker", who.serial + " - " + who.name);
+	SetObjProperty(holy, "storedspells", { 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 });
+    
 	var unholy:=CreateItemInBackpack(who, 0xa5d, 1);
-	SetObjProperty( unholy, "LFucker", who.serial + " - " + who.name);		
-	
+	SetObjProperty(unholy, "LFucker", who.serial + " - " + who.name);		
+	SetObjProperty(unholy, "storedspells", { 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 });
+    
 	var psi:=CreateItemInBackpack(who, 0xa5f, 1);
-	SetObjProperty( psi, "LFucker", who.serial + " - " + who.name);
-	
+	SetObjProperty(psi, "LFucker", who.serial + " - " + who.name);
+	SetObjProperty(psi, "storedspells", { 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 });
 endprogram
