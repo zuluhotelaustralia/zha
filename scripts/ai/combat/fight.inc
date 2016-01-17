@@ -117,6 +117,7 @@ function Fight( opponent )
 	4:
 		//closedistance returned 4, which means the opponent went onto a multi
 		DoRecall(me);
+        return;
 	endcase
 
 	in_combat_event_loop(opponent);
