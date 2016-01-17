@@ -4,7 +4,6 @@ include "include/time";
 const LOG_KILL := "::log_kill";
 
 function logKiller(byref victim, byref killer, dmg, attack_type)
-print("Killer");
     var logDetails := {
         {"killerName", killer.name},
         {"killerAccount", killer.acctname},

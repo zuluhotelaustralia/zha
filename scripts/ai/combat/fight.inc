@@ -310,7 +310,7 @@ var spawnpoint := 0;
 		spawnpoint := GetObjProperty(me,"createdxyz");
 	endif
 //Recalling only for healers with spawnpoints
-		if(spawnpoint != error)
+		if(spawnpoint != error && spawnpoint != 0)
 			GoToSpawnPoint(spawnpoint);		
 		endif
 endfunction
