@@ -36,7 +36,9 @@ endprogram
 function CloseDistance( opponent )
 //  return 4 if they went onto a multi
 	
-	if  (opponent.multi.serial != me.multi.serial)
+	//  Updated to fix the sea serpents spawned from sos with no point crashing server
+	//if  (opponent.multi.serial != me.multi.serial)
+	if (  (me.multi.serial != opponent.multi.serial) && me.graphic != 0x96 ) return 4;
 		return 4;
 	endif
 	
