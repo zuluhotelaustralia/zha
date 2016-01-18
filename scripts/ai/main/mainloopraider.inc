@@ -78,7 +78,7 @@ function main_AI_loop()
     while (1)
 		if (last_loot)
 			//Were not near the gold
-			if (!FindPath())
+			if (!FindPathZHA())
 					waittime := 0;
 					sleepms(SLEEP_TIME);
 			else
@@ -176,7 +176,7 @@ function main_AI_loop()
 endfunction      
 
 
-function FindPath() //Finds way along path to goal and check los if we stay in the same point for too long
+function FindPathZHA() //Finds way along path to goal and check los if we stay in the same point for too long
 
 	var lastwaypoint := 0;
 	var dist_to_walk := DistanceToLocation( goalx, goaly );

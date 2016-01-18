@@ -35,7 +35,7 @@ function GetIndex( byref the_array, byref to_find )
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
 		while( min <= max )
 			ctr := Cint((min+max)/2);
-			if( the_array[ctr].serial = to_find.serial )
+			if( the_array[ctr].serial == to_find.serial ) // Changed from =, ensure logic is the same
 				return ctr;
 			elseif( the_array[ctr].serial < to_find.serial )
 				min := ctr + 1;
@@ -50,7 +50,7 @@ function GetIndex( byref the_array, byref to_find )
 	else
 		while( min <= max )
 			ctr := Cint((min+max)/2);
-			if( the_array[ctr] = to_find )
+			if( the_array[ctr] == to_find ) // Changed from =, ensure logic is the same
 				return ctr;
 			elseif( the_array[ctr] < to_find )
 				min := ctr + 1;
@@ -89,7 +89,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
 		while( min <= max )
 			ctr := Cint((min+max)/2);
-			if( the_array[ctr].serial = element.serial )
+			if( the_array[ctr].serial == element.serial )
 				var ret := error;
 				ret.+errortext := "Element " + element + " already exist in array";
 				return ret;
@@ -102,7 +102,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	else
 		while( min <= max )
 			ctr := Cint((min+max)/2);
-			if( the_array[ctr] = element )
+			if( the_array[ctr] == element )
 				var ret := error;
 				ret.+errortext := "Element " + element + " already exist in array";
 				return ret;
@@ -182,7 +182,7 @@ endfunction
 function fill_array(starts, ends, incr := 1)
 
 	var newarray := array;
-	if (incr = 0)
+	if (incr == 0)
 	     return starts;
 	elseif (incr > 0)
 	     var i:= 1;

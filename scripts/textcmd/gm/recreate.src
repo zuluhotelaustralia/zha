@@ -23,7 +23,7 @@ program textcmd_kill( who )
       
             RevokePrivilege( mob, "invul" );
             SetObjProperty(mob, "guardkill", 1);
-            Damage( mob, GetHp(mob) );
+            ApplyDamage( mob, GetHp(mob) ); // Updated from old Damage call, ensure logic is the same.
             Detach();
             sleep(2);
             CreateNpcFromTemplate(obj,x,y,z);

@@ -9,7 +9,7 @@ include "include/checkcity";
 
 program lockchests(chest)
 /*
-	if(CheckCity(chest)=1) return;	endif
+	if(CheckCity(chest)==1) return;	endif // Changed from =, ensure logic is the same
 	if(chest.multi) return; endif
 	if(chest.movable) return; endif
 	if(chest.locked) return; endif

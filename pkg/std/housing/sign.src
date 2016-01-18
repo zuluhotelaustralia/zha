@@ -796,7 +796,7 @@ endfunction
 function HouseFunctionSecure( who, house, num )
 
 	var itemt;
-	if( num == 3 ) // num = 3 (delete)
+	if( num == 3 )
                 itemt := Target( who );
 		if( !itemt )
                         SendSysMessage( who, "Canceled." );

@@ -43,7 +43,7 @@ program epicranger( attacker, defender, weapon, armor, basedamage, rawdamage)
 		var amulti := attacker.serial;
 		var mmulti := mobile.serial;
 		var dmulti := defender.serial;
-		if(mmulti=amulti)
+		if(mmulti==amulti) // Changed from =, ensure logic is the same
 			okay:=0;
 		elseif( mobile.isA(POLCLASS_NPC) )
 			okay:=1;

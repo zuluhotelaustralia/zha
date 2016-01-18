@@ -654,7 +654,7 @@ function FixName(player)
 		endif
 
 	endfor
-	if (GetObjProperty(player,"guardtype")=2)
+	if (GetObjProperty(player,"guardtype")==2) // Changed from =, ensure logic is the same
 		data[6] := "CVG " + split[1];
 	elseif (GetObjProperty(player,"guardtype")=1)
 		data[6] := "OVG " + split[1];

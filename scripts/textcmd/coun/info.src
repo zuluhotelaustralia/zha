@@ -1240,7 +1240,7 @@ endif
 if (!who.dead)
 RevokePrivilege( who, "invul" );
 SetObjProperty(who, "guardkill", 1);
-Damage( who, GetHp(who) );
+ApplyDamage( who, GetHp(who) ); // Updated from old Damage call, ensure logic is the same. - Seravy
 SendSysMessage( character, whoname + " has been killed!" );
 else
 SendSysMessage( character, whoname + " is not dead!" );

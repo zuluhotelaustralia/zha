@@ -265,7 +265,7 @@ endif
 
 //EBLESS
 safe :=1;
-if (me.ar <= 30 and Random(3) =1 and me.mana > 20)
+if (me.ar <= 30 and Random(3) == 1 and me.mana > 20) // Changed from =, ensure logic is the same
 	foreach critter in ListMobilesInLineOfSight( me, 4 )
 		if (critter.name != me.name)
 			safe := 0;
