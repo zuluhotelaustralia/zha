@@ -47,6 +47,13 @@ program cast_resurrectanimal(parms)
   var elem := FindConfigElem( conf, npctemplate );
   var difficulty;
 
+    if(CInt(GetObjProperty( cast_on, "cut" )) == 1)
+        PrintTextAbovePrivate(cast_on, "*This create has been defiled so the soul has moved on and cannot be resurrected.*", caster);
+        EraseObjProperty( cast_on, "resattempt" );
+        EraseObjProperty( caster, "#Casting");
+        return;
+    endif
+
   if( !elem || GetObjProperty(cast_on, "noresurrect"))
     SendSysMessage( caster, "You can't resurrect that!" );
     EraseObjProperty( cast_on, "resattempt" );
