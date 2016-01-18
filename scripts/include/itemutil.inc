@@ -540,7 +540,7 @@ function IsIDable( item )
 		return 0;
 	elseif( item.graphic >= 0x100e && item.graphic <= 0x1013 )
 		return 0;
-	elseif( IsStackable( item ) )
+	elseif( IsStackableZHA( item ) )
 		return 0;
 	else
 		return 1;
@@ -660,7 +660,7 @@ function IsSand( theobj )
 endfunction
 
 
-function IsStackable( item )
+function IsStackableZHA( item )
 
 /*	if( Cint(item.amount) > 1 )
 		return 1;

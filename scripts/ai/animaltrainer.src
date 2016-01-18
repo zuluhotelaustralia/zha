@@ -563,6 +563,6 @@ function Save_Pet_Data(ticket, pet)
         SetObjProperty(pet, "guardkill", 1);
         pet.graphic := 1000;
         RevokePrivilege( pet, "invul" );
-        Damage(pet, GetHp(pet));
+        ApplyDamage(pet, GetHp(pet)); // Updated from old Damage call, ensure logic is the same.
 
 endfunction

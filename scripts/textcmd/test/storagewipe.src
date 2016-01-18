@@ -21,7 +21,7 @@ program storagewipe(who)
 	endnum := npctest.serial;
 	RevokePrivilege( npctest, "invul" );
 	SetObjProperty(npctest, "guardkill", 1);
-	Damage( npctest, 510 );
+	ApplyDamage( npctest, 510 ); // Updated from old Damage call, ensure logic is the same.
 
 	print("Wiping orphaned storage locations");
 	var tamedstorage, merchantstorage;

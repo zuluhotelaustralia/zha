@@ -119,7 +119,7 @@ program npcdeath(corpse)
 			SetGlobalProperty("raiddead", deaddudes);
 			var killer:=getobjproperty(corpse,"KilledBy");
 			foreach chr in EnumerateOnlineCharacters()
-				if(chr.name=killer) CreateItemInBackpack(chr,0xeed,GetObjProperty(corpse,"killamount")); break; endif
+				if(chr.name==killer) CreateItemInBackpack(chr,0xeed,GetObjProperty(corpse,"killamount")); break; endif // Changed from =, ensure logic is the same
 			endforeach
 		endif
 	endif

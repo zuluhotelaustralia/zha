@@ -62,7 +62,7 @@ program RaidTown(prefs)
 			until (waitforit or (timeout>10));
 
 			EraseGlobalProperty("RaidcfgOK");
-			if (!waitforit=2)
+			if (!waitforit==2) // Changed from =, ensure logic is the same
 				CleanUpRaid("Cfg Error");
 				return;
 			endif

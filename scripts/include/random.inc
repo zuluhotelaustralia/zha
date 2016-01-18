@@ -94,7 +94,7 @@ endfunction
 
 
 // uniform distribution (0.0 -> 1.0)
-function RandomFloat()
+function RandomFloatZHA()
 
 	return CDbl( CDbl(BaseRandom()) / CDbl(0x7fffffff) );
 
@@ -123,8 +123,8 @@ function RandomStandardNormal()
 
 	var u, v, s;
 	repeat
-		u := CDbl(RandomFloat() * 2.0 - 1.0);
-		v := CDbl(RandomFloat() * 2.0 - 1.0);
+		u := CDbl(RandomFloatZHA() * 2.0 - 1.0);
+		v := CDbl(RandomFloatZHA() * 2.0 - 1.0);
 		s := CDbl((u * u) + (v * v));
 	until( s < 1.0 );
 

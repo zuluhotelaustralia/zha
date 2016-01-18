@@ -57,7 +57,7 @@ function MakeChessMove( sqfrom, sqto, byref zboard )
 	// (+1 = down the board, -1 = up the board)
 	//
 	var dir := 1, color := "W", destcol := "W";
-	if ( CAsc(piece) > ascz ) // lower case = black
+	if ( CAsc(piece) > ascz ) // lower case == black
 		dir := -1;
 		color := "B";
 		piece := upper(piece);

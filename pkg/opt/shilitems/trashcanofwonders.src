@@ -31,7 +31,7 @@ function WonderTrash( who, item )
 
 	set_critical(1);
 
-	if( IsStackable(item) )
+	if( IsStackableZHA(item) )
 		DestroyItem(item);
 		PlaySoundEffect( who, SFX_226 );
 		return;

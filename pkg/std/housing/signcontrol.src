@@ -157,7 +157,7 @@ endfunction
 function HouseFunctionSecure( house, event, num )
 
 	var itemt;
-	if( num == 3 ) // num = 3 (delete)
+	if( num == 3 )
 		itemt := Target( event.source );
 		if( !itemt )
 			SendSysMessage( event.source, "Canceled." );

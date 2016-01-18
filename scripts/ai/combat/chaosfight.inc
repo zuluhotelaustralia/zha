@@ -126,7 +126,7 @@ function Fight( opponent )
 		SYSEVENT_ENGAGED:
 			if (ev.source)
 			  process_combat_event(ev);
-			  if (Random(6)=1)
+			  if (Random(6)==1) // Changed from =, ensure logic is the same
 				if ((!ev.source.npctemplate) or (ev.source.script == "tamed") )
 					opponent := ev.source;
 			  		SetOpponent( opponent );

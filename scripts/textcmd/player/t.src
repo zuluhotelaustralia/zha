@@ -9,7 +9,7 @@ SendSysMessage( who, "DELETE the file speech.mul in your UO3D directory." );
 		SendSysMessage( who, "Usage is : .t <msg>" );
 	elseif (!who.dead)
 		var color := who.backpack.color;
-		if (!color || color=0) color:=0x3B2; endif
+		if (!color || color==0) color:=0x3B2; endif
 		PrintTextAbove( who, text, 0x3, color ); 
 	endif
 */

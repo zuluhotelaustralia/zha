@@ -1,6 +1,7 @@
 ## ZHA git ignore files.
 ## Ignore any files that contain configuration or user generated data. 
 ## Put a copy in \setup intead for inital setup.
+## Use the \dev folder to put any interm scripts or items to not commit to git.
 
 # System files
 /pol.cfg
@@ -34,8 +35,10 @@ config/staffcommands - admin.cfg
 config/textcmd.res.cfg
 
 # IDE
-2005-4-19 - ZHA.7z
 /.vscode/
 dev/
+
+# Random excludes
+2005-4-19 - ZHA.7z
 setup/config.rar
 setup/textcmd.rar
