@@ -116,8 +116,13 @@ function Fight( opponent )
 		wasmoving := 1;
 	4:
 		//closedistance returned 4, which means the opponent went onto a multi
-		DoRecall(me);
-        return;
+		if (opponent.multi.isA(POLCLASS_BOAT))
+			DoTeleport(me,opponent);
+      return;
+		else
+			DoRecall(me);
+      return;
+    endif
 	endcase
 
 	in_combat_event_loop(opponent);
@@ -314,4 +319,11 @@ var spawnpoint := 0;
 		if(spawnpoint != error && spawnpoint != 0)
 			GoToSpawnPoint(spawnpoint);		
 		endif
+endfunction
+
+function DoTeleport(me,opponent)
+	say("Rel Por");
+	sleep(1);
+	PlaySoundEffect(caster, 0x1ff);
+	MoveCharacterToLocation(me, opponent.x, opponent.y, opponent.z);
 endfunction

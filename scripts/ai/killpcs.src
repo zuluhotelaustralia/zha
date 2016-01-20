@@ -34,13 +34,9 @@ endprogram
 
 
 function CloseDistance( opponent )
-//  return 4 if they went onto a multi
+
 	
 
-	if  (opponent.multi.serial != me.multi.serial)
-		return 4;
-
-	endif
 	
   var cfg := ReadConfigFile(":combat:itemdesc");
   var weaponType := cfg[me.weapon.objtype];
@@ -64,6 +60,10 @@ function CloseDistance( opponent )
 	if( Distance( me, opponent ) <= weprange)
 		return 1;
 	else
+		if  (opponent.multi.serial != me.multi.serial)
+			// return 4 if they went onto a multi and its not a boat
+			return 4;
+		endif
 		if (!mounted)
 			WalkToward( opponent );
 		
