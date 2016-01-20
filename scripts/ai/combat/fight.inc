@@ -324,6 +324,6 @@ endfunction
 function DoTeleport(me,opponent)
 	say("Rel Por");
 	sleep(1);
-	PlaySoundEffect(caster, 0x1ff);
+	PlaySoundEffect(me, 0x1ff);
 	MoveCharacterToLocation(me, opponent.x, opponent.y, opponent.z);
 endfunction
