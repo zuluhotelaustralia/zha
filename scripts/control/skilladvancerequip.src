@@ -22,6 +22,11 @@ program equip( who, it )
 	fixEquipment(it);
 	var equipslots;
         var itemes;
+        
+	if(( it.objtype == 0x26F || it.objtype == 0xF19D || it.objtype == 0xF19E || it.objtype == 0xF19F) && GetClass(who) != "IsPaladin")
+		SendSysMessage(who, "You require a certain holy bond to hold these items.");
+		return 0;
+	endif
 	if( IsInForbiddenContainer(who, it) )
 		SendSysMessage(who, "You can't equip that object from there.");
 		return 0;
