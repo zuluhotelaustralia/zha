@@ -116,7 +116,7 @@ function Fight( opponent )
 		wasmoving := 1;
 	4:
 		//closedistance returned 4, which means the opponent went onto a multi
-		if (opponent.multi.isA(POLCLASS_BOAT))
+		if (opponent.multi.isA(POLCLASS_BOAT) || me.multi.isA(POLCLASS_BOAT))
 			DoTeleport(me,opponent);
       return;
 		else
@@ -301,6 +301,8 @@ function GoToSpawnPoint(spawnpoint)
 		MoveCharacterToLocation(me, spawnpoint[1], spawnpoint[2], spawnpoint[3]);
 	endif
 	PlaySoundEffect(me, SFX_SPELL_RECALL2);
+	DisableCombatEvents();
+	EnableMainEvents();
 	return;
 endfunction
 

@@ -114,6 +114,15 @@ function Fight( opponent )
 		randomruns := 0;
 		waittime := 0;
 		wasmoving := 1;
+	4:
+		//closedistance returned 4, which means the opponent went onto a multi
+		if (opponent.multi.isA(POLCLASS_BOAT))
+			DoTeleport(me,opponent);
+      return;
+		else
+			DoRecall(me);
+      return;
+    endif
 	endcase
 
 	in_combat_event_loop(opponent);
@@ -300,4 +309,45 @@ function TeletoCharacter(char);
 		PlaySoundEffect( me, SFX_SPELL_RECALL );
 	endif
 
+endfunction
+
+function GoToSpawnPoint(spawnpoint)
+	say("Kal Ort Por");
+	PerformAction(me, 16);
+	sleepms(2500);
+	PlaySoundEffect(me, SFX_SPELL_RECALL1);
+	sleepms(250);
+	if (spawnpoint.isA(POLCLASS_ITEM))
+		MoveCharacterToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z);
+	else
+		MoveCharacterToLocation(me, spawnpoint[1], spawnpoint[2], spawnpoint[3]);
+	endif
+	PlaySoundEffect(me, SFX_SPELL_RECALL2);
+	DisableCombatEvents();
+	EnableMainEvents();
+	return;
+endfunction
+
+function DoRecall(me)
+var spawnpoint := 0;
+	var spawnpointserial := GetObjProperty(me, "SpawnPoint");
+	if (GetObjProperty(me,"championSpawn"))
+		spawnpointserial := GetObjProperty(me,"championSpawn");
+	endif
+	if (spawnpointserial)
+		spawnpoint := SystemFindObjectBySerial(spawnpointserial);
+	elseif (GetObjProperty(me,"createdxyz"))
+		spawnpoint := GetObjProperty(me,"createdxyz");
+	endif
+//Recalling only for healers with spawnpoints
+		if(spawnpoint != error && spawnpoint != 0)
+			GoToSpawnPoint(spawnpoint);		
+		endif
+endfunction
+
+function DoTeleport(me,opponent)
+	say("Rel Por");
+	sleep(1);
+	PlaySoundEffect(me, 0x1ff);
+	MoveCharacterToLocation(me, opponent.x, opponent.y, opponent.z);
 endfunction
