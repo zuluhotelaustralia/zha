@@ -3,14 +3,12 @@ include "include/random";
 
 function process_combat_event(ev)
 
-	ThrowPotion(ev.source);
-
-        if (ev.type == SYSEVENT_DAMAGED)
+   if (ev.type == SYSEVENT_DAMAGED)
 		if ((GetHp(me) * 100/GetMaxHp(me)) < flee_point)
 			EraseObjProperty(me,"#flees");
 			flee(ev.source);
 		endif
-        endif
+   endif
 
 endfunction
 
@@ -41,6 +39,10 @@ function prepare_for_fight(opponent)
 endfunction
 
 function ThrowPotion(you)
+
+	if (!you)
+		return;
+	endif
 
 	if (!GetObjProperty(me,"#lastbreath"))
 		SetObjProperty(me,"#lastbreath",ReadGameClock() + 5);
