@@ -1,7 +1,9 @@
-
+use uo;
+use os;
 include "include/random";
-//include "include/attributes";
+include "include/attributes";
 include "ai/main/npcinfo";
+include "include/cmdlevel_check";
 
 function Fight( opponent )
 
@@ -319,8 +321,14 @@ var spawnpoint := 0;
 	endif
 //Recalling only for healers with spawnpoints
 		if(spawnpoint != error && spawnpoint != 0)
-			GoToSpawnPoint(spawnpoint);		
-		endif
+			GoToSpawnPoint(spawnpoint);				
+// harlz - a check if the npc has no spawnpoint set by the end of this function he'll just die without leaving a body
+		elseif (((spawnpoint == error) || (spawnpoint == 0)) && (me.script !="tamed") && (me.npctemplate))
+	   RevokePrivilege( me, "invul" );
+	   SetObjProperty( me, "guardkill", 1);
+	   ApplyRawDamage( me, GetMaxHp(me)+3 );
+	   return;
+    endif
 endfunction
 
 function DoTeleport(me,opponent)
