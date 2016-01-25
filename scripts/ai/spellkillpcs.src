@@ -72,10 +72,6 @@ function CloseDistance( opponent )
 //	return 0 if we DO need to move
 //  return 4 if they went onto a multi
 	
-	if  (opponent.multi.serial != me.multi.serial)
-		return 4;
-	endif
-	
   var cfg := ReadConfigFile(":combat:itemdesc");
   var weaponType := cfg[me.weapon.objtype];
 
@@ -96,6 +92,9 @@ function CloseDistance( opponent )
 		dtowalkto :=weprange*2;
 	endif
 	if ( d >  dtowalkto)
+		if  (opponent.multi.serial != me.multi.serial)
+			return 4;
+		endif
 		WalkToward( opponent );
 		sleepms(sleepdelay);
 		return 0;
