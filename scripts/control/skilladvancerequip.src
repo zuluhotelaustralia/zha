@@ -19,6 +19,10 @@ const MASTER_SKILL     := 5;
 const GM_SKILL         := 6;
 
 program equip( who, it )
+
+	set_script_option(SCRIPTOPT_NO_RUNAWAY, 1); // stops script from reporting run away errors.
+	
+	
 	fixEquipment(it);
 	var equipslots;
         var itemes;
@@ -440,7 +444,6 @@ function DoImmunity( who, item )
 
 
 	var level;
-
 	foreach prot in possibles
 		level := CInt( GetObjProperty( item, prot ) );
 		if( level )
