@@ -117,14 +117,18 @@ function Fight( opponent )
 		waittime := 0;
 		wasmoving := 1;
 	4:
+	4:
 		//closedistance returned 4, which means the opponent went onto a multi
-		if (opponent.multi.isA(POLCLASS_BOAT) || me.multi.isA(POLCLASS_BOAT))
-//			DoTeleport(me,opponent);
-      return;
-		else
+		// edit by harlz to stop them wandering around and remove the recall onto boats which was being abused
+	// if (opponent.multi.isA(POLCLASS_BOAT))
+	//		DoTeleport(me,opponent);
+  //   return;
+	//	else
+	
 			DoRecall(me);
       return;
-    endif
+  
+   // endif
 	endcase
 
 	in_combat_event_loop(opponent);
