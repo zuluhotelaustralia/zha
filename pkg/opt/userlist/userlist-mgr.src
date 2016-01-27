@@ -90,7 +90,7 @@ program UserListManager()
 					print("Don't know how to manage event type "+ev[1]+" ("+TypeOf(ev[1])+").");
 			endcase
 		//else
-			//qualcosa di utile da fare quando non c'è carico...
+			//qualcosa di utile da fare quando non c'ï¿½ carico...
 		endif
 	endwhile
 
@@ -109,8 +109,8 @@ function UL_Add(who, alias:=0)
 		list:={ppl};
 	else
 		var pos:=1;
-		var max:=list.size();
-		while((pos<max)&&(upper(list[pos].name)<upper(ppl.name)))
+		var maxVariable:=list.size();
+		while((pos<maxVariable)&&(upper(list[pos].name)<upper(ppl.name)))
 			pos:=pos+1;
 		endwhile
 		if(list[pos].serial==ppl.serial)
@@ -120,7 +120,7 @@ function UL_Add(who, alias:=0)
 			endif
 		endif
 		// insert the record in the right place
-		if(pos==max)
+		if(pos==maxVariable)
 			list.append(ppl);
 		else
 			list.insert(pos, ppl);
@@ -239,17 +239,17 @@ endfunction
 function UL_MsgByName(who, name)
 	name:=upper(name);
 	var ll:=len(name);
-	var min:=1;
-	var max:=list.size();
-	var	pos:=max/2;
+	var minVariable:=1;
+	var maxVariable:=list.size();
+	var	pos:=maxVariable/2;
 	var txt:=upper(list[pos].name)[1,ll];
-	while((txt!=name)&&(min<max))
+	while((txt!=name)&&(minVariable<maxVariable))
 		if(txt<name)
-			min:=pos+1;
+			minVariable:=pos+1;
 		else
-			max:=pos-1;
+			maxVariable:=pos-1;
 		endif
-		pos:=(min+max)/2;
+		pos:=(minVariable+maxVariable)/2;
 		txt:=upper(list[pos].name)[1,ll];
 	endwhile
 	if(txt==name)

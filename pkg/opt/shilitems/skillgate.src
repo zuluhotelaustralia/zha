@@ -147,20 +147,20 @@ program skillgate( mobile, gate )
 		max_stats := array;
 	endif
 
-	var max;
+	var maxVariable;
 	for( i := 1; i <= len(max_stats); i := i + 1 )
 		if( max_stats[i][1] )
-			max := CInt( max_stats[i][2] );
-			if( max > 209 )
-				max := 209;
-			elseif( max < 1 )
-				max := 1;
+			maxVariable := CInt( max_stats[i][2] );
+			if( maxVariable > 209 )
+				maxVariable := 209;
+			elseif( maxVariable < 1 )
+				maxVariable := 1;
 			endif
 
 			case( i )
-				1:	SetObjProperty( mobile, "MaximumStrength", max );	break;
-				2:	SetObjProperty( mobile, "MaximumDexterity", max );	break;
-				3:	SetObjProperty( mobile, "MaximumIntelligence", max );	break;
+				1:	SetObjProperty( mobile, "MaximumStrength", maxVariable );	break;
+				2:	SetObjProperty( mobile, "MaximumDexterity", maxVariable );	break;
+				3:	SetObjProperty( mobile, "MaximumIntelligence", maxVariable );	break;
 			endcase
 		endif
 	endfor

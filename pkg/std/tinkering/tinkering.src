@@ -221,7 +221,7 @@ function TryToMakeComplex( character, use_on, to_be_done_objtype, needed_objtype
 
 	points	:= CInt( skill * POINTS_MULTIPLIER );
 
-	PlaySound( character, sfx );
+	PlaySoundTinkering( character, sfx );
 
 	if( CheckSkill( character, SKILLID_TINKERING, skill, points ) )
 
@@ -334,7 +334,7 @@ function TryToMakeComplex( character, use_on, to_be_done_objtype, needed_objtype
 endfunction
 
 
-function PlaySound( who, sfx )
+function PlaySoundTinkering( who, sfx )
 
 	PlaySoundEffect( who, sfx );
 	sleep(2);
@@ -487,7 +487,7 @@ function TryToMakeItem( character, ressource, to_make_objtype, sfx )
 		SubtractAmount( thegem, 1 );
 	endif
 
-	PlaySound( character, sfx );
+	PlaySoundTinkering( character, sfx );
 
 	skill := skill + CInt( ressource_diff / DIVIDER );
 
@@ -793,7 +793,7 @@ function MakeTotem( me, it )
 		return;
 	endif
 
-	PlaySound( me, SFX_GLASSBREAK4 );
+	PlaySoundTinkering( me, SFX_GLASSBREAK4 );
 	SubtractAmount( it, 100 );
 
 	if( !CheckSkill( me, SKILLID_MAGERY, 90, 0 ) || !CheckSkill( me, SKILLID_MAGERY, 90, 0 ) )
@@ -884,7 +884,7 @@ function TryToMakePotionKeg( character, use_on )
 
 	points	:= CInt( skill * POINTS_MULTIPLIER );
 
-	PlaySound( character, CARPENTER_SOUND );
+	PlaySoundTinkering( character, CARPENTER_SOUND );
 
 	var result_color;
 	foreach item in parts

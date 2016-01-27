@@ -216,7 +216,7 @@ function TryToMakeItem( character, resource, to_make_objtype )
 
 		itemname := element.Name;
 
-		PlaySound( character );
+		PlaySoundTailoring( character );
 
 		if( CheckSkill( character, SKILLID_TAILORING, skill, points ) )
 
@@ -403,7 +403,7 @@ function GetresourceName( resource )
 endfunction
 
 
-function PlaySound( character )
+function PlaySoundTailoring( character )
 
 	PlaySoundEffect( character, SCISSORS_SOUND );
 	sleep( 1 );
@@ -464,7 +464,7 @@ function FortifyHat( who, hat )
 		return;
 	endif
 
-	PlaySound( who );
+	PlaySoundTailoring( who );
 
 	var hatstr := GetObjProperty( hat, "str" );
 	var helmstr := GetObjProperty( helm, "str" );

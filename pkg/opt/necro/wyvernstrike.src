@@ -79,7 +79,7 @@ program cast_wyvernstrike( parms )
 	var dmg	:= CalcSpellDamage( caster, cast_on, circle );
 	var magery	:= GetEffectiveSkill( caster, SKILLID_MAGERY );
 	var plvl	:= ModifyWithMagicEfficiency( caster, CInt( magery /40 ) + 1 );
-	var max	:= ModifyWithMagicEfficiency( caster, 4 );
+	var maxVariable	:= ModifyWithMagicEfficiency( caster, 4 );
 
 	if( protected == CURSED )
 		plvl := plvl * 2;
@@ -87,8 +87,8 @@ program cast_wyvernstrike( parms )
 
 	plvl := Resisted( caster, cast_on, circle, plvl );
 
-	if( plvl > max )
-		plvl := max;
+	if( plvl > maxVariable )
+		plvl := maxVariable;
 	endif
 
 	var protection := GetResultingPlaneProtection( cast_on, plane );

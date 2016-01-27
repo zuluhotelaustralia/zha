@@ -1349,7 +1349,7 @@ function RechargeItem( character, item )
 	var elem 	:= config_file[gemtype];
 	var gemname	:= elem.GemName;
 	var charges	:= CInt( GetObjProperty( item, "charges" ) );
-	var max	:= CInt( GetObjProperty( item, "maxcharges" ) );
+	var maxCharges	:= CInt( GetObjProperty( item, "maxcharges" ) );
 	var cost	:= GetObjProperty( item, "CostPerCharge" );
 	if( !cost )
 		cost := 1;
@@ -1379,12 +1379,12 @@ function RechargeItem( character, item )
 				SubtractAmount( gem, cost );
 				if( CheckSkill( character, SKILLID_MAGERY, 100, 500 ) )
 					charges := charges + 1;
-					if( charges < max )
+					if( charges < maxCharges )
 						SendSysMessage( character, "There's now " + charges + " charges stored." );
 					else
 						SendSysMessage( character, "This item is at his max amount of charges." );
-						if( charges > max )
-							charges := max;
+						if( charges > maxCharges )
+							charges := maxCharges;
 						endif
 						break;
 					endif
