@@ -119,7 +119,7 @@ function Fight( opponent )
 	4:
 		//closedistance returned 4, which means the opponent went onto a multi
 		if (opponent.multi.isA(POLCLASS_BOAT) || me.multi.isA(POLCLASS_BOAT))
-			DoTeleport(me,opponent);
+//			DoTeleport(me,opponent);
       return;
 		else
 			DoRecall(me);
