@@ -184,21 +184,21 @@ function UndoImmunity( who, item )
 			endwhile
 		
 			if( CInt( GetObjProperty( who, prots[i] ) ) == protlvl )
-				var max := 0;
-				var min := 0;
+				var maxVar := 0;
+				var minVar := 0;
 			
 				foreach lvl in new_prot_vector
-					if( lvl < min )
-						min := lvl;
-					elseif( lvl > max )
-						max := lvl;
+					if( lvl < minVar )
+						minVar := lvl;
+					elseif( lvl > maxVar )
+						maxVar := lvl;
 					endif
 				endforeach
 			
-				if( min )
-					SetObjProperty( who, prots[i], min );
-				elseif( max )
-					SetObjProperty( who, prots[i], max );
+				if( minVar )
+					SetObjProperty( who, prots[i], minVar );
+				elseif( maxVar )
+					SetObjProperty( who, prots[i], maxVar );
 				else
 					EraseObjProperty( who, prots[i] );
 				endif

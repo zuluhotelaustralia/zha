@@ -122,7 +122,7 @@ var homepage, socialpage, friendspage,banspage,coownpage,optionspage,managementp
 				GFTextLine( 110, 270, TEXT_COLOR_BLUE, "Paid.");
 			endif
 			var GPAYUPKEEP := GFButtonID( 150, 270, G_BUTTON_OKAY_0, G_BUTTON_OKAY_0, 1);
-			var CLOSEGUMP := GFButtonID( 280, 270, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
+			var CLOSEGUMPV := GFButtonID( 280, 270, G_BUTTON_CANCEL_0, G_BUTTON_CANCEL_1, 1 );
 
 			GFPage(homepage);
 			GFTextLine( 40, 140, TEXT_COLOR_GREEN, "Owned by:"); // owner
@@ -563,7 +563,7 @@ var array2;
 			endif
 		endfor
 		
-		if( result[ CLOSEGUMP.keyid ] )
+		if( result[ CLOSEGUMPV.keyid ] )
 			return;
 		elseif( result[ NAMEHOUSE.keyid ] )
 				var newname := RequestInput( who, sign, "Enter a name for this house. (esc to exit)" );

@@ -18,7 +18,7 @@ program cast_poison( parms )
 	var caster;
 	var cast_on;
 	var fromhit;
-	var max := ModifyWithMagicEfficiency( caster, 4 );
+	var maxVar := ModifyWithMagicEfficiency( caster, 4 );
 
 	if (parms[1] == "#MOB")
 		caster := parms[2];
@@ -69,8 +69,8 @@ program cast_poison( parms )
 
 	p_level := Resisted( caster, cast_on, circle, p_level);
 
-	if( p_level > max )
-		p_level := max;
+	if( p_level > maxVar )
+		p_level := maxVar;
 	endif
 
 	if( p_level )

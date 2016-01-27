@@ -26,7 +26,7 @@ program equip( who, it )
 	fixEquipment(it);
 	var equipslots;
         var itemes;
-        
+                
 	if(( it.objtype == 0x26F || it.objtype == 0xF19D || it.objtype == 0xF19E || it.objtype == 0xF19F) && GetClass(who) != "IsPaladin")
 		SendSysMessage(who, "You require a certain holy bond to hold these items.");
 		return 0;
@@ -555,9 +555,9 @@ function UndoImmunity( who, item )
 
 
 	var level;
-	var max := struct;
-	max.+item := 0;
-	max.+lvl  := 0;
+	var maxVar := struct;
+	maxVar.+item := 0;
+	maxVar.+lvl  := 0;
 
 	foreach prot in possibles
 		level := CInt( GetObjProperty( item, prot ) );
@@ -566,19 +566,19 @@ function UndoImmunity( who, item )
 			foreach thing in ListEquippedItems( who )
 				if( item != thing )
 					level := CInt( GetObjProperty( thing, prot ) );
-					if( level > max.lvl )
-						max.item := thing;
-						max.lvl  := level;
+					if( level > maxVar.lvl )
+						maxVar.item := thing;
+						maxVar.lvl  := level;
 					endif
 				endif
 			endforeach
 		
-			if( max.item )
-				SetObjProperty( who, prot, max.lvl );
+			if( maxVar.item )
+				SetObjProperty( who, prot, maxVar.lvl );
 			endif
 		
-			max.item := 0;
-			max.lvl  := 0;
+			maxVar.item := 0;
+			maxVar.lvl  := 0;
 		endif
 	endforeach
 

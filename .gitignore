@@ -37,6 +37,7 @@ config/textcmd.res.cfg
 # IDE
 /.vscode/
 dev/
+/devpkg/
 
 # Random excludes
 2005-4-19 - ZHA.7z

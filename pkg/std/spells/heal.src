@@ -53,26 +53,26 @@ program cast_heal( parms )
 
 	var die_string := "3d2";
 	var healed := RandomDiceStr( die_string );
-	var max := 20;
+	var maxVar := 20;
 
 	if (GetObjProperty(caster, "UsingBardInstrument")==1)
 		if( GetObjProperty( caster, CLASSEID_BARD ) )
-			max := CInt( max * CLASSE_BONUS );
+			maxVar := CInt( maxVar * CLASSE_BONUS );
 		endif
 
 		healed := ModifyWithMagicEfficiency( caster, healed + CInt( GetEffectiveSkill(caster, SKILLID_ENTICEMENT)/20)+5 );
-		if (healed > max)
-			healed := max;
+		if (healed > maxVar)
+			healed := maxVar;
 		endif
 
 	else
 		if( GetObjProperty( caster, CLASSEID_MAGE ) || GetObjProperty(caster, CLASSEID_PRIEST))
-			max := CInt( max * CLASSE_BONUS );
+			maxVar := CInt( maxVar * CLASSE_BONUS );
 		endif
 
 		healed := ModifyWithMagicEfficiency( caster, healed + CInt( GetEffectiveSkill(caster, SKILLID_MAGERY)/20)+5 );
-		if (healed > max)
-			healed := max;
+		if (healed > maxVar)
+			healed := maxVar;
 		endif
 	endif
 	

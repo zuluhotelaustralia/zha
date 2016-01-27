@@ -533,16 +533,16 @@ function PetCount()
 
 	if( imfrommagic )
 		var magery	:= ModifyWithMagicEfficiency( master, GetEffectiveSkill( master, SKILLID_MAGERY ) );
-		var max	:= CInt( magery / 20 );
-		if( magic_pets > max && !master.cmdlevel && magic_pets > 2 )
+		var maxVar	:= CInt( magery / 20 );
+		if( magic_pets > maxVar && !master.cmdlevel && magic_pets > 2 )
 			SpecialFrenzyRelease( master );
 		endif
 
 	else
 		var lore 	:= CInt( GetEffectiveSkill( master, SKILLID_ANIMALLORE ) * ClasseBonus( master, CLASSEID_RANGER ));
 		var taming	:= CInt( GetEffectiveSkill( master, SKILLID_TAMING ) * ClasseBonus( master, CLASSEID_RANGER ));
-		var max	:= CInt( (lore + taming) / 15 );
-		if( pets > max && !master.cmdlevel && pets > 2 )
+		var maxVar	:= CInt( (lore + taming) / 15 );
+		if( pets > maxVar && !master.cmdlevel && pets > 2 )
 			Release();
 		endif
 	endif

@@ -23,24 +23,24 @@ use uo;
 ////////////////////////////////////////////////////////////////
 function GetIndex( byref the_array, byref to_find )
 
-	var max := the_array.Size();
-	if( !max )
+	var maxVar := the_array.Size();
+	if( !maxVar )
 		var ret := error;
 		ret.+errortext := "Element not found";
 		return ret;
 	endif
 	
 	var ctr;
-	var min := 1;
+	var minVar := 1;
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
-		while( min <= max )
-			ctr := Cint((min+max)/2);
+		while( minVar <= maxVar )
+			ctr := Cint((minVar+maxVar)/2);
 			if( the_array[ctr].serial == to_find.serial ) // Changed from =, ensure logic is the same
 				return ctr;
 			elseif( the_array[ctr].serial < to_find.serial )
-				min := ctr + 1;
+				minVar := ctr + 1;
 			else
-				max := ctr - 1;
+				maxVar := ctr - 1;
 			endif
 		endwhile
 		
@@ -48,14 +48,14 @@ function GetIndex( byref the_array, byref to_find )
 		ret.+errortext := "Element not found";
 		return ret;
 	else
-		while( min <= max )
-			ctr := Cint((min+max)/2);
+		while( minVar <= maxVar )
+			ctr := Cint((minVar+maxVar)/2);
 			if( the_array[ctr] == to_find ) // Changed from =, ensure logic is the same
 				return ctr;
 			elseif( the_array[ctr] < to_find )
-				min := ctr + 1;
+				minVar := ctr + 1;
 			else
-				max := ctr - 1;
+				maxVar := ctr - 1;
 			endif
 		endwhile
 		
@@ -79,42 +79,42 @@ endfunction
 ////////////////////////////////////////////////////////////////
 function InsertInSortedArray( byref the_array, byref element )
 
-	var max := the_array.Size();
-	if( !max )
+	var maxVar := the_array.Size();
+	if( !maxVar )
 		return the_array.Append(element);
 	endif
 	
 	var ctr;
-	var min := 1;
+	var minVar := 1;
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
-		while( min <= max )
-			ctr := Cint((min+max)/2);
+		while( minVar <= maxVar )
+			ctr := Cint((minVar+maxVar)/2);
 			if( the_array[ctr].serial == element.serial )
 				var ret := error;
 				ret.+errortext := "Element " + element + " already exist in array";
 				return ret;
 			elseif( the_array[ctr].serial < element.serial )
-				min := ctr + 1;
+				minVar := ctr + 1;
 			else
-				max := ctr - 1;
+				maxVar := ctr - 1;
 			endif
 		endwhile
 	else
-		while( min <= max )
-			ctr := Cint((min+max)/2);
+		while( minVar <= maxVar )
+			ctr := Cint((minVar+maxVar)/2);
 			if( the_array[ctr] == element )
 				var ret := error;
 				ret.+errortext := "Element " + element + " already exist in array";
 				return ret;
 			elseif( the_array[ctr] < element )
-				min := ctr + 1;
+				minVar := ctr + 1;
 			else
-				max := ctr - 1;
+				maxVar := ctr - 1;
 			endif
 		endwhile
 	endif
 
-	return the_array.Insert( min, element );
+	return the_array.Insert( minVar, element );
 	
 endfunction
 
