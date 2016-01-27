@@ -2,7 +2,8 @@ const STARTHAIR := 0x2030;
 const ENDHAIR := 0x2060;
 
 function grabloot()
-//return;
+return;
+/*
 	if( GetGlobalProperty( "#NoNpcLooting" ) )
 		return;
 	endif
@@ -113,7 +114,7 @@ function grabloot()
 
 			endif
      	endforeach
-
+*/
 endfunction
 
 function RunToIt(me,item)
