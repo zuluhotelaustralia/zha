@@ -10,6 +10,8 @@
 /data/
 scripts/ecompile.cfg
 scripts/ECOMPILE.BAT
+scripts/ecompile.exe
+/run-zha.bat
 
 # Misc pol generated files
 leftovers.txt
