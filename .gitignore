@@ -12,6 +12,10 @@ scripts/ecompile.cfg
 scripts/ECOMPILE.BAT
 scripts/ecompile.exe
 /run-zha.bat
+scripts/ecall.bat
+scripts/Compile-Folder.bat
+scripts/Compile-File.bat
+scripts/Compile-All.bat
 
 # Misc pol generated files
 leftovers.txt
@@ -35,6 +39,16 @@ config/servers.cfg
 config/createstack.cfg
 config/staffcommands - admin.cfg
 config/textcmd.res.cfg
+config/staffcommands - gibstaff.cfg
+config/staffcommands - destystaff.cfg
+config/staffcommands - ivanstaff.cfg
+config/staffcommands - KiwiGuy.cfg
+config/staffcommands - legacystaff.cfg
+config/staffcommands.cfg
+config/counselorkills.cfg
+config/asciispeech_log.cfg
+config/councycommandusage.cfg
+config/counselorbackpacks.cfg
 
 # IDE
 /.vscode/
@@ -45,3 +59,5 @@ dev/
 2005-4-19 - ZHA.7z
 setup/config.rar
 setup/textcmd.rar
+scripts/ai/fight.inc
+
