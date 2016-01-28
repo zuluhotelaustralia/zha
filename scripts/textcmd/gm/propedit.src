@@ -67,7 +67,7 @@ var finished       :=0;
 ////////////////////////////////////////////////////////
 
 program Prop_Editor(who)
-	if (!checkStaff(who, "propedit", CMDLEVEL_ADMINISTRATOR))
+	if (!checkStaff(who, "propedit", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
   sendsysmessage(who,"Edit Cprops on what?");

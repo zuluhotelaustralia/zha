@@ -5,7 +5,7 @@ include "include/cmdlevel_check";
 
 
 program cast_fireball( caster,)
-	if (!checkStaff(caster, "masskill", CMDLEVEL_ADMINISTRATOR))
+	if (!checkStaff(caster, "masskill", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
 	
