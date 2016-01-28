@@ -168,124 +168,12 @@ function MakeBlacksmithItems( character, ingots )
 
 			var theitem := CreateItemInBackpack( character, what );
 			if( theitem )
-
-				var quality 	:= smith_cfg[ingots.objtype].quality;
-				var cprops	:= GetConfigStringArray( smith_cfg[ingots.objtype], "CProp" );
-				var excep_ch	:= 10;
-				var excep_diff := skill;
-				var item_cfg	:= ReadConfigFile( ":*:itemdesc" );
-				var sell_price := CInt( item_cfg[what].VendorBuysFor );
-
-				var tempcprops:=cprops;
-				if( theitem.isA(POLCLASS_WEAPON) )
-					cprops:=array{};
-					for i:= 1 to len(tempcprops)
-						if (tempcprops[i]["OreES"])
-							cprops.append(tempcprops[i]);
-						endif
-					endfor
-				endif
-
-				theitem.quality := quality;
-				itemname := orename + " " + itemname;
-
-				if( GetObjProperty( character, CLASSEID_CRAFTER ) )
-					excep_ch	:= CInt( excep_ch * ClasseBonus( character, CLASSEID_CRAFTER ) );
-					excep_diff	:= excep_diff + 20;
-				else
-					excep_diff	:= excep_diff + 40;
-				endif
-
-				if( excep_diff < 90 )
-					excep_diff := 90;
-				endif
-
-				if ( (Random(100) < excep_ch) && CheckSkill( character, SKILLID_BLACKSMITHY, excep_diff, 0 ) )
-
-					var armslore := GetEffectiveSkill( character, SKILLID_ARMSLORE );
-					var multiplier := 5 + CInt( armslore / 10 );
-
-					if( GetObjProperty( character, CLASSEID_CRAFTER ) )
-						multiplier := CInt( multiplier * ClasseBonus( character, CLASSEID_CRAFTER ) );
-					endif
-
-					multiplier	:= 100 + multiplier;
-					var newquality := CInt(quality * multiplier);
-					newquality := CDbl(newquality);
-					newquality := newquality / 100;
-					theitem.quality := newquality;
-					itemname := "Exceptional " + itemname;
-
-					if (GetObjProperty(character, "BuilderMark") == 1)
-						itemname := itemname + " [Crafted by " + character.name + "]";
-					elseif( YesNo( character, "Add Builder Mark?" ) )
-						itemname := itemname + " [Crafted by " + character.name + "]";
-					endif
-
-					if( sell_price )
-						theitem.buyprice := CInt( sell_price * 2 );
-						sell_price := CInt( sell_price * 2 );
-					endif
-
-					SendSysMessage( character, "You make an exceptional item and put it in your pack." );
-					SetObjProperty( theitem, "IsExceptional", 1 );
-
-					if( excep_diff >= 130 )
-						SendSysMessage( character, "This masterpiece will make you famous around the world." );
-						AwardFame( character, FAME_BONUS );
-					elseif( GetObjProperty( character, CLASSEID_CRAFTER ) && excep_diff >= 110 )
-						SendSysMessage( character, "This masterpiece will make you famous around the world." );
-						AwardFame( character, FAME_BONUS );
-					endif
-				else
-
-					//Made a normal item
-					SendSysMessage( character, "You create the item and place it in your pack." );
-				endif
-
-				if( len( cprops ) )
-					foreach cprop in cprops
-						var splited := SplitWords( cprop );
-						var prop_name := splited[1];
-						var prop_mod  := CInt(splited[2]);
-						if( prop_name && prop_mod )
-							var presently := GetObjProperty( theitem, prop_name );
-							if( !presently )
-								presently := 0;
-							endif
-
-							if( presently && Abs(prop_mod) > Abs(presently) )
-								prop_mod := 0 - presently;
-							endif
-
-							var resulting := presently + prop_mod;
-							if( resulting > 0 && prop_name == "DefaultDex" )
-								resulting := 0;
-							endif
-
-							if( resulting  )
-								SetObjProperty( theitem, prop_name, resulting );
-							elseif( presently )
-								EraseObjProperty( theitem, prop_name );
-							endif
-						endif
-					endforeach
-				endif
-
-				if( ingots.objtype == UOBJ_GOLD_INGOT )
-					theitem.color := GOLD_COLOR;
-				else
-					theitem.color := ingots.color;
-				endif
-				/*
-				if( sell_price )
-					theitem.buyprice := Cint( Pow( sell_price , theitem.quality ) );
-				endif
-				*/
-				theitem.hp := theitem.maxhp;
-				SetObjProperty( theitem, "ForgedWith", ingots.objtype );
-				SetObjProperty( theitem, "BaseName", itemname );
-				SetName( theitem, itemname );
+				ProcessCreation(character,theitem,itemname,orename,what,ingots,skill,"You create the item and place it in your pack.","You make an exceptional item and put it in your pack.");
+			else
+				theitem := CreateItemAtLocation(1,1,0, what);
+				ProcessCreation(character,theitem,itemname,orename,what,ingots,skill,"Your backpack is full so you create the item and throw it on the ground.","Your backpack is full so you make an exceptional item and throw it on the ground.");
+				MoveItemToLocation(theitem,character.x,character.y,character.z);
+				
 			endif
 			SubtractAmount( ingots, material );
 
@@ -405,3 +293,124 @@ function CanMake( who, key, ingots, orediff )
 	return 0;
 
 endfunction
+
+function ProcessCreation(character,theitem,itemname,orename,what,ingots,skill,NormalText,ExceptionalText)
+	
+	var quality 	:= smith_cfg[ingots.objtype].quality;
+	var cprops	:= GetConfigStringArray( smith_cfg[ingots.objtype], "CProp" );
+	var excep_ch	:= 10;
+	var excep_diff := skill;
+	var item_cfg	:= ReadConfigFile( ":*:itemdesc" );
+	var sell_price := CInt( item_cfg[what].VendorBuysFor );
+
+				var tempcprops:=cprops;
+				if( theitem.isA(POLCLASS_WEAPON) )
+					cprops:=array{};
+					for i:= 1 to len(tempcprops)
+						if (tempcprops[i]["OreES"])
+							cprops.append(tempcprops[i]);
+						endif
+					endfor
+				endif
+
+				theitem.quality := quality;
+				itemname := orename + " " + itemname;
+
+				if( GetObjProperty( character, CLASSEID_CRAFTER ) )
+					excep_ch	:= CInt( excep_ch * ClasseBonus( character, CLASSEID_CRAFTER ) );
+					excep_diff	:= excep_diff + 20;
+				else
+					excep_diff	:= excep_diff + 40;
+				endif
+
+				if( excep_diff < 90 )
+					excep_diff := 90;
+				endif
+
+				if ( (Random(100) < excep_ch) && CheckSkill( character, SKILLID_BLACKSMITHY, excep_diff, 0 ) )
+
+					var armslore := GetEffectiveSkill( character, SKILLID_ARMSLORE );
+					var multiplier := 5 + CInt( armslore / 10 );
+
+					if( GetObjProperty( character, CLASSEID_CRAFTER ) )
+						multiplier := CInt( multiplier * ClasseBonus( character, CLASSEID_CRAFTER ) );
+					endif
+
+					multiplier	:= 100 + multiplier;
+					var newquality := CInt(quality * multiplier);
+					newquality := CDbl(newquality);
+					newquality := newquality / 100;
+					theitem.quality := newquality;
+					itemname := "Exceptional " + itemname;
+
+					if (GetObjProperty(character, "BuilderMark") == 1)
+						itemname := itemname + " [Crafted by " + character.name + "]";
+					elseif( YesNo( character, "Add Builder Mark?" ) )
+						itemname := itemname + " [Crafted by " + character.name + "]";
+					endif
+
+					if( sell_price )
+						theitem.buyprice := CInt( sell_price * 2 );
+						sell_price := CInt( sell_price * 2 );
+					endif
+
+					SendSysMessage( character, ExceptionalText );
+					SetObjProperty( theitem, "IsExceptional", 1 );
+
+					if( excep_diff >= 130 )
+						SendSysMessage( character, "This masterpiece will make you famous around the world." );
+						AwardFame( character, FAME_BONUS );
+					elseif( GetObjProperty( character, CLASSEID_CRAFTER ) && excep_diff >= 110 )
+						SendSysMessage( character, "This masterpiece will make you famous around the world." );
+						AwardFame( character, FAME_BONUS );
+					endif
+				else
+
+					//Made a normal item
+					SendSysMessage( character, NormalText );
+				endif
+
+				if( len( cprops ) )
+					foreach cprop in cprops
+						var splited := SplitWords( cprop );
+						var prop_name := splited[1];
+						var prop_mod  := CInt(splited[2]);
+						if( prop_name && prop_mod )
+							var presently := GetObjProperty( theitem, prop_name );
+							if( !presently )
+								presently := 0;
+							endif
+
+							if( presently && Abs(prop_mod) > Abs(presently) )
+								prop_mod := 0 - presently;
+							endif
+
+							var resulting := presently + prop_mod;
+							if( resulting > 0 && prop_name == "DefaultDex" )
+								resulting := 0;
+							endif
+
+							if( resulting  )
+								SetObjProperty( theitem, prop_name, resulting );
+							elseif( presently )
+								EraseObjProperty( theitem, prop_name );
+							endif
+						endif
+					endforeach
+				endif
+
+				if( ingots.objtype == UOBJ_GOLD_INGOT )
+					theitem.color := GOLD_COLOR;
+				else
+					theitem.color := ingots.color;
+				endif
+				/*
+				if( sell_price )
+					theitem.buyprice := Cint( Pow( sell_price , theitem.quality ) );
+				endif
+				*/
+				theitem.hp := theitem.maxhp;
+				SetObjProperty( theitem, "ForgedWith", ingots.objtype );
+				SetObjProperty( theitem, "BaseName", itemname );
+				SetName( theitem, itemname );
+EndFunction

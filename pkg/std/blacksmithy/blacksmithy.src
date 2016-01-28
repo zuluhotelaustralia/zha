@@ -73,6 +73,10 @@ function MakeGlass( character, ore )
 			SetName( ingots, "Raw Glass" );
 			DestroyItem( ore );
 			SendSysMessage( character, "You create some glass and place it in your pack." );
+		else
+			ingots := CreateItemAtLocation(character.x, character.y,character.z, what, GetAmount( ore ));
+			DestroyItem( ore );
+			SendSysMessage( character, "Your backpack is full so you create some glass and then throw them on the ground." );
 		endif
 	else
 		SubtractAmount( ore, 1 );
@@ -96,6 +100,10 @@ function MakeIngots( character, ore )
 		if( ingots )
 			DestroyItem( ore );
 			SendSysMessage( character, "You create some ingots and place them in your pack." );
+		else
+			ingots := CreateItemAtLocation(character.x, character.y,character.z, UOBJECT_INGOTS, GetAmount( ore ));
+			DestroyItem( ore );
+			SendSysMessage( character, "Your backpack is full so you create some ingots and then throw them on the ground." );
 		endif
        
 	else
@@ -128,6 +136,10 @@ function MakeJewelry( character, ore )
 		if (ingots)
 			SubtractAmount( ore, theamount * 100 );
 			SendSysMessage( character, "You create some gold ingots and place them in your pack." );
+		else
+			ingots := CreateItemAtLocation(character.x, character.y,character.z, UOBJECT_GOLD_INGOTS, theamount);
+			SubtractAmount( ore, theamount * 100 );
+			SendSysMessage( character, "Your backpack is full so you create some gold ingots and then throw them on the ground." );
 		endif
 	else
 		SubtractAmount( ore, 50 );
