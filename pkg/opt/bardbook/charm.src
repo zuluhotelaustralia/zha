@@ -71,6 +71,7 @@ program cast_charm( caster )
 	SetObjProperty( npc, "master", caster.serial );
 	SetObjProperty( npc, "script", npc.script );
 	SetObjProperty( npc, "duration", mult*60 );
+	SetObjProperty( npc, "charmed", 1 );
 	npc.setmaster( caster );
 	npc.script := "tamed";
 	RestartScript(npc);
