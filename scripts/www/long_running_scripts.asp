@@ -1,6 +1,7 @@
 <%
 use uo;
 use os;
+if (QueryIP() != "127.0.0.1") WriteHtmlRaw("Access Denied."); return 0; endif
 %>
 
 <html>
