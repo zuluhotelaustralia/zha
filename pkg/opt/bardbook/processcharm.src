@@ -44,6 +44,7 @@ PrintTextAbove( npc, npc.name + " can roam free again!" );
 
 npc.setmaster( 0 );
 EraseObjProperty(npc, "master");
+EraseObjProperty(npc, "charmed");
 
 
 RestartScript(npc);
