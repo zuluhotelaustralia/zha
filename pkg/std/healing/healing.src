@@ -224,10 +224,10 @@ function TryToHeal( character, patient, bandages )
 	var delay 	:= DELAY_TO_HEAL;
 	var healing	:= CInt( GetEffectiveSkill( character, SKILLID_HEALING ) / 10 );
 	var anatomy	:= CInt( GetEffectiveSkill( character, SKILLID_ANATOMY ) / 5 );
-	var healed	:= RandomDiceStr( healing + "d4+" + healing ) + RandomDiceStr( "1d8+2" ) + anatomy;
 	if (GetObjProperty(character, CLASSEID_PRIEST))
 		anatomy := CInt(GetEffectiveSkill(character, SKILLID_HEALING)/5);
 	endif
+	var healed	:= RandomDiceStr( healing + "d4+" + healing ) + RandomDiceStr( "1d8+2" ) + anatomy;
 
 
 	if( patient.serial == character.serial )
