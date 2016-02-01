@@ -249,6 +249,7 @@ function CreateGuardian( template, x, y, z )
 		SetObjProperty( nasty, "guardkill", 1 );
 		SetObjProperty( nasty, "noloot", 1 );
 		SetObjProperty( nasty, "nocut", 1 );
+		SetObjProperty( nasty, "createdxyz", {x,y,z});
 
 		var anchor	:= struct;
 		anchor.+x	:= x;
