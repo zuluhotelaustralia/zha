@@ -48,10 +48,12 @@ function changename(who)
 		SendSysMessage(who, "You have chosen an invalid or inappropriate name.",3,41);
 		return 0;
 	endif
-		
-	if( getobjproperty(who, "abv"))
+	
+	/* GIB - Removed the below as abv is no longer used to store the players abreviation in their cprops	
+	if( getobjproperty(who, "abv") && getobjproperty(who, "abv") != 0)
 		vname := vname + " ["+getobjproperty (who, "abv")+"]";
 	endif
+	*/
 	
 	if (!len(getNameChanges(who)))
 		addNameChange(who, "name change vial");
