@@ -466,7 +466,10 @@ endfunction
 
 function CastOnAllPlayersSpell(caster, spellid)
 //casts spell on all players within LOS and range
-	const RANGE := 7;
+	var RANGE := GetObjProperty(caster, "MassCastRange");
+	if(!RANGE)
+		RANGE := 7;
+	endif
 	var circle	:= GetCircle( spellid );
 	
 	var spellparms := { };
@@ -475,7 +478,7 @@ function CastOnAllPlayersSpell(caster, spellid)
 	spellparms[4] := circle;
 		
 
-	foreach mob in ListMobilesInLineOfSight( caster, RANGE)
+	foreach mob in ListMobilesInLineOfSight( caster, RANGE )
 		if (mob.acct || mob.script == "tamed")  //player or tamed monster
 			spellparms[3] := mob;
 			start_script(GetScript(spellid), spellparms);
