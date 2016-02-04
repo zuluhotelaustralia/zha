@@ -44,7 +44,7 @@ function WonderTrash( who, item )
 	DestroyItem(item);
 
 	set_critical(0);
-	var effect := RandomInt(50000);
+	var effect := RandomInt(30000);
 	var res    := 0;
 	if( effect <= 0 )
 		res := CreateWonderItem( who );
