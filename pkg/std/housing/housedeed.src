@@ -114,6 +114,11 @@ function Buildhouse( character, deed )
       PrintTextAbovePrivate( deed, "You can't build in safe areas.", character );
       return;
     endif
+    
+    if (IsInBox( character, 1689,1782, 902, 1217 )==1)
+    	PrintTextAbovePrivate( deed, "You can't build in the GMGY.", character );
+    	return;
+    endif
 
     // try to create the house
     set_critical( 1 );
