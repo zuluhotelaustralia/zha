@@ -1066,7 +1066,7 @@ function SetAbrevName(guild,who,stone)
       name:=allguilds[i].name;
       result:=result-1;
       name:=name[1,result];
-      allguilds[i].name:=name+" ["+tname+"]";
+      //allguilds[i].name:=name+" ["+tname+"]";
       SetObjProperty(allguilds[i].serial, "abv",tname);
     endif
   endfor

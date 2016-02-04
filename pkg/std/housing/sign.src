@@ -409,7 +409,7 @@ function AddFriend( house, who )
 		return;
 	endif
 
-	SetObjProperty( house, "friend" + (numb - 1), targetchr.serial);
+	SetObjProperty( house, "friend" + numb , targetchr.serial);
 	SendSysMessage( who, "Friend " + numb + " added." );
 
 endfunction
