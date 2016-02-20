@@ -1,0 +1,70 @@
+use uo;
+use os;
+
+include "include/cmdlevel_check";
+
+
+program textcmd_nextrun(who)
+
+  if( who.cmdlevel < CMDLEVEL_GAME_MASTER )
+    SendSysMessage( who, "Only Gamemasters can check champions next run." );
+    return 0;
+  endif
+
+  SendSysMessage(who, "Which champion spawn do you want to investigate?");
+  var targ := target(who);
+
+    if (!targ)
+      SendSysMessage( who, "Canceled.");
+    else
+
+      CheckNextRun(targ, who);
+
+    endif
+
+endprogram
+
+function CheckNextRun(targ, who)
+	
+	if( targ.objtype != 0x80AF )
+		SendSysMessage(who, "That is not a champion spawn.");
+		return;
+	endif
+	
+	var lastresettime := ReadGameClock()-GetObjProperty(targ, "resetCounter");
+	var spawnedNPCs := GetObjProperty(targ, "spawned");
+	var nextruntime := GetObjProperty(targ, "waittime")-ReadGameClock();
+	var runningscript := GetObjProperty(targ, "runningscript");
+
+
+	SendSysMessage(who, "The current system clock is "+ReadGameClock());	
+	
+	if( runningscript )
+		SendSysMessage(who, "The champion spawn script is currently running" );
+	else
+		SendSysMessage(who, "The champion spawn script is not currently running" );
+	endif
+	
+	if( lastresettime < 120 )
+		SendSysMessage(who, "The last time the champion spawn reset was "+lastresettime+" seconds ago.");
+	else
+		SendSysMessage(who, "The last time the champion spawn reset was "+lastresettime/60+" minutes ago.");
+	endif
+	
+	if ( spawnedNPCs.size() >= 1 )
+		SendSysMessage(who, "There are "+spawnedNPCs.size()+" spawned npcs alive and their serials are:");
+	
+		foreach serial in spawnedNPCs
+			SendSysMessage( who, serial );
+		endforeach
+	else
+		SendSysMessage(who, "There are no spawned npcs alive.");
+	endif
+	
+	if( nextruntime < 120 )
+		SendSysMessage(who, "The next stage will run in "+nextruntime+" seconds.");
+	else
+		SendSysMessage(who, "The next stage will run in "+nextruntime/60+" minutes.");
+	endif
+	
+endfunction
