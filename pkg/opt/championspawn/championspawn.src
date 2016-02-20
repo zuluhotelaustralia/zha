@@ -43,6 +43,7 @@ program championspawn( who, championSpawn )
   var times := GetObjProperty(championSpawn, "times");
 
   if (!active || !monsters || !numbers || !times)
+    EraseObjProperty( championSpawn, "runningscript");
     return;
   endif
 
@@ -110,11 +111,13 @@ program championspawn( who, championSpawn )
       else
         waittime := GetObjProperty(championSpawn, "waittime");
         sleep( waittime - ReadGameClock() + 1);
+    		EraseObjProperty( championSpawn, "runningscript");
         Start_Script(":championspawn:championspawn", { 0, championSpawn });
       endif
 
     else
       sleep( waittime - ReadGameClock() + 1);
+    	EraseObjProperty( championSpawn, "runningscript");
       Start_Script(":championspawn:championspawn", { 0, championSpawn });
     endif
   endif
@@ -477,6 +480,7 @@ function resetSpawn( championSpawn)
     endif
   endforeach
   SetObjProperty( championSpawn, "spawned", {});
+  EraseObjProperty( championSpawn, "runningscript");
 endfunction
 
 
@@ -1062,6 +1066,7 @@ elseif (choice[ActivateButton.keyid])
   endif
 elseif (choice[ExitButton.keyid])
    SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+   EraseObjProperty( championSpawn, "runningscript");
    sendsysmessage( who, "Goodbye.");
    return 0;
 endif
