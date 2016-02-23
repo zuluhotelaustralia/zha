@@ -44,6 +44,7 @@ program championspawn( who, championSpawn )
 
   if (!active || !monsters || !numbers || !times)
     EraseObjProperty( championSpawn, "runningscript");
+    SetObjProperty( championSpawn, "status", "Nothing Set");
     return;
   endif
 
@@ -60,6 +61,7 @@ program championspawn( who, championSpawn )
   if (!resetCounter)
     SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
   elseif ((resetCounter + (60 * 60 * resetHours)) < ReadGameClock())
+    SetObjProperty( championSpawn, "status", "Running Hours reset");
     resetSpawn( championSpawn);
     SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
     EraseObjProperty( championSpawn, "runningscript");
@@ -134,6 +136,7 @@ function createMonsters( level, monsters, numbers, championSpawn)
   var monsterMade := 0;
   var gctext:= GetObjProperty(championSpawn, "gctext");
   var gcloot:= GetObjProperty(championSpawn, "gcloot");
+  SetObjProperty( championSpawn, "status", "Spawning Level: "+level);
   while (monsters[level] == "nothing")
     if (level >= 6)
       if (monsters[1] != "nothing")
@@ -242,6 +245,7 @@ endfunction
 /* Sets the timer for next monsters **
 ** to spawn.                         */
 function setTimer(championSpawn, times, level)
+  SetObjProperty( championSpawn, "status", "Setting Time for level: "+level);
   var timerLevel := GetObjProperty(championSpawn, "nextRunWait");
 	var addtime := times[timerLevel];
 	
@@ -314,6 +318,7 @@ endfunction
 /* Checks to see if its the end, and      **
 ** if it is, it does the required trigger */
 function endSeq(championSpawn)
+  SetObjProperty( championSpawn, "status", "Starting end sequence");
   var gatedest := GetObjProperty(championSpawn, "gatedest");
   var unlock := GetObjProperty(championSpawn, "unlock");
   var script := GetObjProperty(championSpawn, "script");
@@ -412,6 +417,7 @@ function endSeq(championSpawn)
   endif
   
   SetObjProperty( championSpawn, "resetCounter", ReadGameClock());
+  SetObjProperty( championSpawn, "status", "Finished end sequence");
   return 1;
 endfunction
 
@@ -464,6 +470,7 @@ endfunction
 
 /* Resets all spawn parameters   */
 function resetSpawn( championSpawn)
+  SetObjProperty( championSpawn, "status", "Resetting Spawn");
   SetObjProperty(championSpawn, "level", 0);
   SetObjProperty(championSpawn, "waittime", 0);
   SetObjProperty( championSpawn, "nextRunWait", 0);
@@ -481,6 +488,7 @@ function resetSpawn( championSpawn)
   endforeach
   SetObjProperty( championSpawn, "spawned", {});
   EraseObjProperty( championSpawn, "runningscript");
+  SetObjProperty( championSpawn, "status", "Spawn Reset");
 endfunction
 
 
@@ -531,6 +539,7 @@ var page1, page2, page3,page4,page5,page6,page7,page8;
   var notifiers := GetObjProperty(championSpawn, "skulls");
   var notifiercolours := GetObjProperty(championSpawn, "colours");
   var endDuration := GetObjProperty(championSpawn, "endDuration");
+  var resetHours := GetObjProperty(championSpawn, "resetHours");
   var currentcolours;
   var monster1, monster2, monster3, monster4, monster5, monster6;
 	var amount1 := 0, amount2 := 0, amount3 := 0, amount4 := 0, amount5 := 0, amount6 := 0;
@@ -541,101 +550,103 @@ var page1, page2, page3,page4,page5,page6,page7,page8;
 	var activeColour;
 	var newgctext;
 
-
-if (!monsters || TypeOf(monsters) <> "Array" || monsters.size() < 5)
-  monsters := {};
-  for i := 1 to 6
-    monsters[i] := "nothing";
-  endfor
-elseif (monsters.size() == 5)
-monsters[6] := "nothing";
-endif
-
-if (!gcenable || gcenable == 0)
-  gcenable := 0;
-  gcchance := 0;
-endif
-
-if (!gctext)
-  gctext := "Who summons me?";
-endif
-
-if (!gcchance)
-  gcchance := 0;
-endif
-
-if (!notifiercolours || TypeOf(notifiercolours) <> "Array" || notifiercolours.size() < 3)
-  notifiercolours := {};
-  for i := 1 to 5
-    notifiercolours[i] := { 0, 1383, 1400 };
-  endfor
-elseif (notifiercolours.size == 3)
-  foreach colour in notifiercolours
-  	currentcolours.append( colour );
-  endforeach
-  notifiercolours := { currentcolours, currentcolours, currentcolours, currentcolours, currentcolours };
-  currentcolours := 0;
-endif
-if (!notifiers || TypeOf(notifiers) <> "Array" || notifiers.size() < 5)
-  notifiers := {};
-  for i := 1 to 5
-    notifiers[i] := 0;
-  endfor
-endif
-if (!numbers || TypeOf(numbers) <> "Array" || numbers.size() < 5)
-  numbers := {};
-  for i := 1 to 6
-    numbers[i] := 13-(i*2);
-  endfor
-elseif (numbers.size() == 5)
-	numbers[6] := 1;
-endif
-if (!times || TypeOf(times) <> "Array" || times.size() < 5)
-  times := {};
-  for i := 1 to 6
-    times[i] := CInt((i*10)/2);
-  endfor
-elseif (times.size() == 5)
-	times[6] := 120;
-endif
-if (!gatedest || TypeOf(gatedest) <> "Array" || gatedest.size() < 3)
-  gatedest := {};
-  for i := 1 to 3
-    gatedest[i] := 0;
-  endfor
-endif
-if (!unlock)
-  unlock := 0;
-endif
-if (!script)
- script := "";
-endif
-if (!endDuration)
-  endDuration := 0;
-endif
-if (!active || active == 0 )
-  active := 0;
-  activeString := "Activate";
-  activeColour := 38;
-elseif (active == 1)
-  activeString := "Deactivate";
-  activeColour := 63;
-endif
-if (!noLoot)
-  noLoot := 0;
-endif
-if (!checkLOS)
-  checkLOS := 0;
-endif
-if (!radius)
-  radius := 0;
-endif
-if (!dispel)
-  dispel := 0;
-endif
-if (!gatedest[4])
-  gatedest[4] := 0;
-endif
+	if (!resetHours)
+	  resetHours := 4;
+	endif
+	if (!monsters || TypeOf(monsters) <> "Array" || monsters.size() < 5)
+	  monsters := {};
+	  for i := 1 to 6
+	    monsters[i] := "nothing";
+	  endfor
+	elseif (monsters.size() == 5)
+	monsters[6] := "nothing";
+	endif
+	
+	if (!gcenable || gcenable == 0)
+	  gcenable := 0;
+	  gcchance := 0;
+	endif
+	
+	if (!gctext)
+	  gctext := "Who summons me?";
+	endif
+	
+	if (!gcchance)
+	  gcchance := 0;
+	endif
+	
+	if (!notifiercolours || TypeOf(notifiercolours) <> "Array" || notifiercolours.size() < 3)
+	  notifiercolours := {};
+	  for i := 1 to 5
+	    notifiercolours[i] := { 0, 1383, 1400 };
+	  endfor
+	elseif (notifiercolours.size == 3)
+	  foreach colour in notifiercolours
+	  	currentcolours.append( colour );
+	  endforeach
+	  notifiercolours := { currentcolours, currentcolours, currentcolours, currentcolours, currentcolours };
+	  currentcolours := 0;
+	endif
+	if (!notifiers || TypeOf(notifiers) <> "Array" || notifiers.size() < 5)
+	  notifiers := {};
+	  for i := 1 to 5
+	    notifiers[i] := 0;
+	  endfor
+	endif
+	if (!numbers || TypeOf(numbers) <> "Array" || numbers.size() < 5)
+	  numbers := {};
+	  for i := 1 to 6
+	    numbers[i] := 13-(i*2);
+	  endfor
+	elseif (numbers.size() == 5)
+		numbers[6] := 1;
+	endif
+	if (!times || TypeOf(times) <> "Array" || times.size() < 5)
+	  times := {};
+	  for i := 1 to 6
+	    times[i] := CInt((i*10)/2);
+	  endfor
+	elseif (times.size() == 5)
+		times[6] := 120;
+	endif
+	if (!gatedest || TypeOf(gatedest) <> "Array" || gatedest.size() < 3)
+	  gatedest := {};
+	  for i := 1 to 3
+	    gatedest[i] := 0;
+	  endfor
+	endif
+	if (!unlock)
+	  unlock := 0;
+	endif
+	if (!script)
+	 script := "";
+	endif
+	if (!endDuration)
+	  endDuration := 0;
+	endif
+	if (!active || active == 0 )
+	  active := 0;
+	  activeString := "Activate";
+	  activeColour := 38;
+	elseif (active == 1)
+	  activeString := "Deactivate";
+	  activeColour := 63;
+	endif
+	if (!noLoot)
+	  noLoot := 0;
+	endif
+	if (!checkLOS)
+	  checkLOS := 0;
+	endif
+	if (!radius)
+	  radius := 0;
+	endif
+	if (!dispel)
+	  dispel := 0;
+	endif
+	if (!gatedest[4])
+	  gatedest[4] := 0;
+	endif
 
 	GFInitGump( 10 , 10 );
 	GFPage(0);
@@ -904,6 +915,10 @@ endif
  	linecount := linecount + 15;
   var newdispel := GFTextEntry( 100, linecount, 95, 20, 39, text := dispel );
 	linecount := linecount + 25;
+	GFTextLine(100, linecount, 63, "Spawn Reset Time(hours):");	
+ 	linecount := linecount + 15;
+  var newresetHours := GFTextEntry( 100, linecount, 95, 20, 39, text := resetHours );
+	linecount := linecount + 25;
 	
 	GFPage(page8);//End Control*******************************************************************
 	linecount := 30;
@@ -971,6 +986,8 @@ SetObjProperty(championSpawn, "gatedest", gatedest);
 SetObjProperty(championSpawn, "unlock", cInt(GFExtractData(newunlock.keyid, choice)));
 SetObjProperty(championSpawn, "script", GFExtractData(newscript.keyid, choice));
 SetObjProperty(championSpawn, "endDuration", cint(GFExtractData(newendDuration.keyid, choice)));
+SetObjProperty(championSpawn, "resetHours", cint(GFExtractData(newresetHours.keyid, choice)));
+
 
 if (choice[newgcenable.keyid])
   SetObjProperty(championSpawn, "gcenable", 1);
