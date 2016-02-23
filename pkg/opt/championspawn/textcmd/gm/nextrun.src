@@ -66,5 +66,6 @@ function CheckNextRun(targ, who)
 	else
 		SendSysMessage(who, "The next stage will run in "+nextruntime/60+" minutes.");
 	endif
+	SendSysMessage(who, "The spawns last status was "+GetObjProperty(targ, "status"));
 	
 endfunction
