@@ -17,7 +17,7 @@ use npc;
 //
 
 function NpcWander()
-    case Random( 8 )
+    case (Random(8))
         0: 1: 2: 3: 4: 5:
             Move( Self().facing );
         6:

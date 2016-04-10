@@ -75,7 +75,7 @@ drop_anchor();
 
         endcase
 
-	NPCwander();
+	NpcWander();
     endwhile
 endprogram
 
@@ -142,7 +142,7 @@ function CloseDistance( opponent )
   var sleepdelay := 300 - (CInt(GetDexterity(me)) * 1.5);
   if (sleepdelay < 0) sleepdelay := 0; endif
 
-    case Distance( me, opponent )
+    case (Distance( me, opponent ))
         1:              // the most likely, so first 
         0:
             return 1;
@@ -167,7 +167,7 @@ endfunction
 //
 /////////////////////////////////////////////////////////////////////////////
 function OpenDistance( opponent )
-    case Distance( me, opponent )
+    case (Distance( me, opponent ))
         10:
             return 1;
        
