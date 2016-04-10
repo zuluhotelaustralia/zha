@@ -84,7 +84,7 @@ program textcmd_houseshower (who, text)
 		if (res<=20)
 		//move char to location
 			SendSysMessage(who, "House " + houses[res].x + ", " + houses[res].y + ", " + houses[res].z);
-			MoveCharacterToLocation(who, houses[res].x, houses[res].y, houses[res].z+10, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(who, houses[res].x, houses[res].y, houses[res].z+10, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			res:=housegump(who, houses, page, title);
 		endif
 		if (res==21)//prev
@@ -315,7 +315,7 @@ endfunction
 function GetHouseTypeString (housetype)
 	//returns the string corresponding to the houses type
 	var houseTypeStr;
-	case housetype
+	case (housetype) //Conversion
 		MULTIID_HOUSE_CASTLE:	
 			houseTypeStr := "Castle";
 			break;	

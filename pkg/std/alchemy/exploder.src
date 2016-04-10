@@ -38,7 +38,7 @@ program exploder(parms)
 		where.z := thrower.z;
 		Set_Critical(1);
 		lookout.movable := 1;
-		MoveItemToLocation(lookout, thrower.x, thrower.y, thrower.z);
+		MoveObjectToLocation(lookout, thrower.x, thrower.y, thrower.z, _DEFAULT_REALM); //AutoConversion
 		lookout.movable := 0;
 		Set_Critical(0);
 	else

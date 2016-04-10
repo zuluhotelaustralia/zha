@@ -120,6 +120,6 @@ endfunction
 function ReturnHome()
 
 	var myhome := GetObjProperty(me,"myhome");
-	MoveCharacterToLocation(me,myhome[1],myhome[2],myhome[3],MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,myhome[1],myhome[2],myhome[3], _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 endfunction

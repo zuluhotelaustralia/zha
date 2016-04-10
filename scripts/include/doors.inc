@@ -19,7 +19,7 @@ function open_door(door)
 
     door.graphic := opengraphic;
     door.movable := 1;
-    MoveItemToLocation(door, newx, newy, newz, MOVEITEM_FORCELOCATION);   
+    MoveObjectToLocation(door, newx, newy, newz, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion   
     door.movable := 0;
 
 endfunction
@@ -37,7 +37,7 @@ function close_door(door)
 
     door.graphic := door.objtype;
     door.movable := 1;
-    MoveItemToLocation(door, newx, newy, newz, MOVEITEM_FORCELOCATION);
+    MoveObjectToLocation(door, newx, newy, newz, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     door.movable := 0;
 
 endfunction

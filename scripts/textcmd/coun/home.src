@@ -7,5 +7,5 @@ program textcmd_home( who )
 		return 0;
 	endif
 	
-    MoveCharacterToLocation(who, 1484,1626,30);
+    MoveObjectToLocation(who, 1484,1626,30, _DEFAULT_REALM); //AutoConversion
 endprogram

@@ -392,7 +392,7 @@ function Move_Shit( who, shit )
       PrintTextAbovePrivate(who,"How long do you think the handle of your shovel is?", who);
       return;
   endif
-	MoveItemToLocation( shit, move_to.x, move_to.y, move_to.z );
+	MoveObjectToLocation( shit, move_to.x, move_to.y, move_to.z , _DEFAULT_REALM); //AutoConversion
   PrintTextAbovePrivate(shit,"Moved.", who);
   return;
 endfunction

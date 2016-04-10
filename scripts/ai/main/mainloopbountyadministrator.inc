@@ -252,7 +252,7 @@ endfunction
 function ReturnHome()
 
 	var myhome := GetObjProperty(me,"myhome");
-	MoveCharacterToLocation(me,myhome[1],myhome[2],myhome[3],MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,myhome[1],myhome[2],myhome[3], _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 endfunction
 
@@ -275,7 +275,7 @@ function GoToCurrentBounty(who)
 		SendSysMessage( who, "MONSTER NOT FOUND." );
 		return 0;	
 	endif
-	MoveCharacterToLocation(who, monster.x, monster.y, monster.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(who, monster.x, monster.y, monster.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 endfunction
 
 function GetCurrentBountyMonster()
@@ -311,7 +311,7 @@ function SetNewBountyMonster()
 	var monst:=CreateNpcFromTemplate( CStr(rand_bp.npctemplate),CInt(rand_bp.x),CInt(rand_bp.y),CInt(rand_bp.z));
 	if (!monst)
 		monst:=CreateNpcFromTemplate( CStr(rand_bp.npctemplate),CInt(me.x),CInt(me.y),CInt(me.z));
-		MoveCharacterToLocation(monst,rand_bp.x,rand_bp.y,rand_bp.z,MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(monst,rand_bp.x,rand_bp.y,rand_bp.z, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	endif
 	if (!monst)
 		return 0;

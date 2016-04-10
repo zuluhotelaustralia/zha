@@ -172,7 +172,7 @@ function MakeBlacksmithItems( character, ingots )
 			else
 				theitem := CreateItemAtLocation(1,1,0, what);
 				ProcessCreation(character,theitem,itemname,orename,what,ingots,skill,"Your backpack is full so you create the item and throw it on the ground.","Your backpack is full so you make an exceptional item and throw it on the ground.");
-				MoveItemToLocation(theitem,character.x,character.y,character.z);
+				MoveObjectToLocation(theitem,character.x,character.y,character.z, _DEFAULT_REALM); //AutoConversion
 				
 			endif
 			SubtractAmount( ingots, material );

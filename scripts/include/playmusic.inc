@@ -1,6 +1,6 @@
 include "include/client";
 
-function PlayMusic( character, music_id )
+function PlayMusicConverted( character, music_id )
 
     var packet_str :=  ( "6D00" + music_id );
 

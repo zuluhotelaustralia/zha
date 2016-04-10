@@ -1,10 +1,10 @@
-create_debug_context();
+Create_Debug_Context();
     
     // get a process scripting object by PID
-getprocess( pid );
+GetProcess( pid );
 
     // getpid: get this script's pid
-getpid();
+GetPid();
 
     //
     // unload_scripts: unload scripts from the script cache (they will be 
@@ -12,35 +12,36 @@ getpid();
     //                 scripts will continue as normal.
     //                 Passing "" will unload all scripts.
     //
-unload_scripts( scriptname := "" );
+Unload_Scripts( scriptname := "" );
 
     //
     // set_script_option: Set script options
     //
-set_script_option( optnum, optval );
+Set_Script_Option( optnum, optval );	// return value is the value that is currently set for that option, or error
 const SCRIPTOPT_NO_INTERRUPT := 1;      // if 1, script runs until it sleeps
 const SCRIPTOPT_DEBUG        := 2;      // if 1, prints any debug info included
 const SCRIPTOPT_NO_RUNAWAY   := 3;      // if 1, doesn't warn about runaway conditions
 const SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES := 4;
+const SCRIPTOPT_AUXSVC_ASSUME_STRING := 5;
     //
     // set_script_option(SCRIPTOPT_NO_INTERRUPT,1) is the same as set_critical(1)
     // set_script_option(SCRIPTOPT_DEBUG,1) is the same as set_debug(1)
     //
 
-sleep( num_seconds );
-sleepms( num_milliseconds );
+Sleep( num_seconds );
+Sleepms( num_milliseconds );
 
     //
     // wait_for_event: sleep for a number of seconds until an event shows up
     //                 if timeout is 0, return immediately
     //                 returns 0 if no event was ready
     //
-wait_for_event( num_seconds_timeout );
+Wait_For_Event( num_seconds_timeout );
 
     //
     // events_waiting: the number of events waiting, 0+
     //
-events_waiting();
+Events_Waiting();
 
     //
     // set_priority: the priority of a script is how many instructions it
@@ -48,14 +49,14 @@ events_waiting();
     //               default script priority is 1.
     //               priority range is 1 to 255.
     //               Returns previous priority.
-set_priority( priority );
+Set_Priority( priority );
 
     //
     // set_critical: critical scripts run if they are not blocked, without
     //               interruption.  An infinite loop in a critical script
     //               will hang the server
     //
-set_critical( critical );
+Set_Critical( critical );
 
 
     //
@@ -64,18 +65,20 @@ set_critical( critical );
     //                   will be printed as it is executed.
     //                   if debug=0, disables this output.
     //
-set_debug( debug );
+Set_Debug( debug );
 
 
-start_script( script_name, param := 0 );
-run_script_to_completion( script_name, param := 0 );
+Start_Script( script_name, param := 0 );
+Start_Skill_Script( chr, attr_name, script_name := 0, param := 0 );
+Run_Script_To_Completion( script_name, param := 0 );
+Run_Script( script_name, param := 0 );
 
 
     // 
     // syslog(text): write text to the console, and to the log file
     //               includes context (calling script name)
     //
-syslog( text );
+SysLog( text );
 
 
     //
@@ -83,19 +86,23 @@ syslog( text );
     //               "game loop rotations" completed in the last minute.
     //               This can be zero!
     //
-system_rpm();
+System_RPM();
 
 	//
 	// clear_event_queue(): Empties the event queue of the current script.
 	//
-clear_event_queue();
+Clear_Event_Queue();
 
 	//
 	// set_event_queue_size(size): Sets the event queue size of the current script (default 20)
 	//
-set_event_queue_size(size);
+Set_Event_Queue_Size(size);
 
     //
     // is_critical(): returns 1 if the calling script is set critical, else 0.
     //
-is_critical();
+Is_Critical();
+
+OpenURL( character, url );
+OpenConnection( host, port, scriptdef);
+Debugger(); // put script in debug state

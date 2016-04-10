@@ -12,7 +12,7 @@ function StaffIsEquipped(me, staff)
 endfunction 
 
 function FindSpellIdForObjType(objtype)
-	case objtype
+	case (objtype) //Conversion
           0x1f2d: return 7;
           0x1f2e: return 1;
           0x1f2f: return 2;
@@ -114,7 +114,7 @@ function FindSpellIdForObjType(objtype)
 endfunction
 
 function GetSpellNameFromId(spellid)
-		case spellid
+		case (spellid) //Conversion
                 7: return "Reactive Armor";
                 1: return "Clumsy";
                 2: return "Create Food";

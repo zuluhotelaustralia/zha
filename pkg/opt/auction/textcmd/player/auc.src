@@ -169,7 +169,7 @@ var temp, newitem;
           endforeach
 
 if (temp>99)
-newitem:=SystemFindObjectBySerial(CInt(temp),SYSFIND_SEARCH_STORAGE_AREAS);
+newitem:=SystemFindObjectBySerial(CInt(temp));
 endif
 
   case (res[0])

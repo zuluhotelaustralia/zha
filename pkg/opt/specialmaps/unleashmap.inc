@@ -152,7 +152,7 @@ function RunPlaceHolderMapCheck(mylevel6mapplaceholder)
 						PrintTextAbove(monst, "Kal Ort Por");
 						PlaySoundEffect( monst, SFX_210 );
 						sleepms(250);
-						MoveCharacterToLocation( monst, mylevel6mapplaceholder.x, mylevel6mapplaceholder.y, mylevel6mapplaceholder.z, MOVECHAR_FORCELOCATION);
+						MoveObjectToLocation( monst, mylevel6mapplaceholder.x, mylevel6mapplaceholder.y, mylevel6mapplaceholder.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 						PlaySoundEffect( monst, SFX_SPELL_RECALL );
 						EraseObjProperty(monst, "timesaway");
 					else

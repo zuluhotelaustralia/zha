@@ -139,7 +139,7 @@ program gotNothingGateWalkon( who, moongate )
     //transport
     set_critical(1); 
     SetObjProperty(who,"#moved", 1);
-    if (!MoveCharacterToLocation( who, tox, toy, toz))
+    if (!MoveObjectToLocation( who, tox, toy, toz))
 		who.frozen := 0;
 		EraseObjProperty( who, "frozen");
 		EraseObjProperty(who, "goneThruGotNothing");

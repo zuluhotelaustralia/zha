@@ -23,7 +23,7 @@ who.title_race:="ZuluCTF";
 
 who.setParalyzed(0);
 EraseObjProperty(who,"newbie");
-MoveCharacterToLocation(who,6083,450,-22);
+MoveObjectToLocation(who,6083,450,-22, _DEFAULT_REALM); //AutoConversion
 SendSysMessage(who,"Welcome to Capture the Flag.",3,1000);
 SendSysMessage(who,"To play: walk into either the RED or BLUE gate.",3,1000);
 

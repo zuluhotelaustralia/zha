@@ -58,10 +58,10 @@ function killWisp(currentspy)
 		var backpack := FindExistingPack( currentspy.serial );
 		if( backpack )
 			foreach item in EnumerateItemsInContainer( backpack );
-				MoveItemToLocation( item, currentspy.x, currentspy.y, currentspy.z, MOVEITEM_FORCELOCATION );
+				MoveObjectToLocation( item, currentspy.x, currentspy.y, currentspy.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			endforeach
 		endif
-		MoveCharacterToLocation( currentspy, 0, 0, 0, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( currentspy, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		ApplyRawDamage(currentspy, GetHp(currentspy) + 3);
 	endif
 endfunction

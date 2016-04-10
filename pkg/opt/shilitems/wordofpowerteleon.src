@@ -55,7 +55,7 @@ function TeleportCharacter( who, teleporter )
 
 	sleepms(250);
 
-	MoveCharacterToLocation( who, x, y, z );
+	MoveObjectToLocation( who, x, y, z , _DEFAULT_REALM); //AutoConversion
 	PlaySoundEffect( who, SFX_SPELL_RECALL2 );
 
 endfunction

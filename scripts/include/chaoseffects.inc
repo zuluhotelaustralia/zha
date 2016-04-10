@@ -88,7 +88,7 @@ function ChaosAlteration(who)
 	var i, x, success :=0;
 	i := Random(8) + 1;
 
-	case i
+	case (i) //Conversion
 		1:
 			x := (GetStrength(who) - 1);
 			SetBaseStrength(who,x);
@@ -157,7 +157,7 @@ function ChaosMutation(who)
 	var i, x, y, success :=0;
 	i := Random(10) + 1;
 
-	case i
+	case (i) //Conversion
 		1:
 		
 			x := (GetStrength(who) - 5);
@@ -216,7 +216,7 @@ function ChaosMutation(who)
 			foreach success in ListEquippedItems(who);
 				x := who.x + Random(11) - 5;
 				y := who.y + Random(11) - 5;
-				MoveItemToLocation(success, x, y, GetWorldHeight(x, y),0 );
+				MoveObjectToLocation(success, x, y, GetWorldHeight(x, _DEFAULT_REALM, y),0 ); //AutoConversion
 			endforeach
 			SendSysMessage(who, "You feel colder...");
 			return;
@@ -274,7 +274,7 @@ function DivertPlayer(who)
 
 	SendSysMessage(who, "Something is amiss...");
 
-	MoveCharacterToLocation(who, CInt(newx[i]), CInt(newy[i]), CInt(newz[i]) );
+	MoveObjectToLocation(who, CInt(newx[i]), CInt(newy[i]), CInt(newz[i]) );
 	return;
 
 endfunction

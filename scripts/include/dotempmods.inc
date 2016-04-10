@@ -403,8 +403,8 @@ function UndoTheMod( who, prop, amt )
 					RevokePrivilege( who, "hearghosts" );
                                         SendSysMessage(who, "You are now no longer detecting Brainwaves.");
                                         var casterLoc := {who.x, who.y, who.z};
-                                        MoveCharacterTolocation(who, 1, 1, 1, MOVECHAR_FORCELOCATION);
-                                        MoveCharacterTolocation(who, casterLoc[1], casterLoc[2], casterLoc[3], MOVECHAR_FORCELOCATION );
+                                        MoveObjectToLocation(who, 1, 1, 1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
+                                        MoveObjectToLocation(who, casterLoc[1], casterLoc[2], casterLoc[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				endif
 
 		"seehidden":	if (!amt)

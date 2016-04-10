@@ -338,7 +338,7 @@ program joinctf(who,item)
 if (who.title_race=="CTF_II") who.title_race:="ZuluCTF"; endif
 
 if (who.title_race!="ZuluCTF")
-MoveCharacterToLocation(who,1417,1715,20);
+MoveObjectToLocation(who,1417,1715,20, _DEFAULT_REALM); //AutoConversion
 SendSysMessage(who,"You are not allowed to be here!",3,34);
 return;
 endif
@@ -365,11 +365,11 @@ PlaySoundEffectPrivate( who, 0x14b, who );
 // players already in a game and should not be here.
 if (team=="BLUE" && ctfloc>0)
 SetObjProperty(who,"ctfloc",1);
-MoveCharacterToLocation(who,bluewait[1],bluewait[2],bluewait[3]);
+MoveObjectToLocation(who,bluewait[1],bluewait[2],bluewait[3], _DEFAULT_REALM); //AutoConversion
 return;
 elseif (team=="RED" && ctfloc>0)
 SetObjProperty(who,"ctfloc",1);
-MoveCharacterToLocation(who,redwait[1],redwait[2],redwait[3]);
+MoveObjectToLocation(who,redwait[1],redwait[2],redwait[3], _DEFAULT_REALM); //AutoConversion
 return;
 endif
 
@@ -423,12 +423,12 @@ if (GetDexterity(who)==1) SetBaseDexterity(who,50); endif
 
 if (team=="BLUE")
 SetGlobalProperty("ctfblueteam",GetGlobalProperty("ctfblueteam")+1);
-MoveCharacterToLocation(who,bluewait[1],bluewait[2],bluewait[3]);
+MoveObjectToLocation(who,bluewait[1],bluewait[2],bluewait[3], _DEFAULT_REALM); //AutoConversion
 endif
 
 if (team=="RED")
 SetGlobalProperty("ctfredteam",GetGlobalProperty("ctfredteam")+1);
-MoveCharacterToLocation(who,redwait[1],redwait[2],redwait[3]);
+MoveObjectToLocation(who,redwait[1],redwait[2],redwait[3], _DEFAULT_REALM); //AutoConversion
 endif
 
 CreateItemInBackpack(who,0xeed,100);

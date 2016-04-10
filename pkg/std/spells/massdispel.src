@@ -61,7 +61,7 @@ program mass_dispel ( parms )
 	
 				if( !CheckSkill( mobile, SKILLID_MAGICRESISTANCE, magery, 50 ))
 					PlaySoundEffect( mobile, SFX_SPELL_DISPEL );
-					MoveCharacterToLocation(mobile,0,0,0,MOVECHAR_FORCELOCATION);
+					MoveObjectToLocation(mobile,0,0,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 					ApplyTheDamage( mobile, caster, GetMaxHp(mobile) + 3, DMGID_MAGIC );
 				endif
 

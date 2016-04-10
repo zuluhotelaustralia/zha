@@ -84,14 +84,14 @@ program cast_teleport( parms )
 		endif
 	endif
 	var sx := caster.x, sy := caster.y, sz := caster.z;
-	MoveCharacterToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z) );
+	MoveObjectToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z) );
 	SetSpeedCheckNote(caster);
 	PlayStationaryEffect( sx, sy, sz, FX_SPELL_TELEPORT, SPEED_SPELL_TELEPORT, LOOP_SPELL_TELEPORT );
 	PlayStationaryEffect( CInt(caster.x), CInt(caster.y), CInt(caster.z), FX_SPELL_TELEPORT, SPEED_SPELL_TELEPORT, LOOP_SPELL_TELEPORT );
 	PlaySoundEffect( caster, SFX_SPELL_TELEPORT );
 	//Print("multi:"+caster.multi);
 	if (caster.multi)
-		MoveCharacterToLocation( caster, bx, by, bz );
+		MoveObjectToLocation( caster, bx, by, bz , _DEFAULT_REALM); //AutoConversion
 		print("Entrou aqui!!");
 	endif
 

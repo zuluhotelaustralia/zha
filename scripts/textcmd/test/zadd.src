@@ -8,5 +8,5 @@ program textcmd_zadd( who, zdiff )
 	endif
     zdiff := CInt( zdiff );
 
-    MoveCharacterToLocation( who, who.x, who.y, who.z + zdiff );
+    MoveObjectToLocation( who, who.x, who.y, who.z + zdiff , _DEFAULT_REALM); //AutoConversion
 endprogram

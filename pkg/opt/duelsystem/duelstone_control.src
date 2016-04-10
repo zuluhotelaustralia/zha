@@ -32,7 +32,7 @@ program duelstone_control(stone)
             ApplyRawDamage(object, GetHp(object)+3);
           elseif (!object.cmdlevel)
             var spot := pickRandomSpotInArea(exitArea);
-            MoveCharacterToLocation(object, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+            MoveObjectToLocation(object, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
           endif
         else
           if (!GetObjProperty(object, "duelitem"))

@@ -66,7 +66,7 @@ endif
 endforeach
 
 stone.movable :=1;
-MoveItemToLocation(stone,who.x,who.y,who.z,MOVEITEM_FORCELOCATION);
+MoveObjectToLocation(stone,who.x,who.y,who.z, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 stone.movable:=0;
 stone.newbie :=1;
 stone.graphic:=UOBJ_GUILDSTONE_GRAPHIC;

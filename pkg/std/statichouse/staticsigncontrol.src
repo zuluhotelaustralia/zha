@@ -46,7 +46,7 @@ program statichouse_controlscript(house)
 			foreach mobile in ListObjectsInBox( tlcx,tlcy,0, brcx,brcy,100 )
 				if( (mobile.IsA(POLCLASS_NPC) || mobile.acctname) && mobile != error)
 					if( IsBanned(house, mobile) )
-						MoveCharacterToLocation( mobile, house.x, house.y, house.z, MOVECHAR_FORCELOCATION);
+						MoveObjectToLocation( mobile, house.x, house.y, house.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 						PlaySoundEffect( mobile, 0x0207 );
 						SendSysMessage( mobile, "You are banned from this house and not allowed inside.");
 					endif
@@ -183,7 +183,7 @@ function DestroyHouse( house )
 	foreach mobile in ListMobilesNearLocation( house.x, house.y, house.z, 100 )
 		if( (mobile.IsA(POLCLASS_NPC) || mobile.acctname) && mobile != error)
 			if(IsInStaticHouse(mobile.x, mobile.y, mobile.z))
-				MoveCharacterToLocation( mobile, house.x, house.y, house.z, MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation( mobile, house.x, house.y, house.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 				SendSysMessage( mobile, "You were ejected from the house due to unpaid housing bills!");
 			endif
 		endif

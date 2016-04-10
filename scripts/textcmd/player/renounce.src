@@ -26,6 +26,6 @@ program renounce(who)
 		RemoveNewbie(who);
   		SendSysMessage(who,"[Young] status removed, you have lost newbie poison protection and can be killed by all players. When you die you will NOT be teleported to the healer in Wind.");
 		//assumes all newbies will be confined to Wind or leave via renounce gate... so this will tele to Brit
-		MoveCharacterToLocation(who,1475,1645,20); //brit starting area
+		MoveObjectToLocation(who,1475,1645,20, _DEFAULT_REALM); //AutoConversion //brit starting area
   	endif
 endprogram

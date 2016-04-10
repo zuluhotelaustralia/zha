@@ -4,7 +4,7 @@
 //
 //  If Z is not specified, map data will be read.  Note statics and dynamic
 //  items won't be taken into account, except insofar as 
-//  MoveCharacterToLocation does automatically.
+//  MoveObjectToLocation does automatically.
 //
 //  Last Modified: 1999/02/06 Syzygy
 //
@@ -26,7 +26,7 @@ program textcmd_goxyz( who, text )
         params[3] := GetMapInfo( CInt(params[1]), CInt(params[2]) ).z;
     endif
 
-	var res := MoveCharacterToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), MOVECHAR_FORCELOCATION );
+	var res := MoveObjectToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 
     if (!res)
         SendSysMessage( who, "Unable to go there: " + res.errortext );

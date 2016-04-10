@@ -40,7 +40,7 @@ function CloseDistance( opponent )
   var sleepdelay := 300 - (CInt(me.dexterity) * 1.5);
   if (sleepdelay < 0) sleepdelay := 0; endif
   
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first 
         0:
             return 1;

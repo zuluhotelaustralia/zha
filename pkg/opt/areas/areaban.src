@@ -33,7 +33,7 @@ function SendPlayerToValidArea( who )
 			x := loc[1];
 			y := loc[2];
 			z := loc[3];
-			return MoveCharacterToLocation( who, x, y, z, MOVECHAR_FORCELOCATION );
+			return MoveObjectToLocation( who, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		endif
 	endforeach
 
@@ -41,6 +41,6 @@ function SendPlayerToValidArea( who )
 	y := 1645;
 	z := 20;
 
-	return MoveCharacterToLocation( who, x, y, z, MOVECHAR_FORCELOCATION );
+	return MoveObjectToLocation( who, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 
 endfunction

@@ -288,12 +288,12 @@ function DryDock(event)
 	foreach item in items;
 	  oldmovable := item.movable;
       item.movable := 1;
-      MoveItemToLocation(item, me.x, me.y, me.z, MOVEITEM_FORCELOCATION);
+      MoveObjectToLocation(item, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       item.movable := oldmovable;
     endforeach
     items := ListRootItemsInContainer(boat.hold);
     foreach item in items;
-      MoveItemToLocation(item, me.x, me.y, me.z, MOVEITEM_FORCELOCATION);
+      MoveObjectToLocation(item, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     endforeach
     var key := FindKey(me, boat.portplank);
     if (boat.tillerman.name)

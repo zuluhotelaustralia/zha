@@ -33,7 +33,7 @@ program textcmd_gotochampion(who, number)
     if (number > 0 && number <= spawns.size())
       var spawn := SystemFindObjectBySerial(spawns[number]);
       if (spawn)
-        MoveCharacterToLocation( who, spawn.x, spawn.y, spawn.z, MOVECHAR_FORCELOCATION );
+        MoveObjectToLocation( who, spawn.x, spawn.y, spawn.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
       else
         SendSysMessage(who, "Error finding spawn. Contact a dev.");
       endif

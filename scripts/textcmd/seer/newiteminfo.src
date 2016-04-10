@@ -1451,15 +1451,15 @@ function EditItemInt( who, item, result )
 
 	case( result )
 		1:	//x value
-			MoveItemToLocation( item, val, item.y, item.z, MOVEITEM_FORCELOCATION );
+			MoveObjectToLocation( item, val, item.y, item.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 		
 		2:	//y value
-			MoveItemToLocation( item, item.x, val, item.z, MOVEITEM_FORCELOCATION );
+			MoveObjectToLocation( item, item.x, val, item.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 		
 		3:	//z value
-			MoveItemToLocation( item, item.x, item.y, val, MOVEITEM_FORCELOCATION );
+			MoveObjectToLocation( item, item.x, item.y, val, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 		
 		4:	//graphic number

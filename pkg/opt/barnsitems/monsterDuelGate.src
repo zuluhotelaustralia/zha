@@ -119,22 +119,22 @@ function CheckBounds(who, monsterDuelController)
 	endif
 	//Broadcast(bounds);
 	//return;
-	MoveCharacterToLocation( who, bounds.x1, bounds.y1, who.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation( who, bounds.x1, bounds.y1, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SendSysMessage(who, "North-west boundary");
 	sleep(2);
 		
-	MoveCharacterToLocation( who, bounds.x2, bounds.y1, who.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation( who, bounds.x2, bounds.y1, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SendSysMessage(who, "North-east boundary");
 	sleep(2);
 
-	MoveCharacterToLocation( who, bounds.x1, bounds.y2, who.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation( who, bounds.x1, bounds.y2, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SendSysMessage(who, "south-west boundary");
 	sleep(2);
 
-	MoveCharacterToLocation( who, bounds.x2, bounds.y2, who.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation( who, bounds.x2, bounds.y2, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SendSysMessage(who, "south-east boundary");
 	sleep(2);
-	MoveCharacterToLocation( who, monsterDuelController.x, monsterDuelController.y+1, monsterDuelController.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation( who, monsterDuelController.x, monsterDuelController.y+1, monsterDuelController.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 	
 

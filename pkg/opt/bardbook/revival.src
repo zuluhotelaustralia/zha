@@ -45,7 +45,7 @@ program songofendurance( caster )
 			SetHp(com1, Cint(GetMaxHp(com1) / 10));
 			SetMana(com1, Cint(GetMaxMana(com1) / 10));
 			CheckResRobe(com1);
-			MoveCharacterToLocation( com1, x, y, z );
+			MoveObjectToLocation( com1, x, y, z , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 	endif
@@ -65,7 +65,7 @@ program songofendurance( caster )
 			SetHp(com2, Cint(GetMaxHp(com2) / 10));
 			SetMana(com2, Cint(GetMaxMana(com2) / 10));
 			CheckResRobe(com2);
-			MoveCharacterToLocation( com2, x, y, z );
+			MoveObjectToLocation( com2, x, y, z , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 	endif
@@ -85,7 +85,7 @@ program songofendurance( caster )
 			SetHp(com3, Cint(GetMaxHp(com3) / 10));
 			SetMana(com3, Cint(GetMaxMana(com3) / 10));
 			CheckResRobe(com3);
-			MoveCharacterToLocation( com3, x, y, z );
+			MoveObjectToLocation( com3, x, y, z , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 	endif
@@ -105,7 +105,7 @@ program songofendurance( caster )
 			SetHp(com4, Cint(GetMaxHp(com4) / 10));
 			SetMana(com4, Cint(GetMaxMana(com4) / 10));
 			CheckResRobe(com4);
-			MoveCharacterToLocation( com4, x, y, z );
+			MoveObjectToLocation( com4, x, y, z , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 	endif
@@ -125,7 +125,7 @@ program songofendurance( caster )
 			SetHp(com5, Cint(GetMaxHp(com5) / 10));
 			SetMana(com5, Cint(GetMaxMana(com5) / 10));
 			CheckResRobe(com5);
-			MoveCharacterToLocation( com5, x, y, z );
+			MoveObjectToLocation( com5, x, y, z , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 	endif
@@ -145,7 +145,7 @@ program songofendurance( caster )
 			SetHp(com6, Cint(GetMaxHp(com6) / 10));
 			SetMana(com6, Cint(GetMaxMana(com6) / 10));
 			CheckResRobe(com6);
-			MoveCharacterToLocation( com6, x, y, z );
+			MoveObjectToLocation( com6, x, y, z , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 	endif

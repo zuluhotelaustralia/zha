@@ -10,7 +10,7 @@ program visit(who)
 	
 
 foreach character in EnumerateOnlineCharacters()
-        MoveCharacterToLocation(who, character.x, character.y, character.z);
+        MoveObjectToLocation(who, character.x, character.y, character.z, _DEFAULT_REALM); //AutoConversion
         sleep(5);
 endforeach
 

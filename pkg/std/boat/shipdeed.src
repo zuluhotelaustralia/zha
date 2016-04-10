@@ -109,7 +109,7 @@ endfunction
 
 function ShipFacingFlags( facing )
   var flags := 0;
-  case facing
+  case (facing) //Conversion
     DIR_N:
     DIR_NE:
         flags := CRMULTI_FACING_EAST;

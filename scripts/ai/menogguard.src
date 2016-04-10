@@ -104,7 +104,7 @@ SetAnchor(me.x, me.y, 10, 20);
             SYSEVENT_ITEM_GIVEN:
                 say( "Bah!  I have no need for " + ev.item.desc );
                 say( "Art thou trying to bribe me?" );
-                MoveItemToLocation( ev.item, me.x, me.y, me.z+MOVEITEM_FORCELOCATION,0 );
+                MoveObjectToLocation( ev.item, me.x, me.y, me.z+MOVEOBJECT_FORCELOCATION, _DEFAULT_REALM,0 ); //AutoConversion
                 if (ev.source)
                     Fight( ev.source );
                 endif
@@ -199,7 +199,7 @@ endfunction
 //
 /////////////////////////////////////////////////////////////////////////////
 function CloseDistance( opponent )
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first 
         0:
             return 1;

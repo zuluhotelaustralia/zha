@@ -50,11 +50,7 @@ program textcmd_raiserect( who, params )
     foreach item in ListObjectsInBox( topleft.x, topleft.y, lowz,
                                       botright.x, botright.y, highz )
         if (objtype == 0 || item.objtype == objtype)
-            MoveItemToLocation( item,
-                                item.x + xdiff,
-                                item.y + ydiff,
-                                item.z + zdiff,
-                                MOVEITEM_FORCELOCATION );
+            MoveObjectToLocation( item, item.x + xdiff, item.y + ydiff, item.z + zdiff, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION );
         endif
 
     endforeach

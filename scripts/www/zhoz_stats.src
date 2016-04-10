@@ -16,8 +16,8 @@ var load      := system.load;
 var uptime    := system.uptime;
 var sysver    := system.version;
 var bytesent  := system.bytes_sent;
-var itemcount := GameStat( "itemcount" );
-var mobcount  := GameStat( "mobilecount" );
+var itemcount := system.itemcount;
+var mobcount  := system.mobilecount;
 var struptime;
 var team, totalplayers, players;
 

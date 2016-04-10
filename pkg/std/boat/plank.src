@@ -50,7 +50,7 @@ function YankOntoBoat( mob, plank )
     //print( "sh.multi: " + sh.multi );
     var nx := (plank.x + plank.multi.x) / 2;
     var ny := (plank.y + plank.multi.y) / 2;
-    MoveCharacterToLocation( mob, nx, ny, plank.z );
+    MoveObjectToLocation( mob, nx, ny, plank.z , _DEFAULT_REALM); //AutoConversion
     return;
   endif
 endfunction

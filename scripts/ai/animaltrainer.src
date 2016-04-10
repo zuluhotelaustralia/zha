@@ -432,7 +432,7 @@ function sellanimal(who)
 		say(pet.name + " is worth " + buyamount);
 		SetObjProperty(pet, "guardkill", 1);
 		pet.graphic := 1000;
-		Damage(pet, GetHp(pet));
+		ApplyDamage(pet, GetHp(pet));
 
 		CreateItemInBackpack(who, UOBJ_GOLD_COIN, buyamount);
 		return;

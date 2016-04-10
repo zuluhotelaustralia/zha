@@ -118,7 +118,7 @@ program raidmenu(who)
 			else //goto
 				SendSysMessage(user, "Going to " + GetGlobalProperty("raidname"+raidpid) + "raid.");
 				sets := GetGlobalProperty("raidsettings"+raidpid);
-				MoveCharacterToLocation(user, sets[SET_XGOAL]+1, sets[SET_YGOAL], GetWorldHeight(sets[SET_XGOAL]+1,sets[SET_YGOAL]));
+				MoveObjectToLocation(user, sets[SET_XGOAL]+1, sets[SET_YGOAL], GetWorldHeight(sets[SET_XGOAL]+1, _DEFAULT_REALM,sets[SET_YGOAL])); //AutoConversion
 				return;
 			endif
 

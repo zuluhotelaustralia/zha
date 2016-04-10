@@ -25,5 +25,5 @@ program move_em(who, serial)
 	SendSysMessage(who, "Click where you want to send them.");
 	var where := TargetCoordinates(who);
 	
-	MoveCharacterToLocation(tgt, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(tgt, where.x, where.y, where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 endprogram

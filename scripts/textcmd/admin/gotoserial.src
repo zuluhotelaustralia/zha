@@ -14,7 +14,7 @@ program textcmd_gotoserial( who, serial )
 
 	var object := SystemFindObjectBySerial(serial);
 	if( !object )
-		object := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_STORAGE_AREAS);
+		object := SystemFindObjectBySerial(serial);
 	endif
 	
 	if( object )
@@ -27,13 +27,13 @@ program textcmd_gotoserial( who, serial )
 		
 		if (parent == object)
 			SendSysMessage( who, "Object is " + object.name + "." );
-			MoveCharacterToLocation( who, object.x, object.y, object.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( who, object.x, object.y, object.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		elseif (parent.isA(POLCLASS_MOBILE) && !parent.isA(POLCLASS_NPC))
 			SendSysMessage( who, "Object is " + object.name + " and is on the Player: " + parent.name + ", Account: " + parent.acctname + ", at location: (" + parent.x + ", " + parent.y + ", " + parent.z + ")." );
 		elseif (SplitWords(parent.name)[1] == "SecureChest")
 			SendSysMessage( who, "Object is " + object.name + " and is in a secure chest " + Hex(splitWords(parent.name)[2]));
-			var chest := SystemFindObjectBySerial(SplitWords(parent.name)[2], SYSFIND_SEARCH_STORAGE_AREAS);
-			MoveCharacterToLocation( who, chest.x, chest.y, chest.z, MOVECHAR_FORCELOCATION );
+			var chest := SystemFindObjectBySerial(SplitWords(parent.name)[2]);
+			MoveObjectToLocation( who, chest.x, chest.y, chest.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		else
 			var parent_owner_serial := CInt(SplitWords(parent.name)[3]);
 			var owner := SystemFindObjectBySerial(parent_owner_serial);

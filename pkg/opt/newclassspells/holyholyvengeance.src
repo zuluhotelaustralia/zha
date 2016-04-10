@@ -39,10 +39,10 @@ program cast_holyvengeance(parms)
   for i := 1 to 20
     set_critical(1);
     pillar.movable := 1;
-    MoveItemToLocation(pillar, pillar.x, pillar.y, pillar.z+1, MOVEITEM_FORCELOCATION);
+    MoveObjectToLocation(pillar, pillar.x, pillar.y, pillar.z+1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     pillar.movable := 0;
     set_critical(0);
-    MoveCharacterToLocation( caster, caster.x, caster.y, caster.z+1, MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation( caster, caster.x, caster.y, caster.z+1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     PlayStationaryEffectHuefx( caster.x+flamepos[i][1], caster.y+flamepos[i][2], caster.z,
       FX_SPELL_HOLYVENGEANCE, SPEED_SPELL_HOLYVENGEANCE, LOOP_SPELL_HOLYVENGEANCE, 0, 1580, 4);
     PlaySoundEffect(caster, SFX_SPELL_HOLYVENGEANCE2);
@@ -78,10 +78,10 @@ program cast_holyvengeance(parms)
   for i := 1 to 20
     set_critical(1);
     pillar.movable := 1;
-    MoveItemToLocation(pillar, pillar.x, pillar.y, pillar.z-1, MOVEITEM_FORCELOCATION);
+    MoveObjectToLocation(pillar, pillar.x, pillar.y, pillar.z-1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     pillar.movable := 0;
     set_critical(0);
-    MoveCharacterToLocation( caster, caster.x, caster.y, caster.z-1, MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation( caster, caster.x, caster.y, caster.z-1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     sleepms(50);
   endfor
   destroyItem(pillar);

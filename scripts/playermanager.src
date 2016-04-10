@@ -62,7 +62,7 @@ program logon( who )
 		//SetNewNotoName(who);
 		if (DetermineNewbie(who))
 			SendSysMessage(who, "You are no longer newbie!");
-			MoveCharacterToLocation(who,1475,1645,20); //brit starting area
+			MoveObjectToLocation(who,1475,1645,20, _DEFAULT_REALM); //AutoConversion //brit starting area
 		endif
 	endif
 
@@ -82,7 +82,7 @@ function StartScripts(who)
 	if(who.cmdlevel>0) return; endif
 
 	if (ctf<=3 && ctf>=0)
-	MoveCharacterToLocation(who,6083,450,-22);
+	MoveObjectToLocation(who,6083,450,-22, _DEFAULT_REALM); //AutoConversion
 	setobjproperty(who,"ctfloc",0);
 	else*/
 
@@ -116,7 +116,7 @@ function ReleaseIfJailTimeUp(who)
 	if (relday)
 		if (ReadGameClock() >= relday)
           		who.acct.setprop("Release",0);
-          		MoveCharacterToLocation( who, 1475, 1645, 20, 0);
+          		MoveObjectToLocation( who, 1475, 1645, 20, _DEFAULT_REALM, 0); //AutoConversion
 		endif
         endif
 

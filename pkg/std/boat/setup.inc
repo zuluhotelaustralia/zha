@@ -59,7 +59,7 @@ function deleteboat(boat, x:=DEFAULT_LOCATION_CHARACTER_RELOCATION_X ,y:=DEFAULT
 	var inhold := boat.hold;
 	foreach item in EnumerateItemsInContainer( inhold );
 		if (moveOrDeleteItemFlag == DELBOAT_MOVEITEMS)
-			MoveItemToLocation(item, x,y, z);
+			MoveObjectToLocation(item, x,y, z, _DEFAULT_REALM); //AutoConversion
 		else
 			//delete all items
 		endif
@@ -67,7 +67,7 @@ function deleteboat(boat, x:=DEFAULT_LOCATION_CHARACTER_RELOCATION_X ,y:=DEFAULT
 
 	foreach item in (boat.items) //move onboard items
 		if (moveOrDeleteItemFlag == DELBOAT_MOVEITEMS)
-			MoveItemToLocation(item, x,y, z);
+			MoveObjectToLocation(item, x,y, z, _DEFAULT_REALM); //AutoConversion
 		else
 			//delete all items
 		endif

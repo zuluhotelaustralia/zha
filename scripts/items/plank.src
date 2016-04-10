@@ -29,7 +29,7 @@ endprogram
 //
 
 function plankpartner( planktype )
-    case planktype
+    case (planktype) //Conversion
              // boat 0x4000, 0x4002 - see config/boats.cfg
         0x3ed5: return 0x3eb1;
         0x3eb1: return 0x3ed5;

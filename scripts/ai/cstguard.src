@@ -93,7 +93,7 @@ program CastleGuard()
             SYSEVENT_ITEM_GIVEN:
                 say( "Bah!  I have no need for " + ev.item.desc );
                 say( "Art thou trying to bribe me?" );
-                MoveItemToLocation( ev.item, me.x, me.y, me.z, MOVEITEM_FORCELOCATION );
+                MoveObjectToLocation( ev.item, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
                 if (ev.source)
                     Fight( ev.source );
                 endif
@@ -213,7 +213,7 @@ endfunction
 //
 /////////////////////////////////////////////////////////////////////////////
 function CloseDistance( opponent )
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first 
         0:
             return 1;

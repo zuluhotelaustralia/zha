@@ -83,7 +83,7 @@ program cast_psychoportation( parms )
   endforeach
 
   var sx := caster.x, sy := caster.y, sz := caster.z;
-  MoveCharacterToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z) );
+  MoveObjectToLocation( caster, CInt(where.x), CInt(where.y), CInt(where.z), _DEFAULT_REALM );
   SetSpeedCheckNote(caster);
   PlayStationaryEffect( sx, sy, sz, FX_SPELL_PSYCHOPORTATION, SPEED_SPELL_PSYCHOPORTATION, LOOP_SPELL_PSYCHOPORTATION );
   PlayStationaryEffect( CInt(caster.x), CInt(caster.y), CInt(caster.z), FX_SPELL_PSYCHOPORTATION, SPEED_SPELL_PSYCHOPORTATION, LOOP_SPELL_PSYCHOPORTATION );
@@ -92,7 +92,7 @@ program cast_psychoportation( parms )
 
 
   if (caster.multi)
-    MoveCharacterToLocation( caster, bx, by, bz );
+    MoveObjectToLocation( caster, bx, by, bz , _DEFAULT_REALM); //AutoConversion
     print("You Cannot Teleport Here!");
   endif
 

@@ -437,7 +437,7 @@ function GetCastParams(who, staff)
 	
 	//params[3] is cast_on;
 	var targ;
-	case targopt
+	case (targopt) //Conversion
 		CAST_SELF:
 			params[3]:=who;
 			break;
@@ -503,7 +503,7 @@ endfunction
 function GetTargetOptionString(staff)
 	var targopt := GetObjProperty(staff, "StaffTargetOption");	
 
-	case targopt
+	case (targopt) //Conversion
 		CAST_SELF:
 			return "Staff automatically casts spells on me.";
 			break;

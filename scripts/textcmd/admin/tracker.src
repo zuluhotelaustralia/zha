@@ -131,7 +131,7 @@ program tracker (user, accountname)
 		endif
 	endif
 	if (result[button3.keyid])
-		MoveCharacterToLocation( user, player.x, player.y, player.z, MOVECHAR_FORCELOCATION );		
+		MoveObjectToLocation( user, player.x, player.y, player.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion		
 	endif
 endprogram	
 

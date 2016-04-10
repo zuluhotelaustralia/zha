@@ -108,7 +108,7 @@ function checkply(who)
 //	SendSysMessage( who, "You have been jailed, 1 day.");
 	var acc := who.acct;
 	acc.setprop("Release", (ReadGameClock() + 86400));
-	MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+	MoveObjectToLocation( who, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
 	DisconnectClient( who );
 	return;
    endif

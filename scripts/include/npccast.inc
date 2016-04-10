@@ -253,7 +253,7 @@ function TeleToPlayer(caster, cast_on)
 	say("Rel Por");
 	sleep(1);
 	PlaySoundEffect(caster, 0x1ff);
-	MoveCharacterToLocation(caster, cast_on.x, cast_on.y, cast_on.z);
+	MoveObjectToLocation(caster, cast_on.x, cast_on.y, cast_on.z, _DEFAULT_REALM); //AutoConversion
 endfunction
 	
 function SummonElfLord (caster, cast_on)

@@ -259,9 +259,9 @@ endif
 start_script(":zuluctf:hud",who);
 
       if (team=="BLUE")
-        MoveCharacterToLocation(who,ranum+bloc[1],ranum+bloc[2],bloc[3]);
+        MoveObjectToLocation(who,ranum+bloc[1],ranum+bloc[2],bloc[3], _DEFAULT_REALM); //AutoConversion
       else
-        MoveCharacterToLocation(who,ranum+rloc[1],ranum+rloc[2],rloc[3]);
+        MoveObjectToLocation(who,ranum+rloc[1],ranum+rloc[2],rloc[3], _DEFAULT_REALM); //AutoConversion
       endif
 
     endif
@@ -294,7 +294,7 @@ noexit:=1;
       SetGlobalProperty("ctfblueteam",GetGlobalProperty("ctfblueteam")+1);
       SendSysMessage(who,"You are being moved to the BLUE team.",3,300);
       PlaySoundEffect(who,309);
-      MoveCharacterToLocation(who,bluemove[1],bluemove[2],bluemove[3]);
+      MoveObjectToLocation(who,bluemove[1],bluemove[2],bluemove[3], _DEFAULT_REALM); //AutoConversion
       noexit:=0;
     endif
   endwhile
@@ -320,7 +320,7 @@ noexit:=1;
       SetGlobalProperty("ctfredteam",GetGlobalProperty("ctfredteam")+1);
       SendSysMessage(who,"You are being moved to the RED team.",3,33);
       PlaySoundEffect(who,309);
-      MoveCharacterToLocation(who,redmove[1],redmove[2],redmove[3]);
+      MoveObjectToLocation(who,redmove[1],redmove[2],redmove[3], _DEFAULT_REALM); //AutoConversion
       noexit:=0;
     endif
   endwhile

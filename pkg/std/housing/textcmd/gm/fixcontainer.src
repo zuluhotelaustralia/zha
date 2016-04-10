@@ -18,7 +18,7 @@ program textcmd_fixcontainer( who )
 	foreach item in EnumerateItemsInContainer(container)
 		if( item.container == container )
 			root_items.append(item);
-			MoveItemToLocation(item, who.x, who.y, who.z, MOVEITEM_FORCELOCATION);
+			MoveObjectToLocation(item, who.x, who.y, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		endif
 	endforeach
 

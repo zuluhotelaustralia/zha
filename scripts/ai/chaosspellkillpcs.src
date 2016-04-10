@@ -108,7 +108,7 @@ endforeach
 		return 0;
 	endif
 
-    case d
+    case (d) //Conversion
         1:              // the most likely, so first 
         0:
 		if ( runaway < 15 )

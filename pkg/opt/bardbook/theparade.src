@@ -52,7 +52,7 @@ program minstrelsjourney( caster )
 		if(!com1.dead)
 			if((Distance (caster, com1)<7))
 				SendSysMessage( com1, "Your bard's melody has magically taken you to Britain");
-				MoveCharacterToLocation( com1, bx1, by1, bz1 );
+				MoveObjectToLocation( com1, bx1, by1, bz1 , _DEFAULT_REALM); //AutoConversion
 			endif
 		endif
 	endif
@@ -60,7 +60,7 @@ program minstrelsjourney( caster )
 		if(!com2.dead)
 			if((Distance (caster, com2)<7))
 				SendSysMessage( com2, "Your bard's melody has magically taken you to Britain");
-				MoveCharacterToLocation( com2, bx2, by2, bz2 );
+				MoveObjectToLocation( com2, bx2, by2, bz2 , _DEFAULT_REALM); //AutoConversion
 			endif
 		endif
 	endif
@@ -68,7 +68,7 @@ program minstrelsjourney( caster )
 		if(!com3.dead)
 			if((Distance (caster, com3)<7))
 				SendSysMessage( com3, "Your bard's melody has magically taken you to Britain");
-				MoveCharacterToLocation( com3, bx3, by3, bz3 );
+				MoveObjectToLocation( com3, bx3, by3, bz3 , _DEFAULT_REALM); //AutoConversion
 			endif
 		endif
 	endif
@@ -76,7 +76,7 @@ program minstrelsjourney( caster )
 		if(!com4.dead)
 			if((Distance (caster, com4)<7))
 				SendSysMessage( com4, "Your bard's melody has magically taken you to Britain");
-				MoveCharacterToLocation( com4, bx4, by4, bz4 );
+				MoveObjectToLocation( com4, bx4, by4, bz4 , _DEFAULT_REALM); //AutoConversion
 			endif
 		endif
 	endif
@@ -84,7 +84,7 @@ program minstrelsjourney( caster )
 		if(!com5.dead)
 			if((Distance (caster, com5)<7))
 				SendSysMessage( com5, "Your bard's melody has magically taken you to Britain");
-				MoveCharacterToLocation( com5, bx5, by5, bz5 );
+				MoveObjectToLocation( com5, bx5, by5, bz5 , _DEFAULT_REALM); //AutoConversion
 			endif
 		endif
 	endif
@@ -92,12 +92,12 @@ program minstrelsjourney( caster )
 		if(!com6.dead)
 			if((Distance (caster, com6)<7))
 				SendSysMessage( com6, "Your bard's melody has magically taken you to Britain");
-				MoveCharacterToLocation( com6, bx6, by6, bz6 );
+				MoveObjectToLocation( com6, bx6, by6, bz6 , _DEFAULT_REALM); //AutoConversion
 			endif
 		endif
 	endif
 
-	MoveCharacterToLocation( caster, bx, by, bz );
+	MoveObjectToLocation( caster, bx, by, bz , _DEFAULT_REALM); //AutoConversion
 	SetSpeedCheckNote(caster);
 
 	PlaySoundEffect( caster, 0x1FD );

@@ -25,7 +25,7 @@ var data;
     while (1)
         var where := TargetCoordinates( who );
         if (where)
-            var result := MoveCharacterToLocation( who, where.x, where.y, where.z, MOVECHAR_FORCELOCATION );
+            var result := MoveObjectToLocation( who, where.x, where.y, where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
             if( where.mobile )
             	mob := where.mobile;
             	mobstring := " mob: "+cstr(mob.name)+"-"+mob.serial;

@@ -196,7 +196,7 @@ function BanishGhost (ev)
 			sleepms(2000);
 			if (me)
 				PlaySoundEffect(me, SFX_SPELL_RECALL1);
-				MoveCharacterToLocation(me, 5274, 1162, 0);
+				MoveObjectToLocation(me, 5274, 1162, 0, _DEFAULT_REALM); //AutoConversion
 				ApplyRawDamage(me, GetHp(me)+3);
 			endif
 		endif	
@@ -210,7 +210,7 @@ function BanishGhost (ev)
 		sleepms(2000);
 		PlaySoundEffect(ghost, SFX_SPELL_RECALL1);
 		sleepms(500);
-		MoveCharacterToLocation(ghost, dx, dy, dz);
+		MoveObjectToLocation(ghost, dx, dy, dz, _DEFAULT_REALM); //AutoConversion
 		PlaySoundEffect(ghost, SFX_SPELL_RECALL2);
 		sleep(5);
 		if (me)
@@ -219,7 +219,7 @@ function BanishGhost (ev)
 			sleepms(2000);
 			if (me)
 				PlaySoundEffect(me, SFX_SPELL_RECALL1);
-				MoveCharacterToLocation(me, 5274, 1162, 0);
+				MoveObjectToLocation(me, 5274, 1162, 0, _DEFAULT_REALM); //AutoConversion
 				ApplyRawDamage(me, GetHp(me)+3);
 			endif
 		endif
@@ -235,7 +235,7 @@ function RecallToSpawnPoint(spawnpoint)
 	sleepms(2500);
 	PlaySoundEffect(me, SFX_SPELL_RECALL1);
 	sleepms(250);
-	MoveCharacterToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z);
+	MoveObjectToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z, _DEFAULT_REALM); //AutoConversion
 	PlaySoundEffect(me, SFX_SPELL_RECALL2);
 	return;
 endfunction	
@@ -256,7 +256,7 @@ function TeleToGhost(ghost)
 		x := x + ghost.x;
 		y := y + ghost.y;
 		z := GetWorldHeight(x, y);
-	Until (MoveCharacterToLocation(me, x, y, z, MOVECHAR_FORCELOCATION) || j>20);
+	Until (MoveObjectToLocation(me, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION) || j>20); //AutoConversion
 	
 	return;
 endfunction

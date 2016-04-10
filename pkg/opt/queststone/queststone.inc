@@ -1458,7 +1458,7 @@ function DoPrivateFinal(stone, player)
     	var toy := GetObjProperty (stone, "toy");
     	var toz := GetObjProperty (stone, "toz");
 if( tox && toy && toz)
-	MoveCharacterToLocation( player, tox, toy, toz);
+	MoveObjectToLocation( player, tox, toy, toz, _DEFAULT_REALM); //AutoConversion
 endif
 	
 endfunction
@@ -2396,7 +2396,7 @@ endif
 	endif
 
 	if (choice[gotospawnbutton.keyid])
-		MoveCharacterToLocation(who,spawn.x, spawn.y, spawn.z);
+		MoveObjectToLocation(who,spawn.x, spawn.y, spawn.z, _DEFAULT_REALM); //AutoConversion
                 RunSpawnEditGump(who, spawn, stone);
 	elseif (choice[openspawnbutton.keyid])
                 Start_Script(":spawnpoint:spawnpoint", array{ who, spawn });

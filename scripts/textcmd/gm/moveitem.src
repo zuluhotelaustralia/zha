@@ -14,7 +14,7 @@ program textcmd_moveitem( who )
             SendSysMessage( who, "Now select a location on the ground." );
             var where := TargetCoordinates( who );
             if (where)
-                var result := MoveItemToLocation( what.item, where.x, where.y, where.z, MOVECHAR_FORCELOCATION );
+                var result := MoveObjectToLocation( what.item, where.x, where.y, where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
                 if (result)
                     PrintTextAbovePrivate( what.item, "Done!", who );
                 else

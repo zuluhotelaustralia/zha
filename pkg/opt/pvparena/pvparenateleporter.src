@@ -11,7 +11,7 @@ program teleporter(who, stone)
 	var x := GetObjProperty(stone, "x");
 	var y := GetObjProperty(stone, "y");
 	var z := GetObjProperty(stone, "z");
-	MoveCharacterToLocation(who, x, y, z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(who, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	resPlayer(who);
 endprogram
 

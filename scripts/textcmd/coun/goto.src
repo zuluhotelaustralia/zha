@@ -15,7 +15,7 @@ program textcmd_goto( character, whom )
 	if( chr )
 	var data := {	"goto", cstr(chr.name), chr.serial, "na", chr.x+", "+chr.y+", "+chr.z,"concealed: "+character.concealed,"na",cstr(whom)};
 	logcommand(character, data);
-		MoveCharacterToLocation( character, chr.x, chr.y, chr.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( character, chr.x, chr.y, chr.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		ShowFlame( character );
 	endif
 

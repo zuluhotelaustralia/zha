@@ -7,7 +7,7 @@
  *
  *
  *  The "JustGated" flag is to keep you from bouncing between gates.
- *  MoveCharacterToLocation checks the destination location for gates,
+ *  MoveObjectToLocation checks the destination location for gates,
  *	  (and traps and whatever)
  *
  *  So, when someone steps into a moongate, the following will happen:
@@ -95,7 +95,7 @@ program moongate_use( mobile, gate )
 	endif
 
 	set_critical(1);
-	if( MoveCharacterToLocation( mobile, x, y, z ) )
+	if( MoveObjectToLocation( mobile, x, y, z ) )
 		SetObjProperty( mobile, "JustGated", 1 );
 		SetSpeedCheckNote(mobile);
 	endif

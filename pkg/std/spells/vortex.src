@@ -71,7 +71,7 @@ program cast_summon( parms )
 
 	PlaySoundEffect( thecritter, SFX_SPELL_ENERGY_VORTEX );
 	PlayStationaryEffect( CInt(thecritter.x), CInt(thecritter.y), CInt(thecritter.z), FX_SPELL_ENERGY_VORTEX, SPEED_SPELL_ENERGY_VORTEX, LOOP_SPELL_ENERGY_VORTEX );
-	MoveCharacterToLocation( thecritter,0,0,0,MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation( thecritter,0,0,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 	ApplyRawDamage( thecritter, GetHp(thecritter) + 3 );
 

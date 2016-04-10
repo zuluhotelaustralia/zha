@@ -148,7 +148,7 @@ function BreedOstards(user)
 		return;
 	endif
 
-	MoveCharacterToLocation(male, female.x, female.y, female.z);
+	MoveObjectToLocation(male, female.x, female.y, female.z, _DEFAULT_REALM); //AutoConversion
 	female.frozen := 1;
 	male.frozen := 1;
 

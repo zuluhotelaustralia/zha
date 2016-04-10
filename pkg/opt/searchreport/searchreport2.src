@@ -33,7 +33,7 @@ program ItemReportPage(thestring)
 	var Ygump:= 20;
 	var item:=SystemFindObjectBySerial(itemArray[itemNum]);
 	if (!item)
-		item:=SystemFindObjectBySerial(itemArray[itemNum], SYSFIND_SEARCH_STORAGE_AREAS);
+		item:=SystemFindObjectBySerial(itemArray[itemNum]);
 		if (!item)
 			SendSysMessage(who, "Couldn't find item "+itemArray[itemNum]);
 		endif
@@ -147,18 +147,18 @@ program ItemReportPage(thestring)
 	endif
 	if (result[button3.keyid])
 		if(bankowner)
-			MoveCharacterToLocation(who, bankowner.x, bankowner.y, bankowner.z, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(who, bankowner.x, bankowner.y, bankowner.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		elseif(carriedby)
-			MoveCharacterToLocation(who, carriedby.x, carriedby.y, carriedby.z, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(who, carriedby.x, carriedby.y, carriedby.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		else
-			MoveCharacterToLocation(who, x, y, z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation(who, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		endif
 		start_script("searchreport2", CStr(CStr(who.serial)+" "+itemNum+" "+searchstring));
 	endif
 	if (result[button4.keyid])
 		var grabitem:= SystemFindObjectBySerial(itemArray[itemNum]);
 		if (!grabitem)
-			grabitem := SystemFindObjectBySerial(itemArray[itemNum], SYSFIND_SEARCH_STORAGE_AREAS);
+			grabitem := SystemFindObjectBySerial(itemArray[itemNum]);
 		endif
 		if (grabitem)
 			MoveItemToContainer(grabitem, who.backpack);

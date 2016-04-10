@@ -10,7 +10,7 @@ program ListOtherItemsInContainer(parameters)
 	var container:= SystemFindObjectBySerial(CInt(params[2]));
 	if (!container)
 		SendSysMessage(who, container);
-		container:= SystemFindObjectBySerial(CInt(params[2]), SYSFIND_SEARCH_STORAGE_AREAS);
+		container:= SystemFindObjectBySerial(CInt(params[2]));
 		if(!container)
 			SendSysMessage(who, container);
 		endif

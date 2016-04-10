@@ -91,8 +91,8 @@ program cast_detectbrainwaves(parms)
   
   var tempCasterLoc := {caster.x, caster.y, caster.z};
   EraseObjProperty( caster, "#Casting");
-  MoveCharacterTolocation(caster, 1, 1, 1, MOVECHAR_FORCELOCATION);
-  MoveCharacterTolocation(caster, tempCasterLoc[1], tempCasterLoc[2], tempCasterLoc[3], MOVECHAR_FORCELOCATION );
+  MoveObjectToLocation(caster, 1, 1, 1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
+  MoveObjectToLocation(caster, tempCasterLoc[1], tempCasterLoc[2], tempCasterLoc[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
   SendSysMessage(caster, "Your now tracking any 'New' Ghosts that enter on your screen");
   DoPersistedMod(caster, "seehidden", 1, caster.enabled("seehidden"), duration);
 */

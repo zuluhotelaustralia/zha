@@ -1,5 +1,5 @@
 use uo;
-//use attributes;
+use attributes;
 
 program raw_to_baseskill( who, text )
 

@@ -156,10 +156,10 @@ function SelectTeleport(who,item)
 		SetObjProperty( item, "LocZ", where.z);
 		SendSysMessage(who,"Configuration ends.",3,33);
 
-/*        var result := MoveCharacterToLocation( who, where.x, where.y,where.z);
+/*        var result := MoveObjectToLocation( who, where.x, where.y,where.z, _DEFAULT_REALM); //AutoConversion
 
         if (!result)
-            result := MoveCharacterToLocation( who, where.x, where.y,where.z, MOVECHAR_FORCELOCATION);
+            result := MoveObjectToLocation( who, where.x, where.y,where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         endif*/
 	endif
 
@@ -182,10 +182,10 @@ function SelectNPC(who,item)
 		SetObjProperty( item, "STime",CInt(RequestInput( who, who.backpack, "Min Frequency :" ))*60 );
 		EraseObjProperty(item,"LTime");
 		SendSysMessage(who,"Configuration ends.",3,33);
-/*        var result := MoveCharacterToLocation( who, where.x, where.y,where.z);
+/*        var result := MoveObjectToLocation( who, where.x, where.y,where.z, _DEFAULT_REALM); //AutoConversion
 
         if (!result)
-            result := MoveCharacterToLocation( who, where.x, where.y,where.z, MOVECHAR_FORCELOCATION);
+            result := MoveObjectToLocation( who, where.x, where.y,where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         endif*/
 	endif
 
@@ -200,10 +200,10 @@ function TeleportChar(who,item)
 
     var dest := CreateItemAtLocation(x, y, z, 0x3779, 1);
 
-	var result := MoveCharacterToLocation( who, x, y,z);
+	var result := MoveObjectToLocation( who, x, y,z, _DEFAULT_REALM); //AutoConversion
 
 	if (!result)
-	    result := MoveCharacterToLocation( who, x, y,z, MOVECHAR_FORCELOCATION);
+	    result := MoveObjectToLocation( who, x, y,z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	endif
 	sleep(2);
 
@@ -446,7 +446,7 @@ function trappedswitch(who, item, mid, stt, snd)
   Detach();
   var traptype := CInt(GetObjProperty(item,"trap_type"));
   var trapstrength := CInt(Random(99) + 1);
-  case traptype
+  case (traptype) //Conversion
     1:   PlaySoundEffect(who, SFX_224);
          var dmg := (Random(20) + CInt(trapstrength));
          SendSysMessage(who, "You set off a needle trap!");
@@ -517,7 +517,7 @@ function alterpassage(who, item, stt, snd);
       foreach entry in pl
         obj := SystemFindObjectBySerial(CInt(entry));
         obj.movable := 1;
-        MoveItemToLocation(obj, obj.x, obj.y, obj.z - 2, MOVEITEM_FORCELOCATION);
+        MoveObjectToLocation(obj, obj.x, obj.y, obj.z - 2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         obj.movable := 0;
       endforeach
       if(a == 2)
@@ -539,7 +539,7 @@ function alterpassage(who, item, stt, snd);
       foreach entry in pl
         obj := SystemFindObjectBySerial(CInt(entry));
         obj.movable := 1;
-        MoveItemToLocation(obj, obj.x, obj.y, obj.z + 2, MOVEITEM_FORCELOCATION);
+        MoveObjectToLocation(obj, obj.x, obj.y, obj.z + 2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         obj.movable := 0;
       endforeach
       if(a == 2)
@@ -603,7 +603,7 @@ function alterpassage(who, item, stt, snd);
         foreach entry in pl
           obj := SystemFindObjectBySerial(CInt(entry));
           obj.movable := 1;
-          MoveItemToLocation(obj, obj.x, obj.y, obj.z - 2, MOVEITEM_FORCELOCATION);
+          MoveObjectToLocation(obj, obj.x, obj.y, obj.z - 2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
           obj.movable := 0;
         endforeach
         if(a == 2)
@@ -625,7 +625,7 @@ function alterpassage(who, item, stt, snd);
         foreach entry in pl
           obj := SystemFindObjectBySerial(CInt(entry));
           obj.movable := 1;
-          MoveItemToLocation(obj, obj.x, obj.y, obj.z + 2, MOVEITEM_FORCELOCATION);
+          MoveObjectToLocation(obj, obj.x, obj.y, obj.z + 2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
           obj.movable := 0;
         endforeach
         if(a == 2)
@@ -718,7 +718,7 @@ function teleporter(who, item, mid, stt, snd)
     tilea := SystemFindObjectBySerial(CInt(GetObjProperty(tile,"link")));
     foreach person in ListMobilesNearLocation( tile.x, tile.y, tile.z, 0);
       if(GetObjProperty(person, "inside") == 1)
-        MoveCharacterToLocation( person, tilea.x, tilea.y, tilea.z );
+        MoveObjectToLocation( person, tilea.x, tilea.y, tilea.z , _DEFAULT_REALM); //AutoConversion
       endif
     endforeach
   endforeach

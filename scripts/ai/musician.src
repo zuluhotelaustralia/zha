@@ -155,7 +155,7 @@ endfunction
 //
 /////////////////////////////////////////////////////////////////////////////
 function OpenDistance( opponent )
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         10:
             return 1;       
         default:

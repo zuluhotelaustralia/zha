@@ -17,7 +17,7 @@ if (where)
 			prevpos.x:=who.x;
 			prevpos.y:=who.y;
 			prevpos.z:=who.z;
-        MoveCharacterToLocation(what, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
+        MoveObjectToLocation(what, where.x, where.y, where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		  if (who.cmdlevel == 1)
 
 			councycommandlog(who, "teleto", what, prevpos, where);

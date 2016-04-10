@@ -41,7 +41,7 @@ program textcmd_destroyShip( who )
 	SendSysMessage( who, "Where do you wish items to be moved?" );
        	newloc := TargetCoordinates( who );
 	if (newloc)
-		MoveCharacterToLocation(who, newloc.x,newloc.y, newloc.z);
+		MoveObjectToLocation(who, newloc.x,newloc.y, newloc.z, _DEFAULT_REALM); //AutoConversion
 	else
 		return;
 	endif
@@ -57,13 +57,13 @@ program textcmd_destroyShip( who )
 	SendSysMessage( who, "Moving items in hold to target location." );
 	var inhold := boat.hold;
 	foreach item in EnumerateItemsInContainer( inhold );
-		MoveItemToLocation(item, newloc.x,newloc.y, newloc.z);
+		MoveObjectToLocation(item, newloc.x,newloc.y, newloc.z, _DEFAULT_REALM); //AutoConversion
 	endforeach
 
 	//var boattag := boat.multi;
 	SendSysMessage( who, "Moving items on deck to target location." );
 	foreach item in (boat.items) //move onboard items
-		MoveItemToLocation(item, newloc.x,newloc.y, newloc.z);
+		MoveObjectToLocation(item, newloc.x,newloc.y, newloc.z, _DEFAULT_REALM); //AutoConversion
 	endforeach
 	
 	

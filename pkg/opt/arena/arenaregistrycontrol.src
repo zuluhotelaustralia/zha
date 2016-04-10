@@ -100,7 +100,7 @@ function PerformArenaMaintenance(arenacontrol)
 
 	foreach i in ListObjectsInBox(arenatopleft[1], arenatopleft[2], arenatopleft[3], arenabottomright[1], arenabottomright[2], arenabottomright[3])
 		if (i.acctname)
-			MoveCharacterToLocation(i, arenacontrol.x, arenacontrol.y + 1, arenacontrol.z);
+			MoveObjectToLocation(i, arenacontrol.x, arenacontrol.y + 1, arenacontrol.z, _DEFAULT_REALM); //AutoConversion
 		endif
 
 		if ( (GetHp(i) >= 0) && (!i.acctname) )
@@ -303,14 +303,14 @@ function FightArenaBattle(arenacontrol, combatents)
 			// Oponent Is an Player
 		  	x := Random( len(destx) ) + 1;
 			SendSysMessage(opponent, "Prepare yourself...");
-			MoveCharacterToLocation(opponent, destx[x], desty[x], destz[x]);		
+			MoveObjectToLocation(opponent, destx[x], desty[x], destz[x], _DEFAULT_REALM); //AutoConversion		
 	endif
 
 	repeat
 		y := Random( len(destx) ) + 1;
 	until (y!=x);
 
-	MoveCharacterToLocation(who, destx[y], desty[y], destz[y]);
+	MoveObjectToLocation(who, destx[y], desty[y], destz[y], _DEFAULT_REALM); //AutoConversion
 	SendSysMessage(who, "Prepare yourself...");
 
 	success := 0;
@@ -323,14 +323,14 @@ function FightArenaBattle(arenacontrol, combatents)
 			if (opponent.acctname)
 				SendSysMessage(opponent, "Maybe next time.");			
 				gain:=TakeGps(arenacontrol, opponent);
-				MoveCharacterToLocation(opponent, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z);
+				MoveObjectToLocation(opponent, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z, _DEFAULT_REALM); //AutoConversion
 				else
 				  gain:=exp(gpbase,monsterlevel);
 			endif
 			GrantGps(arenacontrol, who,gain);
 		
 			sleep(20);			
-			MoveCharacterToLocation(who, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z);
+			MoveObjectToLocation(who, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z, _DEFAULT_REALM); //AutoConversion
 			success := 1;
 		elseif ( (who.dead) || (!who) || (!PlayerInside(who, arenatopleft,arenabottomright)) )
 			SendSysMessage(who, "Maybe next time.");			
@@ -338,11 +338,11 @@ function FightArenaBattle(arenacontrol, combatents)
 			if (opponent.acctname)
 				SendSysMessage(opponent, "You have fought well.");
 				GrantGps(arenacontrol, opponent,gain);
-				MoveCharacterToLocation(opponent, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z);			
+				MoveObjectToLocation(opponent, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z, _DEFAULT_REALM); //AutoConversion			
 				else
 				  ApplyRawDamage(opponent,GetHp(opponent)+3);
 			endif
-			MoveCharacterToLocation(who, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z);
+			MoveObjectToLocation(who, arenacontrol.x - 1, arenacontrol.y, arenacontrol.z, _DEFAULT_REALM); //AutoConversion
 			sleep(20);					
 			success := 1;
 		endif

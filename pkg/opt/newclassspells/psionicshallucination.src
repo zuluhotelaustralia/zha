@@ -56,7 +56,7 @@ program cast_hallucination(parms)
     if (person)
       person.hidden := 1;
       person.squelch(3);
-      MoveCharacterToLocation(person, LOCATION_ONE_HALLUCINATION[1], LOCATION_ONE_HALLUCINATION[2], LOCATION_ONE_HALLUCINATION[3], MOVECHAR_FORCELOCATION);
+      MoveObjectToLocation(person, LOCATION_ONE_HALLUCINATION[1], LOCATION_ONE_HALLUCINATION[2], LOCATION_ONE_HALLUCINATION[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       PlaySoundEffectPrivate(person, SFX_SPELL_HALLUCINATION, person);
     endif
   endforeach
@@ -66,7 +66,7 @@ program cast_hallucination(parms)
   foreach mobarray in goOnTrip
     var person := SystemFindObjectBySerial(mobarray[1], SYSFIND_SEARCH_OFFLINE_MOBILES);
     if (person)
-      MoveCharacterToLocation(person, LOCATION_TWO_HALLUCINATION[1], LOCATION_TWO_HALLUCINATION[2], LOCATION_TWO_HALLUCINATION[3], MOVECHAR_FORCELOCATION);
+      MoveObjectToLocation(person, LOCATION_TWO_HALLUCINATION[1], LOCATION_TWO_HALLUCINATION[2], LOCATION_TWO_HALLUCINATION[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       PlaySoundEffectPrivate(person, SFX_SPELL_HALLUCINATION2, person);
     endif
   endforeach
@@ -78,7 +78,7 @@ program cast_hallucination(parms)
     if (person)
       person.hidden := 0;
       person.squelch(0);
-      MoveCharacterToLocation(person, mobarray[2], mobarray[3], mobarray[4], MOVECHAR_FORCELOCATION);
+      MoveObjectToLocation(person, mobarray[2], mobarray[3], mobarray[4], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     endif
   endforeach
 

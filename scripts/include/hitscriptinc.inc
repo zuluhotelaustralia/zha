@@ -516,7 +516,7 @@ function BackStabDamageBonus(ninjalevel, attacker, defender)
 	if ((ninjalevel && attacker.facing == defender.facing) && (attacker.x!=defender.x || attacker.y!=defender.y))
 		var myfacing := attacker.facing;
 		
-		case myfacing
+		case (myfacing) //Conversion
 		1: //south east
 			if (defender.x > attacker.x && defender.y < attacker.y)
 				backstab:=1;

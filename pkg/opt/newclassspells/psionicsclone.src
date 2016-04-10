@@ -109,11 +109,11 @@ program cast_clone(parms)
   var backpack := FindExistingPack(clone.serial);
   if(backpack)
     foreach item in EnumerateItemsInContainer(backpack);
-      MoveItemToLocation(item, clone.x, clone.y, clone.z, MOVEITEM_FORCELOCATION);
+      MoveObjectToLocation(item, clone.x, clone.y, clone.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     endforeach
   endif
 
-  MoveCharacterToLocation(clone, 0, 0, 0, MOVECHAR_FORCELOCATION );
+  MoveObjectToLocation(clone, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
   ApplyRawDamage(clone, GetHp(clone) + 3);
   EraseObjProperty( caster, "#PsionicClone");
 endprogram

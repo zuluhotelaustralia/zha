@@ -1035,7 +1035,7 @@ function Eject( house, who,sign )
 		return;
 	endif
 
-	MoveCharacterToLocation( targetchr, sign.x, sign.y, 0, MOVECHAR_FORCELOCATION );
+	MoveObjectToLocation( targetchr, sign.x, sign.y, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 
 	SendSysMessage( who, targetchr.name + " was ejected!" );
 
@@ -1174,7 +1174,7 @@ function HouseFunctionLock(who, house, num )
 			if(( GetObjProperty( house, "numlockdowns" ) > 0 ) && (itemt.movable))
 
 				if( IsCarpet( itemt ) )
-					MoveItemToLocation(itemt, CInt(itemt.x), CInt(itemt.y), CInt(itemt.z)+1, MOVECHAR_FORCELOCATION);
+					MoveObjectToLocation(itemt, CInt(itemt.x), CInt(itemt.y), CInt(itemt.z)+1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 				endif
 					itemt.movable := 0;
 					SetObjProperty( house, "numlockdowns", GetObjProperty( house, "numlockdowns") - 1 );

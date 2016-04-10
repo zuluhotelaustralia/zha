@@ -65,7 +65,7 @@ program oncreate(who,skillids)
     SendSysMessage(who,"Pick the race you would like to be.");
     SetObjProperty(who,"newbie",1);
     SetObjProperty(who, "cors",1);
-    MoveCharacterToLocation(who,5561,1169,0,MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation(who,5561,1169,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 
     set_critical(0);
 endprogram

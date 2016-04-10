@@ -24,7 +24,7 @@ program WeightLimit()
 	  item:=items[i];
 	  if ((item.weight) && (!item.newbie) && (item.objtype!=0x0eed) && (item.container.objtype!=0x0efa) )
 	     total:=total-item.weight;
-             MoveItemToLocation(item,player.x,player.y,player.z, 1);
+             MoveObjectToLocation(item,player.x,player.y,player.z, _DEFAULT_REALM, 1); //AutoConversion
              if (total<=limit)
                break;
              endif	   

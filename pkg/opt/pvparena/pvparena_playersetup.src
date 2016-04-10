@@ -27,7 +27,7 @@ program playerSetup(parms)
 	killPlayer(who); 
 	var teamnum := GetObjProperty(who, PVPARENA_TEAM);
 	var baselocation := Unpack(GetObjProperty(stone, "Base" + CStr(teamnum) + "Start"));
-	MoveCharacterToLocation( who, baselocation[1], baselocation[2], baselocation[3], MOVECHAR_FORCELOCATION );
+	MoveObjectToLocation( who, baselocation[1], baselocation[2], baselocation[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 	resPlayer(who); // Res them and destroy their items.
 	fixStats(who);
 	

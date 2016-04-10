@@ -306,7 +306,7 @@ function DressWar(me,gender)
 	var item;
 	var shield := Random(3);
 
-	case Random(2)
+	case (Random(2)) //Conversion
 	0:	item := 0x170b;		//LeatherBoots
 	1:	item := 0x1711;		//ThighBoots
 	endcase
@@ -566,7 +566,7 @@ function DressLeather(me,gender)
 	var item;
 	var shield := Random(3);
 
-	case Random(2)
+	case (Random(2)) //Conversion
 	0:	item := 0x170b;		//LeatherBoots
 	1:	item := 0x1711;		//ThighBoots
 	endcase

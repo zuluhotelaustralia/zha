@@ -412,9 +412,9 @@ endfunction
 
 function KillME()
 	DisableMainEvents();
-	MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SetObjProperty(me,"guardkill",1);
-	Damage( me, GetMaxHp(me) + 8 );
+	ApplyDamage( me, GetMaxHp(me) + 8 );
 endfunction
 
 function RemoveDEXUpgd()

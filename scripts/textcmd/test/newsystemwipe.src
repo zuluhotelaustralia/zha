@@ -67,7 +67,7 @@ program newsystemwipe( who )
 	var i3;
 	set_critical( 1 );
 	for( i3 := 1; i3 <= max_serial; i3 := i3 + 1 )
-		var item := SystemFindObjectBySerial( i3, SYSFIND_SEARCH_STORAGE_AREAS );
+		var item := SystemFindObjectBySerial( i3 );
 		if( item )
 			if( NeedToBeDestroyed( item ) )
 				DestroyItem( item );

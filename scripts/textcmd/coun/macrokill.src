@@ -146,7 +146,7 @@ function JailPlayer( player )
 	acc.setprop("Release", (ReadGameClock() + jailtime ));
 	if(GetObjProperty(player,"starttime"))
 		EraseObjProperty(player,"starttime");
-		MoveCharacterToLocation( player, 5304, 1184, 0, 0);
+		MoveObjectToLocation( player, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
 
 		SendSysMessage( player, "You have been jailed for one day. Reason: Breaking macro rule." );
 

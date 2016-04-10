@@ -93,13 +93,13 @@ endfunction
 function ClearGuard()
 
 	PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
-	//MoveCharacterToLocation(me, 5283,1184,0, MOVECHAR_FORCELOCATION);
+	//MoveObjectToLocation(me, 5283,1184,0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	sleepms(500);
 	me.hidden := 1;
 	sleepms(500);
 	SetObjProperty(me,"guardkill", 1);
 	RevokePrivilege( me, "invul" );
-	Damage( me, GetMaxHp(me) + 3 );
+	ApplyDamage( me, GetMaxHp(me) + 3 );
 
 endfunction
 
@@ -112,14 +112,14 @@ function Closedistance()
 	endif
 	
 	
-case Distance( me, targ )
+case (Distance( me, targ )) //Conversion
 	1: return 1;
         2: RunToward( targ );
  	   return 0;
 	0: return 1;
 	default:
 		PlayStationaryEffect( CInt(me.x), CInt(me.y), CInt(me.z), FX_SMOKE, 0xa, 0xa );
-		MoveCharacterToLocation(me, CInt(targ.x), CInt(targ.y), CInt(targ.z));
+		MoveObjectToLocation(me, CInt(targ.x), CInt(targ.y), CInt(targ.z));
 		PlayStationaryEffect( CInt(me.x), CInt(me.y), CInt(me.z), FX_SMOKE, 0xa, 0xa );
 		return 0;
 endcase

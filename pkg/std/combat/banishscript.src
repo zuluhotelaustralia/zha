@@ -29,7 +29,7 @@ program banishscript(attacker, defender, weapon, armor, basedamage, rawdamage)
     			PlayObjectCenteredEffect( defender, FX_SPELL_MANA_VAMPIRE, 7,7);
 			PlaySoundEffect( attacker, SFX_SPELL_MANA_VAMPIRE );
 			PlayStationaryEffect( defender.x, defender.y, defender.z, FX_SPELL_SUMMON_CREATURE, 0xa, 0xa );
-			MoveCharacterToLocation(defender,5288, 1176, 0, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(defender,5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			ApplyTheDamage( defender, attacker, GetMaxHp(defender) + 3, DMGID_MAGIC );
 		else
 			PlayObjectCenteredEffect( attacker, FX_SPELL_MANA_VAMPIRE, 7,7);

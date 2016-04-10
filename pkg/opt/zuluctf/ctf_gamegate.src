@@ -10,7 +10,7 @@ include "include/attributes";
 program joinctfgate(who)
 
 if (who.title_race!="ZuluCTF")
-MoveCharacterToLocation(who,1417,1715,20);
+MoveObjectToLocation(who,1417,1715,20, _DEFAULT_REALM); //AutoConversion
 SendSysMessage(who,"You are not allowed to be here!",3,34);
 return;
 endif

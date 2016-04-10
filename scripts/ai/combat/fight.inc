@@ -183,7 +183,7 @@ function flee(opponent)
 
 	if (numflees)
 		if ( numflees > 10 )
-			// MoveCharacterToLocation(me,5288,1176,0,MOVECHAR_FORCELOCATION);
+			// MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
 			ApplyDamage( me, GetMaxHp(me) + 3 );
@@ -302,9 +302,9 @@ function GoToSpawnPoint(spawnpoint)
 	PlaySoundEffect(me, SFX_SPELL_RECALL1);
 	sleepms(250);
 	if (spawnpoint.isA(POLCLASS_ITEM))
-		MoveCharacterToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z);
+		MoveObjectToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z, _DEFAULT_REALM); //AutoConversion
 	else
-		MoveCharacterToLocation(me, spawnpoint[1], spawnpoint[2], spawnpoint[3]);
+		MoveObjectToLocation(me, spawnpoint[1], spawnpoint[2], spawnpoint[3], _DEFAULT_REALM); //AutoConversion
 	endif
 	PlaySoundEffect(me, SFX_SPELL_RECALL2);
 	DisableCombatEvents();
@@ -339,5 +339,5 @@ function DoTeleport(me,opponent)
 	say("Rel Por");
 	sleep(1);
 	PlaySoundEffect(me, 0x1ff);
-	MoveCharacterToLocation(me, opponent.x, opponent.y, opponent.z);
+	MoveObjectToLocation(me, opponent.x, opponent.y, opponent.z, _DEFAULT_REALM); //AutoConversion
 endfunction

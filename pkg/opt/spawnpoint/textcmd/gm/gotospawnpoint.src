@@ -71,7 +71,7 @@ program goto_spawnpoint( who, text )
 
 	var res := MakeAndProcessGump( who, found );
 	if( res )
-		MoveCharacterToLocation( who, res.x, res.y, res.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( who, res.x, res.y, res.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 	endif
 
 endprogram

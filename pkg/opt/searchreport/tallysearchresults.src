@@ -9,7 +9,7 @@ program tally_search_results(who)
 	foreach line in file
 		item:=SystemFindObjectBySerial(CInt(line));
 		if (!item)
-			item:=SystemFindObjectBySerial(CInt(line), SYSFIND_SEARCH_STORAGE_AREAS);
+			item:=SystemFindObjectBySerial(CInt(line));
 		endif
 		if (item)
 			tally:=tally + item.amount;

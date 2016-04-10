@@ -22,5 +22,5 @@ program walk_on_moongate( mobile, gate )
     y := GetObjProperty( gate, "DestY" );
     z := GetObjProperty( gate, "DestZ" );
 	print( "Moving " + mobile.name + " to (" + x + "," + y + "," + z + ")" );
-    MoveCharacterToLocation( mobile, x, y, z );
+    MoveObjectToLocation( mobile, x, y, z , _DEFAULT_REALM); //AutoConversion
 endprogram

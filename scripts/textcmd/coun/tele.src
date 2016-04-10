@@ -10,10 +10,10 @@ program textcmd_tele( who )
 
     var where := TargetCoordinates( who );
     if (where)
-        var result := MoveCharacterToLocation( who, where.x, where.y,where.z);
+        var result := MoveObjectToLocation( who, where.x, where.y,where.z, _DEFAULT_REALM); //AutoConversion
 
         if (!result)
-            result := MoveCharacterToLocation( who, where.x, where.y,where.z, MOVECHAR_FORCELOCATION);
+            result := MoveObjectToLocation( who, where.x, where.y,where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         endif
 
 if( where.mobile )

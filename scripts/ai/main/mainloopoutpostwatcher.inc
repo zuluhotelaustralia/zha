@@ -257,7 +257,7 @@ endfunction
 function ReturnHome()
 
 	var myhome := GetObjProperty(me,"myhome");
-	MoveCharacterToLocation(me,myhome[1],myhome[2],myhome[3],MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,myhome[1],myhome[2],myhome[3], _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 endfunction
 
@@ -369,7 +369,7 @@ function SpawnMonster(attack_point, stone_serial, who)
 	var monst:=CreateNpcFromTemplate( attack_point.npctemplate ,CInt(attack_point.x),CInt(attack_point.y),CInt(attack_point.z));
 	if (!monst)
 		monst:=CreateNpcFromTemplate( attack_point.npctemplate,CInt(me.x),CInt(me.y),CInt(me.z));
-		MoveCharacterToLocation(monst,attack_point.x,attack_point.y,attack_point.z,MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(monst,attack_point.x,attack_point.y,attack_point.z, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	endif
 	if (!monst)
 		return 0;

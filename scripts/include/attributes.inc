@@ -33,7 +33,7 @@ use os;
 use math;
 use util;
 use cfgfile;
-//use attributes;
+use attributes;
 use vitals;
 
 // Include client.inc to get the SKILLID_* constants

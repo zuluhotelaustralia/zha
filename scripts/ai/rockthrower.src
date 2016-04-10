@@ -213,7 +213,7 @@ sleepms(250);
     else
         // attacking hand-to-hand (hope we unequipped the bow!)
 
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first
         0:
             return 0;

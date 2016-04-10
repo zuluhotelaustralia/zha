@@ -17,7 +17,7 @@ function DeleteAccountChars(account) //account object as parameter
 	//deletes all characters, items and bankboxes for account
 	for (charNum:=1; charNum <=5; charNum := charNum+1)
 		player:=account.GetCharacter(charNum);
-		//MoveCharacterToLocation(player, 0, 0, 0, MOVECHAR_FORCELOCATION);
+		//MoveObjectToLocation(player, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		//DisconnectClient(player);
 		if (player != error)
 			
