@@ -1,5 +1,6 @@
 use uo;
 use os;
+use vitals;
 
 program angry_bees (bees)
 

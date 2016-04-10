@@ -1,5 +1,7 @@
 use uo;
 use os;
+//use attributes;
+
 include "include/client";
 include "include/cmdlevel_check";
 

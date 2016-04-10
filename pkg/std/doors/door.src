@@ -19,6 +19,7 @@
 use uo;
 use os;
 use cfgfile;
+use storage;
 
 include "doors";
 include "include/attributes";

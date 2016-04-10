@@ -1,6 +1,8 @@
 /*
  * key.inc - key functions
  */
+use storage;
+ 
 include "include/client";
 include "include/objtype";
 

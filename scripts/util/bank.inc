@@ -8,6 +8,7 @@
 //
 
 use os;
+use storage;
 
 include "include/objtype";
 

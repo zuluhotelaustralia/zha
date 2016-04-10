@@ -1,4 +1,5 @@
 use uo;
+use guilds;
 
 include "guildchat";
 

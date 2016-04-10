@@ -3,6 +3,8 @@
 
 use uo;
 use os;
+use guilds;
+
 include "guilduniform";
 
 program guild_destroy(stone)

@@ -1,4 +1,6 @@
 use uo;
+use guilds;
+
 include "guildchat";
 
 program send_allied_message (who, text)

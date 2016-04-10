@@ -6,6 +6,7 @@ use uo;
 use os;
 use cfgfile;
 use basic;
+use guilds;
 
 include "util/bank";
 include "include/attributes";

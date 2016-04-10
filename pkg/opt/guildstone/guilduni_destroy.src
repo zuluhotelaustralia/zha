@@ -1,5 +1,6 @@
 use uo;
 use os;
+use guilds;
 include "guilduniform";
 
 program guilduni_destroy(guilduni)
