@@ -1,5 +1,6 @@
 use uo;
 use os;
+use storage;
 
 include "securechests";
 include "utility";

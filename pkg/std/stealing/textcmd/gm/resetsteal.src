@@ -4,6 +4,8 @@
 
 use uo;
 use os;
+use storage;
+
 include "include/cmdlevel_check";
 
 program reset_steal(who, parms)

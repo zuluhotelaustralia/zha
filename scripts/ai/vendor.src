@@ -1,6 +1,8 @@
 use npc;
 use os;
 use uo;
+use storage;
+
 include "include/random";
 include "ai/setup/modsetup";
 

@@ -1,3 +1,4 @@
+use storage;
 
 function find_or_create_storage( areaname )
 

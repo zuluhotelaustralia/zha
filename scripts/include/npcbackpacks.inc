@@ -1,3 +1,5 @@
+use storage;
+
 include "include/objtype";
 
 function OpenTamedStorageAreas()

@@ -19,7 +19,7 @@
 **	4) Create a new ATTRIBUTEID_ constant to fit the given attribute name.
 **	5) Add a line to GetAttributeIdBySkillId( skillid ) function like:
 **		newSKILLID_: return newATTRIBUTEID_;
-**	6) Add a line to GetSkillIdByAttributeId( attributeid ) function like:
+**	6) Add a line to GetSkillIdByAttributility.incuteId( attributeid ) function like:
 **		newATTRIBUTEID_: return newSKILLID_;
 **	7) Add the new SKILLID_ to GetSkillIds() function.
 **	8) Add the new ATTRIBUTEID_ to GetAttributeIds() function.
@@ -33,6 +33,8 @@ use os;
 use math;
 use util;
 use cfgfile;
+//use attributes;
+use vitals;
 
 // Include client.inc to get the SKILLID_* constants
 include "include/client";

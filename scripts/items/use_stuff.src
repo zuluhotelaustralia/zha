@@ -2,6 +2,7 @@
 use uo;
 use os;
 use cfgfile;
+//use attributes;
 
 var config;
 var elem;

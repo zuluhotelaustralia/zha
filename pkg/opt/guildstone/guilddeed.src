@@ -4,6 +4,7 @@
 
 use uo;
 use os;
+use guilds;
 
 include "guilddata";
 

@@ -1,5 +1,6 @@
 use uo;
 use os;
+use guilds;
 
 const DMGID_FIRE	:= 0x0001;
 const DMGID_AIR		:= 0x0002;

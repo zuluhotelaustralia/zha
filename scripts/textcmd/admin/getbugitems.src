@@ -1,6 +1,8 @@
 use basic;
 use os;
 use uo;
+use storage;
+
 include "include/cmdlevel_check";
 
 program textcmd_getbuggers( who )

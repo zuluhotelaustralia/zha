@@ -5,6 +5,7 @@
 
 use uo;
 use os;
+use storage;
 
 include "include/objtype";
 include "include/attributes";

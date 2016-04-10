@@ -1,5 +1,6 @@
 use uo;
 use os;
+use vitals;
 
 program reactivearmorhit(param)
   var attacker := param[1];
