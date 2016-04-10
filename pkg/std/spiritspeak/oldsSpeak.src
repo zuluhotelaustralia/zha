@@ -173,7 +173,7 @@ function ContactUndead( caster, skillid, level )
 	
 		PlayStationaryEffect( mobile.x, mobile.y, mobile.z, 0x3728, 0xa, 0xa );
 		mobile.frozen := 0;
-		MoveCharacterToLocation( mobile, 0, 0, 0, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( mobile, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		ApplyRawDamage( mobile, GetMaxHp(mobile) + 3 );
 	endif
 

@@ -56,7 +56,7 @@ function RunMonsterPoint(monsterDuelController, player, positionindex)
   		set_critical(1); 
   	  	SetObjProperty(player,"#moved", 1);
       
- 		if (!MoveCharacterToLocation( player, mp.playerlocation.x, mp.playerlocation.y, mp.playerlocation.z, MOVECHAR_FORCELOCATION))
+ 		if (!MoveObjectToLocation( player, mp.playerlocation.x, mp.playerlocation.y, mp.playerlocation.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION))
 			//kill monst
 			ApplyRawDamage(monst, CInt(GetHp(monst)+3) );
 			
@@ -76,7 +76,7 @@ function EndMonsterDuel(monsterDuelController, player)
 	
 	//send player back to duel gate
 
- 		MoveCharacterToLocation( player, monsterDuelController.x, monsterDuelController.y+1, monsterDuelController.z, MOVECHAR_FORCELOCATION);
+ 		MoveObjectToLocation( player, monsterDuelController.x, monsterDuelController.y+1, monsterDuelController.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		SetSpeedCheckNote(player);
 	
 	//kill current monster (if one)
@@ -168,7 +168,7 @@ function RunBoundsChecker(moongate,who)
 		//checks that another player hasnt broken in
 		foreach mob in ListMobilesInLineOfSight( who, 30 )
 			if (mob.acct && ! mob.cmdlevel)
-				MoveCharacterToLocation( mob, moongate.x, moongate.y+1, moongate.z, MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation( mob, moongate.x, moongate.y+1, moongate.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 				SetSpeedCheckNote(mob);
 				//tell staff
 				foreach person in EnumerateOnlineCharacters()

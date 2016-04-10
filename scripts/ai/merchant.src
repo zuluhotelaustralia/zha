@@ -422,8 +422,7 @@ function WalkHome()
 	endfor
 
 	if (me.x != myhome[1] && me.y != myhome[2] )
-		MoveCharacterToLocation(me, myhome[1], myhome[2],
-			GetMapInfo(myhome[1], myhome[2]).z, MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(me, myhome[1], myhome[2], GetMapInfo(myhome[1], myhome[2]).z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
 	endif
 
 	SetAnchor( myhome[1], myhome[2], 3, 80 );

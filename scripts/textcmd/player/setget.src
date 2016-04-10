@@ -150,7 +150,7 @@ function SetDefaultBag(who, type)
 		bagarray := {};
 	endif
 	
-	case type
+	case (type) //Conversion
 			"reags":		bagarray[1] := bag.serial;
 			"pagans": 	bagarray[2] := bag.serial;
 			"ammo":			bagarray[3] := bag.serial;

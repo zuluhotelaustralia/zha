@@ -32,7 +32,7 @@ function make_loot(objtype, container)
 	if (mypack)
 		if (GetObjProperty(container, "summoned"))
 			foreach thingie in EnumerateItemsInContainer(mypack)
-				MoveItemToLocation(thingie, container.x, container.y, container.z, MOVEITEM_NORMAL );
+				MoveObjectToLocation(thingie, container.x, container.y, container.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion
 			endforeach
 		else
 			foreach thingie in EnumerateItemsInContainer(mypack)
@@ -114,7 +114,7 @@ function CreateLootItemInContainer(corpse, lootitem)
 		for (cntr := 1; cntr <= intamount; cntr := cntr + 1)
 			var created := CreateItemInContainer(corpse, CInt(theitem), 1);
 			if (propname)
-				case proptype
+				case (proptype) //Conversion
 					"i" :
 						SetObjProperty(created, propname, CInt(propval));
 					"r" :
@@ -156,7 +156,7 @@ function CreateLootItemAtLocation(x,y,z, lootitem)
 		for (cntr := 1; cntr <= intamount; cntr := cntr + 1)
 				var created := CreateItemAtLocation(x,y,z, theitem, 1);
 				if (propname)
-					case proptype
+					case (proptype) //Conversion
 						"i" :
 							SetObjProperty(created, propname, CInt(propval));
 						"r" :

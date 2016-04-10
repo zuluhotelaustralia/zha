@@ -24,7 +24,7 @@ program textcmd_makeshipdeed( who, shiptype )
 endprogram
 
 function validate_shiptype( shiptype )
-    case shiptype
+    case (shiptype) //Conversion
         0x4000:
             return 1;
         default:

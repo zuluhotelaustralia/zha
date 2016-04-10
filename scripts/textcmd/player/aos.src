@@ -21,13 +21,13 @@ if (text == "on")
   account.setprop("AOS", 1);
   SendSysMessage( who, "You enabled Age of Shadows on your account.");
   SendPacket(who, "B9801B");
-  MoveCharacterTolocation(who, who.x, who.y, who.z);
+  MoveObjectToLocation(who, who.x, who.y, who.z, _DEFAULT_REALM); //AutoConversion
 elseif (text == "off")
   account.eraseprop("AOS");
   SendSysMessage(who,"You disabled Age of Shadows on your account.");
   // This packet sends the T2A Packet with Chat Button Disabled, change to B90001 To enable chat button
   SendPacket(who, "B90000");
-  MoveCharacterTolocation(who, who.x, who.y, who.z);
+  MoveObjectToLocation(who, who.x, who.y, who.z, _DEFAULT_REALM); //AutoConversion
 endif
 
 endprogram

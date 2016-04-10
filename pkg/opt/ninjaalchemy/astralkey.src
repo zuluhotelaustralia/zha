@@ -77,7 +77,7 @@ program recall( who, astralkey )
 	if(!who.dead)
 	PlaySoundEffect( who, SFX_SPELL_EXPLOSION );
 	PlayStationaryEffect( who.x, who.y, who.z, FX_SPELL_DISPEL_FIELD, SPEED_SPELL_DISPEL_FIELD, LOOP_SPELL_DISPEL_FIELD );
-	MoveCharacterToLocation( who, tox, toy, toz );
+	MoveObjectToLocation( who, tox, toy, toz , _DEFAULT_REALM); //AutoConversion
 	SendSysMessage(who, "You arrive safely at your destination.");
 	else
 	SendSysMessage(who, "You have died.");

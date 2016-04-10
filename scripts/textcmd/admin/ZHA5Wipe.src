@@ -137,7 +137,7 @@ function WipePlayerItems( )
 				continue;
 			endif
 			
-			MoveCharacterToLocation( Character, 1475, 1645, 20, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( Character, 1475, 1645, 20, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			
 			CharacterCount := CharacterCount + 1;
 			

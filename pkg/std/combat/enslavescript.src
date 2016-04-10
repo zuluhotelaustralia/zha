@@ -31,7 +31,7 @@ program enslave(attacker, defender, weapon, armor, basedamage, rawdamage)
 			if (!defender.dead && RandomDiceRoll("1d2")==1)
 				PlayLightningBoltEffect( defender );
 				PrintTextAbove(attacker, attacker.name + " has enslaved " + defender.name + "!");
-				MoveCharacterToLocation(defender, CInt(slaveloc[1]), Cint(slaveloc[2]), Cint(slaveloc[3]), MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation(defender, CInt(slaveloc[1]), Cint(slaveloc[2]), Cint(slaveloc[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 				PrintTextAbove(defender, "You have been enslaved and sent to the Slavers' Dungeon!");
 				PrintTextAbove(defender, "You will be able to leave in 3 hours time, unless you are rescued beforehand.");
 				SetObjProperty(defender, "#cantLeaveSlaversBefore", ReadGameClock()+1800);

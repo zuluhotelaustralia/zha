@@ -138,7 +138,7 @@ program cast_lavastream(parms)
  /*   set_critical(1);
       foreach rock in rocksMade
         rock.movable := 1;
-        MoveItemToLocation(rock, rock.x, rock.y, (rock.z+1), MOVEITEM_FORCELOCATION);
+        MoveObjectToLocation(rock, rock.x, rock.y, (rock.z+1), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         rock.movable := 0;
       endforeach
     set_critical(0);
@@ -147,7 +147,7 @@ program cast_lavastream(parms)
     set_critical(1);
       foreach lava in lavaPoolMade
         lava.movable := 1;
-        MoveItemToLocation(lava, lava.x, lava.y, (lava.z+2), MOVEITEM_FORCELOCATION);
+        MoveObjectToLocation(lava, lava.x, lava.y, (lava.z+2), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         lava.movable := 0;
       endforeach
     set_critical(0);

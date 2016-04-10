@@ -42,11 +42,11 @@ program music ( character, text )
 
     //print("musicid: " + music_id);
 
-    PlayMusic( character, music_id );
+    PlayMusicInline( character, music_id );
 
 endprogram
 
-function PlayMusic( character, music_id )
+function PlayMusicInline( character, music_id )
 
     var packet_str :=  ( "6D00" + music_id );
 

@@ -78,7 +78,7 @@ function lastRitesOn( who)
     if (result[button1.keyid])
       if(who.dead)
         SendSysMessage(who, "Your Soul has been Transported to Britain Healer");
-        MoveCharacterToLocation( who, HEALER_X, HEALER_Y, HEALER_Z );
+        MoveObjectToLocation( who, HEALER_X, HEALER_Y, HEALER_Z , _DEFAULT_REALM); //AutoConversion
         PlaySoundEffectPrivate( who, SFX_SPELL_LASTRITES, who );
         return 1;
       else

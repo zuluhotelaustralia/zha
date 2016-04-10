@@ -114,7 +114,7 @@ case(type)
 			endif
 			RevokePrivilege( npc, "invul" );
 			SetObjProperty(npc, "guardkill", 1);
-			Damage( npc, (GetMaxHp(npc)) );
+			ApplyDamage( npc, (GetMaxHp(npc)) );
 		endif
 	   endforeach
 

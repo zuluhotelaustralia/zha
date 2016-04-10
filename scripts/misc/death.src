@@ -194,9 +194,9 @@ program npcdeath(corpse)
 		elseif( item.container == corpse )
 			if( GetObjProperty( item, "dropitem" ) )
 				EraseObjProperty( item, "dropitem" );
-				MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL );
+				MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion
 			// elseif( nocorpse || summoned || guardkill )
-				//MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL ); DONT keep putting this in.  It wrecks the townraid where they drop all their stuff
+				//MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion DONT keep putting this in.  It wrecks the townraid where they drop all their stuff
 				// I DONT want that, plus there is something called dropitem, which is looted items.
 				// The above line causes a shit load of extra items and lag.
 				//moveitemtocontainer( item, corpse); //This line is useless and prevent some monsters from giving their loot back.
@@ -242,7 +242,7 @@ program npcdeath(corpse)
    	if( nocorpse )
     		foreach item in EnumerateItemsInContainer( corpse )
     			if( item.container == corpse )
-    				MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL );
+    				MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion
     			endif
     		endforeach
     		DestroyItem(corpse);

@@ -24,9 +24,9 @@ program spectile(who, item)
   who.hidden := 1;
   who.squelch(duration);
   SetObjProperty(who, "#Duel-Spec", 1);
-  MoveCharacterToLocation(who, toX, toY, toZ, MOVECHAR_FORCELOCATION);
+  MoveObjectToLocation(who, toX, toY, toZ, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
   SendGump(who);
-  MoveCharacterToLocation(who, wasLoc[1], wasLoc[2], wasLoc[3], MOVECHAR_FORCELOCATION);
+  MoveObjectToLocation(who, wasLoc[1], wasLoc[2], wasLoc[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
   who.hidden := 0;
   who.frozen := 0;
   who.squelch(0);

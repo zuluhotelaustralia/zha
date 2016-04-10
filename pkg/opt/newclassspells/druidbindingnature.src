@@ -127,7 +127,7 @@ program cast_bindingnature(parms)
   set_critical(1);
     foreach item in MadeStuff
       item.movable := 1;
-      MoveItemToLocation(item, item.x, item.y, item.z+2, MOVEITEM_FORCELOCATION);
+      MoveObjectToLocation(item, item.x, item.y, item.z+2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       item.movable := 0;
     endforeach
     set_critical(0);
@@ -144,7 +144,7 @@ program cast_bindingnature(parms)
   set_critical(1);
     foreach item in MadeStuff
       item.movable := 1;
-      MoveItemToLocation(item, item.x, item.y, item.z-2, MOVEITEM_FORCELOCATION);
+      MoveObjectToLocation(item, item.x, item.y, item.z-2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       item.movable := 0;
     endforeach
     sleepms(250);

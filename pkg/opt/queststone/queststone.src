@@ -660,7 +660,7 @@ function DisplayGMPlayersGump(who, stone)
 			endif
 		elseif(gumpresult >= 99 )
 			who.concealed := 1;
-			MoveCharacterToLocation( who, players[cint(gumpresult) - 100].x, players[cint(gumpresult) - 100].y, players[cint(gumpresult) - 100].z);
+			MoveObjectToLocation( who, players[cint(gumpresult) - 100].x, players[cint(gumpresult) - 100].y, players[cint(gumpresult) - 100].z, _DEFAULT_REALM);
 			GMPlayerChangesGump(who, stone, players[cint(gumpresult) - 100]);
 			return;
 		endif
@@ -1498,7 +1498,7 @@ function MoveCharToLocation(who, locationserial)
 		SendSysMessage(who, "Cant find location");
 		return;
 	endif
-	MoveCharacterToLocation(who, loc.x,loc.y,loc.z);
+	MoveObjectToLocation(who, loc.x,loc.y,loc.z, _DEFAULT_REALM); //AutoConversion
 	
 endfunction
 

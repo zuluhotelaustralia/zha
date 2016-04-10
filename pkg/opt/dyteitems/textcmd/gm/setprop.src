@@ -197,16 +197,16 @@ function SetObjctProp( obj, propname, amount, amount_str )
 	endif
 
 	case (propname)
-		"x":		MoveItemToLocation( obj, amount, obj.y, obj.z, MOVEITEM_FORCELOCATION );
-				MoveCharacterToLocation( obj, amount, obj.y, obj.z, MOVECHAR_FORCELOCATION );
+		"x":		MoveObjectToLocation( obj, amount, obj.y, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
+				MoveObjectToLocation( obj, amount, obj.y, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
 			
-		"y":		MoveItemToLocation( obj, obj.x, amount, obj.z, MOVEITEM_FORCELOCATION );
-				MoveCharacterToLocation( obj, obj.x, amount, obj.z, MOVECHAR_FORCELOCATION );
+		"y":		MoveObjectToLocation( obj, obj.x, amount, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
+				MoveObjectToLocation( obj, obj.x, amount, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
 			
-		"z":		MoveItemToLocation( obj, obj.x, obj.y, amount, MOVEITEM_FORCELOCATION );
-				MoveCharacterToLocation( obj, obj.x, obj.y, amount, MOVECHAR_FORCELOCATION );
+		"z":		MoveObjectToLocation( obj, obj.x, obj.y, amount, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
+				MoveObjectToLocation( obj, obj.x, obj.y, amount, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
 	
 		"objtype": 	obj.objtype		:= amount;	break;

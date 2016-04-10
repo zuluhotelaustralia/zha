@@ -58,7 +58,7 @@ program textcmd_getbuggers( who )
 				if( !item )
 					item := SystemFindObjectBySerial(number, SYSFIND_SEARCH_OFFLINE_MOBILES);
 					if( !item )
-						item := SystemFindObjectBySerial(number, SYSFIND_SEARCH_STORAGE_AREAS);
+						item := SystemFindObjectBySerial(number);
 					endif
 				endif
 			

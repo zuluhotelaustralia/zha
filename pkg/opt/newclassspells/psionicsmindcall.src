@@ -99,7 +99,7 @@ program cast_mindcall( caster )
   endif
   if (sx == caster.x && sy == caster.y && sz == caster.z)
     PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SPELL_MINDCALL, SPEED_SPELL_MINDCALL, LOOP_SPELL_MINDCALL);
-    MoveCharacterToLocation( caster, tox, toy, toz );
+    MoveObjectToLocation( caster, tox, toy, toz , _DEFAULT_REALM); //AutoConversion
     PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SPELL_MINDCALL, SPEED_SPELL_MINDCALL, LOOP_SPELL_MINDCALL);
     PlaySoundEffect( caster, SFX_SPELL_MINDCALL2 );
   else

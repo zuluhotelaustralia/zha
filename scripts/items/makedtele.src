@@ -15,6 +15,6 @@ program walk_on_moongate( mobile, gate )
     	z := GetObjProperty( gate, "DestZ" );
 
     	SetObjProperty(mobile,"#justgated",1);
-    	MoveCharacterToLocation( mobile, x, y, z );
+    	MoveObjectToLocation( mobile, x, y, z , _DEFAULT_REALM); //AutoConversion
 
 endprogram

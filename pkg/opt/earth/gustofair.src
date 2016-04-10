@@ -85,7 +85,7 @@ program cast_gust_of_air( parms )
 	var newz	:= cast_on.z + kickbackz;
 	
 	if( CheckLosAt( cast_on, newx, newy, newz ) )
-//		MoveCharacterToLocation( cast_on, newx, newy, newz );
+//		MoveObjectToLocation( cast_on, newx, newy, newz , _DEFAULT_REALM); //AutoConversion
 	endif
 
 	EraseObjProperty( caster, "#Casting" );

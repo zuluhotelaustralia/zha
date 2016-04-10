@@ -23,7 +23,7 @@ program possess_undead(who)
 			PlaySoundEffect(who, 0x485);
 			sleep(1);
 			mob.hidden:=1;
-			MoveCharacterToLocation(who, mob.x, mob.y, mob.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation(who, mob.x, mob.y, mob.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			ResurrectMobile(who);
 			who.graphic := mob.graphic;
 			who.color := mob.color;

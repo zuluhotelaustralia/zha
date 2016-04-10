@@ -9,6 +9,7 @@ const DF_KEYTYPE_INTEGER      := 0x01;
 //
 // Functions
 //
+ListDataFiles();
 CreateDataFile( filespec, flags := DF_KEYTYPE_STRING );
 OpenDataFile( filespec ); // fails if does not exist
 //DataFileExists( filespec );

@@ -139,10 +139,10 @@ function SendGateGump(who)
 	endcase
 
 	if(res[0])
-		MoveCharacterToLocation(who, x, y, z, MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(who, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 	else
-		MoveCharacterToLocation(who, 1475, 1645, 20, MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(who, 1475, 1645, 20, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	endif
 	return 1;
 

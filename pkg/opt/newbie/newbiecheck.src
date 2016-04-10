@@ -9,7 +9,7 @@ program checknewbie(who)
 		sleep(60);
 		SendSysMessage(who, "You are no longer newbie!");
 		sleep(3);
-		MoveCharacterToLocation(who,1475,1645,20); //brit starting area	
+		MoveObjectToLocation(who,1475,1645,20, _DEFAULT_REALM); //AutoConversion //brit starting area	
 	endif
 	return;
 	

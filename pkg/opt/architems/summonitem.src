@@ -38,7 +38,7 @@ program summon_npc(user, item)
 	SetObjProperty(critter, "guardkill", 1);
 	PerformAction(user, 17);
 	sleep(2);
-	MoveCharacterToLocation(critter, location.x, location.y, location.z);
+	MoveObjectToLocation(critter, location.x, location.y, location.z, _DEFAULT_REALM); //AutoConversion
 	PlaySoundEffect(critter, SFX_SPELL_RECALL2);
 	PrintTextAbove(critter, "Who summoned me?");
 	Detach();
@@ -50,7 +50,7 @@ program summon_npc(user, item)
 		PerformAction(critter, 16);
 		sleep(3);
 		PlaySoundEffect(critter, SFX_SPELL_RECALL1);
-		MoveCharacterToLocation(critter,5275,1163,0,MOVECHAR_FORCELOCATION);  // jail
+		MoveObjectToLocation(critter,5275,1163,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion  // jail
 		ApplyRawDamage(critter, GetHp(critter) + 3);
 
 		// wipe horse if summoned monster was mounted

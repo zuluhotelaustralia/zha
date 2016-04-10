@@ -40,7 +40,7 @@ function ProcessHumanCorpseDecaying( corpse )
 		if( !GetObjProperty( corpse, "NoDecay" ) )
 			foreach item in EnumerateItemsInContainer(corpse)
 				if( item.container == corpse )
-					MoveItemToLocation( item, corpse.x, corpse.y, corpse.z, MOVEITEM_NORMAL );
+					MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion
 				endif
 				usescript:=GetObjProperty( item, "old_us");
    				if(usescript)

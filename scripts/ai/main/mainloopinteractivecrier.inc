@@ -211,7 +211,7 @@ endfunction
 function ReturnHome()
 
 	var myhome := GetObjProperty(me,"myhome");
-	MoveCharacterToLocation(me,myhome[1],myhome[2],myhome[3],MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,myhome[1],myhome[2],myhome[3], _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 endfunction
 
@@ -441,7 +441,7 @@ function BecomeMonster(npctemplate)
 	if (thecritter)
 		PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
 		me.hidden := 1;
-		//MoveCharacterToLocation( me, 0, 0, 0, MOVECHAR_FORCELOCATION );
+		//MoveObjectToLocation( me, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		SetObjProperty( me, "noloot", 1 );
 		SetObjProperty( me, "summoned", 1 );
 		RevokePrivilege( me, "invul" );

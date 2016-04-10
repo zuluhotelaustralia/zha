@@ -8,7 +8,7 @@ const FX_POISON_GAS := 0x113a;
 program open_trapped_item(character, item)
       var traptype := GetObjProperty(item,"trap_type");
       var trapstrength := GetObjProperty(item,"trap_strength");
-      case traptype
+      case (traptype) //Conversion
           1 :   PlaySoundEffect(character, SFX_224);
                 var dmg := (Random(20) + CInt(trapstrength));
                 SendSysMessage(character, "You set off a needle trap!");

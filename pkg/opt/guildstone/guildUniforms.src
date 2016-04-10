@@ -238,7 +238,7 @@ function BringAllGuildUniformsToMe(who, guild)
 	if (YesNo(who, "Are you sure?"))
 		var gclothing := ListGuildUniforms(guild);
 		foreach g in gclothing
-			MoveItemToLocation( g, who.x, who.y, who.z);
+			MoveObjectToLocation( g, who.x, who.y, who.z, _DEFAULT_REALM); //AutoConversion
 		endforeach
 	endif
 endfunction

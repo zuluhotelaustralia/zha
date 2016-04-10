@@ -210,7 +210,7 @@ program textcmd_testgump( who )
 		return;
 
 	elseif( action == 1 ) // GOTO
-		MoveCharacterToLocation( who, client.x, client.y, client.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( who, client.x, client.y, client.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		gmdata := {	"admin: goto", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+client.x+" y: "+client.y+" z: "+client.z,"na"};
 		logcommand(who, gmdata);
 		ShowFlame(who);
@@ -218,7 +218,7 @@ program textcmd_testgump( who )
 
 	elseif( action == 2 ) // SUMMON
 
-		MoveCharacterToLocation( client, who.x, who.y, who.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( client, who.x, who.y, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		gmdata := {	"admin: summon", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"x: "+who.x+" y: "+who.y+" z: "+who.z,"na"};
 		logcommand(who, gmdata);
 		ShowFlame(client);
@@ -227,7 +227,7 @@ program textcmd_testgump( who )
 	elseif( action == 3 ) // SUMMON CAGE
 
 		var tempitem;
-		MoveCharacterToLocation(client, who.x+1, who.y+1, who.z, MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(client, who.x+1, who.y+1, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		tempitem := CreateItemAtLocation( client.x-1,client.y, client.z, 0x821, 1 );
 		tempitem.decayAt := ReadGameClock() + 30;
 		tempitem := CreateItemAtLocation( client.x+1,client.y, client.z, 0x821, 1 );
@@ -307,7 +307,7 @@ program textcmd_testgump( who )
 		endif
 
 		acc.setprop( "Release", (ReadGameClock() + time) );
-		MoveCharacterToLocation( client, 5304, 1184, 0, 0 );
+		MoveObjectToLocation( client, 5304, 1184, 0, _DEFAULT_REALM, 0 ); //AutoConversion
 		SendSysMessage( client, "You have been jailed" );
 		SendSysMessage( who, playername + " has been jailed." );
 		gmdata := {	"admin: jail", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"days: "+val,"release: "+(ReadGameClock() + time)};
@@ -327,7 +327,7 @@ program textcmd_testgump( who )
 		acc.setprop( "Release", 0 );
 		SendSysMessage( client, "You have been freed.");
 		SendSysMessage( who, playername + " has been freed." );
-		MoveCharacterToLocation( client, 1475, 1645, 20, 0);
+		MoveObjectToLocation( client, 1475, 1645, 20, _DEFAULT_REALM, 0); //AutoConversion
 		gmdata := {	"admin: forgive", client.name, client.serial , client.acctname,"concealed: "+who.concealed,"NA","release time: "+ReadGameClock()};
 		logcommand(who, gmdata);
 		return;

@@ -42,7 +42,7 @@ program unleash_map(parms)
 	
 	//testing
 	//Broadcast("moving u to map!");
-	//MoveCharacterToLocation( who, x, y, z, MOVECHAR_FORCELOCATION);
+	//MoveObjectToLocation( who, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	//
 
 	//Broadcast("limit: " + limit);	

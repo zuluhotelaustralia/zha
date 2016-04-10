@@ -122,7 +122,7 @@ endfunction
 
 function ReturnHome()
 	var myhome := GetObjProperty(me,"myhome");
-	MoveCharacterToLocation(me,myhome[1],myhome[2],myhome[3],MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,myhome[1],myhome[2],myhome[3], _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 endfunction
 
 function DeleteItem(item)
@@ -156,7 +156,7 @@ function DecayThisItem(item)
 		var x := CInt(moveLocation[1]);
 		var y := CInt(moveLocation[2]);
 		var z := CInt(moveLocation[3]);
-		if (! MoveItemToLocation( item, x, y, z))	
+		if (! MoveObjectToLocation( item, x, y, z))	
 			DestroyItem(item);
 		endif	
 	else

@@ -43,10 +43,10 @@ program textcmd_destroyShip( who )
 	if (newloc)
 		var flags := LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN+LISTEX_FLAG_GHOST;
 		foreach mob in ListMobilesNearLocationEx(who.x, who.y, who.z, 3, flags)
-			MoveCharacterToLocation(mob, newloc.x,newloc.y, newloc.z, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(mob, newloc.x,newloc.y, newloc.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		endforeach
 		
-		MoveCharacterToLocation(who, newloc.x,newloc.y, newloc.z);
+		MoveObjectToLocation(who, newloc.x,newloc.y, newloc.z, _DEFAULT_REALM); //AutoConversion
 	else
 		return;
 	endif

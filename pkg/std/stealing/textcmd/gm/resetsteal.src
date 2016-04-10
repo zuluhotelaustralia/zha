@@ -17,7 +17,7 @@ program reset_steal(who, parms)
 
 	DestroyRootItemInStorageArea(storage, "temp storage of " + who.serial);
 
-	MoveCharacterToLocation( who, who.x, who.y, who.z+1 );
+	MoveObjectToLocation( who, who.x, who.y, who.z+1 , _DEFAULT_REALM); //AutoConversion
 	EraseObjProperty(who, "#snooper");
 
 endprogram

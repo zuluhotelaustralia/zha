@@ -160,7 +160,7 @@ function startGame(stone)
   var spot;
   foreach player in getTeamAsObjects(teamOneArray)
     spot := pickRandomSpotInArea(teamOneArea);
-    MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation(player, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     SetObjProperty(player, "#duel", stone.serial);
     if (GOdispel)
       WipeMods(player);
@@ -181,7 +181,7 @@ function startGame(stone)
 
   foreach player in getTeamAsObjects(teamTwoArray)
     spot := pickRandomSpotInArea(teamTwoArea);
-    MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation(player, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     SetObjProperty(player, "#duel", stone.serial);
     if (GOdispel)
       WipeMods(player);
@@ -240,7 +240,7 @@ function checkGameStatus(stone)
       if(getPlayersTeam(player.serial, teamOneArray, teamTwoArray) == 1)
         spot := pickRandomSpotInArea(teamOneArea);
       endif
-      MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+      MoveObjectToLocation(player, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       if (GOlooting)
         ApplyRawDamage(player, GetHp(player)+3);
       else
@@ -263,7 +263,7 @@ endfunction
 function endTheGame(stone)
   foreach player in getAliveObjects(teamOneArray, teamTwoArray)
     var spot := pickRandomSpotInArea(exitArea);
-    MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation(player, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     EraseObjProperty(player, "#duel");
     RecordStat(player.serial, 1);
 
@@ -289,7 +289,7 @@ endfunction
 function playerExitsBattle(player, stone)
   stone := 0;
   var spot := pickRandomSpotInArea(exitArea);
-  MoveCharacterToLocation(player, spot[1], spot[2], spot[3], MOVECHAR_FORCELOCATION);
+  MoveObjectToLocation(player, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
   setMemberStatus(player.serial, -1, teamOneArray, teamTwoArray);
   EraseObjProperty(player, "#duel");
   if (player.posioned)

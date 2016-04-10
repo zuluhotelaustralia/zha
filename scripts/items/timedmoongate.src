@@ -90,7 +90,7 @@ program walk_on_moongate(mobile, moongate )
     set_critical(1); 
     SetObjProperty(mobile,"#moved", 1);
     SetSpeedCheckNote(mobile);
-//  MoveCharacterToLocation( mobile, toX, toY, toZ);
+//  MoveObjectToLocation( mobile, toX, toY, toZ, _DEFAULT_REALM); //AutoConversion
     SendGateGump(mobile);
 
 endprogram   
@@ -143,7 +143,7 @@ function SendGateGump(who)
 	endcase
 
 	if(res[0])
-		MoveCharacterToLocation(who, x,y,z);
+		MoveObjectToLocation(who, x,y,z, _DEFAULT_REALM); //AutoConversion
 	endif
 
 	who.frozen:=0;

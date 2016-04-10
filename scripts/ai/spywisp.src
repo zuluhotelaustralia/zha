@@ -35,7 +35,7 @@ endprogram
 
 function CloseDistance( opponent )
 
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:
         0:
             return 1;

@@ -13,7 +13,7 @@ program removepack(parms)
 	var markbackpack:=parms[4];
 	var markx:=mark.x, marky:=mark.y;
 
-	var thiefbackpack:=SystemFindObjectBySerial(markbackpack, SYSFIND_SEARCH_STORAGE_AREAS);
+	var thiefbackpack:=SystemFindObjectBySerial(markbackpack);
 
 	var whopack:=SystemFindObjectBySerial(who.serial);
 	if(!whopack) whopack:=SystemFindObjectBySerial(who.serial, SYSFIND_SEARCH_OFFLINE_MOBILES); endif
@@ -42,7 +42,7 @@ program removepack(parms)
 
 	DestroyRootItemInStorageArea(storage, "temp storage of " + who.serial);
 
-	MoveCharacterToLocation( who, who.x, who.y, who.z+1 );
+	MoveObjectToLocation( who, who.x, who.y, who.z+1 , _DEFAULT_REALM); //AutoConversion
 	EraseObjProperty(who, "#snooper");
 
 endprogram

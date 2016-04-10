@@ -77,7 +77,7 @@ program textcmd_shipshower (who, text)
 		if (res<=20)
 		//move char to location
 			SendSysMessage(who, "Ship " + ships[res].x + ", " + ships[res].y + ", " + ships[res].z);
-			MoveCharacterToLocation(who, ships[res].x, ships[res].y, ships[res].z+10, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(who, ships[res].x, ships[res].y, ships[res].z+10, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			res:=shipgump(who, ships, page, title);
 		endif
 		if (res==21)//prev

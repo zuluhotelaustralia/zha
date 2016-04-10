@@ -20,7 +20,7 @@ program textcmd_goto(character, whom)
 	whom := upper( whom );
 	var chr := MakeAndProcessGump( character,whom);
 	if( chr )
-		MoveCharacterToLocation( character, chr.x, chr.y, chr.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( character, chr.x, chr.y, chr.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		SendSysMessage(character, chr.name+"'s account is '"+chr.acctname+"'");
 		
 		if (!chr.backpack)

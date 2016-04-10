@@ -95,7 +95,7 @@
 			- Moves item ignoring it's movable state.
 			Returns: nonzero if successful, error otherwise.
 
-		MoveItem(item, byref place, flags := MOVEITEM_NORMAL)
+		MoveItem(item, byref place, flags := MOVEOBJECT_NORMAL)
 			- Moves item either to a container or to a place depending of
 			the parameter passed. Item will be moved to a container if the
 			parameter is a ContainerRef, or a location if it's an array.
@@ -320,22 +320,22 @@ endfunction
 
 // HellRaider <zion@uo.com.br> 2000-12-13
 // Required Modules: UO
-// This function forces the move in every aspect: using MOVEITEM_FORCELOCATION
+// This function forces the move in every aspect: using MOVEOBJECT_FORCELOCATION
 // and setting the item movable state to 1 if it's zero. The movable state is
 // set back to it's original state.
 function MoveItemToForcedLocation(item, x, y, z)
 	if (!item.movable)
 		item.movable := 1;
-		var result := MoveItemToLocation(item, x, y, z, MOVEITEM_FORCELOCATION);
+		var result := MoveObjectToLocation(item, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		item.movable := 0;
 		return result;
 	endif
-	return MoveItemToLocation(item, x, y, z, MOVEITEM_FORCELOCATION);
+	return MoveObjectToLocation(item, x, y, z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 endfunction
 
 // HellRaider <zion@uo.com.br> 2000-12-13
 // Required Modules: UO
-function MoveItem(item, byref place, flags := MOVEITEM_NORMAL)
+function MoveItem(item, byref place, flags := MOVEOBJECT_NORMAL)
 	if (place.isa(POLCLASS_CONTAINER))
 		return MoveItemToContainer(item, place);
 	elseif (place==array)
@@ -348,7 +348,7 @@ function MoveItem(item, byref place, flags := MOVEITEM_NORMAL)
 				place[3] := GetWorldHeight(place[1], place[2]);
 				continue;
 			default:
-				return MoveItemToLocation(item, place[1], place[2], place[3], flags);
+				return MoveObjectToLocation(item, place[1], place[2], place[3], _DEFAULT_REALM, flags); //AutoConversion
 		endif
 	endif
 	var result := error;
@@ -425,7 +425,7 @@ endfunction
 			GetTimeOfDay();
 			ListObjectsOfClassNearLocation(x, y, z, range, POLCLASS, flags := LISTEX_FLAG_NORMAL);
 			MoveItemToForcedLocation(item, x, y, z);
-			MoveItem(item, byref place, flags := MOVEITEM_NORMAL);
+			MoveItem(item, byref place, flags := MOVEOBJECT_NORMAL);
 			ToSextant(x, y);
 
 	Version 0.2
@@ -437,7 +437,7 @@ endfunction
 		- Added function GetStacksOfTypeInContainer (container, objtype).
 		- Added function SubtractFromStackArray (byref arrayofobjrefs, amount).
 		- Fixed a bug in GetGoldInContainer(container) that would generate a compilation error.
-		- Fixed a bug in MoveItem (item, byref place, flags := MOVEITEM_NORMAL).
+		- Fixed a bug in MoveItem (item, byref place, flags := MOVEOBJECT_NORMAL).
 		- Small tweak on the design of GetGoldInContainer(container). Since POL arrays don't support
 		elements at index zero, the function was changed so the first element (index one) is the sum
 		of the amount of gold found within the container, and the following elements are objrefs to

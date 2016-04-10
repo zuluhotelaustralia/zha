@@ -224,7 +224,7 @@ function RecallToSpawnPoint(spawnpoint)
 	sleepms(2500);
 	PlaySoundEffect(me, SFX_SPELL_RECALL1);
 	sleepms(250);
-	MoveCharacterToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z);
+	MoveObjectToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z, _DEFAULT_REALM); //AutoConversion
 	PlaySoundEffect(me, SFX_SPELL_RECALL2);
 	return;
 endfunction	

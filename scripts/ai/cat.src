@@ -34,7 +34,7 @@ endprogram
 
 function CloseDistance( opponent )
 
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first 
         0:
             return 1;

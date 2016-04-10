@@ -292,7 +292,7 @@ function Follow(byref mmaster)
 		d:= Distance(mmaster, me);
 		if (d > 20)
 			PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa );
-			MoveCharacterToLocation( me, mmaster.x, mmaster.y, mmaster.z );
+			MoveObjectToLocation( me, mmaster.x, mmaster.y, mmaster.z , _DEFAULT_REALM); //AutoConversion
 			PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa );
 			PlaySoundEffect( mmaster, SFX_SPELL_TELEPORT );
 		elseif (d > 1)
@@ -506,7 +506,7 @@ function GetPay()
 			me.hidden := 1;
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me, "guardkill", 1);
-			Damage( me, GetHp(me) +3);
+			ApplyDamage( me, GetHp(me) +3);
 		endif
 	else
 		EraseObjProperty(me,"pastdue");
@@ -540,7 +540,7 @@ function wear_item(byref item)
 			if (GetObjProperty(thingie, "mine"))
 				DestroyItem(thingie);
 			else
-		        	MoveItemToLocation(thingie, me.x, me.y, me.z, MOVEITEM_FORCELOCATION );
+		        	MoveObjectToLocation(thingie, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			endif
 		endif
 	endforeach
@@ -594,10 +594,10 @@ function Fireme(byref ev)
 	say("Kal Ort Por");
 	sleep(2);
 	PlaySoundEffect(ev.source, SFX_SPELL_RECALL);
-	MoveCharacterToLocation(me, 5288, 1176, 0, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	RevokePrivilege(me, "invul");
 	SetObjProperty(me, "guardkill", 1);
-	Damage(me, GetHp(me) +3);
+	ApplyDamage(me, GetHp(me) +3);
 
 endfunction
 

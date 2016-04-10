@@ -385,9 +385,9 @@ function Release()
 			it.movable := 1;
 			PlaySoundEffect( me, SFX_SPELL_DISPEL );
 			PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
-			MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
-			Damage( me, GetMaxHp(me) + 3 );
+			ApplyDamage( me, GetMaxHp(me) + 3 );
 			set_critical(0);
 		else
 			say("*Argh*");
@@ -395,7 +395,7 @@ function Release()
 		endif
 	elseif( summoned )
 		PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
-		MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 		RevokePrivilege( me, "invul" );
 		ApplyRawDamage( me, GetHp(me) + 3 );
 	elseif( animated || specialsteed)
@@ -437,7 +437,7 @@ endfunction
 function drop()
 	foreach myitems in EnumerateItemsInContainer(mypack)
 		if (myitems.container.serial == mypack.serial)
-			MoveItemToLocation(myitems, me.x, me.y, me.z, 0);
+			MoveObjectToLocation(myitems, me.x, me.y, me.z, _DEFAULT_REALM, 0); //AutoConversion
 			sleepms(100);
 		endif
 	endforeach
@@ -695,7 +695,7 @@ function OpenMyPack();
 			SendSysMessage( master, "This creature is not suitable for riding");
 		elseif( staff.objtype == OAK_STAFF || robe.objtype == RITUAL_ROBE )
 			SendSysMessage( master, "You can't ride anything while wearing ritual clothing." );
-		elseif ( MoveCharacterToLocation(master,me.x,me.y,me.z,0) )
+		elseif ( MoveObjectToLocation(master,me.x,me.y,me.z, _DEFAULT_REALM, 0) )
 
 			set_critical(1);
 			master.facing := me.facing;
@@ -713,20 +713,20 @@ function OpenMyPack();
 			if (GetObjProperty(me, "PersonalizedMount"))
 				SetObjProperty(mount,"PersonalizedMount", GetObjProperty(me, "PersonalizedMount"));
 			endif
-			MoveCharacterToLocation(me, 5288, 1176, 0, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(me, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			mount.graphic := mounttype;
 			EquipItem(master,mount);
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			Damage( me, GetMaxHp(me) + 3 );
+			ApplyDamage( me, GetMaxHp(me) + 3 );
 
 			set_critical(0);
 			sleep(1);
 
-			MoveCharacterToLocation(me, 5288, 1176, 0, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(me, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			Damage( me, GetMaxHp(me) + 3 );
+			ApplyDamage( me, GetMaxHp(me) + 3 );
 
 		endif
 	endif
@@ -957,7 +957,7 @@ function Follow()
 		sleep(1);
 		chaseloop := 0;
 	elseif (( d > 10 ) || ( chaseloop > 50 ))
-		MoveCharacterToLocation( me, following.x, following.y, following.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( me, following.x, following.y, following.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		chaseloop := 0;
 		sleep(1);
 	else
@@ -1189,10 +1189,10 @@ function flee(opponent)
 				sleep(30);
 				return;
 			else
-				MoveCharacterToLocation(me,5288,1176,0,MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 				RevokePrivilege( me, "invul" );
 				SetObjProperty(me,"guardkill",1);
-				Damage( me, GetMaxHp(me) + 3 );
+				ApplyDamage( me, GetMaxHp(me) + 3 );
 			endif
 		else
 			numflees := numflees + 1;

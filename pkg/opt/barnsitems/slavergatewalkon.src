@@ -9,7 +9,7 @@ program slavergatewalkon( who, gate )
 		return;
 	endif
 	if (HasSlaveTimeElapsed(who))
-		MoveCharacterToLocation(who, 1475, 1645, 20, MOVECHAR_FORCELOCATION); //brit start
+		MoveObjectToLocation(who, 1475, 1645, 20, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion //brit start
 		EraseObjProperty(who, "#cantLeaveSlaversBefore");	
 	endif
 	SendSysMessage(who, "You must still wait " + CInt(CInt(GetObjProperty(who, "#cantLeaveSlaversBefore")-ReadGameClock())/60) + " minutes before you can pass through this gate to freedom.");

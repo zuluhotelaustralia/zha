@@ -129,7 +129,7 @@ function CheckSheepAmount()
 	endforeach
 
 	if ( Random(500) < deathchance )		
-		Damage( me, GetMaxHp(me) + 3 );
+		ApplyDamage( me, GetMaxHp(me) + 3 );
 	endif
 
 endfunction

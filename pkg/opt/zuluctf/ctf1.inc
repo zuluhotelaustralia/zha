@@ -92,7 +92,7 @@ endif
 removetech(who);
 EraseObjProperty(who,"team");
 SetObjProperty(who,"ctfloc",0);
-MoveCharacterToLocation(who,6083,450,-22);
+MoveObjectToLocation(who,6083,450,-22, _DEFAULT_REALM); //AutoConversion
 
 endfunction
 
@@ -169,10 +169,10 @@ PlaySoundEffect(who,0x135);
 
 if(GetObjProperty(who,"team")=="BLUE")
 colorstuff(who,4);
-MoveCharacterToLocation(who,(Random(9)+bluestart[1]),(Random(9)+bluestart[2]),bluestart[3]);
+MoveObjectToLocation(who,(Random(9)+bluestart[1]),(Random(9)+bluestart[2]),bluestart[3], _DEFAULT_REALM); //AutoConversion
 else
 colorstuff(who,33);
-MoveCharacterToLocation(who,(Random(9)+redstart[1]),(Random(9)+redstart[2]),redstart[3]);
+MoveObjectToLocation(who,(Random(9)+redstart[1]),(Random(9)+redstart[2]),redstart[3], _DEFAULT_REALM); //AutoConversion
 endif
 
 endfunction

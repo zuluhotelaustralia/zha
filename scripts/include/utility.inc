@@ -48,7 +48,7 @@ function IsLocationAccessible( character, x, y, z )
 
 endfunction
 
-function min(x, y)
+function minConversion(x, y)
 	if (x<= y)
 		return x;
 	else
@@ -56,7 +56,7 @@ function min(x, y)
 	endif
 endfunction
 
-function max(x, y)
+function maxConversion(x, y)
     if (x>= y)
         return x;
     else

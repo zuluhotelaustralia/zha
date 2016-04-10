@@ -12,7 +12,7 @@ program textcmd_summon( character, whom )
 	if( !whom )
 		var chr := MakeAndProcessGump( character );
 		if( chr )
-			MoveCharacterToLocation( chr, character.x, character.y, character.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( chr, character.x, character.y, character.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		endif
 
 	else
@@ -20,7 +20,7 @@ program textcmd_summon( character, whom )
 
 		foreach chr in EnumerateOnlineCharacters()
 			if( upper( chr.name ) == whom )
-				MoveCharacterToLocation( chr, character.x, character.y, character.z, MOVECHAR_FORCELOCATION );
+				MoveObjectToLocation( chr, character.x, character.y, character.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
 			endif
 		endforeach

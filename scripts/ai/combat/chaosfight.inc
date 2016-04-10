@@ -48,7 +48,7 @@ function Fight( opponent )
 			return;
 		endif
 	cd := CloseDistance( opponent );
-	case cd
+	case (cd) //Conversion
 	0:
 		//Closedistance returned 0, which means the mob needs to move
 		wasmoving := 1;
@@ -170,10 +170,10 @@ function flee(opponent)
 
 	if (numflees)
 		if ( numflees > 10 )
-			// MoveCharacterToLocation(me,5288,1176,0,MOVECHAR_FORCELOCATION);
+			// MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			damage( me, me.maxhp + 3 );
+			ApplyDamage( me, me.maxhp + 3 );
 		else
 			numflees := numflees + 1;
 		endif

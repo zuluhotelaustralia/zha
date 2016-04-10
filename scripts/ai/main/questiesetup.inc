@@ -64,9 +64,9 @@ function QuestieSetup()
 		if (!SystemFindObjectBySerial(GetObjProperty(me,"master")))
 			//I should have a master but I don't!
 			RevokePrivilege( me, "invul" );
-			//MoveCharacterToLocation(me,5288,1176,0,MOVECHAR_FORCELOCATION);
+			//MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			SetObjProperty(me,"guardkill",1);
-			Damage( me, GetMaxHp(me) + 3 );
+			ApplyDamage( me, GetMaxHp(me) + 3 );
 		endif
 	endif
 

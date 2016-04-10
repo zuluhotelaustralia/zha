@@ -38,21 +38,21 @@ function main_AI_loop()
 				if (master.serial == me.serial)
 					if (!slave)
 						RevokePrivilege( me, "invul" );
-						//MoveCharacterToLocation(me,5288,1176,0,MOVECHAR_FORCELOCATION);
+						//MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 						SetObjProperty(me,"guardkill",1);
-						Damage( me, GetMaxHp(me) + 3 );
+						ApplyDamage( me, GetMaxHp(me) + 3 );
 					endif
 				else
 					if (!master)
-						MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+						MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 						SetObjProperty(me,"guardkill",1);
-						Damage( me, GetMaxHp(me) + 3 );
+						ApplyDamage( me, GetMaxHp(me) + 3 );
 					endif
 				endif
 			else
-				MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 				SetObjProperty(me,"guardkill",1);
-				Damage( me, GetMaxHp(me) + 3 );
+				ApplyDamage( me, GetMaxHp(me) + 3 );
 			endif
 			endif
 			ev := sleepmode();

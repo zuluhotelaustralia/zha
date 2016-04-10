@@ -12,7 +12,7 @@ program textcmd_moveitem( who, newz )
     if (what)
         if (what.item)
             var item := what.item;
-            var result := MoveItemToLocation( item, item.x, item.y, newz + MOVEITEM_FORCELOCATION,0  );
+            var result := MoveObjectToLocation( item, item.x, item.y, newz + MOVEOBJECT_FORCELOCATION, _DEFAULT_REALM,0  ); //AutoConversion
             if (result)
                 PrintTextAbovePrivate( what.item, "Done!", who );
             else

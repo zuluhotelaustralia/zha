@@ -911,7 +911,7 @@ var time:=0;
   endif
 
   acc.setprop("Release", (ReadGameClock() + time));
-  MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+  MoveObjectToLocation( who, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
 
   SendSysMessage( who, "You have been jailed");
   SendSysMessage( character, whoname + " has been jailed." );
@@ -931,7 +931,7 @@ endif
 acc.setprop("Release",0);
 SendSysMessage( who, "You have been freed.");
 SendSysMessage( character, whoname + " has been freed." );
-MoveCharacterToLocation( who, 1475, 1645, 20, 0);
+MoveObjectToLocation( who, 1475, 1645, 20, _DEFAULT_REALM, 0); //AutoConversion
 
 return;
 endif
@@ -965,7 +965,7 @@ prevpos.x:=who.x;
 prevpos.y:=who.y;
 prevpos.z:=who.z;
 
-MoveCharacterToLocation( who, character.x, character.y, character.z );
+MoveObjectToLocation( who, character.x, character.y, character.z , _DEFAULT_REALM); //AutoConversion
 showflame(who);
 if (character.cmdlevel ==1)
 	councycommandlog(character, "summon", who, prevpos, character);
@@ -1200,7 +1200,7 @@ if (character.cmdlevel ==1)
 	councycommandlog(character, "summon cage", who, prevpos, character);
 endif
 
-MoveCharacterToLocation(who, character.x+1, character.y+1, character.z, MOVECHAR_FORCELOCATION);
+MoveObjectToLocation(who, character.x+1, character.y+1, character.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 tempitem := CreateItemAtLocation( who.x-1,who.y, who.z, 0x821, 1 );
 tempitem.decay :=20;
 tempitem := CreateItemAtLocation( who.x+1,who.y, who.z, 0x821, 1 );
@@ -1547,9 +1547,9 @@ endif
          1: SetBaseStrength(who,val);
          2: SetBaseIntelligence(who,val);
          3: SetBaseDexterity(who,val);
-         4: MoveCharacterToLocation( who, val, who.y, who.z );
-         5: MoveCharacterToLocation( who, who.x, val, who.z );
-         6: MoveCharacterToLocation( who, who.x, who.y, val );
+         4: MoveObjectToLocation( who, val, who.y, who.z , _DEFAULT_REALM); //AutoConversion
+         5: MoveObjectToLocation( who, who.x, val, who.z , _DEFAULT_REALM); //AutoConversion
+         6: MoveObjectToLocation( who, who.x, who.y, val , _DEFAULT_REALM); //AutoConversion
          7: SetHp(who, val);
          9: SetMana(who, val);
         11: SetStamina(who, val);
@@ -1677,7 +1677,7 @@ function invokegomenu( who)
     else
       traveler := who;
     endif
-    MoveCharacterToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y).Z);
+    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, _DEFAULT_REALM, dest.Y).Z); //AutoConversion
     showflame(traveler);
     UnloadConfigFile("::golocs");
   endif

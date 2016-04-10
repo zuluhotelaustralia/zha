@@ -283,7 +283,7 @@ function CreateSpawnPointContainer( byref point, byref pt_data )
 
 	var count := 1;
 	chest.movable := 1;
-	while( !MoveItemToLocation( chest, CInt(x), CInt(y), CInt(z), MOVEITEM_NORMAL ) && (count <= 10) )
+	while( !MoveObjectToLocation( chest, CInt(x), CInt(y), CInt(z), _DEFAULT_REALM, MOVEOBJECT_NORMAL ) && (count <= 10) )
 		if( appear )
 			x := point.x + RandomInt((appear*2)+1) - appear;
 			y := point.y + RandomInt((appear*2)+1) - appear;
@@ -457,7 +457,7 @@ function CreateSpawnPointNpc( byref point, byref template, byref pt_data )
 	while( count <= 10 )
 		if( standing )
 			if( !standing.multi || GetObjProperty(point, "spawninhouseallowed"))
-				if( MoveCharacterToLocation( critter, x, y, CInt(standing.z) ) )
+				if( MoveObjectToLocation( critter, x, y, CInt(standing.z) ) )
 					RestartScript(critter);
 					serials := GetObjProperty( point, PROPID_SPAWNPOINT_SPAWNED_OBJECTS );
 					if( !serials )

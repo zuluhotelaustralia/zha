@@ -76,7 +76,7 @@ function JailAndKick(who)
   endif
 	
   who.acct.setprop("Release", (ReadGameClock() + jailtime));
-  MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+  MoveObjectToLocation( who, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
 
   SendSysMessage( who, "You have been jailed for using a concealed staff detection exploit",3,53);
   DisconnectClient( who );

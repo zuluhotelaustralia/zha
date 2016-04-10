@@ -141,7 +141,7 @@ function CustomRecall( caster, x, y, z, from_charge := 0 )
 	PlaySoundEffect( caster, SFX_SPELL_RECALL1 );
 	sleepms(250);
 
-	MoveCharacterToLocation( caster, tox, toy, toz );
+	MoveObjectToLocation( caster, tox, toy, toz , _DEFAULT_REALM); //AutoConversion
 	PlaySoundEffect( caster, SFX_SPELL_RECALL2 );
 
         return 1;

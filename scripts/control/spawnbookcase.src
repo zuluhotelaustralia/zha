@@ -27,7 +27,7 @@ function addbooks(bookcase)
 
 SetObjProperty(bookcase,"casecity",1);
 
-var title,count:=0,books:=EnumerateItemsInContainer(bookcase),i,item,max:=RandomDiceStr("1d2+2");
+var title,count:=0,books:=EnumerateItemsInContainer(bookcase),i,item,maxbk:=RandomDiceStr("1d2+2");
 
 if (books.size()!=0)
   foreach book in books
@@ -37,8 +37,8 @@ if (books.size()!=0)
   endforeach
 endif
 
-if (count<max)
-  for(i:=1;i<=(max-count);i:=i+1)
+if (count<maxbk)
+  for(i:=1;i<=(maxbk-count);i:=i+1)
 	item:=CreateItemInContainer(bookcase,0x7903+random(44),1);
 	title:=item.getprop("title");
 	item.name := title;

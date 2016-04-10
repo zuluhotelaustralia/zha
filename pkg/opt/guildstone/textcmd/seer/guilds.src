@@ -138,5 +138,5 @@ function GoToGuildStone(who, guild)
 		SendSysMessage(who, "error: no stone found ");
 		return;
 	endif
-	MoveCharacterToLocation(who, stone.x, stone.y, stone.z, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(who, stone.x, stone.y, stone.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 endfunction

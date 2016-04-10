@@ -33,7 +33,7 @@ program deleteitemsinreport(who)
 		SendSysMessage(who, "deleting item " + item);
 		tempitem:=SystemFindObjectBySerial(Cint(item), SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if (!tempitem)
-			tempitem:=SystemFindObjectBySerial(Cint(item), SYSFIND_SEARCH_STORAGE_AREAS);
+			tempitem:=SystemFindObjectBySerial(Cint(item));
 		endif
 		if (!DestroyItem(tempitem))
 			SendSysMessage(who, "error: " + item.name + " " +item.serial + " not deleted");

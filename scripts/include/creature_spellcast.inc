@@ -379,7 +379,7 @@ endfunction
 function cast_teleport( caster, where )
 
     if (CheckLosAt( caster, where.x, where.y, where.z ))
-        MoveCharacterToLocation( caster, where.x, where.y, where.z );
+        MoveObjectToLocation( caster, where.x, where.y, where.z , _DEFAULT_REALM); //AutoConversion
     else
        
     endif

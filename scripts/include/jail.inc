@@ -11,10 +11,10 @@ function JailCheck(who)
 			var timeremaining := ((release - ReadGameClock())/86400) + 1;
 			SendSysMessage(who, "You have " + timeremaining + " day(s) left in jail.");
 			
-			MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+			MoveObjectToLocation( who, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
 		else
 			acc.setprop("Release", 0);
-			MoveCharacterToLocation( who, 1475, 1645, 20, 0);
+			MoveObjectToLocation( who, 1475, 1645, 20, _DEFAULT_REALM, 0); //AutoConversion
 			SendSysMessage(who, "You are freed.");
 		endif
 	endif

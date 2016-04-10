@@ -48,7 +48,7 @@ program walk_on_moongate( mobile, moongate )
    
     set_critical(1); 
     SetObjProperty(mobile,"#moved", 1);
-    MoveCharacterToLocation( mobile, tox, toy, toz);
+    MoveObjectToLocation( mobile, tox, toy, toz, _DEFAULT_REALM); //AutoConversion
     SetSpeedCheckNote(mobile);
 
 endprogram

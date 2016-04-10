@@ -53,14 +53,14 @@ program chrdeath(corpse,ghost)
 	if( team=="BLUE")
 		teamctf(ghost,corpse);
 		DestroyItem(corpse);
-		MoveCharacterToLocation(ghost,6047,223,44);
+		MoveObjectToLocation(ghost,6047,223,44, _DEFAULT_REALM); //AutoConversion
 		return;
 	endif
 
 	if( team=="RED")
 		teamctf(ghost,corpse);
 		DestroyItem(corpse);
-		MoveCharacterToLocation(ghost,6039,407,0);
+		MoveObjectToLocation(ghost,6039,407,0, _DEFAULT_REALM); //AutoConversion
 		return;
 	endif
 
@@ -188,7 +188,7 @@ program chrdeath(corpse,ghost)
 			var newbie_res_pos := GetGlobalProperty("newbie_res_pos");
 			newbie_res_pos :=SplitWords(newbie_res_pos);
 			if (newbie_res_pos)
-				MoveCharacterToLocation( ghost, CInt(newbie_res_pos[1]), CInt(newbie_res_pos[2]), CInt(newbie_res_pos[3]), MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation( ghost, CInt(newbie_res_pos[1]), CInt(newbie_res_pos[2]), CInt(newbie_res_pos[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			endif 
 			SendSysMessage(ghost, "You have been saved from the void by the healers of Haven!");
 		elseif (PSIONIC_Reincarnation)
@@ -201,7 +201,7 @@ program chrdeath(corpse,ghost)
 			ank[2].movable := 0;
 			SetObjProperty(ank[1], "f", 1);
 			SetObjProperty(ank[2], "f", 1);
-                        MoveCharacterToLocation(ghost, charspot[1], charspot[2], charspot[3], MOVECHAR_FORCELOCATION);
+                        MoveObjectToLocation(ghost, charspot[1], charspot[2], charspot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			sleep(10);
                         ghost.squelch(0);
 			ghost.frozen := 0;
@@ -215,7 +215,7 @@ program chrdeath(corpse,ghost)
 			PlaySoundEffect(ghost, 0x217);	
 		elseif (autotelequest && !inDuelGate)//teleports quester to queststone
 			SetSpeedCheckNote(ghost);
-			MoveCharacterToLocation( ghost, autotelequest.x, autotelequest.y, autotelequest.z, 	MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation( ghost, autotelequest.x, autotelequest.y, autotelequest.z, _DEFAULT_REALM, 	MOVEOBJECT_FORCELOCATION); //AutoConversion
 			SendSysMessage(ghost, "You have been saved from annihilation by the power of the quest!",3,53);	
 		elseif (waractive && samewaroppteams && !inDuelGate) //teleports war people killed to war stone
 			//Broadcast("warstone: "  + warstone);
@@ -223,9 +223,9 @@ program chrdeath(corpse,ghost)
 				SetSpeedCheckNote(ghost);
 				var warstone_res_pos := GetObjProperty(warstone, "warstone_res_pos");
 				if (warstone_res_pos)
-					MoveCharacterToLocation( ghost, CInt(warstone_res_pos[1]), CInt(warstone_res_pos[2]), CInt(warstone_res_pos[3]), MOVECHAR_FORCELOCATION);
+					MoveObjectToLocation( ghost, CInt(warstone_res_pos[1]), CInt(warstone_res_pos[2]), CInt(warstone_res_pos[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 				else
-					MoveCharacterToLocation( ghost, warstone.x, warstone.y, warstone.z, 	MOVECHAR_FORCELOCATION);
+					MoveObjectToLocation( ghost, warstone.x, warstone.y, warstone.z, _DEFAULT_REALM, 	MOVEOBJECT_FORCELOCATION); //AutoConversion
 				endif
 			endif	
 			SendSysMessage(ghost, "Your death in war will always be remembered.",3,53);	
@@ -355,7 +355,7 @@ program chrdeath(corpse,ghost)
 	SetObjProperty(ghost,"death",ReadGameClock()+3600);
 
 	// Play the "death" music midi
-	PlayMusic( ghost, "2A" );
+	PlayMusicConverted( ghost, "2A" );
 
 endprogram
 

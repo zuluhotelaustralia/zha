@@ -21,7 +21,7 @@ program jailkeeper()
             endif
           endforeach
           act.setprop("Release",0);
-          MoveCharacterToLocation( account, 1475, 1645, 20, 0);
+          MoveObjectToLocation( account, 1475, 1645, 20, _DEFAULT_REALM, 0); //AutoConversion
 //          act.enable();
         endif
       endif

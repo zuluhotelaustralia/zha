@@ -113,7 +113,7 @@ program CastleGuard()
       wander();
       next_wander := ReadGameClock() + 10;
     elseif((ReadGameClock() > killtime) && (killtime != 0))
-      //MoveCharacterToLocation(me, 5555, 1111, 0, MOVECHAR_FORCELOCATION);
+      //MoveObjectToLocation(me, 5555, 1111, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       SetObjProperty(me, "guardkill", 1);
       ApplyRawDamage(me, GetHp(me) + 100);
       break;
@@ -178,7 +178,7 @@ function idleloop()
       grabloot();
       next_wander := ReadGameClock() + 10;
     elseif((ReadGameClock() > killtime) && (killtime != 0))
-      //MoveCharacterToLocation(me, 5555, 1111, 0, MOVECHAR_FORCELOCATION);
+      //MoveObjectToLocation(me, 5555, 1111, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       SetObjProperty(me, "guardkill", 1);
       ApplyRawDamage(me, GetHp(me) + 100);
       break;
@@ -206,7 +206,7 @@ function Follow()
 endfunction
 
 function CloseDistance( opponent )
-  case Distance( me, opponent )
+  case (Distance( me, opponent )) //Conversion
     1:
     0:       return 1;
     default: RunToward( opponent );

@@ -117,7 +117,7 @@ function CloseDistance( opponent )
 	if  (opponent.multi.serial != me.multi.serial)
 		return 4;
 	endif
-  case Distance( me, opponent )
+  case (Distance( me, opponent )) //Conversion
     1:
     0:       return 1;
     default: RunToward( opponent );

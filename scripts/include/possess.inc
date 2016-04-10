@@ -54,7 +54,7 @@ function MoveMyPack(me)
 		endif
 	endforeach
 
-	MoveItemToLocation(mypack,5123, 1779, 0, MOVEITEM_FORCELOCATION);
+	MoveObjectToLocation(mypack,5123, 1779, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 	return mypack;
 
@@ -92,8 +92,8 @@ function clone(npc, me)
 		SetBaseSkill( me, i, GetBaseSkill(npc,i) );
 	endfor
 
-	MoveCharacterToLocation(me,npc.x, npc.y, npc.z, MOVECHAR_FORCELOCATION);
-	MoveCharacterToLocation(npc,5276, 1164, 0, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,npc.x, npc.y, npc.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
+	MoveObjectToLocation(npc,5276, 1164, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	me.concealed := 0;
 
 	npc.hidden := 1;
@@ -141,7 +141,7 @@ function unpossess( me )
 	SetHp(npc, GetHP(me));
 	SetMana(npc, GetMana(me));
 
-	MoveCharacterToLocation(npc,me.x, me.y, me.z,MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(npc,me.x, me.y, me.z, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	RestartScript(npc);
 
 	var i;
@@ -191,7 +191,7 @@ function SwapClothes(me, npc)
 	var mypack := me.backpack;
 
 	if (hispack)
-		MoveItemToLocation(hispack, 5123, 1779, 0, MOVEITEM_FORCELOCATION);
+		MoveObjectToLocation(hispack, 5123, 1779, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	else
 		hispack := CreateItemAtLocation(5123, 1779, 0, 0xe75,1);
 	endif
@@ -241,10 +241,10 @@ function unpossesscorpse( me, corpse )
 	EraseObjProperty(me,"oldprefix");
 	EraseObjProperty(me,"oldsuffix");
 
-	MoveCharacterToLocation(npc, 5288, 1176, 0, 0x40000000);
+	MoveObjectToLocation(npc, 5288, 1176, 0, _DEFAULT_REALM, 0x40000000); //AutoConversion
 	SetObjProperty(npc, "guardkill", 1);
 	RevokePrivilege( npc, "invul" );
-	Damage( npc, GetHp(npc) );
+	ApplyDamage( npc, GetHp(npc) );
 
 	var i;
 	for (i := 0; i <= SKILLID__HIGHEST; i := i + 1)

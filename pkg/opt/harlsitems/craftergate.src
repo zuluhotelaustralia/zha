@@ -10,7 +10,7 @@ use uo;
 program craftergate (who)
 
 if(GetObjProperty( who, "IsCrafter"))
-	MoveCharacterToLocation( who, 5205, 1992, 5 );
+	MoveObjectToLocation( who, 5205, 1992, 5 , _DEFAULT_REALM); //AutoConversion
 	SendSysMessage( who, "Welcome to the Crafter mine!");
 else
 	SendSysMessage( who, "You are NOT a Crafter!");

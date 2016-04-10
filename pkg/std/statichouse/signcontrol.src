@@ -144,7 +144,7 @@ endif
 			if(( GetObjProperty( house, "numlockdowns" ) > 0 ) && (itemt.movable))
 
 				if( IsCarpet( itemt ) )
-					MoveItemToLocation(itemt, CInt(itemt.x), CInt(itemt.y), CInt(itemt.z)+1, MOVECHAR_FORCELOCATION);
+					MoveObjectToLocation(itemt, CInt(itemt.x), CInt(itemt.y), CInt(itemt.z)+1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 				endif
 					itemt.movable := 0;
 					SetObjProperty( house, "numlockdowns", GetObjProperty( house, "numlockdowns") - 1 );

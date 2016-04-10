@@ -96,7 +96,7 @@ function look_around()
 	foreach critter in ListMobilesInLineOfSight( me, HALT_THRESHOLD )
 		var myfacing := me.facing;
 		if ((!critter.npctemplate || critter.script == "tamed") && !critter.cmdlevel)
-			case myfacing
+			case (myfacing) //Conversion
 			1: //south east
 				if (critter.x > me.x && critter.y < me.y)
 					IntruderAlert( critter );
@@ -331,7 +331,7 @@ function TeleToFirstWayPoint()
 		say("Kal Ort Por");
 		PlaySoundEffect( me, SFX_210 );
 		sleepms(250);
-		MoveCharacterToLocation( me, waypt1.x, waypt1.y, waypt1.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( me, waypt1.x, waypt1.y, waypt1.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		PlaySoundEffect( me, SFX_SPELL_RECALL );
 	endif
 endfunction

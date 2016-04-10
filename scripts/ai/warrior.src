@@ -191,10 +191,10 @@ function ChangeWeapons()
 	var shield := GetEquipmentByLayer(me,LAYER_HAND2);
 
 	if (weapon)
-		MoveItemToLocation(weapon, me.x, me.y, me.z, MOVEITEM_FORCELOCATION);
+		MoveObjectToLocation(weapon, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	endif
 	if (shield)
-		MoveItemToLocation(shield, me.x, me.y, me.z, MOVEITEM_FORCELOCATION);
+		MoveObjectToLocation(shield, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	endif
 	foreach item in ListRootItemsInContainer(me.backpack)
 		EquipItem(me,item);
@@ -745,8 +745,7 @@ function Follow()
 		sleep(1);
 		chaseloop := 0;
 	elseif (( d > 10 ) || ( chaseloop > 50 ))
-		MoveCharacterToLocation( me, following.x, following.y, following.z,
-				MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( me, following.x, following.y, following.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION );
 		chaseloop := 0;
 		sleep(1);
 	else
@@ -1034,7 +1033,7 @@ endfunction
 function DropEverything()
 
 	foreach item in ListRootItemsInContainer(me.backpack)
-		MoveItemToLocation(item, me.x, me.y, me.z, 0);
+		MoveObjectToLocation(item, me.x, me.y, me.z, _DEFAULT_REALM, 0); //AutoConversion
 	endforeach
 
 endfunction
@@ -1078,7 +1077,7 @@ function MountHorse(horse)
 	endif
 
 	if (mounttype)
-		if ( MoveCharacterToLocation(me,horse.x,horse.y,horse.z,0) )
+		if ( MoveObjectToLocation(me,horse.x,horse.y,horse.z, _DEFAULT_REALM,0) )
 			set_critical(1);
 			me.facing := horse.facing;
 			var mount := CreateItemAtLocation(5288, 1176, 0, 0xf021,1);
@@ -1088,18 +1087,17 @@ function MountHorse(horse)
 			SetObjProperty(mount,"petmana",GetMana(horse));
 			SetObjProperty(mount,"freetime",ReadGameClock()+1200);
 			mount.graphic := mounttype;
-			MoveCharacterToLocation(horse, 5288, 1176, 0, MOVECHAR_FORCELOCATION);
+			MoveObjectToLocation(horse, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( horse, "invul" );
 			SetObjProperty(horse,"guardkill",1);
-			Damage(horse,GetMaxHp(horse)+3);
+			ApplyDamage(horse,GetMaxHp(horse)+3);
 			EquipItem(me,mount);
 
 			if (horse)
-				MoveCharacterToLocation(horse, 5288, 1176, 0,
-				 MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation(horse, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
 				RevokePrivilege(horse, "invul" );
 				SetObjProperty(horse,"guardkill",1);
-				Damage(horse,GetMaxHp(horse)+3);
+				ApplyDamage(horse,GetMaxHp(horse)+3);
 			endif
 			set_critical(0);
 		endif

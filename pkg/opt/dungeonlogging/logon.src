@@ -17,7 +17,7 @@ program logon( who )
 		var sendpoints := ListSendPoints();
 		var myspoint := sendpoints[CInt(dparams[1])];
 		myspoint := SplitWords(myspoint);
-		MoveCharacterToLocation( who, Cint(myspoint[1]), Cint(myspoint[2]), Cint(myspoint[3]), MOVECHAR_FORCELOCATION  );
+		MoveObjectToLocation( who, Cint(myspoint[1]), Cint(myspoint[2]), Cint(myspoint[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION  ); //AutoConversion
 		SendSysMessage (who, "The Gamemasters have recovered you from " + GetDungeonName(Cint(dparams[1])) +"!", 3, 53);
 	endif
 	

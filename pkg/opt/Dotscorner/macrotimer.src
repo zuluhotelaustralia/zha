@@ -27,7 +27,7 @@ function JailPlayer( player )
     var acc := player.acct;
 
     acc.setprop("Release", (ReadGameClock() + jailtime ));
-    MoveCharacterToLocation( player, 5304, 1184, 0, 0);
+    MoveObjectToLocation( player, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
     player.frozen := 1;
 
     SendSysMessage( player, "You have been jailed for illegal macroing");

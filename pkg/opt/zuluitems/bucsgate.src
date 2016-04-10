@@ -7,7 +7,7 @@ use uo;
 
 program serpsgate (who)
 
-MoveCharacterToLocation( who, 2667, 2191, 0 );
+MoveObjectToLocation( who, 2667, 2191, 0 , _DEFAULT_REALM); //AutoConversion
 SendSysMessage( who, "Welcome to Buc's Den!");
 
 endprogram

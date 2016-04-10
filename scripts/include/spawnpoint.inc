@@ -466,7 +466,7 @@ function CreateSpawnPointNpc( byref point, template )
 
 	SetObjProperty( critter, "SpawnPoint", point.serial );
 	SetObjProperty( critter, "AiSerial", critter.serial );
-	if( !MoveCharacterToLocation( critter, x, y, z ) )
+	if( !MoveObjectToLocation( critter, x, y, z ) )
 		RevokePrivilege( critter, "invul" );
 		SetObjProperty(  critter, "guardkill", 1 );
 		ApplyRawDamage(  critter, CInt(GetMaxHp(critter) + 3) );

@@ -37,7 +37,7 @@ program bouncingonhit(parms)
 		var newz	:= attacker.z + kickbackz;
 	
 		if( CheckLosAt( attacker, newx, newy, newz ) )
-			MoveCharacterToLocation( attacker, newx, newy, newz );
+			MoveObjectToLocation( attacker, newx, newy, newz , _DEFAULT_REALM); //AutoConversion
 		endif
 	endif
 				 	

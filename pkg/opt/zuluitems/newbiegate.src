@@ -27,7 +27,7 @@ if (unmod_int > STATCAP)
 endif
 
 if (allowed)
-MoveCharacterToLocation( who, 5548, 372, 0 );
+MoveObjectToLocation( who, 5548, 372, 0 , _DEFAULT_REALM); //AutoConversion
 SendSysMessage( who, "Welcome to the newbie dungeon!");
 else
 SendSysMessage( who, "You are not allowed to enter the newbie dungeon.");

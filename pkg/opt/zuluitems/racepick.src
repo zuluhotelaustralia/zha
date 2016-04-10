@@ -14,7 +14,7 @@ if (racepicked)
 	return;
 endif
 
-MoveCharacterToLocation(who,5561,1169,0);
+MoveObjectToLocation(who,5561,1169,0, _DEFAULT_REALM); //AutoConversion
 EraseObjProperty(who,"newbie");
 SendSysMessage(who,"Pick the race you would like to be.");
 

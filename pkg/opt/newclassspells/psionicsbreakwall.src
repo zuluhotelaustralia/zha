@@ -36,7 +36,7 @@ program cast_breakwall( parms )
       var i;
       for (i := 1; i <= 5; i := i + 1)
         targ.movable := 1;
-        MoveItemToLocation(targ, targ.x, targ.y, targ.z - 2, MOVEITEM_FORCELOCATION);
+        MoveObjectToLocation(targ, targ.x, targ.y, targ.z - 2, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
         targ.movable := 0;
         sleepms(200);
       endfor

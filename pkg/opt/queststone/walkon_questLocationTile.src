@@ -79,7 +79,7 @@ function DoLocationActions(tile, who)
 		//Broadcast("summoning monster: " + actions[7]);	
 		var monst := SystemFindObjectBySerial(actions[7]);
 		if (monst)
-			MoveCharacterToLocation( monst, tile.x, tile.y, tile.z,  MOVECHAR_FORCELOCATION);	
+			MoveObjectToLocation( monst, tile.x, tile.y, tile.z, _DEFAULT_REALM,  MOVEOBJECT_FORCELOCATION); //AutoConversion	
 			monst.frozen:=0;	
 			monst.hidden:=0;
 			sleep(1);

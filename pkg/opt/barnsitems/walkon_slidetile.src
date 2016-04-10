@@ -15,22 +15,22 @@ program walkon_slidetile(who, tile )
 	//find tile dir
 	//move in dir of tile
 	var tempgraphic := tile.graphic;
-	case tempgraphic
+	case (tempgraphic) //Conversion
 		//east
 		6114:
-			MoveCharacterToLocation( who, who.x+1, who.y, tile.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( who, who.x+1, who.y, tile.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 		//south
 		6115:
-			MoveCharacterToLocation( who, who.x, who.y+1, tile.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( who, who.x, who.y+1, tile.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 		//north
 		6119:
-			MoveCharacterToLocation( who, who.x, who.y-1, tile.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( who, who.x, who.y-1, tile.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 		//west
 		6120:	
-			MoveCharacterToLocation( who, who.x-1, who.y, tile.z, MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( who, who.x-1, who.y, tile.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			break;
 	endcase
 	who.frozen:=0;

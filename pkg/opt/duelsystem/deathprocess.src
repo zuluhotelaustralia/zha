@@ -100,7 +100,7 @@ broadcast("lawll");
     if (corpseHasItems(corpse))
       var spot := pickRandomSpotInArea(exitArea);
       corpse.movable := 1;
-      MoveItemToLocation(corpse, spot[1], spot[2], spot[3], MOVEITEM_FORCELOCATION);
+      MoveObjectToLocation(corpse, spot[1], spot[2], spot[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
       corpse.movable := 0;
     else
       destroyItem(corpse);

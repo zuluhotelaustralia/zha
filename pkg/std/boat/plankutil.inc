@@ -32,7 +32,7 @@ function TogglePlank( plank )
 endfunction
 
 function PlankPartner( planktype )
-  case planktype
+  case (planktype) //Conversion
     GID_PLANK_EXTENDED_FACING_EAST:  return GID_PLANK_RETRACTED_FACING_EAST;   // 0x3ed5: return 0x3eb1;
     GID_PLANK_RETRACTED_FACING_EAST: return GID_PLANK_EXTENDED_FACING_EAST;    // 0x3eb1: return 0x3ed5;
     GID_PLANK_EXTENDED_FACING_WEST:  return GID_PLANK_RETRACTED_FACING_WEST;   // 0x3ed4: return 0x3eb2;

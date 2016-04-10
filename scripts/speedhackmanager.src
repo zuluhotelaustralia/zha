@@ -103,7 +103,7 @@ function InformAndPunish(who)
 		SendSysMessage( who, "You have been jailed, 1 day for speedhacking.", 3, COLOR_RED);
 		var acc := who.acct;
 		acc.setprop("Release", (ReadGameClock() + 86400));
-		MoveCharacterToLocation( who, 5304, 1184, 0, 0);
+		MoveObjectToLocation( who, 5304, 1184, 0, _DEFAULT_REALM, 0); //AutoConversion
 		writeToNotes(acc);
 		DisconnectClient( who );
 	else

@@ -75,7 +75,7 @@ program CastleGuard()
 endprogram
 
 function CloseDistance( opponent )
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first 
         0:
             return 1;
@@ -304,7 +304,7 @@ endfunction
 
 function Killme()
 
-	MoveCharacterToLocation(me, 5445,1153,0, MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me, 5445,1153,0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	RevokePrivilege( me, "invul" );
 	SetObjProperty(me,"guardkill",1);
 	ApplyRawDamage(me,GetMaxHp(me)+3);

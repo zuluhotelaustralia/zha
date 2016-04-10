@@ -170,7 +170,7 @@ function drop()
 	SayWhat();
 	foreach myitems in EnumerateItemsInContainer(mypack)
 		if (myitems.container.serial == mypack.serial)
-        		MoveItemToLocation(myitems, me.x, me.y, me.z,0);
+        		MoveObjectToLocation(myitems, me.x, me.y, me.z, _DEFAULT_REALM,0); //AutoConversion
 			sleepms(100);
 		endif
 	endforeach
@@ -257,8 +257,7 @@ function Follow()
 		sleep(1);
 		chaseloop := 0;
 	elseif (( d > 10 ) || ( chaseloop > 50 ))
-		MoveCharacterToLocation( me, following.x, following.y, following.z,
-			MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( me, following.x, following.y, following.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION );
 		chaseloop := 0;
 		sleep(1);
 	else
@@ -721,7 +720,7 @@ function TeletoMaster();
 		say("Kal Ort Por");
 		PlaySoundEffect( me, SFX_210 );
 		sleepms(250);
-		MoveCharacterToLocation( me, master.x, master.y, master.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( me, master.x, master.y, master.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		following := master;
 		PlaySoundEffect( me, SFX_SPELL_RECALL );
 	endif
@@ -840,10 +839,10 @@ function flee(opponent)
 				sleep(30);
 				return;
 			else
-				MoveCharacterToLocation(me,5288,1176,0,MOVECHAR_FORCELOCATION);
+				MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 				RevokePrivilege( me, "invul" );
 				SetObjProperty(me,"guardkill",1);
-				Damage( me, GetMaxHp(me) + 3 );
+				ApplyDamage( me, GetMaxHp(me) + 3 );
 			endif
 		else
 			numflees := numflees + 1;
@@ -915,7 +914,7 @@ endfunction
 function Release()
 		say("*Argh*");
 		PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
-		MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+		MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 		RevokePrivilege( me, "invul" );
 		ApplyRawDamage( me, GetHp(me) + 3 );
 endfunction

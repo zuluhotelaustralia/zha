@@ -1,6 +1,6 @@
 use uo;
 use os;
-//use attributes;
+use attributes;
 
 include "include/client";
 include "include/cmdlevel_check";
@@ -18,7 +18,7 @@ program sysload(who)
 	endif
 
 	SendSysMessage(who, "Item Count     = " + CInt(core.itemcount) + ".",FONT_NORMAL, COLOR_YELLOW_LIGHT);
-	SendSysMessage(who, "NPC Count     = " + GameStat("mobilecount"),FONT_NORMAL, COLOR_YELLOW_LIGHT);
+	SendSysMessage(who, "NPC Count     = " + core.mobilecount,FONT_NORMAL, COLOR_YELLOW_LIGHT);
 	SendSysMessage(who, "Sysload         = " + polcore().sysload,FONT_NORMAL, COLOR_YELLOW_LIGHT);
 	SendSysMessage(who, "Core Severity = " + polcore().sysload_severity,FONT_NORMAL, COLOR_YELLOW_LIGHT);
 	SendSysMessage(who, "Players Online = " + len(players),FONT_NORMAL, COLOR_YELLOW_LIGHT);

@@ -46,7 +46,7 @@ endfunction
 
 function ReturnHome()
 	var myhome := GetObjProperty(me,"myhome");
-	MoveCharacterToLocation(me,myhome[1],myhome[2],myhome[3],MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,myhome[1],myhome[2],myhome[3], _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 endfunction
 
 function ReportToMaster(mobile_entered)
@@ -60,10 +60,10 @@ function StillAlive()
 		var backpack := FindExistingPack( me.serial );
 		if( backpack )
 			foreach item in EnumerateItemsInContainer( backpack );
-				MoveItemToLocation( item, me.x, me.y, me.z, MOVEITEM_FORCELOCATION );
+				MoveObjectToLocation( item, me.x, me.y, me.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			endforeach
 		endif
-		MoveCharacterToLocation( me, 0, 0, 0, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( me, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		ApplyRawDamage(me, GetHp(me) + 3);
 	endif
 endfunction

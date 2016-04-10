@@ -17,7 +17,7 @@ program goto_all_spawnpoints( who )
 
 	var point := MakeAndProcessGump( who, points );
 	if( point )
-		MoveCharacterToLocation( who, point.x, point.y, point.z, MOVECHAR_FORCELOCATION );
+		MoveObjectToLocation( who, point.x, point.y, point.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 	endif
 
 endprogram

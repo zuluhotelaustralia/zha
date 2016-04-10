@@ -12,7 +12,7 @@ const magicrequired := 100;
 program windgate (who)
 
 if (GetEffectiveSkill( who, 25 )>=magicrequired )
-MoveCharacterToLocation( who, 5169, 242, 15 );
+MoveObjectToLocation( who, 5169, 242, 15 , _DEFAULT_REALM); //AutoConversion
 SendSysMessage( who, "Welcome to Wind!");
 else
 SendSysMessage( who, "You are not a worthy mage to enter Wind!");

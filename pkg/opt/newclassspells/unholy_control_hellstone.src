@@ -187,9 +187,9 @@ function MoveObjectToSafeArea(object, stone)
   endif
 
   if (object.isA(POLCLASS_ITEM))
-    MoveItemToLocation(object, safeItemLocation[1], safeItemLocation[2], safeItemLocation[3], MOVEITEM_FORCELOCATION);
+    MoveObjectToLocation(object, safeItemLocation[1], safeItemLocation[2], safeItemLocation[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
   elseif (object.isA(POLCLASS_MOBILE))
-    MoveCharacterToLocation(object, safePCLocation[1], safePCLocation[2], safePCLocation[3], MOVECHAR_FORCELOCATION);
+    MoveObjectToLocation(object, safePCLocation[1], safePCLocation[2], safePCLocation[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
     if (!object.isA(POLCLASS_NPC)) // Player
       SendSysMessage(object, "You were sucked out of hell.");
     endif

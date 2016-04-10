@@ -7,7 +7,7 @@ SendSysMessage(who, "Move where?");
 var where := TargetCoordinates(who);
 
 if (where)
-        MoveCharacterToLocation(what, where.x, where.y, where.z, MOVECHAR_FORCELOCATION);
+        MoveObjectToLocation(what, where.x, where.y, where.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 endif
 
 endprogram

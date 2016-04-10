@@ -165,11 +165,11 @@ program cast_summonlegion(parms)
   var backpack := FindExistingPack( sumcreature.serial );
   if( backpack )
     foreach item in EnumerateItemsInContainer( backpack );
-      MoveItemToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, MOVEITEM_FORCELOCATION );
+      MoveObjectToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
     endforeach
   endif
 
-  MoveCharacterToLocation( sumcreature, 0, 0, 0, MOVECHAR_FORCELOCATION );
+  MoveObjectToLocation( sumcreature, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
   ApplyRawDamage(sumcreature, GetHp(sumcreature) + 3);
 
   foreach minion in minions
@@ -178,11 +178,11 @@ program cast_summonlegion(parms)
     var backpack := FindExistingPack( sumcreature.serial );
     if( backpack )
       foreach item in EnumerateItemsInContainer( backpack );
-        MoveItemToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, MOVEITEM_FORCELOCATION );
+        MoveObjectToLocation( item, sumcreature.x, sumcreature.y, sumcreature.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
       endforeach
     endif
 
-    MoveCharacterToLocation( sumcreature, 0, 0, 0, MOVECHAR_FORCELOCATION );
+    MoveObjectToLocation( sumcreature, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
     ApplyRawDamage(minion, GetHp(minion) + 3);
   endforeach
 

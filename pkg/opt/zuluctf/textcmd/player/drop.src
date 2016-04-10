@@ -60,7 +60,7 @@ case (GetObjProperty(who,"#ctftech"))
 endcase
 if (fixtech)
 	tech.movable:=1;
-	MoveItemToLocation( tech, who.x, who.y, who.z, MOVEITEM_FORCELOCATION );
+	MoveObjectToLocation( tech, who.x, who.y, who.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 	 SetObjProperty(tech,"user",who.serial);
 	 tech.movable:=0;
 	 tech.invisible:=0;

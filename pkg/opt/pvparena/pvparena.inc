@@ -105,7 +105,7 @@ function cleanup(stone, fightactive := 1)
 				EraseObjProperty(member, PVPARENA_WASNTCRIMINAL);
 			endif
 			
-			MoveCharacterToLocation( member, exitlocation[1], exitlocation[2], exitlocation[3], MOVECHAR_FORCELOCATION );
+			MoveObjectToLocation( member, exitlocation[1], exitlocation[2], exitlocation[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			resPlayer(member); // Res them and destroy their items.
 			fixStats(member);
 		endif

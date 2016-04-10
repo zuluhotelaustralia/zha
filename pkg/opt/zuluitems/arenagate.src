@@ -7,7 +7,7 @@ use uo;
 
 program newbiegate (who)
 
-MoveCharacterToLocation( who, 1398, 3742, 20 );
+MoveObjectToLocation( who, 1398, 3742, 20 , _DEFAULT_REALM); //AutoConversion
 SendSysMessage( who, "Welcome to the Fighting Arena!");
 
 endprogram

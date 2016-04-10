@@ -77,7 +77,7 @@ program textcmd_go( who, text )
     endif
 
     // Teleport moble
-    MoveCharacterToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y).Z, MOVECHAR_FORCELOCATION );
+    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, _DEFAULT_REALM, dest.Y).Z, MOVEOBJECT_FORCELOCATION ); //AutoConversion
     gmdata := {	"go", traveler.serial+ " / "+traveler.name+" / "+traveler.acctname, "x: "+dest.x, "y: "+dest.y,"z: "+dest.z,"concealed: "+who.concealed , dest.name};
 		logcommand(who, gmdata);
     showflame(traveler);
@@ -87,7 +87,7 @@ program textcmd_go( who, text )
         params[3] := GetMapInfo( CInt(params[1]), CInt(params[2]) ).z;
     endif
 
-	var res := MoveCharacterToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), MOVECHAR_FORCELOCATION );
+	var res := MoveObjectToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 		gmdata := {	"go", who.serial+ " / "+who.name+" / "+who.acctname, "x: "+params[1], "y: "+params[2],"z: "+params[3],"concealed: "+who.concealed , "manual entry"};
 		logcommand(who, gmdata);
     if (!res)

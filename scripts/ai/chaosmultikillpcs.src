@@ -574,7 +574,7 @@ if (distance(me, critter) < distance(me, opponent) and (!critter.npctemplate or 
 			TurnToward(opponent);
 			return;
 		endif
-	case d
+	case (d) //Conversion
         1:              // the most likely, so first 
         0:
 		if ( runaway < 15 )
@@ -618,7 +618,7 @@ if (distance(me, critter) < distance(me, opponent) and (!critter.npctemplate or 
 			return 1;
     		endif
     		else
-		case Distance( me, opponent )
+		case (Distance( me, opponent )) //Conversion
         		1:
         		0:
             			return 1;
@@ -631,7 +631,7 @@ if (distance(me, critter) < distance(me, opponent) and (!critter.npctemplate or 
 	if (amethod == "melee")
 		saywords := 0;
 	 	ReadySword ();
-		case Distance( me, opponent )
+		case (Distance( me, opponent )) //Conversion
 		        1:              // the most likely, so first 
 		        0:
 		            return 1;
@@ -700,7 +700,7 @@ function MakeLord(me, mergewith)
 	me.hidden := 1;
 	mergewith.hidden :=1;
 	ShowFlame2(mergewith);
-	MoveCharacterToLocation( mergewith, 5376, 1081, 0, 0);
+	MoveObjectToLocation( mergewith, 5376, 1081, 0, _DEFAULT_REALM, 0); //AutoConversion
 	RevokePrivilege( mergewith, "invul" );
 	setobjproperty( mergewith, "guardkill", 1);
 	ApplyRawDamage( mergewith, Cint(mergewith.hp+3) );
@@ -745,9 +745,9 @@ function SplitLord(me)
 	twin1.hidden := 1;
 	twin2.hidden := 1;
 	sleep(1);
-	MoveCharacterToLocation( me, 5376, 1081, 0, 0);
-	MoveCharacterToLocation( twin1, newx, newy, newz, 0);
-	MoveCharacterToLocation( twin2, newx, newy, newz, 0);
+	MoveObjectToLocation( me, 5376, 1081, 0, _DEFAULT_REALM, 0); //AutoConversion
+	MoveObjectToLocation( twin1, newx, newy, newz, _DEFAULT_REALM, 0); //AutoConversion
+	MoveObjectToLocation( twin2, newx, newy, newz, _DEFAULT_REALM, 0); //AutoConversion
 	twin1.hidden := 0;
 	twin2.hidden := 0;
 	PlaySoundEffect( twin1 , 0x020a );	

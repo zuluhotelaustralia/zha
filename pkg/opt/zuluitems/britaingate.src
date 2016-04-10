@@ -7,7 +7,7 @@ use uo;
 
 program britaingate (who)
 
-MoveCharacterToLocation( who, 1417, 1715, 20 );
+MoveObjectToLocation( who, 1417, 1715, 20 , _DEFAULT_REALM); //AutoConversion
 SendSysMessage( who, "Welcome to Britain!");
 
 endprogram

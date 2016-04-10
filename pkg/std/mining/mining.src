@@ -500,7 +500,7 @@ function Move_Shit( who, byref shit )
       return;
   endif
   shit.movable := 1;
-	MoveItemToLocation( shit, cint(move_to.x), cint(move_to.y), cint(move_to.z), 0 );
+	MoveObjectToLocation( shit, cint(move_to.x), cint(move_to.y), cint(move_to.z), _DEFAULT_REALM, 0 ); //AutoConversion
   shit.movable := 0;
   PrintTextAbovePrivate(who,"Moved.", who);
   return;

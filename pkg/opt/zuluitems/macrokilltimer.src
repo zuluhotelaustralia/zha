@@ -30,7 +30,7 @@ if (GetObjProperty(client,"starttime"));
 	EraseObjProperty(client,"starttime");
 	SendSysMessage(client,"You took too long to answer!");
 	acc.setprop( "Release", (ReadGameClock() + 86400 ));
-	MoveCharacterToLocation( client, 5304, 1184, 0, 0 );
+	MoveObjectToLocation( client, 5304, 1184, 0, _DEFAULT_REALM, 0 ); //AutoConversion
 	var after := ReadGameClock();
 	var notcheat := "The macrotest jailed the client after " + (after - before) + "seconds";
 	textcmd_bcast( playername, notcheat );

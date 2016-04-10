@@ -1,5 +1,5 @@
 use uo;
 
 program textcmd_home( who )
-    MoveCharacterToLocation(who, 1484,1626,30);
+    MoveObjectToLocation(who, 1484,1626,30, _DEFAULT_REALM); //AutoConversion
 endprogram

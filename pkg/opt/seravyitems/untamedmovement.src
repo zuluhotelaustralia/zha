@@ -15,7 +15,7 @@ program untamedmovement( who, item )
 
   if(destX && destY && destZ)
     if (who.isA(POLCLASS_NPC) && !hasMaster)
-      MoveCharacterToLocation( who, destX, destY, destZ, MOVECHAR_FORCELOCATION );
+      MoveObjectToLocation( who, destX, destY, destZ, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
       PrintTextAbove( who, "Untamed creatures are not allowd to move here!");
     endif
   endif

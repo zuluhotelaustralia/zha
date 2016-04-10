@@ -20,6 +20,6 @@ else
 endif
 
 
-MoveItemToLocation(what, what.x + tdist, what.y, what.z, MOVECHAR_FORCELOCATION);
+MoveObjectToLocation(what, what.x + tdist, what.y, what.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 
 endprogram

@@ -18,7 +18,7 @@ program textcmd_fixcontainer( who )
 	foreach item in EnumerateItemsInContainer(container)
 		if( item.container == container )
 			root_items.append(item);
-			MoveItemToLocation(item, 5492, 1111, 0, MOVEITEM_FORCELOCATION);
+			MoveObjectToLocation(item, 5492, 1111, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 		endif
 	endforeach
 

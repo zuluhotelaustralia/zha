@@ -121,7 +121,7 @@ function CloseDistance( opponent )
 		return 2;
 	endif
 
-    case Distance( me, opponent )
+    case (Distance( me, opponent )) //Conversion
         1:              // the most likely, so first 
         0:
             return 1;
@@ -154,9 +154,9 @@ endfunction
 
 function KillMe()
 	DisableMainEvents();
-	MoveCharacterToLocation(me,5288, 1176, 0,MOVECHAR_FORCELOCATION);
+	MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SetObjProperty(me,"guardkill",1);
-	Damage( me, GetMaxHp(me) + 3 );
+	ApplyDamage( me, GetMaxHp(me) + 3 );
 endfunction
 
 function DistanceToLocation( locx, locy )

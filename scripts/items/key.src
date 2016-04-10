@@ -29,6 +29,8 @@
 //
 
 use uo;
+use storage;
+
 include "include/objtype";
 
 const KEYSTART := 0x100e;

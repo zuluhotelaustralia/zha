@@ -27,7 +27,7 @@ function getObject(serial)
 	if (serial)
 		var object := SystemFindObjectBySerial(serial);
 		if (!object)
-			object := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_STORAGE_AREAS);
+			object := SystemFindObjectBySerial(serial);
 		endif
 		if (!object)
 			object := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);

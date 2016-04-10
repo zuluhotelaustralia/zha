@@ -76,8 +76,8 @@ function QuestieSetup()
 			//I should have a master but I don't!
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			// MoveCharacterToLocation(me,5288 , 1176 , 0,MOVECHAR_FORCELOCATION);
-			Damage( me, GetMaxHp(me) + 3 );
+			// MoveObjectToLocation(me,5288 , 1176 , 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
+			ApplyDamage( me, GetMaxHp(me) + 3 );
 		endif
 	else
 		master := me;

@@ -233,10 +233,10 @@ function DoStuckHelp(who)
 	endwhile
 	
 	if (GetObjProperty(who, "newbie")==1)
-		MoveCharacterToLocation(who, 5149, 59, 25, MOVECHAR_FORCELOCATION); //newbie starting area
+		MoveObjectToLocation(who, 5149, 59, 25, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion //newbie starting area
 		SendSysMessage(who, "You have been transported to the Haven starting point!", 3, 70);
 	else
-		MoveCharacterToLocation( who, 1475, 1645, 20, MOVECHAR_FORCELOCATION); //brit starting area
+		MoveObjectToLocation( who, 1475, 1645, 20, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion //brit starting area
 		SendSysMessage(who, "You have been transported to the Britain starting point!", 3, 70);
 	endif
 endfunction
