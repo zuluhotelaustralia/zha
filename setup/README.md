@@ -1,8 +1,15 @@
 # Setup
-This folder contains the inital files required to seed
+This folder contains the inital files required to seed a new server.
 
 ## Instructions
-Copy most/all the files from the setup folder into the root of the pol folder and modify them.
+1. Rename pol.exe.RENAMEME to pol.exe
+2. Copy the following files from the setup folder into the root of the pol folder and modify them.
+    * config\servers.cfg
+    * pol.cfg
+    * POLHook.cfg
+3. Run the data file generation. Modify setup\pol.cfg to point to UO folder then run 'Generate Data Files.bat'.
+4. Compile scripts using 'Compile.bat'. This needs to be run every time the scripts have changed.
+5. Run the server batch file 'Run.bat'.
 
 ## File listing
 * config\servers.cfg - Server listings.
