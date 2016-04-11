@@ -22,6 +22,12 @@ leftovers.txt
 objtypes.txt
 orphans.txt
 
+# Mul generated files 
+config/tiles.cfg 
+config/multis.cfg 
+config/landtiles.cfg 
+realm/ 
+
 # Script objects
 *.dep
 *.lst
