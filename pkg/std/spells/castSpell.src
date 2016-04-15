@@ -1,0 +1,38 @@
+/*
+ * $Id: castSpell.src 373 2006-06-17 18:27:33Z austinheilman $
+ * ZHA Conversion: Maintained by Seravy
+ */
+
+use uo;
+use os;
+use cfgfile;
+
+include "include/spelldata";
+
+program castSpell(who, spell_id)
+
+	// Try to cast the spell.
+	if( TryToCast(who, spell_id ) != SUCCESS )
+		EraseObjProperty(who, "#Casting" );
+		return;
+	endif
+	
+	// Get the configuration item.
+	var spellElement := ReadConfigFile(":spells:spells")[spell_id];
+	var script := Start_Script(spellElement.SpellScript, who);
+	if (script.errortext)
+		// If there is an error, this is pretty serious so send to console.
+		print(who.name + " was unable to start [" + spellElement.SpellScript + "] -> " + script.errortext);
+	endif
+
+	return 1;
+	/*
+	// Distro way of starting spell scripts. We dont need to use it yet. 
+	var script := Start_Script("spellStarter", {who, spell_id});
+	if ( script.errortext )
+		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);
+		return 0;
+	endif
+	return 1;
+	*/
+endprogram
