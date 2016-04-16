@@ -1,6 +1,6 @@
 use uo;
 
-program SingleClick(who, singleSerial)
+program SingleClickHook(who, singleSerial)
 	print("Player is using singleclick: "+who.name);
 	var singClObject := SystemFindObjectBySerial(CInt(singleSerial));
 	if (!who.cmdlevel && singClObject.cmdlevel && singClObject.concealed)
