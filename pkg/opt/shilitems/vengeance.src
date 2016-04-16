@@ -36,7 +36,7 @@ program item_vengeance( who, item )
 		endif
 	endif
 
-	var victim := Target( who, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+	var victim := Target95( who, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
 	if( !victim )
 		return;
 	endif

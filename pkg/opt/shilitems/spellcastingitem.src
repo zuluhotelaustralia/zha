@@ -51,7 +51,7 @@ program spellcastingitem( who, item )
 	endif
 
 	SendSysMessage( who, "Select a target." );
-	var cast_on := Target( who, TGTOPT_CHECK_LOS );
+	var cast_on := Target95( who, TGTOPT_CHECK_LOS );
 	if( !cast_on )
 		return;
 	endif

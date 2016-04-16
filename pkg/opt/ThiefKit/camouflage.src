@@ -5,6 +5,7 @@ use storage;
 include "include/client";
 include "include/attributes";
 include "include/camouflage";
+include "include/pol95";
 
 const DIFFICULTY:=100;
 const POINTS:=300;
@@ -37,7 +38,7 @@ SetObjProperty(thief, "#cmftime", ReadGameClock() + 30);
 
 	SendSysMessage(thief, "Who would u like to camouflage as?");
 
-	var what := Target(thief, TGTOPT_CHECK_LOS);
+	var what := Target95(thief, TGTOPT_CHECK_LOS);
 
 	if(!what)
 	        return;

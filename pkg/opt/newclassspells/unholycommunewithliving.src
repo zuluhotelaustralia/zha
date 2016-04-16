@@ -14,7 +14,7 @@ program cast_communewithliving( caster )
   var clevel:=GetClasseLevel(caster);
   var end_time := ReadGameClock()+CInt(20*clevel);
   var circle := GetCircle( SPELL_ID );
-  var cast_on := Target( caster,  TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
+  var cast_on := Target95( caster,  TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
   var ev;
   
   RegisterForSpeechEvents(cast_on , 1, LISTENPT_HEAR_GHOSTS );
