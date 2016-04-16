@@ -35,7 +35,7 @@ program use_mortar( user, mortar )
 	
 	SendSysMessage( user, "What would you like to use that on?" );
 
-	var use_on := Target( user, TGTOPT_CHECK_LOS );
+	var use_on := Target95( user, TGTOPT_CHECK_LOS );
 	
 	if( !use_on )
 		return;

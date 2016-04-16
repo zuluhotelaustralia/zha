@@ -50,7 +50,7 @@ program use_bandages( character, kusuribin )
 	endif
 
 	SendSysMessage( character, "Who would you like to heal?" );
-	var patient := Target( character, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+	var patient := Target95( character, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
 
 	//Targeting was canceled
 	if( !patient )

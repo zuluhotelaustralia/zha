@@ -26,7 +26,7 @@ program cast_necrolysis( parms )
     Send_Attack( cast_on, caster, SPELL_ID);
   else
     caster := parms;
-    cast_on := Target( caster, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
+    cast_on := Target95( caster, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
 
     if (!cast_on)
       EraseObjProperty( caster, "#Casting");

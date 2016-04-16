@@ -2,6 +2,7 @@ use uo;
 use os;
 
 include "include/namingbyenchant";
+include "include/pol95";
 
 const DELAY_BETWEEN_USE	:= 2;
 
@@ -31,7 +32,7 @@ program wand_of_id( who, item )
 	endif
 
 	SendSysMessage( who, "Select an object to identify." );
-	var the_item := Target(who, TGTOPT_CHECK_LOS);
+	var the_item := Target95(who, TGTOPT_CHECK_LOS);
 	if( !the_item )
 		return;
 	endif
