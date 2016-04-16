@@ -422,7 +422,7 @@ function CanTargetSpell( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
 	var cy := caster.y;
 	var shp := GetHp(caster);
 
-	var cast_on := Target( caster, targopt );
+	var cast_on := Target95( caster, targopt );
 	if(!cast_on  || !GetStrength(cast_on) || cast_on.hidden)
 		return 0;
 	endif
