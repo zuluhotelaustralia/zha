@@ -60,7 +60,7 @@ program textcmd_checkspeed (staff, text)
     //SendSysMessage (staff, "INSPECTION TIME: " + INSPECTION_TIME, FONT_NORMAL, FONTCOLOR_GREEN);   
    
     //SendSysMessage (staff, "Select a character to check.", FONT_NORMAL, FONTCOLOR_GREEN);
-    //who := Target (staff, TGTOPT_NOCHECK_LOS);
+    //who := Target(staff, TGTOPT_NOCHECK_LOS);
    
     text := upper(text);
     who := MakeAndProcessGump(staff, text);

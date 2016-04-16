@@ -46,7 +46,7 @@ return;
 		endif
 		*/
 		
-		if( CheckLineOfSight( me, myitem ) )
+		if( CheckLineOfSight95( me, myitem ) )
 			var sh := GetStandingHeight( CInt(myitem.x), CInt(myitem.y), CInt(myitem.z) );
 			if (sh.multi || sh.multi.serial)
 				break;

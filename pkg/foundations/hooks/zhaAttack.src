@@ -6,6 +6,7 @@ include ":hooks:zhaSpecialMonsterAttacks";
 include "include/hitscriptinc";
 include "include/guardcall";
 include "include/classes";
+include "include/pol95";
 
 
 var cfg := ReadConfigFile(":combat:itemdesc");
@@ -17,6 +18,10 @@ endprogram
 
 exported function ZHAAttackfunc( attacker, defender ) 
 	if (attacker == defender)
+		return 1;
+	endif
+	
+	if (!CheckLineOfSight95(attacker, defender))
 		return 1;
 	endif
 	

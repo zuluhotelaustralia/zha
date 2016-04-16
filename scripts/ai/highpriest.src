@@ -197,7 +197,7 @@ while (1)
             	SYSEVENT_ENTEREDAREA:
 			if ( !event.source.isA(POLCLASS_NPC) )
 				var player := event.source;
-                 		if( player.dead && CheckLineOfSight(me,player) && !GetObjProperty( player, "PriestUpset" ) )
+                 		if( player.dead && CheckLineOfSight95(me,player) && !GetObjProperty( player, "PriestUpset" ) )
 					TurnToward( event.source );
 					if( GetObjProperty( event.source, "PriestUpset" ) )
 						say( "Hahah I see that thee was finally killed, that is what thee deserved,");

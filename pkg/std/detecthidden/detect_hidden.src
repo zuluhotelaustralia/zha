@@ -62,7 +62,7 @@ program detect_hidden( who )
 			endif
 			
 			if (item.objtype == 0x12||item.objtype == 0x13||item.objtype == 0x14) //hidentraptile and trapped pick doors
-				if ((Distance(who, item)<=distanceallowed) && CheckLineOfSight( who, item ))
+				if ((Distance(who, item)<=distanceallowed) && CheckLineOfSight95( who, item ))
 					var dparams:= {who, item};
 					start_script(":barnsitems:revealtraptile", dparams);//handles temporarily revealing the tile
 				endif

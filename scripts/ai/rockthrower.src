@@ -24,6 +24,7 @@ include "include/objtype";
 include "include/anchors";
 include "ai/setup/modsetup";
 include "include/random";
+include "include/pol95";
 
 const stone := 0x1365;
 const HALT_THRESHOLD := 5; // how close before he attacks?
@@ -151,13 +152,13 @@ endif
                     break;
 
                 SYSEVENT_ENGAGED:
-                    if( !CheckLineOfSight( me, opponent ) )
+                    if( !CheckLineOfSight95( me, opponent ) )
                          Fight(ev.source);
                          break;
                     endif
 
 
-                    if( !CheckLineOfSight( me, opponent ) )
+                    if( !CheckLineOfSight95( me, opponent ) )
                          Fight(ev.source);
                          break;
                     endif
@@ -176,7 +177,7 @@ endif
                 SYSEVENT_LEFTAREA:
                     // ignore both of these
             endcase
-            if( (loops > 20) && !CheckLineOfSight(me,opponent))
+            if( (loops > 20) && !CheckLineOfSight95(me,opponent))
                     break outer;
             endif
         until (! (ev := wait_for_event(0)) );

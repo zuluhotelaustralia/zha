@@ -273,7 +273,7 @@ function WaitAndCheckTheTamer( the_tamer, the_creature )
 		return 0;
 	endif
 
-	if( !CheckLineOfSight( the_tamer, the_creature ) )
+	if( !CheckLineOfSight95( the_tamer, the_creature ) )
 		SendSysMessage( the_tamer, "The creature isn't in your line of sight." );
 		return 0;
 	endif

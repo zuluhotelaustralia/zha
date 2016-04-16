@@ -57,7 +57,7 @@ program cast_teleport( parms )
 	endif
 	firefield.invisible:=1;
 	
-	if (! CheckLineOfSight(firefield, caster) ||  ! CheckLineOfSight(caster, firefield) || Distance(caster,firefield)>22)
+	if (! CheckLineOfSight95(firefield, caster) ||  ! CheckLineOfSight95(caster, firefield) || Distance(caster,firefield)>22)
 		SendSysMessage( caster, "You can't see that." );
 		DestroyItem(firefield);
 		return;

@@ -15,6 +15,7 @@
 
 use uo;
 use os;
+include "include/pol95";
 
 // move to a master include file ? example include/client ?
 // or split to object, animation, sound, ... file
@@ -37,7 +38,7 @@ var cfg := ReadConfigFile(":combat:itemdesc");
 
 program training_archery( who, butte )
 
-	if (!CheckLineOfSight( who, butte ))
+	if (!CheckLineOfSight95( who, butte ))
 	        SendSysMessage( who, "You don't have line of sight to that." );
         	return;
 	endif

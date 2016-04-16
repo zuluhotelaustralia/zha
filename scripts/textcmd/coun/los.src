@@ -1,19 +1,35 @@
 use uo;
 
 include "include/cmdlevel_check";
+include "include/pol95";
 
-program loscheck( chr )
+program loscheck( chr, ground )
 	if (!checkStaff(chr, "los", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
 	
     SendSysMessage( chr, "Select something to check Line-of-Sight to." );
-    var what := Target( chr, TGTOPT_NOCHECK_LOS );
-    if (what)
-        if (CheckLineOfSight( chr, what ))
-            SendSysMessage( chr, "You have line-of-sight to that." );
-        else
-            SendSysMessage( chr, "You do not have line-of-sight to that." );
+    if (ground)
+         var what := TargetCoordinates( chr );
+        if (what)
+            if (CheckLosAt( chr, what.x, what.y, what.z ))
+                SendSysMessage( chr, "You have line-of-sight to that." );
+            else
+                SendSysMessage( chr, "You do not have line-of-sight to that." );
+            endif
+        endif   else
+        var what := Target( chr, TGTOPT_NOCHECK_LOS );
+        if (what)
+            if (CheckLineOfSight( chr, what ))
+                SendSysMessage( chr, "You have line-of-sight to that." );
+            else
+                SendSysMessage( chr, "You do not have line-of-sight to that." );
+            endif
+            if (CheckLineOfSight95( chr, what ))
+                SendSysMessage( chr, "POL95: You have line-of-sight to that." );
+            else
+                SendSysMessage( chr, "POL95: You do not have line-of-sight to that." );
+            endif
         endif
     endif
 endprogram

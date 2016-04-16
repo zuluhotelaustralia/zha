@@ -8,6 +8,7 @@ use uo;
 use os;
 
 include "include/client";
+include "include/pol95";
 
 const UOBJECT_DUMMYSWING_EW := 0x1ec1;
 const UOBJECT_DUMMYFREEZE_EW := 0x1ec0;
@@ -22,7 +23,7 @@ program pickpocket_dummy( who, dummy )
         	return;
 	endif
 
-	if( !CheckLineOfSight( who, dummy ))
+	if( !CheckLineOfSight95( who, dummy ))
 	        SendSysMessage( who, "You don't have line of sight to that." );
         	return;
 	endif

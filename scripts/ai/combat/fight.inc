@@ -1,5 +1,6 @@
 use uo;
 use os;
+include "include/pol95";
 include "include/random";
 include "include/attributes";
 include "ai/main/npcinfo";
@@ -96,7 +97,7 @@ function Fight( opponent )
 
 		steps := 0;
 		randomruns := 0;
-		if ( CheckLineOfSight(me,opponent) )
+		if ( CheckLineOfSight95(me,opponent) )
 			loops := 0;
 			waittime := 1;
 			EraseObjProperty(me,"#flees");

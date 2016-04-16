@@ -448,7 +448,7 @@ function GetCastParams(who, staff)
 				//return;
 			endif
 				targ:=SystemFindObjectBySerial(targeser);
-			if (!targ||targ==error||!CheckLineOfSight(who, targ));
+			if (!targ||targ==error||!CheckLineOfSight95(who, targ));
 				params:=who; //i.e. no auto targ
 				//return;
 			endif
