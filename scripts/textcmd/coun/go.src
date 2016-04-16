@@ -77,7 +77,7 @@ program textcmd_go( who, text )
     endif
 
     // Teleport moble
-    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, _DEFAULT_REALM, dest.Y).Z, MOVEOBJECT_FORCELOCATION ); //AutoConversion
+    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y).Z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
     gmdata := {	"go", traveler.serial+ " / "+traveler.name+" / "+traveler.acctname, "x: "+dest.x, "y: "+dest.y,"z: "+dest.z,"concealed: "+who.concealed , dest.name};
 		logcommand(who, gmdata);
     showflame(traveler);

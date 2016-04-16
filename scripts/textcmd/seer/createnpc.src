@@ -24,8 +24,8 @@ program textcmd_createnpc( who, template )
 		return;
 	endif
 	endforeach
-
-	var props array;
+	
+	var props:= struct;
 	var createdxyz := array{};
 	props.+facing := who.facing;
 	var loc := TargetCoordinates(who);
