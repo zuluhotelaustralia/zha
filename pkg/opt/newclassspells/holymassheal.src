@@ -33,7 +33,7 @@ program cast_massheal(parms)
   var level:=GetClasseLevel(caster);
 
   foreach person in people
-    if (CheckLineOfSight(person, caster))
+    if (CheckLineOfSight95(person, caster))
       PlayObjectCenteredEffect(caster, FX_SPELL_MASSHEAL, SPEED_SPELL_MASSHEAL, LOOP_SPELL_MASSHEAL);
       PlaySoundEffect(caster, SFX_SPELL_MASSHEAL);
       

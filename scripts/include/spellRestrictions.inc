@@ -375,7 +375,7 @@ endfunction
 
 function newusemana(who, circle, cast_on, delivery)
   if(delivery == "direct")
-    if(!CheckLineOfSight(who, cast_on))
+    if(!CheckLineOfSight95(who, cast_on))
       SendSysMessage(who, "You can't see that.");
       return 0;
     endif
@@ -534,7 +534,7 @@ endfunction
 
 function usemana(who, circle, cast_on)
   if(cast_on.mobile)
-    if(!CheckLineOfSight(who, cast_on))
+    if(!CheckLineOfSight95(who, cast_on))
       SendSysMessage(who, "You can't see that.");
       return 0;
     endif

@@ -95,7 +95,7 @@ endfunction
 
 function lookToRes()
 		foreach corpse in ListItemsNearLocationOfType( me.x, me.y, me.z, HALT_THRESHOLD, 0x2006 )
-		if (CheckLineOfSight( me, corpse ))
+		if (CheckLineOfSight95( me, corpse ))
 			if (! GetObjProperty(corpse, "triedToResButFailed"))
 				SetObjProperty(corpse, "triedToResButFailed",1);
 				if (	GetObjProperty(corpse, "Karma") < -1000)

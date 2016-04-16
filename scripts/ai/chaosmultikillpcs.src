@@ -78,7 +78,7 @@ Near := ListItemsNearLocation( me.x , me.y , me.z , 5 );
 var kwall := 0;
 foreach item in Near
 if (item.objtype == 0x5f or item.objtype == 0x57 or item.objtype == 0x3946 or item.objtype == 0x3955)
-	if (!CheckLineOfSight( me, opponent) and Random(2) == 1 )
+	if (!CheckLineOfSight95( me, opponent) and Random(2) == 1 )
 		if (kwall == 0)
 			saywords := 1;
 			if (GetObjProperty(me,"amethod") != "magic")
@@ -102,7 +102,7 @@ var servant;
 var npctemplate ;
 foreach item in NearDead
 if (GetObjProperty(item,"npctemplate") and GetObjProperty(item,"Karma") < (-400) )
-if (kdead == 0 and Random (30) == 1 and GetObjProperty(item,"Type") != "Animal" and CheckLineOfSight( me, item))
+if (kdead == 0 and Random (30) == 1 and GetObjProperty(item,"Type") != "Animal" and CheckLineOfSight95( me, item))
 			npctemplate := GetObjProperty(item,"npctemplate");
 			saywords := 1;
 			servant := item;
@@ -251,7 +251,7 @@ endif
 //
 			
 //RETARGET IF NO LOS
-if (!CheckLineOfSight( me, opponent) )
+if (!CheckLineOfSight95( me, opponent) )
 	if (GetObjProperty(me,"lastnolos") != opponent.name)
 		if (runrandom(opponent))
 			Sleepms(sleepdelay);
@@ -443,7 +443,7 @@ if (notgts3 > 2 and Random (5) == 1 and !crazymode)
 			blah3 := blah3 + 1;
 		endwhile
 		saywords := 1;
-		if (CheckLineOfSight( me, opponent) )
+		if (CheckLineOfSight95( me, opponent) )
 			me.mana := me.mana + 30;
 			CastSpell(me, opponent, "mindblast");	
 			sleep(1);
@@ -595,7 +595,7 @@ if (distance(me, critter) < distance(me, opponent) and (!critter.npctemplate or 
 			RunToward( opponent );
 			Sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight( me, opponent) )
+		elseif (!CheckLineOfSight95( me, opponent) )
 			if (runrandom(opponent))
 			Sleepms(sleepdelay);
 				return 2;
@@ -641,7 +641,7 @@ if (distance(me, critter) < distance(me, opponent) and (!critter.npctemplate or 
 			        	RunToward( opponent );
 					mofo := mofo + 1;
 			        endwhile   
-				if (mofo > 39 and CheckLineOfSight( me, opponent))
+				if (mofo > 39 and CheckLineOfSight95( me, opponent))
 					me.mana := me.mana + 30;
 					CastSpell(me,opponent,"teleport");
 				endif

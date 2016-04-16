@@ -121,7 +121,7 @@ function CloseDistance( opponent )
 			WalkToward( opponent );
 			sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight( me, opponent) )
+		elseif (!CheckLineOfSight95( me, opponent) )
 			if (runrandom(opponent))
 			sleepms(sleepdelay);
 				return 2;

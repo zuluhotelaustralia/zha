@@ -3,6 +3,7 @@ use cfgfile;
 
 include "bardbook";
 include "include/client";
+include "include/pol95";
 include "include/speedhackRecallCheck";
 
 var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
@@ -62,7 +63,7 @@ program minstrelsjourney( caster, parms )
 	endif
 	firefield.invisible:=1;
 	
-	if (! CheckLineOfSight(firefield, caster) ||  ! CheckLineOfSight(caster, firefield) || Distance(caster,firefield)>22)
+	if (! CheckLineOfSight95(firefield, caster) ||  ! CheckLineOfSight95(caster, firefield) || Distance(caster,firefield)>22)
 		SendSysMessage( caster, "You can't see that." );
 		DestroyItem(firefield);
 		EraseObjProperty( caster, "#Casting" );

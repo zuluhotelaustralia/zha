@@ -219,7 +219,7 @@ function Fight( opponent )
 				if (ev.source)
 					if ( (ev.source.serial != opponent.serial) && (ev.source.serial != master.serial) &&
 					     (ev.source.serial != me.serial) )
-						if( (!CheckLineOfSight( me, opponent )) || (Random(8)==1) )
+						if( (!CheckLineOfSight95( me, opponent )) || (Random(8)==1) )
 							opponent := ev.source;
 							SetOpponent( opponent );
 						endif
@@ -231,7 +231,7 @@ function Fight( opponent )
 				if (ev.source)
 					if ( (ev.source.serial != opponent.serial) && (ev.source.serial != master.serial) &&
 					     (ev.source.serial != me.serial) )
-						if( (!CheckLineOfSight( me, opponent )) || (Random(8)==1) )
+						if( (!CheckLineOfSight95( me, opponent )) || (Random(8)==1) )
 							opponent := ev.source;
 							SetOpponent( opponent );
 						endif
@@ -419,7 +419,7 @@ function Fetch()
 	endif
 
 	var times := 0;
-	while ( (Distance(me, tobj) > 1) && (times < 5) && CheckLineOfSight(me,tobj) )
+	while ( (Distance(me, tobj) > 1) && (times < 5) && CheckLineOfSight95(me,tobj) )
 		if( !RunToward(tobj))
 			sleep(1);
 			times := times + 1;
@@ -1041,7 +1041,7 @@ function ProcessSpeech(ev)
 		else
 			var what := Target( master, TGTOPT_CHECK_LOS );
 			if (what)
-				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
+				if (!CheckLineOfSight95(me, what)) //barns - to stop exploit
 					return;
 				endif
 				if (what.multi && (me.multi.serial != what.multi.serial))
@@ -1061,7 +1061,7 @@ function ProcessSpeech(ev)
 			stopme();
 			var what := Target( master, TGTOPT_CHECK_LOS );
 			if (what)
-				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
+				if (!CheckLineOfSight95(me, what)) //barns - to stop exploit
 					return;
 				endif
 				if (what.multi && (me.multi.serial != what.multi.serial))
@@ -1087,7 +1087,7 @@ function ProcessSpeech(ev)
 			stopme();
 			var what := Target( master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
 			if (GetHp(what))
-				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
+				if (!CheckLineOfSight95(me, what)) //barns - to stop exploit
 					return;
 				endif
 				if (what.multi && (me.multi.serial != what.multi.serial))
@@ -1108,7 +1108,7 @@ function ProcessSpeech(ev)
 			stopme();
 			var what := Target( master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
 			if (GetHp(what))
-				if (!CheckLineOfSight(me, what)) //barns - to stop exploit
+				if (!CheckLineOfSight95(me, what)) //barns - to stop exploit
 					return;
 				endif
 				if (what.multi && (me.multi.serial != what.multi.serial))

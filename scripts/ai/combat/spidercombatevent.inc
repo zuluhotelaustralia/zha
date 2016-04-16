@@ -51,7 +51,7 @@ function send_web(opponent)
 		return;
 	endif
 
-	if (!CheckLineOfSight( me, opponent ))
+	if (!CheckLineOfSight95( me, opponent ))
 		return;
 	endif
 

@@ -3,6 +3,7 @@ use uo;
 use cfgfile;
 
 include "include/client";
+include "include/pol95";
 
 program herd(who)
   SendSysMessage(who, "What do you want to herd?");
@@ -11,7 +12,7 @@ program herd(who)
     SendSysMessage(who, "Cancelled!");
     return;
   endif
-  if (!CheckLineOfSight(who, npc))
+  if (!CheckLineOfSight95(who, npc))
     SendSysMessage(who, "You can't see that!");
   endif
   var conf := ReadConfigFile("::npcdesc");

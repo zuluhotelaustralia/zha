@@ -82,7 +82,7 @@ var runaround := 0;
 foreach item in Near
 if (item.objtype == 0x5f or item.objtype == 0x57 or item.objtype == 0x3946 or item.objtype == 0x3955)
 if (kwall == 0)
-	if (!CheckLineOfSight( me, opponent))
+	if (!CheckLineOfSight95( me, opponent))
 		if (Random(2) == 1 )
 			me.mana := me.mana + 50;
 			CastSpell(me,me,"dispel_field");
@@ -129,7 +129,7 @@ endforeach
 			RunToward( opponent );
 			Sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight( me, opponent) )
+		elseif (!CheckLineOfSight95( me, opponent) )
 			if (GetObjProperty(me,"lastnolos") != opponent.name)
 				if (runrandom(opponent))
 					Sleepms(sleepdelay);
@@ -137,7 +137,7 @@ endforeach
 			endif
 			SetObjProperty(me,"lastnolos",opponent.name);
 			foreach mobile in ListMobilesNearLocation( me.x, me.y, me.z, 9 )
-				if (CheckLineOfSight( me, mobile ) and !mobile.npctemplate )
+				if (CheckLineOfSight95( me, mobile ) and !mobile.npctemplate )
 					opponent := mobile;
 		
 				endif

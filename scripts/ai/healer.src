@@ -211,7 +211,7 @@ function HealerStuff(mobile)
       say("I cannot help thee until I escape this danger!");
     else
 	if( mobile.dead )
-		if( CheckLineOfSight(me,mobile))
+		if( CheckLineOfSight95(me,mobile))
 	   		//Bring up Res choice gump
 	   		TurnToward(mobile);
 	   		say( "Live again by the Virtues!" );
@@ -221,13 +221,13 @@ function HealerStuff(mobile)
 		endif
 
 
-	elseif( (mobile.poisoned) && (CheckLineOfSight(me,mobile)) && (!len(ListHostiles(mobile))))
+	elseif( (mobile.poisoned) && (CheckLineOfSight95(me,mobile)) && (!len(ListHostiles(mobile))))
 
 		TurnToward(mobile);
 		say("Sacrifice Purifies the Body and Soul!");
 		CastSpell( me, mobile, "archcure" );
 
-	elseif( (GetHp(mobile) < GetMaxHp(mobile)) && CheckLineOfSight(me,mobile) && (!len(ListHostiles(mobile))) )
+	elseif( (GetHp(mobile) < GetMaxHp(mobile)) && CheckLineOfSight95(me,mobile) && (!len(ListHostiles(mobile))) )
 
 		TurnToward(mobile);
 		say("Compassion heals all!");
