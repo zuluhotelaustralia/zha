@@ -1,6 +1,6 @@
 use uo;
 
-program SingleClick(who, singleSerials)
+program SingleClickHook(who, singleSerials)
 	var myinput := SplitWords (singleSerials);
 	//Broadcast("HI! " + myinput[1] + " " + myinput[2]);
 	foreach st in myinput
