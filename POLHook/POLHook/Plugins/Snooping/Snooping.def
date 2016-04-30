@@ -1,4 +1,0 @@
-LIBRARY Snooping
-EXPORTS
-POLHookPlugin
-KillPlugin

@@ -1,4 +1,0 @@
-LIBRARY SkillLock
-EXPORTS
-POLHookPlugin
-KillPlugin
