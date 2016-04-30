@@ -40,7 +40,7 @@ const ORE_BONUS_ID:=  	   38;
 const STATIC_ED_ID:=	   39;
 
 // CLASS EQUIP SLOTS PER LEVEL
-const BASE_ES:=            30;
+const BASE_ES:=            500;
 const BARD_ES:=            10;
 const CRAFTER_ES:=         10;
 const MAGE_ES:=            10;

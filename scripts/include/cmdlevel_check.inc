@@ -13,7 +13,7 @@ const ADD_ACCOUNT_PASSWORD_HINT := "Id like to go back to old Tennessee";
 //devs and admins are hardcoded and require recompile
 
 // Account names of current staff. LOWER CASE!
-var developers := {"admin", "gibstaff"};
+var developers := {"admin", "gibstaff", "archstaff", "barnstaff", "seravystaff"};
 var administrators := {"destystaff", "ivanstaff"};
 //var gamemasters := {"vash", "chrisstaff", "staffaccount2", "banestaff"};
 //var seers := {"sstaff","fuel", "arreatstaff", "katstaff", "dagstaff"};
