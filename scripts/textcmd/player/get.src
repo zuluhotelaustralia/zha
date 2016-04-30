@@ -106,9 +106,14 @@ case (typename) //Conversion
 	
 	SetObjProperty(who, "fastlooting", 1);
 	foreach item in EnumerateItemsInContainer(corpse)
+		if (!ReserveItem(Item))
+			SendSysMessage(who, "That item is in use.");
+			return;
+		endif
 		if (item.objtype in type)
 			if (CreateItemInContainer(bag, item.objtype, item.amount))
 				SendSysMessage(who, "Grabbed "+item.desc);
+				ReleaseItem(Item);
 				DestroyItem(item);
 			else
 				SendSysMessage(who, "Failed to move "+item.desc);
@@ -129,8 +134,13 @@ function GrabScrolls(who, corpse)
 		if ((obj >= 0x1f2d && obj <= 0x1f6c) || 
 		(obj >= 0xa100 && obj <=0xa110) ||
 		(obj >= 0xb100 && obj <= 0xb110))
+		if (!ReserveItem(Item))
+			SendSysMessage(who, "That item is in use.");
+			return;
+		endif
 			if (CreateItemInContainer(bag, obj, item.amount))
 				SendSysMessage(who, "Grabbed "+item.desc);
+				ReleaseItem(Item);
 				DestroyItem(item);
 			else
 				SendSysMessage(who, "Failed to move "+item.desc);
