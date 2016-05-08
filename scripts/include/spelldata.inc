@@ -1229,17 +1229,18 @@ function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0
 		elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
 			spelldelay := CInt( spelldelay * ClasseBonus( caster, CLASSEID_WARRIOR ) );
 		endif
+		
 		while( spelldelay >= 500 )
 			sleepms( 500 );
 			spelldelay := spelldelay - 500;
-			if( GetHp(caster) < shp )
+			if(!IsNormalSpell(spell) && (GetHp(caster) < shp))
 				SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
 				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
 				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
 				return INTERRUPTED;
 			endif
 
-			if( caster.x != sx || caster.y != sy || caster.z != sz )
+			if(!IsNormalSpell(spell) && (caster.x != sx || caster.y != sy || caster.z != sz))
 				SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
 				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
 				return INTERRUPTED;
@@ -1248,14 +1249,14 @@ function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0
 
 		sleepms( spelldelay );
 
-		if( GetHp(caster) < shp )
+		if(!IsNormalSpell(spell) && (GetHp(caster) < shp))
 			SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
 			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
 			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
 			return INTERRUPTED;
 		endif
 
-		if( caster.x != sx || caster.y != sy || caster.z != sz )
+		if(!IsNormalSpell(spell) && (caster.x != sx || caster.y != sy || caster.z != sz))
 			SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
 			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
 			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
@@ -1298,7 +1299,10 @@ function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0
 	endif
 
 	return SUCCESS;
+endfunction
 
+function IsNormalSpell(spellId)
+	return spellId >= 1 && spellId <= 64;
 endfunction
 
 //These are new versions of other spelldata functions that support new class spellbooks
