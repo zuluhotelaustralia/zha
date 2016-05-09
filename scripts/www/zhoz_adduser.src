@@ -3,18 +3,18 @@ use uo;
 use os;
 use basic;
 
-const AdminEmail := "bucket_o_rice@hotmail.com";
+const AdminEmail := "harlz@zuluhotel.com.au";
 
 program zha_createaccount()
 
 	var Username := CStr(QueryParam( "account" ));
 	var Password := CStr(QueryParam( "password" ));
-	var Password2 := CStr(QueryParam( "password2" ));
+//	var Password2 := CStr(QueryParam( "password2" ));
 	var Email := CStr(QueryParam( "email" ));
 	
 	username := EscapeString(username);
 	password := EscapeString(password);
-	password2 := EscapeString(password2);
+//	password2 := EscapeString(password2);
 	
 	WriteHtml("<style type='text/css'> body{ background:none transparent; font-family: Georgia, 'Times New Roman', serif; font-size: 13px; line-height: 1.5em; margin-right: auto; margin-left: auto; margin-top: 40px; color: #625252;}</style> ");
 	WriteHtml( "<html><head>");
@@ -24,7 +24,7 @@ program zha_createaccount()
 	var Errors := array;
 	
 	CheckAccountName(Username, Errors);
-	CheckPassword(Password, Password2, Errors);
+	CheckPassword(Password, Errors);
 	CheckEmail(Email, Errors);
 
 	WriteHtml( "<body>" );
@@ -62,7 +62,7 @@ function SendCreationFailed(Username)
 	endforeach
 	
 	WriteHtml( "<p>There was an error creating the account, please try again.</p>");
-	WriteHtml( "<p><br>If the problem persists, <a href='mailto:" + AdminEmail + "'>email a staff member</a> or leave a post on the <a href='http://zha5.47.forumer.com/' target='_blank'>forums</a>.");
+	WriteHtml( "<p><br>If the problem persists, <a href='mailto:" + AdminEmail + "'>email a staff member</a> or leave a post on the <a href='http://forums.zuluhotel.com.au' target='_blank'>forums</a>.");
 
 endfunction
 
@@ -128,13 +128,13 @@ function CheckAccountName(Username, byref Errors)
 
 endfunction
 
-function CheckPassword(password, password2, byref Errors)
+function CheckPassword(password, byref Errors)
 
-	if ( password != password2)
-		Errors.append(7);
-	endif
+//	if ( password != password2)
+//		Errors.append(7);
+//	endif
 
-	if (password == password2)
+	if (password)
 		if ( Len (password) < 4)
 			Errors.append(8);
 		elseif ( Len(password) > 15)
