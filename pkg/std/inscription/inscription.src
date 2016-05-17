@@ -1294,9 +1294,11 @@ function MakeAndProcessMenu( character, spellbook )
 
 	////set_priority(1);   
 	var circles := { };
-
-	foreach spell in EnumerateItemsInContainer(spellbook)
-		var elem := FindConfigElem(config_file, spell.objtype);
+	
+	var spellList := spellbook.Spells();
+	foreach spellId in spellList
+		var spellobjtype := Hex(spellId + 0x1f2c);
+		var elem := FindConfigElem(config_file, spellobjtype);
 		var thecircle := GetConfigInt(elem, "circle");
 		circles[thecircle] := 1;
 	endforeach
@@ -1319,13 +1321,14 @@ function MakeAndProcessMenu( character, spellbook )
 
 	var tmenu2 := CreateMenu("Select a spell to inscribe");
 	var scrolls_objtype := {};
-	foreach spell in EnumerateItemsInContainer(spellbook)
-		var elem := FindConfigElem(config_file, spell.objtype);
+	foreach spellId in spellList
+		var spellobjtype := Hex(spellId + 0x1f2c);
+		var elem := FindConfigElem(config_file, spellobjtype);
 		var thecircle := GetConfigInt(elem, "circle");
 		if (thecircle == firstchoice.objtype - 0x20bf)
 			var spellname := GetConfigString(elem, "name");
 			var thetype := GetConfigInt(elem, "graphic");
-			scrolls_objtype.append( spell.objtype );
+			scrolls_objtype.append( spellobjtype );
 			AddMenuItem(tmenu2, thetype, spellname);
 		endif
 	endforeach
