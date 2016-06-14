@@ -661,7 +661,7 @@ endfunction
 
 function CopyNormalSpellbook( character, item, book )
 
-	if( len( EnumerateItemsInContainer( book ) ) )
+	if( len(book.Spells()) )
 		SendSysMessage( character, "You must target an empty book." );
 		return;
 	endif
@@ -691,8 +691,9 @@ function CopyNormalSpellbook( character, item, book )
 
 	PlaySoundEffect( character, SOUND_EFFECT_INSCRIPTION );
 	SendSysMessage( character, "You copied the spellbook successfully." );
-	foreach scroll in EnumerateItemsInContainer( item )
-		CreateItemInContainer( book, scroll.objtype, 1 );
+	var spellList := item.Spells(); 
+	foreach spellId in spellList 
+		book.AddSpell(spellId);
 	endforeach
 
 endfunction
