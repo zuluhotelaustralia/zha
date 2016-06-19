@@ -6,10 +6,11 @@ include "include/attributes";
 include "include/areas";
 
 function get_default_points(skillid)
-        var cfg := ReadConfigFile("skills");
-
-        var default_points := cfg[skillid].default_points;
-       
+		var uoskills := ReadConfigFile(":*:uoskills");
+		var skillname := uoskills[skillid].Attribute;
+		var cfg := ReadConfigFile(":*:attributes");
+		var default_points := cfg[skillname].default_points;
+		
         if (!default_points)
                 return 0;
         else
