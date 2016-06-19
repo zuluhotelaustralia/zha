@@ -8,7 +8,6 @@ program textcmd_listcprops( who )
 		foreach cprop_name in GetObjPropertyNames(object)
 			if( object )
 				SendSysMessage(who, "\"" + cprop_name + "\" = " + GetObjProperty(object, cprop_name) + ".");
-				sleep(5);
 			else
 				SendSysMessage(who, "The object is no longer existing.");
 				return 0;

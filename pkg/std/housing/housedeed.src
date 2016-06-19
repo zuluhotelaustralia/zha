@@ -312,6 +312,11 @@ function CreatehouseKeysAndBuiltDeed( character, housetype, where, deed )
         return;
     endif
 
+    // Seems like it doesn't automatically attach house_serial to the components anymore in pol99, do this for legacy reasons.
+    foreach item in (house.components)
+        SetObjProperty( item, "house_serial", house.serial); 
+    endforeach
+
     var result array;
    
     result .+ packkey := packkey;
