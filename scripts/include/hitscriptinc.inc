@@ -169,7 +169,7 @@ function ModByDist( attacker, defender, weapon, basedamage )
 
 	// Sno changed this 23/1/03. For some reason it didn't like weapon.Attribute - it returned "<uninitialized object>".
 	// So I've re-read itemdesc.cfg, and done it that way... it seems a bit unnecessary - is this because of a core bug?
-	
+	var multiplier := 1;
 	if( lower(weaponElem.Attribute) == lower(ATTRIBUTEID_ARCHERY) )
 		/*
 		basedamage := basedamage
@@ -220,7 +220,10 @@ function ModByDist( attacker, defender, weapon, basedamage )
 		endif
 		
 		if (IsNinja(attacker))
-			basedamage := basedamage + BackStabDamageBonus(GetClasseLevel(attacker), attacker, defender);
+		
+			multiplier := BackStabDamageBonus(GetClasseLevel(attacker), attacker, defender);
+			//broadcast("ninja multi: "+multiplier);
+			basedamage := basedamage + multiplier;
 		endif
 	
 		if(IsPaladin(attacker))
@@ -231,8 +234,9 @@ function ModByDist( attacker, defender, weapon, basedamage )
 		
 		if (IsPriest(attacker))
 			// tactics compensator
-			
-			basedamage := basedamage * ((GetEffectiveSkill(attacker, SKILLID_MACEFIGHTING) + GetClasseLevel(attacker)*10) *0.01);
+			multiplier := ((GetEffectiveSkill(attacker, SKILLID_MACEFIGHTING) + GetClasseLevel(attacker)*10) *0.01);
+			//broadcast("priest multi: "+multiplier);
+			basedamage := basedamage * multiplier;
 			//basedamage := PriestHitscriptBonuses(basedamage, attacker, GetClasseLevel(attacker));
 			//broadcast("After priest: "+basedamage);
 		endif
@@ -243,8 +247,10 @@ function ModByDist( attacker, defender, weapon, basedamage )
 		endif
 
 		if (IsMonk(attacker))
-			if (attacker.weapon.graphic in VALID_MONK_WEAPS)
-				basedamage := basedamage + (MONK_BONUS_DAMAGE_WITH_STAFF * GetClasseLevel(attacker));
+			if (weapon.graphic in VALID_MONK_WEAPS)
+				multiplier := (MONK_BONUS_DAMAGE_WITH_STAFF * GetClasseLevel(attacker))*0.1;
+				//broadcast("monk multi: "+multiplier);
+				basedamage := basedamage * multiplier;
 				//broadcast("After monk: "+basedamage);
 			endif
 		endif

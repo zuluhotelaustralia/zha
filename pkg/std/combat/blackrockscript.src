@@ -41,7 +41,7 @@ program blackrockscript(attacker, defender, weapon, armor, basedamage, rawdamage
 	var animated := GetObjProperty( defender, "animated" );
 	if( summoned )
 		if( !cursed )
-    			PlayObjectCenteredEffect( defender, FX_SPELL_MANA_VAMPIRE, 7,7);
+    	PlayObjectCenteredEffect( defender, FX_SPELL_MANA_VAMPIRE, 7,7);
 			PlaySoundEffect( attacker, SFX_SPELL_MANA_VAMPIRE );
 			PlayStationaryEffect( defender.x, defender.y, defender.z, FX_SPELL_SUMMON_CREATURE, 0xa, 0xa );
 			MoveObjectToLocation(defender,5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion

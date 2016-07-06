@@ -23,6 +23,12 @@ program use_scroll( who, scroll )
 	if (!scroll.amount)
 		return;
     	endif
+	var container := scroll.container;
+	
+	if(container.objtype == 0x0EFA)
+		SendSysMessage(who, "This scroll is inside your book.");
+		return;
+	endif
 
 	if(!ReserveItem(scroll)) return; endif
 

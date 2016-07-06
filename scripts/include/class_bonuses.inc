@@ -97,7 +97,7 @@ const PALADIN_KARMA_DAMAGE_MOD_DENOMINATOR:=40000; 		// used in karma comparison
 //Damage = BaseDamage * (1 + ((PaladinKarma - DefenderKarma) / PALADIN_KARMA_DAMAGE_MOD_DENOMINATOR))  
 
 const MONK_BONUS_DAMAGE :=5; 					// +5 per level - only wrestling (used in wrestlinghitscript)
-const MONK_BONUS_DAMAGE_WITH_STAFF :=2;				// +2 dmg per level when using staves
+const MONK_BONUS_DAMAGE_WITH_STAFF :=2.85;				// +2 dmg per level when using staves
 const PRIEST_SPECIAL_WEAPON_BONUS_DAMAGE :=2; 			// +2 per level from Holy and Silver after 5th
 
 const HUMAN_BONUS_ES_PER_LEVEL:= 1;				// +1 ES per level for humans

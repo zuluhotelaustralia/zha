@@ -3,6 +3,7 @@ use uo;
 use os;
 
 include ":hooks:zhaSpecialMonsterAttacks";
+//include ":hooks:zhaArchery";
 include "include/hitscriptinc";
 include "include/guardcall";
 include "include/classes";
