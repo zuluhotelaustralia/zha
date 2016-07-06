@@ -727,6 +727,7 @@ function OpenMyPack();
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
 			ApplyDamage( me, GetMaxHp(me) + 3 );
+			RemoveFromMastersTamedArray();
 
 		endif
 	endif

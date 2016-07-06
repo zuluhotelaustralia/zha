@@ -14,7 +14,7 @@ function MeleeAttack( attacker, defender )
 	
 	//if (!coordDistance (attacker.x, attacker.y, attackx, attacky))
 	//endif
-	DoAttack(attacker, defender, weaponType);
+	DoAttack(attacker, defender);
 endfunction 
 
 function DoAttack(attacker, defender)
