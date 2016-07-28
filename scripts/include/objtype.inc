@@ -12,7 +12,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-const UOBJ_STONEWALL_NS := 0x005f;
+const UOBJ_STONEWALL_NS := 0x0058;
 const UOBJ_STONEWALL_EW := 0x0057;
 
 const UOBJ_FISHSTEAK    := 0x097a;

@@ -1,8 +1,12 @@
 // Try mimic what the old check line of sight did.
 //POl97     Line of sight to items changed: will be from head of mobile to center of item
 // I believe the old method used to check the ground tile of the mobile.
-function CheckLineOfSight95(object1, object2)
-        return CheckLosBetween(object1.x, object1.y, object1.z, object2.x, object2.y, object2.z);
+function CheckLineOfSight95(object1, object2, use95 := 0)
+        if (use95)
+                return CheckLosBetween(object1.x, object1.y, object1.z, object2.x, object2.y, object2.z);
+        else
+                return CheckLineOfSight(object1, object2);
+        endif
 endfunction
 
 function Target95(by_character, options := TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL)
