@@ -1,14 +1,15 @@
 Create_Debug_Context();
-    
+
     // get a process scripting object by PID
-GetProcess( pid );
+    // If no PID is supplied will use parent script pid.
+GetProcess( pid := -1 );
 
     // getpid: get this script's pid
 GetPid();
 
     //
-    // unload_scripts: unload scripts from the script cache (they will be 
-    //                 reloaded from disk on demand) currently running 
+    // unload_scripts: unload scripts from the script cache (they will be
+    //                 reloaded from disk on demand) currently running
     //                 scripts will continue as normal.
     //                 Passing "" will unload all scripts.
     //
@@ -23,6 +24,8 @@ const SCRIPTOPT_DEBUG        := 2;      // if 1, prints any debug info included
 const SCRIPTOPT_NO_RUNAWAY   := 3;      // if 1, doesn't warn about runaway conditions
 const SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES := 4;
 const SCRIPTOPT_AUXSVC_ASSUME_STRING := 5;
+const SCRIPTOPT_SURVIVE_ATTACHED_DISCONNECT := 6; // if 1, do not kill script if attached character's client disconnects
+
     //
     // set_script_option(SCRIPTOPT_NO_INTERRUPT,1) is the same as set_critical(1)
     // set_script_option(SCRIPTOPT_DEBUG,1) is the same as set_debug(1)
@@ -69,24 +72,16 @@ Set_Debug( debug );
 
 
 Start_Script( script_name, param := 0 );
-Start_Skill_Script( chr, attr_name, script_name := 0, param := 0 );
+Start_Skill_Script( chr, attr_name, script_name := "", param := 0 );
 Run_Script_To_Completion( script_name, param := 0 );
 Run_Script( script_name, param := 0 );
 
 
-    // 
+    //
     // syslog(text): write text to the console, and to the log file
     //               includes context (calling script name)
     //
 SysLog( text );
-
-
-    //
-    // system_rpm(): returns the system RPM, which is the number of
-    //               "game loop rotations" completed in the last minute.
-    //               This can be zero!
-    //
-System_RPM();
 
 	//
 	// clear_event_queue(): Empties the event queue of the current script.
@@ -104,5 +99,8 @@ Set_Event_Queue_Size(size);
 Is_Critical();
 
 OpenURL( character, url );
-OpenConnection( host, port, scriptdef);
+OpenConnection( host, port, scriptdef, params := 0, assume_string := 0);
 Debugger(); // put script in debug state
+
+PerformanceMeasure(delta_seconds := 10, max_scripts := 100);
+HTTPRequest(url, method := "GET", options := struct{});

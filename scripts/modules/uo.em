@@ -137,6 +137,11 @@ const DELETE_BY_SCRIPT := 1;
 const ENUMERATE_IGNORE_LOCKED	:= 0x1; // List content of locked container.
 const ENUMERATE_ROOT_ONLY		:= 0x2; // Do not list contents of sub-containers.
 
+// FindObjtypeInContainer constants
+const FINDOBJTYPE_RECURSIVE     := 0x0; // Search in sub-containers (DEFAULT).
+const FINDOBJTYPE_IGNORE_LOCKED := 0x1; // Find matches in locked containers.
+const FINDOBJTYPE_ROOT_ONLY     := 0x2; // Do not find matches in sub-containers.
+
 // FindSubstance constants
 const FINDSUBSTANCE_IGNORE_LOCKED := 0x1; // Find matches in locked containers
 const FINDSUBSTANCE_ROOT_ONLY     := 0x2; // Do not find matches in sub-containers.
@@ -193,6 +198,7 @@ const RACE_GARGOYLE := 2;
 //  (and I don't know what for color)
 const _DEFAULT_TEXT_FONT     := 3;
 const _DEFAULT_TEXT_COLOR    := 1000;
+const _DEFAULT_TEXT_REQUIREDCMD    := 0;
 
 // Realms
 const _DEFAULT_REALM  		:= "britannia";
@@ -223,8 +229,12 @@ const CLOSE_PROFILE   := 8;
 const CLOSE_CONTAINER := 12;
 
 //SendCharProfile
-const CHARPROFILE_NO_UNEDITABLE_TEXT := array;
-const CHARPROFILE_NO_EDITABLE_TEXT := array;
+const CHARPROFILE_NO_UNEDITABLE_TEXT := "";
+const CHARPROFILE_NO_EDITABLE_TEXT := "";
+
+//Accessible
+const ACCESSIBLE_DEFAULT := -1; // uses the default from ssopt
+const ACCESSIBLE_IGNOREDISTANCE := -2; // ignores the range check
 
 ////////////////////////////////////////////////////////////////
 //
@@ -232,13 +242,13 @@ const CHARPROFILE_NO_EDITABLE_TEXT := array;
 //
 ////////////////////////////////////////////////////////////////
 
-Accessible( by_character, item );
+Accessible( by_character, item, range := ACCESSIBLE_DEFAULT );
 AddAmount( item, amount );
 AddMenuItem( menu, objtype, text, color:=0 );
 ApplyConstraint( objlist, configfile, propertyname, minvalue );
 AssignRectToWeatherRegion( region, xwest, ynorth, xeast, ysouth );
 Attach( character );
-Broadcast( text, font := _DEFAULT_TEXT_FONT, color := _DEFAULT_TEXT_COLOR );
+Broadcast( text, font := _DEFAULT_TEXT_FONT, color := _DEFAULT_TEXT_COLOR, requiredcmdlevel := _DEFAULT_TEXT_REQUIREDCMD );
 CancelTarget( of_whom );
 CanWalk(movemode, x1, y1, z1, x2_or_dir, y2 := CANWALK_DIR, realm := _DEFAULT_REALM);
 CheckLineOfSight( object1, object2 );
@@ -275,7 +285,7 @@ EquipItem( mobile, item );
 EraseGlobalProperty( propname );
 EraseObjProperty( object, propname );
 FindAccount( acctname );
-FindObjtypeInContainer( container, objtype );
+FindObjtypeInContainer( container, objtype, flags := FINDOBJTYPE_RECURSIVE );
 FindPath( x1, y1, z1, x2, y2, z2, realm := _DEFAULT_REALM, flags := FP_IGNORE_MOBILES, searchskirt := 5 );
 FindSubstance( container, objtype, amount, makeinuse := 0, flags := 0 );
 GetAmount( item );
@@ -309,19 +319,23 @@ ListEquippedItems( who );
 ListGhostsNearLocation( x, y, z, range, realm := _DEFAULT_REALM );
 ListHostiles( character, range := 20, flags := 0 );
 ListItemsAtLocation( x, y, z, realm := _DEFAULT_REALM );
+ListItemsInBoxOfObjType( objtype, x1,y1,z1, x2,y2,z2, realm := _DEFAULT_REALM );
 ListItemsNearLocation( x, y, z, range, realm := _DEFAULT_REALM );
 ListItemsNearLocationOfType( x,y,z, range, objtype, realm := _DEFAULT_REALM );
 ListItemsNearLocationWithFlag( x,y,z, range, flags, realm := _DEFAULT_REALM );
 ListMobilesInLineOfSight( object, range );
 ListMobilesNearLocation( x, y, z, range, realm := _DEFAULT_REALM );
 ListMobilesNearLocationEx( x,y,z, range, flags, realm := _DEFAULT_REALM );
-ListOfflineMobilesInRealm(realm := _DEFAULT_REALM);
 ListMultisInBox( x1,y1,z1, x2,y2,z2, realm := _DEFAULT_REALM );
-ListObjectsInBox( x1,y1,z1, x2,y2,z2, realm := _DEFAULT_REALM );
 ListMobilesInBox( x1,y1,z1, x2,y2,z2, realm := _DEFAULT_REALM );
+ListObjectsInBox( x1,y1,z1, x2,y2,z2, realm := _DEFAULT_REALM );
+ListObjectsInBoxOfClass( POL_Class, x1, y1, z1, x2, y2, z2, realm := _DEFAULT_REALM );
+ListOfflineMobilesInRealm(realm := _DEFAULT_REALM);
 ListStaticsAtLocation( x, y, z, flags := 0, realm := _DEFAULT_REALM );
 ListStaticsInBox( x1,y1,z1, x2,y2,z2, flags := 0, realm := _DEFAULT_REALM );
 ListStaticsNearLocation( x, y, z, range, flags := 0, realm := _DEFAULT_REALM );
+ListStaticsNearLocationOfType( x,y,z, range, objtype, flags := 0, realm := _DEFAULT_REALM );
+ListStaticsNearLocationWithFlag( x,y,z, range, flags, realm := _DEFAULT_REALM );
 MoveItemToContainer( item, container, x := -1, y := -1, add_to_existing_stack := 0 );
 MoveItemToSecureTradeWin( item, character );
 MoveObjectToLocation( object, x, y, z, realm := _DEFAULT_REALM, flags := MOVEOBJECT_NORMAL );
@@ -366,7 +380,7 @@ SendOpenSpecialContainer( character, container );
 SendOverallSeason( season_id, playsound := 1 );
 SendPacket( to_whom, packet_hex_string );
 SendPopUpMenu( to_whom, above, menu );
-SendQuestArrow( to_whom, x := -1, y := -1, target := "" ); // no params (-1x,-1y) turns the arrow off, target is required for HSA clients
+SendQuestArrow( to_whom, x := -1, y := -1, arrowid := 0 ); // no params (-1x,-1y) turns the arrow off, target is required for HSA clients
 SendSellWindow( character, vendor, i1, i2, i3, flags := 0 );
 SendSkillWindow( towhom, forwhom );
 SendStatus( character );

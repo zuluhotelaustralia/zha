@@ -6,5 +6,5 @@ program textcmd_rpm( who )
 	if (!checkStaff(who, "rpm", CMDLEVEL_ADMINISTRATOR))
 		return 0;
 	endif
-    SendSysMessage( who, "RPM: " + system_rpm() );
+    // SendSysMessage( who, "RPM: " + system_rpm() );
 endprogram
