@@ -1030,15 +1030,15 @@ var agftlength:={ };
          "`',.;:::::::::"+ //  3
          "!!!!!!!!!!!!!!"+ //  4
          "il1[]]]]]]]]]]"+ //  5
-         "bcejot”(){}==="+ //  6
-         "adfpqrszI„~~~~"+ //  7
+         "bcejot(){}===="+ //  6
+         "adfpqrszI~~~~~"+ //  7
          "ghnuvy? <>----"+ //  8
          "xJ578$?+++++++"+ //  9
          "kCE2369^/*****"+ // 10
-         "mwABDFOPŽ™40%%"+ // 11
+         "mwABDFOP40%%%%"+ // 11
          "GLNQSZ@#######"+ // 12
          "HRT&__________"+ // 13
-         "KšUYYYYYYYYYYY"+ // 14
+         "KUYYYYYYYYYYYY"+ // 14
          "XXXXXXXXXXXXXX"+ // 15
          "VVVVVVVVVVVVVV"+ // 16
          "MMMMMMMMMMMMMM"+ // 18

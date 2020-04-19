@@ -3,8 +3,8 @@
 # README #
 ### What is this repository for? ###
 
-* Zulu Hotel Australia 2016
-* Current version running on POL0.99 2013
+* Zulu Hotel Australia
+* Current version running on POL100
 
 ### How do I get set up? ###
 * Read the instructions in /setup/README.md
@@ -23,4 +23,9 @@ A recommended development tool (IDE) to use for server scripting is [Visual Stud
 
 * Jonathan Morland-Barrett (Dev GIB) - jmorland.barrett@gmail.com
 * Craig Bruce (Harlz) - craigbruce32@gmail.com
-* ***REMOVED***(Seravy) - seravy@gmail.com
+* (Seravy) - seravy@gmail.com
+
+### Getting started ###
+* Windows subsystem for Linux
+`sudo apt-get update`
+`sudo apt-get install default-libmysqlclient-dev` on ubuntu 18.04LTS (libmysqlclient-dev on ubuntu debian <=8)
