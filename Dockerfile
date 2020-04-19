@@ -6,7 +6,7 @@ ARG POL_RELEASE=https://github.com/polserver/polserver/releases/download/Nightly
 RUN apt-get update \
  && apt-get install -y -q --no-install-recommends \
     ca-certificates wget unzip rsync procps \
-    libatomic1 
+    libatomic1
 
 RUN cd /tmp && \
  wget $POL_RELEASE -O pol.zip \
@@ -26,12 +26,12 @@ WORKDIR /app/
 
 
 RUN rsync -av /polserver/ . \
- && mv -f setup/config/servers.cfg config/servers.cfg \
- && mv -f setup/pol.cfg pol.cfg \
+ && cp -f setup/config/servers.cfg config/servers.cfg \
+ && cp -f setup/pol.cfg pol.cfg \
  && mv -f setup/data data \
  && rm -rf /polserver \
- && mv setup/ecompile.cfg scripts/ecompile.cfg \
- && scripts/ecompile -C ./scripts/ecompile.cfg -s
+ && cp setup/ecompile.cfg scripts/ecompile.cfg \
+ && scripts/ecompile -C ./scripts/ecompile.cfg
 
 
-#CMD ["pol"]
+CMD ["./run.sh"]
