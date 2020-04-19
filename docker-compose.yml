@@ -4,7 +4,7 @@ services:
     zha:
         build: .
         container_name: polserver
-        image: docker.pkg.github.com/zuluhotelaustralia/zha/server:master
+        image: docker.pkg.github.com/zuluhotelaustralia/zha/server:latest
         hostname: shard.zuluhotel.com.au
         restart: unless-stopped
         ports:
