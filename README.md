@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/polserver/ModernDistro.svg?branch=master)](https://travis-ci.org/polserver/ModernDistro)
+
 # README #
 ### What is this repository for? ###
 
