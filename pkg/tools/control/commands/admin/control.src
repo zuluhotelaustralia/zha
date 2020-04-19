@@ -20,7 +20,6 @@ include ":gumps:gumpPrompt";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include ":gumps:yesNo";
-include "include/security";
 
 // Arbitrary button return (id) values.
 CONST START_ID		:= 0xA00000; // Anything above this value is a button.
@@ -37,11 +36,6 @@ var pkg_info := DFOpenDataFile(":control:packages", DF_CREATE);
 var pkg_gumps := DFOpenDataFile(":control:gumps", DF_CREATE);
 
 program textcmd_ICPSystem( who, pkg_name )
-
-        if( !AuthorizationCode( who ))
-                SendSysMessage( who, "Cancelled." );
-                return 0;
-        endif
 
 	while( who.connected )
 		if( pkg_name )

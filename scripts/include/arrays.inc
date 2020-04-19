@@ -12,7 +12,7 @@
 use basic;
 use os;
 use uo;
-
+use math;
 
 ////////////////////////////////////////////////////////////////
 // Function	GetIndex(byref the_array, byref to_find)
@@ -29,7 +29,7 @@ function GetIndex( byref the_array, byref to_find )
 		ret.+errortext := "Element not found";
 		return ret;
 	endif
-	
+
 	var ctr;
 	var minVar := 1;
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
@@ -43,7 +43,7 @@ function GetIndex( byref the_array, byref to_find )
 				maxVar := ctr - 1;
 			endif
 		endwhile
-		
+
 		var ret := error;
 		ret.+errortext := "Element not found";
 		return ret;
@@ -58,12 +58,12 @@ function GetIndex( byref the_array, byref to_find )
 				maxVar := ctr - 1;
 			endif
 		endwhile
-		
+
 		var ret := error;
 		ret.+errortext := "Element not found";
-		return ret;	
+		return ret;
 	endif
-	
+
 endfunction
 
 
@@ -83,7 +83,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	if( !maxVar )
 		return the_array.Append(element);
 	endif
-	
+
 	var ctr;
 	var minVar := 1;
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
@@ -115,7 +115,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	endif
 
 	return the_array.Insert( minVar, element );
-	
+
 endfunction
 
 
@@ -167,9 +167,9 @@ function SortArray( byref the_array )
 			return the_array.Sort();
 		endif
 	endif
-	
+
 	return 1;
-	
+
 endfunction
 
 //Fill_array
@@ -205,7 +205,88 @@ function fill_array(starts, ends, incr := 1)
 	         i := i + 1;
 	     endwhile
 	endif
-	
+
 	return 0;
 endfunction
 
+/*
+ * BreakArray(the_array, size)
+ *
+ * Purpose
+ * Breaks an array up into smaller arrays.
+ *
+ * Parameters
+ * the_array:	The array that will be broken up.
+ * size:	Size of the new arrays.
+ *
+ * Return value
+ * Returns an array of arrays
+ *
+ */
+function BreakArray(byref the_array, size:=1)
+	if ( Lower(TypeOf(the_array)) != "array" )
+		return error{"errortext":="Object passed was not an array."};
+	endif
+
+	if ( the_array.Size() > size )
+		var new_arrays := array();
+		var arrays_needed := Ceil(CDbl(the_array.Size()) / CDbl(size));
+
+		var i := 1;
+		var start := i;
+		var stop := size;
+		for ( i; i<=arrays_needed; i:=i+1 )
+			new_arrays.Append(GetArrayRange(the_array, start, stop));
+			start := stop+1;
+			stop := stop+size;
+			SleepMS(2);
+		endfor
+
+		return new_arrays;
+	else
+		return array{the_array};
+	endif
+endfunction
+
+/*
+ * GetArrayRange(the_array, start, stop)
+ *
+ * Purpose
+ * Retrieves a range from the array.
+ *
+ * Parameters
+ * the_array:	The array to extract data from.
+ * start:	Start index to get data from.
+ * stop:	End index to get data from.
+ *		If stop is 0, will go until the end of the array is reached.
+ *
+ * Return value
+ * Returns an array on success.
+ * Returns an error on failure.
+ *
+ */
+function GetArrayRange(byref the_array, start, stop:=0)
+	if ( Lower(TypeOf(the_array)) != "array" )
+		return error{"errortext":="Object passed was not an array."};
+	endif
+
+	start := CInt(start);
+	stop := CInt(stop);
+
+	if ( start < 1 )
+		start := 1;
+	endif
+	if ( !stop )
+		stop := the_array.Size();
+	elseif ( stop > the_array.Size() )
+		stop := the_array.Size();
+	endif
+
+	var new_array := array{};
+	for ( start; start<=stop; start:=start+1 )
+		new_array.Append(the_array[start]);
+		SleepMS(2);
+	endfor
+
+	return new_array;
+endfunction

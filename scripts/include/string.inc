@@ -14,7 +14,7 @@
 //	- Code cleanup
 //
 //	Version 1.0 - 10-Apr-2000
-//	
+//
 //
 // Questions, comments, flames?   Send to Sig at -
 // EMail: prostheticdelirium@worldnet.att.net
@@ -29,7 +29,7 @@ const CONST_NULL := "";
 
 
 // Function TruncateArticle(x)
-// This function will remove an indefinite article ("a" or "an") 
+// This function will remove an indefinite article ("a" or "an")
 // from a string "x", returning the rest of the string.  If there
 // is no article, it returns the original string "x".
 
@@ -54,7 +54,7 @@ endfunction
 
 // function AddArticle(x)
 // This function will prefix an indefinite article ("a" or "an") in
-// front of a string.  If the string begins with a consonant, it 
+// front of a string.  If the string begins with a consonant, it
 // uses "a", and if the string begins with a vowel it will use "an".
 // Note, this will occasionally produce grammatically incorrect
 // phrases involving strings beginning with "h" or glided "u" sounds,
@@ -90,7 +90,7 @@ endfunction
 //      var myarray := { 4, 5, 9, 0, 100, 22, 7 };
 //
 // the function will return the following:
-// 
+//
 //	result := CreateArrayIndex(myarray);
 //	SortedArray := result[1];  // { 0, 4, 5, 7, 9, 22, 100 }
 //	IndexArray := result[2];   // { 4, 1, 2, 7, 3, 6, 5}
@@ -156,8 +156,8 @@ endfunction
 // function SortMultiArrayByIndex(MultiArray, SubIndex)
 // (Function added 26-Apr-2000 by Myrathi)
 // This function will sort an array of arrays (or structures) by
-// the contents of the sub-index provided. So, if you have an 
-// array (zCoords) of [x,y,z] structures, calling the function 
+// the contents of the sub-index provided. So, if you have an
+// array (zCoords) of [x,y,z] structures, calling the function
 // with 'fn(zCoords,2)' will sort by the second sub-index... that
 // is, the 'y' member. Returns '0' if the SubIndex is invalid
 // (only checks against the first index)
@@ -264,4 +264,35 @@ function ReturnIndex(myarray, elementvalue)
 
 	return 0;
 
+endfunction
+
+function Check_ValidChar(text, allow_space:=0)
+
+         //Make sure you check a text without spaces or it will fail.
+         var valid_char := array{ "a", "b", "c", "d", "e", "f", "g",
+                                  "h", "i", "j", "k", "l", "m", "n",
+                                  "o", "p", "q", "r", "s", "t", "u",
+                                  "v", "w", "x", "y", "z", "A", "B",
+                                  "C", "D", "E", "F", "G", "H", "I",
+                                  "P", "O", "N", "M", "L", "K", "J",
+                                  "Q", "R", "S", "T", "U", "V", "W",
+                                  "X", "Y", "Z", "1", "2", "3", "4",
+                                  "5", "6", "7", "8", "9", "0" };
+
+         var len_text := Len( text );
+
+         var i;
+         for( i:=1; i<=len_text; i+=1 )
+                  SleepMS(5);
+                  var letter := CStr( text[i] );
+                  if( letter in valid_char )
+                           continue;
+                  elseif( allow_space && ( text[i] == " " || CAsc( text[i] ) == 0 ))
+                           continue;
+                  endif
+
+                  return 0;
+         endfor
+
+         return 1;
 endfunction
