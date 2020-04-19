@@ -1,6 +1,6 @@
 function countvotes(item)
 
-var result := { };  //formato { nบ votos}
+var result := { };  //formato { nยบ votos}
 var i, voto;
 
 //conta os votos
