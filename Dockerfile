@@ -28,7 +28,6 @@ WORKDIR /app/
 RUN rsync -av /polserver/ . \
  && cp -f setup/config/servers.cfg config/servers.cfg \
  && cp -f setup/pol.cfg pol.cfg \
- && mv -f setup/data data \
  && rm -rf /polserver \
  && cp setup/ecompile.cfg scripts/ecompile.cfg \
  && scripts/ecompile -C ./scripts/ecompile.cfg
