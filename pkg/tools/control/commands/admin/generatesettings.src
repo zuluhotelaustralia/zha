@@ -1,0 +1,28 @@
+use uo;
+use file;
+
+include ":control:include/settings/xml";
+
+program textcmd_generatesettings( mobile, settingsName )
+
+	if(!settingsName)
+		SendSysMessage(mobile, "No settings name supplied.",  color := 38 );
+		SendSysMessage(mobile, "Correct use is .generatesettings <name of package>");
+		return 0;
+	endif
+	var settingsFile := LoadOrCreateXMLSettings( settingsName );
+	if(!settingsFile)
+		print(settingsFile.errortext);
+	endif
+ // 	var resp;
+	// repeat
+	// 	if( resp != ".")
+	// 		resp := RequestInput(mobile, mobile.backpack, "Type a name for the setting, enter '.' when finished.");
+	// 		settingsFile.appendxmlnode(resp, struct{});
+	// 	endif
+	// until ( resp == "" );
+
+	// settingsFile.savexml(":control:"+settingsName+".xml");
+
+
+endprogram
