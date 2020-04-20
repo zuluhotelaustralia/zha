@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/zuluhotelaustralia/zha/workflows/Build/badge.svg)](https://github.com/zuluhotelaustralia/zha/actions)
+![Compile Status](https://github.com/ZuluHotelAustralia/zha/workflows/Compile%20test/badge.svg)
 
 # README #
 ### What is this repository for? ###
