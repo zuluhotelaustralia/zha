@@ -18,8 +18,8 @@ RUN mkdir -p $POL_TEMP_DIR \
  && unzip polserver*.zip \
  && rm -rf *.zip \
  && mkdir -p $POL_DEST \
- && mv ./**/* $POL_DEST \
- && rm -rf $POL_TEMP_DIR \
+ && mv ./**/* $POL_DEST/ \
+ && rm -rf $POL_TEMP_DIR/ \
  && wget $LIBMYSQL_DEB -O /tmp/libmysqlclient20.deb \
  && dpkg --extract /tmp/libmysqlclient20.deb /tmp/libmysqlclient20 \
  && cp /tmp/libmysqlclient20/usr/lib/x86_64-linux-gnu/libmysqlclient.so.20 /usr/lib/x86_64-linux-gnu/libmysqlclient.so.20 \
@@ -28,7 +28,7 @@ RUN mkdir -p $POL_TEMP_DIR \
 COPY . /app/
 WORKDIR /app/
 
-RUN rsync -av $POL_DEST . \
+RUN rsync -av $POL_DEST/ . \
  && cd setup \
  && cp -f ./config/servers.cfg ../config/servers.cfg \
  && cp -f ./pol.cfg ../pol.cfg \
