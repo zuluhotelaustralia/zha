@@ -1,5 +1,5 @@
 ## ZHA git ignore files.
-## Ignore any files that contain configuration or user generated data. 
+## Ignore any files that contain configuration or user generated data.
 ## Put a copy in \setup intead for inital setup.
 ## Use the \dev folder to put any interm scripts or items to not commit to git.
 
@@ -9,8 +9,9 @@
 /pol.exe
 /*.dll
 /pol
+/uoconvert
 /pol.pid
-/data/
+/data
 scripts/ecompile.cfg
 scripts/ECOMPILE.BAT
 scripts/ecompile.exe
@@ -19,17 +20,19 @@ scripts/ecall.bat
 scripts/Compile-Folder.bat
 scripts/Compile-File.bat
 scripts/Compile-All.bat
+setup/uo-client
+realm
 
 # Misc pol generated files
 leftovers.txt
 objtypes.txt
 orphans.txt
 
-# Mul generated files 
-config/tiles.cfg 
-config/multis.cfg 
-config/landtiles.cfg 
-realm/ 
+# Mul generated files
+config/tiles.cfg
+config/multis.cfg
+config/landtiles.cfg
+realm/
 
 # Script objects
 *.dep

@@ -14,16 +14,16 @@ $BINARY landtiles
 mv landtiles.cfg ../config/
 
 # Non Mondain's Legacy use "width=6144" here
-$BINARY  map     realm=britannia mapid=0 usedif=1 width=7168 height=4096
+$BINARY  map     realm=britannia mapid=0 usedif=1 width=6144 height=4096
 $BINARY  statics realm=britannia
 $BINARY  maptile realm=britannia
 
 mv -f realm/* ../realm/
 echo "Only generating brit realm 1 for zha legacy"
-exit 1
+exit 0
 
 # Non Mondain's Legacy use "width=6144" here
-$BINARY  map     realm=britannia_alt mapid=1 usedif=1 width=7168 height=4096
+$BINARY  map     realm=britannia_alt mapid=1 usedif=1 width=6144 height=4096
 $BINARY  statics realm=britannia_alt
 $BINARY  maptile realm=britannia_alt
 
