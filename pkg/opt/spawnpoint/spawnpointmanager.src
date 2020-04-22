@@ -31,7 +31,7 @@ var wait_for_event_time;
 // THE MANAGER
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 program SpawnPointManager()
-
+	sleep(RandomIntMinMax(5, 10)); //Random sleep to prevent all scripts trying to start at the same time.
 	set_script_option( SCRIPTOPT_NO_RUNAWAY, 1 );
 
 	RegisterSpawnPoints();
@@ -48,29 +48,29 @@ program SpawnPointManager()
 			case( ev[1] )
 				EVID_SPAWNPOINT_CHECK_POINT:
 					ManagerAnswer( ev[2], CheckPoint(ev[3]) );
-				
+
 				EVID_SPAWNPOINT_CREATED:
 					ManagerAnswer( ev[2], CreatePoint(ev[3]) );
-				
+
 				EVID_SPAWNPOINT_DEATH:
 					ProcessSpawnDeath(ev);
-			
+
 				EVID_SPAWNPOINT_DESTROYED:
 					ManagerAnswer( ev[2], DeleteSpawnPoint(ev[3]) );
 
 				EVID_SPAWNPOINT_RESETED:
 					ManagerAnswer( ev[2], ResetSpawnPoint(ev[3]) );
-			
+
 				EVID_SPAWNPOINT_SPAWN_ALL:
 					ManagerAnswer( ev[2], SpawnAllPoints() );
-				
+
 				EVID_SPAWNPOINT_REQUEST_POINTS:
 					ManagerAnswer( ev[2], spawnpoints );
-				
+
 				EVID_SPAWNPOINT_REFRESH_POINTS:
 					ManagerAnswer( ev[2], RegisterSpawnPoints() );
 			endcase
-		
+
 			if( events_waiting() < 25 )
 				set_priority(5);
 				wait_time := wait_for_event_time;
@@ -169,6 +169,7 @@ function RegisterSpawnPoints()
 		if( object.objtype == UOBJ_SPAWNPOINT )
 			spawnpoints.append(object);
 		endif
+		sleepms(100);
 	endforeach
 
 	syslog( "Spawnpoints registration completed, took " + (ReadGameClock()-start) +

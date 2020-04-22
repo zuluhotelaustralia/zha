@@ -6,7 +6,7 @@
 //    parameters are (who, skillids)
 //       who: character created
 //       skillids: array of skillid integers
-//    
+//
 
 use uo;
 
@@ -16,12 +16,12 @@ include "include/time";
 
 program oncreate(who,skillids)
 
-    const EXPECTED_STAT_TOTAL := 80;
+    const EXPECTED_STAT_TOTAL := 90;
     const SINGLE_STAT_MAX := 60;
     set_critical(1);
 
     var serial := who.serial;
-    
+
     print( "Character created: " + who.name );
     var strength := GetStrength(who);
     var dexterity := GetDexterity(who);
@@ -33,25 +33,25 @@ program oncreate(who,skillids)
 	if (!who)
 		who := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
 	endif
-	
+
 	if (!NameValidation(who.name))
 		who.acct.ban();
 		log(who);
 		syslog("ALERT! Account " + who.acctname + " was banned for cheating.");
 		return;
-	endif	
+	endif
 
 	if (total > EXPECTED_STAT_TOTAL)
 		who.acct.ban();
 		log(who);
 		syslog("ALERT! Account " + who.acctname + " was banned for cheating.");
 		return;
-	endif	
-		   
+	endif
+
 	if (strength>SINGLE_STAT_MAX)
 		who.setStrength(SINGLE_STAT_MAX);
 	endif
-	
+
 	if (dexterity>SINGLE_STAT_MAX)
 		who.setDexterity(SINGLE_STAT_MAX);
 	endif
@@ -81,25 +81,25 @@ endfunction
 
 function log(who)
 	var desc := who.name + " / " + who.acctname;
-	
+
 	var elemkey := who.acctname;
 	var props := array;
 	var prop := array;
 	prop .+ pname;
 	prop .+ pvalue;
-	
+
 	prop.pname := "charname";
 	prop.pvalue := who.name;
 	props[1] := prop;
-	
+
 	prop.pname := "ip";
 	prop.pvalue := who.ip;
 	props[2] := prop;
-	
+
 	prop.pname := "datetime";
 	prop.pvalue := NowString();
 	props[3] := prop;
-	
+
 	AppendConfigFileElem( "charcreation", "haxor", elemkey, props );
 	UnloadConfigFile("charcreation");
 endfunction
