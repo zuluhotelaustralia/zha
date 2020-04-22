@@ -3,6 +3,8 @@ use os;
 
 Program chatbutton( mobile )
 
+return 1;
+//functions after the return? what is this?
 OpenURL( mobile, "https://discord.gg/hHsNH7k" );
 
 endprogram
