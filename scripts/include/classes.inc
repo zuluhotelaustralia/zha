@@ -23,7 +23,8 @@ const CLASSEID_MONK    := "IsMonk";
 const CLASSEID_NECROMANCER    := "IsNecromancer";
 const CLASSEID_POWERPLAYER  := "IsPowerPlayer";
 
-const LEVEL1 := 360;
+// COMMENTED OUT UNFOR NOW UNLESS LEVELS IS TO BE INCREASED
+/*const LEVEL1 := 360;
 const LEVEL2 := 460;
 const LEVEL3 := 560;
 const LEVEL4 := 660;
@@ -32,6 +33,7 @@ const LEVEL6 := 860;
 const LEVEL7 := 960;
 const LEVEL8 := 1060;
 
+
 const PERCENT1 := 60;
 const PERCENT2 := 65;
 const PERCENT3 := 70;
@@ -39,7 +41,27 @@ const PERCENT4 := 75;
 const PERCENT5 := 80;
 const PERCENT6 := 85;
 const PERCENT7 := 90;
-const PERCENT8 := 95;
+const PERCENT8 := 95;*/
+
+
+const LEVEL1 := 600;
+const LEVEL2 := 720;
+const LEVEL3 := 840;
+const LEVEL4 := 960;
+const LEVEL5 := 1080;
+const LEVEL6 := 1200;
+const LEVEL7 := 1201;
+const LEVEL8 := 1202;
+
+
+const PERCENT1 := 60;
+const PERCENT2 := 65;
+const PERCENT3 := 75;
+const PERCENT4 := 85;
+const PERCENT5 := 95;
+const PERCENT6 := 100;
+const PERCENT7 := 110;
+const PERCENT8 := 111;
 
 const EACH_MUST_REPRESENT := 7.5;
 const REPRESENT_LEVEL_MOD := 1;
@@ -129,7 +151,7 @@ function EnumerateRestrictedItemTypesFromClasse( classeid )
 					fract_array.append( GetPlatemailArmorGraphics() );
 					fract_array.append( GetShieldGraphics() );
 					break;
-					
+
 		CLASSEID_NINJA:		fract_array.append( GetBoneArmorGraphics() );
 					fract_array.append( GetRingmailArmorGraphics() );
 					fract_array.append( GetChainmailArmorGraphics() );
@@ -160,7 +182,7 @@ function EnumerateRestrictedItemTypesFromClasse( classeid )
 		CLASSEID_DEATHKNIGHT:	fract_array.append( GetLeatherArmorGraphics() );
 					fract_array.append( GetStuddedLeatherArmorGraphics() );
 					break;
-					
+
 		CLASSEID_PRIEST:	fract_array.append( GetPlatemailArmorGraphics() );
 
 	endcase
@@ -202,15 +224,15 @@ function GetClasseIds()
 		 CLASSEID_MAGE,
 		 CLASSEID_RANGER,
 		 CLASSEID_THIEF,
-		 CLASSEID_WARRIOR,
+		 CLASSEID_WARRIOR/*,
 		 CLASSEID_DRUID,
 		CLASSEID_DEATHKNIGHT,
 		CLASSEID_NINJA,
-		CLASSEID_NECROMANCER,		 
+		CLASSEID_NECROMANCER,
 		CLASSEID_POWERPLAYER,
 		CLASSEID_MONK,
-		CLASSEID_PALADIN,		 
-		CLASSEID_PRIEST};
+		CLASSEID_PALADIN,
+		CLASSEID_PRIEST*/};
 
 endfunction
 
@@ -297,7 +319,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_SWORDSMANSHIP,
 						 SKILLID_TACTICS,
 						 SKILLID_WRESTLING	};
-		 
+
 		CLASSEID_DRUID:    	return { SKILLID_ALCHEMY,
 						 SKILLID_ANIMALLORE,
 						 SKILLID_HERDING,
@@ -306,7 +328,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_TAMING,
 						 SKILLID_VETERINARY,
 						 SKILLID_MEDITATION	};
-		
+
 		CLASSEID_NINJA:		return { SKILLID_STEALTH,
 						 SKILLID_HIDING,
 						 SKILLID_SWORDSMANSHIP,
@@ -314,7 +336,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_FENCING,
 						 SKILLID_TACTICS,
 						 SKILLID_ALCHEMY,
-						 SKILLID_POISONING	};		
+						 SKILLID_POISONING	};
 
 		CLASSEID_DEATHKNIGHT:	return { SKILLID_ANATOMY,
 						 SKILLID_NECROMANCY,
@@ -324,7 +346,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_SWORDSMANSHIP,
 						 SKILLID_TACTICS,
 						 SKILLID_MEDITATION	};
-		
+
 		CLASSEID_NECROMANCER: 	return { SKILLID_NECROMANCY,
 						 SKILLID_MAGERY,
 						 SKILLID_MEDITATION,
@@ -341,7 +363,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_PSIONICS,
 						 SKILLID_MEDITATION,
 						 SKILLID_TACTICS,
-						 SKILLID_PARRY		};		
+						 SKILLID_PARRY		};
 
 		CLASSEID_PALADIN:	return { SKILLID_SWORDSMANSHIP,
 						 SKILLID_FENCING,
@@ -351,7 +373,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_TACTICS,
 						 SKILLID_PIETY,
 						 SKILLID_MEDITATION	};
-		
+
 		CLASSEID_PRIEST: 	return { SKILLID_PIETY,
 						 SKILLID_MEDITATION,
 						 SKILLID_MAGERY,
@@ -360,8 +382,8 @@ function GetClasseSkills( classeid )
 						 SKILLID_HEALING,
 						 SKILLID_PARRY,
 						 SKILLID_MAGICRESISTANCE};
-				
-		CLASSEID_POWERPLAYER: 
+
+		CLASSEID_POWERPLAYER:
 					return { SKILLID_BEGGING,
 						 SKILLID_CARTOGRAPHY,
 						 SKILLID_ENTICEMENT,
@@ -369,7 +391,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_MUSICIANSHIP,
 						 SKILLID_PEACEMAKING,
 						 SKILLID_PROVOCATION,
-						 SKILLID_TASTEID, 
+						 SKILLID_TASTEID,
 						 SKILLID_ARMSLORE,
 						 SKILLID_BLACKSMITHY,
 						 SKILLID_BOWCRAFT,
@@ -415,7 +437,7 @@ function GetClasseSkills( classeid )
 						 SKILLID_NECROMANCY,
 						 SKILLID_PIETY,
 						 SKILLID_PSIONICS	};
-						 
+
 
 		default:		return {};
 
@@ -464,21 +486,21 @@ function GetMaxCircleForClasse( classeid )
 		CLASSEID_RANGER:	return 12;
 
 		CLASSEID_THIEF:		return 8;
-		
+
 		CLASSEID_NINJA:		return 8;
 
 		CLASSEID_WARRIOR:	return 4;
-		
+
 		CLASSEID_DRUID:		return 0;
-		
+
 		CLASSEID_DEATHKNIGHT: 	return 12;
-		
+
 		CLASSEID_POWERPLAYER: 	return 0;
 
 		CLASSEID_MONK:		return 0;
-		
+
 		CLASSEID_PALADIN: 	return 12;
-		
+
 		CLASSEID_PRIEST: 	return 0;
 
 		default:		return 0;
@@ -516,7 +538,7 @@ endfunction
 function HaveInvalidSkillEnchantmentForClasse( item, classeid )
 
          // Removed Class skill requirement for equipping skill items 12/6/4 Archy
-         
+
 	/* var ret	:= 0;
 	var skillnum	:= GetObjProperty( item, "skilladv" );
 
@@ -527,7 +549,7 @@ function HaveInvalidSkillEnchantmentForClasse( item, classeid )
 	endif
 
 	return ret; */
- 
+
         return 0;
 
 endfunction
@@ -550,13 +572,13 @@ function HaveRestrictedModEnchantmentForClasse( who, item, classeid )
 		CLASSEID_RANGER:	break;
 
 		CLASSEID_THIEF:		break;
-		
+
 		CLASSEID_POWERPLAYER: 	break;
-		
+
 		CLASSEID_DRUID:		break;
-		
+
 		CLASSEID_NINJA:		break;
-		
+
 		CLASSEID_DEATHKNIGHT:	break;
 
 		CLASSEID_WARRIOR:	if( GetObjProperty( item, "MagicImmunity" ) )
@@ -571,9 +593,9 @@ function HaveRestrictedModEnchantmentForClasse( who, item, classeid )
 					break;
 
 		CLASSEID_MONK:		break;
-		
+
 		CLASSEID_PRIEST:	break;
-		
+
 		CLASSEID_PALADIN:	break;
 	endcase
 	*/
@@ -728,7 +750,7 @@ function IsFromThatClasse( who, classe_skills )
 	endfor
 
 	/*Does a fast check on Powerplayers because their levels are determined slightly differently*/
-	
+
 	if (number == PPSKILLNUMBER)
 		if(classe>=5880)
 			return 4;
@@ -746,7 +768,7 @@ function IsFromThatClasse( who, classe_skills )
 		return 0;
 	elseif( classe < CInt(total * number * EACH_MUST_REPRESENT * 0.01) )
 		return 0;
-		
+
 	else
 		var level     := 1;
 		var represent := EACH_MUST_REPRESENT + REPRESENT_LEVEL_MOD;
@@ -766,16 +788,16 @@ endfunction
 
 function IsProhibitedClasseItem(who, item)
 	var item_level, player_level;
-	
+
 	foreach CLASSEID in GetClasseIds()
 		item_level := CInt(GetObjProperty(item, CLASSEID));
 		if (item_level)
 			player_level := CInt(GetObjProperty(who, CLASSEID));
-			if (item_level>0)	
+			if (item_level>0)
 				return (player_level < item_level);       // If the item level is positive
 			else					          // player level >= item level to wear.
 
-				return (player_level >= abs(item_level)); // If the item level is negative 
+				return (player_level >= abs(item_level)); // If the item level is negative
 			endif						  // the player level must be less than the
 		endif							  // absolute value of that to wear it.
 	endforeach
@@ -837,14 +859,14 @@ function IsProhibitedByClasse( who, item )
 		elseif( HaveRestrictedModEnchantmentForClasse( who, item, CLASSEID_WARRIOR ) )
 			ret := 1;
 		endif
-		
+
 	elseif( GetObjProperty( who, CLASSEID_DRUID ) )
 		if( HaveInvalidSkillEnchantmentForClasse( item, CLASSEID_DRUID ) )
 			ret := 1;
 		elseif( item.graphic in EnumerateRestrictedItemTypesFromClasse( CLASSEID_DRUID ) )
 			ret := 1;
 		endif
-	
+
 	elseif( GetObjProperty( who, CLASSEID_NINJA ) )
 		if( HaveInvalidSkillEnchantmentForClasse( item, CLASSEID_NINJA ) )
 			ret := 1;
@@ -862,7 +884,7 @@ function IsProhibitedByClasse( who, item )
 			if (item.attribute == "Archery")
 				ret:=1;
 			endif
-		endif		
+		endif
 	elseif( GetObjProperty( who, CLASSEID_NECROMANCER ) )
 		if( HaveInvalidSkillEnchantmentForClasse( item, CLASSEID_NECROMANCER ) )
 			ret := 1;
@@ -900,7 +922,7 @@ function IsProhibitedByClasse( who, item )
 				"voidscript":		ret:=1;
 			endcase
 		endif
-						
+
 	elseif( GetObjProperty( who, CLASSEID_PRIEST ) )
 		if( HaveInvalidSkillEnchantmentForClasse( item, CLASSEID_PRIEST ) )
 			ret := 1;
@@ -970,7 +992,7 @@ function SetClasse (who)
 		if (level > 8)
 			level:=8;
 		endif
-           	playerclass:=CLASSEID_POWERPLAYER;		
+           	playerclass:=CLASSEID_POWERPLAYER;
         else
              if (classtotal >= LEVEL8 && percentage >=PERCENT8)
                     level:=8;
@@ -993,7 +1015,7 @@ function SetClasse (who)
 
         // apply race bonus
        	SetRaceProt(who);
-        
+
         // set class
 	foreach class in classlist
 		EraseObjProperty(who, class);
@@ -1002,8 +1024,8 @@ function SetClasse (who)
            SetObjProperty(who, playerclass, level);
            return playerclass;
         endif
-        return 0; 
-              
+        return 0;
+
 endfunction
 
 function GetSkillTotal (who)
@@ -1028,7 +1050,7 @@ function GetClasseSkillTotal (who, class)
 
         // broadcast(class+": "+classtotal);
         return classtotal;
-        
+
 endfunction
 
 // Returns the % of class skills to total skills for class
@@ -1048,14 +1070,14 @@ endfunction
 
 // Returns class level (regardless of class)
 function GetClasseLevel(who)
-	
+
 	var class:= GetClass(who);
 	if (class)
 		return GetObjProperty(who, class);
 	else
 		return 0;
 	endif
-	
+
 endfunction
 
 function GetAvailableClasseCmds(who)
@@ -1063,9 +1085,9 @@ function GetAvailableClasseCmds(who)
 	var class:=GetClass(who);
 	var level:=GetClasseLevel(who);
 	var cmdarray:= array;
-	
+
 	case (class)
-	
+
 		CLASSEID_MONK:		cmdarray.append(".stunmode");
 					cmdarray.append(".disarmmode");
 		CLASSEID_DEATHKNIGHT:	if (level >=GET_STEED_AT_LEVEL )
@@ -1087,9 +1109,9 @@ function GetAvailableClasseCmds(who)
 						cmdarray.append(".possessundead");
 					endif
 	endcase
-	
+
 	return cmdarray;
-	
+
 endfunction
 
 function GetElementalAffinityByClasse(class, dmgtype)
@@ -1103,94 +1125,94 @@ function GetElementalAffinityByClasse(class, dmgtype)
 				CLASSEID_NINJA:
 				CLASSEID_WARRIOR:	affinity:=PENALTY_PER_LEVEL;
 			endcase
-		
+
 		AIR:	case(class)
 				CLASSEID_DRUID:		affinity:=LARGE_BONUS_PER_LEVEL;
 				CLASSEID_NECROMANCER:
 				CLASSEID_MAGE:		affinity:=BONUS_PER_LEVEL;
 				CLASSEID_NINJA:
 				CLASSEID_WARRIOR:	affinity:=PENALTY_PER_LEVEL;
-			endcase		
-			
+			endcase
+
 		EARTH:	case(class)
 				CLASSEID_DRUID:		affinity:=LARGE_BONUS_PER_LEVEL;
 				CLASSEID_MAGE:
 				CLASSEID_NECROMANCER:	affinity:=BONUS_PER_LEVEL;
 				CLASSEID_NINJA:
 				CLASSEID_WARRIOR:	affinity:=PENALTY_PER_LEVEL;
-			endcase		
-			
+			endcase
+
 		WATER:	case(class)
 				CLASSEID_DRUID:		affinity:=LARGE_BONUS_PER_LEVEL;
 				CLASSEID_NECROMANCER:
 				CLASSEID_MAGE:		affinity:=BONUS_PER_LEVEL;
 				CLASSEID_NINJA:
 				CLASSEID_WARRIOR:	affinity:=PENALTY_PER_LEVEL;
-			endcase	
-				
+			endcase
+
 		NECRO:	case(class)
 				CLASSEID_NECROMANCER:	affinity:=LARGE_BONUS_PER_LEVEL;
-				CLASSEID_DEATHKNIGHT:	
+				CLASSEID_DEATHKNIGHT:
 				CLASSEID_MAGE:		affinity:=BONUS_PER_LEVEL;
 				CLASSEID_WARRIOR:
 				CLASSEID_PRIEST:
 				CLASSEID_DRUID:
 				CLASSEID_NINJA:
 				CLASSEID_PALADIN:	affinity:=PENALTY_PER_LEVEL;
-			endcase	
-				
+			endcase
+
 		HOLY:	case(class)
 				CLASSEID_PRIEST:	affinity:=LARGE_BONUS_PER_LEVEL;
-				CLASSEID_PALADIN:	
+				CLASSEID_PALADIN:
 				CLASSEID_MAGE:		affinity:=BONUS_PER_LEVEL;
 				CLASSEID_NECROMANCER:
 				CLASSEID_DEATHKNIGHT:
 				CLASSEID_DRUID:
 				CLASSEID_NINJA:
 				CLASSEID_WARRIOR:	affinity:=PENALTY_PER_LEVEL;
-			endcase	
-				
+			endcase
+
 		ACID:	case(class)
 				CLASSEID_DRUID:		affinity:=LARGE_BONUS_PER_LEVEL;
 				CLASSEID_MAGE:		affinity:=BONUS_PER_LEVEL;
 				CLASSEID_NINJA:
 				CLASSEID_WARRIOR:	affinity:=PENALTY_PER_LEVEL;
-			endcase	
+			endcase
 	endcase
-	
+
 	return affinity;
-	
+
 endfunction
 
 function GetResistanceMultiplier (who, dmgtype)
 
 	var class := GetClass(who);
 	var level := GetClasseLevel(who);
-	
+
 	var mult := GetElementalAffinityByClasse(class, dmgtype);
 	return level * mult;
-	
+
 endfunction
-							
+
 function db(who, text)
 
 	if (GetObjProperty(who, "debugmode"))
 		SendSysMessage(who, text);
 	endif
-	
+
 endfunction
 
 function GetsNoArmorPenalty(who)
 
 	var class:=GetClass(who);
 	case (class)
-		CLASSEID_PRIEST:	
+		CLASSEID_PRIEST:
 		CLASSEID_NECROMANCER:
 		CLASSEID_DRUID:
 		CLASSEID_RANGER:
 		CLASSEID_PALADIN:
 		CLASSEID_DEATHKNIGHT:	return 1;
-		default:		return 0;		
+		default:		return 0;
 	endcase
 
 endfunction
