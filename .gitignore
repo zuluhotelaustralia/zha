@@ -21,6 +21,7 @@ scripts/Compile-Folder.bat
 scripts/Compile-File.bat
 scripts/Compile-All.bat
 setup/uo-client
+setup/ecompile
 realm
 
 # Misc pol generated files

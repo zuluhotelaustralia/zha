@@ -8,7 +8,7 @@ include "include/dotempmods";
 include ":logon:logon";
 
 program reconnect( who )
-	
+
 	set_critical(1);
 	enableAosLBRClient(who);
 	JailCheck(who);
@@ -21,7 +21,7 @@ program reconnect( who )
 		start_script(":email:message", who);
 	endif
 	SetClasse(who);
-	if (getexistinglogons(who) == 1)
- 		DisconnectClient(who);
- 	endif
+	//if (getexistinglogons(who) == 1)
+ 	//	DisconnectClient(who);
+ 	//endif
 endprogram

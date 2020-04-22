@@ -9,7 +9,6 @@ services:
         restart: unless-stopped
         #command: ["bash", "-c", "tail -f /dev/null"]
         ports:
-            - 5003:5003
             - 5333:5333
         environment:
             - SERVER_EXTERNAL_IP
