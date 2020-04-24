@@ -25,11 +25,11 @@ program npcdeath(corpse)
    	var npctemplate := GetObjProperty(corpse,"npctemplate");
 
 	set_critical(1);
-	
+
 	if (WasASkillTamedOrSpellboundMonster(corpse))
 		RemoveFromTamedArray(CInt(GetObjProperty(corpse, "master")), CInt(GetObjProperty(corpse, "serial")));
 	endif
-	
+
 	foreach mount in ListRootItemsInContainerOfObjtype(corpse, 0xf021)
 		if (! GetObjProperty(corpse, "nomountatdeath"))
 			if (GetObjProperty(corpse, "untamemountatdeath"))
@@ -51,7 +51,7 @@ program npcdeath(corpse)
 			FindPersonToPossess(possessedgenerator);
 		endif
 	endif
-	
+
 	// Create a gate on death.
 	var gateLocation := GetObjProperty(corpse, "OnDeathGateLocation");
 	var fromLocation := corpse;
@@ -98,7 +98,7 @@ program npcdeath(corpse)
 	if (atdeathscript)
 		start_script(atdeathscript, corpse);
 	endif
-	
+
 	WarnManagerOfNpcDeath(corpse);
 
 //Check if corpse was a townraider spawn v0.7
@@ -142,11 +142,11 @@ program npcdeath(corpse)
                 var spawnserial:= GetObjProperty(corpse, "SpawnPoint");
 		var monsterserial:=GetObjProperty(corpse,"AiSerial");
 		var monsterpoints:=GetObjProperty(corpse,"QuestPoints");
-  
+
                 If(GetObjProperty(corpse, "SetQuestPointReward"))
                        monsterpoints := GetObjProperty(corpse, "SetQuestPointReward");
                 endif
-                
+
 		if (GetObjProperty(corpse,"RemoveFromQuestAfterDeath")==1)
 			MonsterObjectiveMet(queststoneserial, killerserial, monsterserial, spawnserial, monsterpoints);
 			RemoveObjective(queststoneserial, monsterserial);
@@ -156,8 +156,8 @@ program npcdeath(corpse)
                     //I removed this to see if it fixes prob with returning 2 lots of quest points.
                    // QuestNPCDeath(queststoneserial, monsterserial, killerserial, spawnserial, monsterpoints);
 	endif
-	
-	
+
+
 	//check if monster is part of Monster Duel Gate
 	var monstDuelGateSer:=Cint(GetObjProperty(corpse, "monsterDuelController"));
 	if (monstDuelGateSer)
@@ -167,8 +167,8 @@ program npcdeath(corpse)
 		if (monstDuelGate)
 			IncrementMonsterPoint(monstDuelGate, npctemplate, CInt(GetObjProperty(corpse, "monsterDuelControllerIndex")));
 		endif
-	endif	
-	
+	endif
+
 	if (GetObjProperty(corpse, "rise"))
 		start_script("misc/rise", corpse);
 	endif
@@ -178,10 +178,10 @@ program npcdeath(corpse)
 	if (GetObjProperty(corpse,"color"))
 		corpse.color := CInt(GetObjProperty(corpse,"color"));
 	endif
-	
+
 	//to get rid of packanimal and playervendor storage
 	zapstorageareas(corpse);
-	
+
    MoveBackpackToCorpse( corpse );
 
 	var nocorpse  := GetObjProperty(corpse,"nocorpse");
@@ -194,7 +194,7 @@ program npcdeath(corpse)
 		elseif( item.container == corpse )
 			if( GetObjProperty( item, "dropitem" ) )
 				EraseObjProperty( item, "dropitem" );
-				MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion
+				MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 			// elseif( nocorpse || summoned || guardkill )
 				//MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, _DEFAULT_REALM, MOVEOBJECT_NORMAL ); //AutoConversion DONT keep putting this in.  It wrecks the townraid where they drop all their stuff
 				// I DONT want that, plus there is something called dropitem, which is looted items.
@@ -202,6 +202,7 @@ program npcdeath(corpse)
 				//moveitemtocontainer( item, corpse); //This line is useless and prevent some monsters from giving their loot back.
 			endif
 		endif
+		sleepms(100);
 	endforeach
 
 	var npc_cfg	:= ReadConfigFile( "::npcdesc" );
@@ -233,12 +234,12 @@ program npcdeath(corpse)
 				//if ( GetObjProperty( item, "cansteal"))
 				item.movable:=1;
 				//endif
-			endforeach			
+			endforeach
 			return;
     	else
        		MakeLoot(corpse);
     	endif
-    
+
    	if( nocorpse )
     		foreach item in EnumerateItemsInContainer( corpse )
     			if( item.container == corpse )
@@ -268,40 +269,40 @@ function zapstorageareas(me)
 
 endfunction
 
-function logCounselor(who, corpse)	
+function logCounselor(who, corpse)
 	var props := array;
 	var prop := array;
 	prop .+ pname;
 	prop .+ pvalue;
-	
+
 	prop.pname := "char name";
 	prop.pvalue := who.name;
 	props[1] := prop;
-	
+
 	prop.pname := "char serial";
 	prop.pvalue := who.serial;
 	props[2] := prop;
-	
+
 	prop.pname := "char account";
 	prop.pvalue := who.acctname;
 	props[3] := prop;
-	
+
 	prop.pname := "npctemplate";
 	prop.pvalue := GetObjProperty(corpse, "npctemplate");
 	props[4] := prop;
-	
+
 	prop.pname := "char location";
 	prop.pvalue := who.x + " " + who.y + " " + who.z;
 	props[5] := prop;
-	
+
 	prop.pname := "corpse location";
 	prop.pvalue := corpse.x + " " + corpse.y + " " + corpse.z;
 	props[6] := prop;
-	
+
 	prop.pname := "datetime";
 	prop.pvalue := NowString();
 	props[7] := prop;
-	
+
 	AppendConfigFileElem("counselorkills", "kill", "", props );
 	UnloadConfigFile("counselorkills");
 endfunction

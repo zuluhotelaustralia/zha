@@ -1,13 +1,11 @@
+include "include/pol95";
 const STARTHAIR := 0x2030;
 const ENDHAIR := 0x2060;
 
 function grabloot()
-return;
-/*
-	if( GetGlobalProperty( "#NoNpcLooting" ) )
+	if( GetGlobalProperty( "NoNpcLooting" ) )
 		return;
 	endif
-
 	var numitems := 0;
 	var mypack := 0;
 	if (!GetObjProperty(me,"serial"))
@@ -40,25 +38,25 @@ return;
 	var near_items := ListItemsNearLocation(me.x, me.y, me.z,6);
 
    foreach myitem in near_items
-	  
-    	/*if ((GetObjProperty(myitem,"houseserial")!=error) || (myitem.multi) || (!myitem.movable)) 
-			return; 
+
+    	if ((GetObjProperty(myitem,"houseserial")!=error) || (myitem.multi) || (!myitem.movable && myitem.objtype != UOBJ_CORPSE))
+			continue;
 		endif
-		*/
-		
+
+
 		if( CheckLineOfSight95( me, myitem ) )
 			var sh := GetStandingHeight( CInt(myitem.x), CInt(myitem.y), CInt(myitem.z) );
 			if (sh.multi || sh.multi.serial)
-				break;
+				continue;
 			endif
-			var info := CInt(GetMapInfo( CInt(myitem.x), CInt(myitem.y) ).landtile);
+			/*var info := CInt(GetMapInfo( CInt(myitem.x), CInt(myitem.y) ).landtile);
 			if ((info > CInt(0x405)) && (info < CInt(0x456)))
-				break;
-			endif
+				continue;
+			endif*/
 
 			if ( (myitem.movable) && ((myitem.objtype < STARTHAIR || myitem.objtype > ENDHAIR))  )
 				if (GetObjProperty(myitem,"houseserial")!=error)
-					return;
+					continue;
 				endif
 				RunToIt(me,myitem);
 				if ( Distance(me, myitem)<2)
@@ -71,7 +69,7 @@ return;
 					return;
 				endif
 			elseif (myitem.objtype == UOBJ_CORPSE)
-				
+
 	 		   if (!GetObjProperty(myitem,"#ignoreit") && !GetObjProperty( myitem, "nocut" ) )
 					var items := { };
 
@@ -91,12 +89,12 @@ return;
 									if( !looters )
 										looters := {};
 									endif
-					
+
 									if( !(me.name in looters) )
 										looters.append( me.name );
 										SetObjProperty( myitem, "LootedBy", looters );
 									endif
-					
+
 									say( "*yoink*" );
 									sleep(2);
 									return;
@@ -114,7 +112,7 @@ return;
 
 			endif
      	endforeach
-*/
+
 endfunction
 
 function RunToIt(me,item)
