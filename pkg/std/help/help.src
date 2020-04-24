@@ -56,7 +56,7 @@ program help( who2 )
 		"Notes from Admin on AOS Clients",
 		"Return to the game.",
 		"For more info, visit our webpage at",
-		"http://www.gamiix.com/ultima"
+		"http://www.zuluhotel.com.au"
 		);
 
 	var res := SendDialogGump( who, layout, data );

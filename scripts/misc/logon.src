@@ -6,7 +6,7 @@ include ":logon:logon";
 program logon( who )
 
 	print( "logon: " + who.name );
-	enableAosLBRClient(who);
+//	enableAosLBRClient(who);
 
 	if (who.title_race=="Vampire")
 		who.color:=0;

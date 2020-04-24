@@ -10,7 +10,7 @@ include ":logon:logon";
 program reconnect( who )
 
 	set_critical(1);
-	enableAosLBRClient(who);
+	// enableAosLBRClient(who);
 	JailCheck(who);
 	CurePoison(who);
 	set_critical(0);

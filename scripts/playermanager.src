@@ -187,13 +187,13 @@ function ShowWelcomeGump(who, message)
 	endif
 		
   	if (choice[openmainpage.keyid])
-		OpenWebSite(who, "ultima.gamiix.com");
+		OpenWebSite(who, "http://www.zuluhotel.com.au");
 		ShowWelcomeGump(who, message);
 	elseif (choice[openforumpage.keyid])
-		OpenWebSite(who, "forum.gamiix.com");
+		OpenWebSite(who, "http://www.zuluhotel.com.au");
 		ShowWelcomeGump(who, message);
 	elseif (choice[openrulespage.keyid])
-		OpenWebSite(who, "http://ultima.gamiix.com/rules.php");
+		OpenWebSite(who, "http://www.zuluhotel.com.au");
 		ShowWelcomeGump(who, message);
 	endif
 
