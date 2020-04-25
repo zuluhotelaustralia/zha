@@ -44,7 +44,7 @@ function castspell( caster, cast_on, spellname )
 		if (castingcmd[1] == "MassCast")
 			spellname:=castingcmd[2];
 		endif
-	
+
 		var spellid := GetSpellID(spellname);
 		if (!spellid)
 			return;
@@ -61,6 +61,7 @@ function castspell( caster, cast_on, spellname )
 			parms[1] := "#MOB";
 			parms[2] := caster;
 			parms[3] := cast_on;
+			parms[4] := spellid;
 			Detach();
 			start_script( GetScript( spellid ), parms );
 		endif
@@ -126,13 +127,13 @@ function SummonEleLord(me, onwho)
 	SetObjProperty(me, "timescasted", timescasted);
 
 	if (timescasted>=3) return; endif
-		
+
 	var utterance := Random(4);
 	PlaySoundEffect(me, 0x218);
 
 	case (utterance)
         	0: say("I summon forth the Living Rock to protect me!");
-			NpcSummonCreature(me, "earthelementallord");	
+			NpcSummonCreature(me, "earthelementallord");
         	1: say("The power of Fire shall purge your soul!");
 			NpcSummonCreature(me, "fireelementallord");
         	2: say("The Winds of fate shall sweep you away!");
@@ -154,12 +155,12 @@ function SummonElf(me, onwho)
 	SetObjProperty(me, "timescasted", timescasted);
 
 	if (timescasted>=3) return; endif
-		
+
 	var utterance := Random(3);
 
 	case (utterance)
         	0: say("Druids, protect me!");
-			NpcSummonCreature(me, "elfdruid");	
+			NpcSummonCreature(me, "elfdruid");
         	1: say("Warriors, to arms!");
 			NpcSummonCreature(me, "elfwarrior");
         	2: say("Archers, cover me!");
@@ -177,12 +178,12 @@ function SummonDarkElf(me, onwho)
 	SetObjProperty(me, "timescasted", timescasted);
 
 	if (timescasted>=4) return; endif
-		
+
 	var utterance := Random(3);
 
 	case (utterance)
         	0: say("Necromancers, protect me!");
-			NpcSummonCreature(me, "darkelfnecromancer");	
+			NpcSummonCreature(me, "darkelfnecromancer");
         	1: say("Warriors, to arms!");
 			NpcSummonCreature(me, "darkelfwarrior");
         	2: say("Assassins, cover me!");
@@ -199,11 +200,11 @@ function SummonSpider(me, onwho)
 	SetObjProperty(me, "timescasted", timescasted);
 
 	if (timescasted>=4) return; endif
-	say ("Feast, my children!");	
+	say ("Feast, my children!");
 	var spider := Random(3);
 
 	case (spider)
-        	0: NpcSummonCreature(me, "direweaver");	
+        	0: NpcSummonCreature(me, "direweaver");
         	1: NpcSummonCreature(me, "flamingspider");
         	2: NpcSummonCreature(me, "phasespider");
 	endcase
@@ -255,7 +256,7 @@ function TeleToPlayer(caster, cast_on)
 	PlaySoundEffect(caster, 0x1ff);
 	MoveObjectToLocation(caster, cast_on.x, cast_on.y, cast_on.z, _DEFAULT_REALM); //AutoConversion
 endfunction
-	
+
 function SummonElfLord (caster, cast_on)
 	var timescasted := GetObjProperty(caster, "timescasted");
 	if (!timescasted) timescasted :=0; endif
@@ -452,17 +453,17 @@ function SpitWeb(caster, cast_on)
 		var y := cast_on.y;
 		var z := cast_on.z;
 		PrintTextAbove(caster, caster.name+" spits a web!");
-		PlayMovingEffect(caster, cast_on, 0xbf01, 6); 
+		PlayMovingEffect(caster, cast_on, 0xbf01, 6);
 		sleep(1);
-	
+
 		CreateItemAtLocation(x, y, z, 0xbf01,  1);
-	
+
 		if ( cast_on.x == x && cast_on.y == y)
 			SendSysMessage(cast_on, "You are trapped in a spider web!");
 			DoTempMod(cast_on, "p", 1, 15);
 		endif
 	endif
-endfunction	
+endfunction
 
 function CastOnAllPlayersSpell(caster, spellid)
 //casts spell on all players within LOS and range
@@ -471,12 +472,12 @@ function CastOnAllPlayersSpell(caster, spellid)
 		RANGE := 7;
 	endif
 	var circle	:= GetCircle( spellid );
-	
+
 	var spellparms := { };
 	spellparms[1] := "#MOB";
 	spellparms[2] := caster;
 	spellparms[4] := circle;
-		
+
 
 	foreach mob in ListMobilesInLineOfSight( caster, RANGE )
 		if (mob.acct || mob.script == "tamed")  //player or tamed monster
@@ -511,5 +512,5 @@ function IncreaseHoardeDemonSize(caster, cast_on)
 	SetObjProperty( caster, "guardkill", 1);
 	ApplyRawDamage( caster, CInt(GetHp(caster)+3) );
 
-	
+
 endfunction

@@ -10,16 +10,21 @@ use cfgfile;
 include "include/spelldata";
 
 program castSpell(who, spell_id)
+	var params := who;
+	if( who[1] == "#MOB")
+		spell_id := who[4];
+		who := who[2];
+	endif
 
 	// Try to cast the spell.
 	if( TryToCast(who, spell_id ) != SUCCESS )
 		EraseObjProperty(who, "#Casting" );
 		return;
 	endif
-	
+
 	// Get the configuration item.
 	var spellElement := ReadConfigFile(":spells:spells")[spell_id];
-	var script := Start_Script(spellElement.SpellScript, who);
+	var script := Start_Script(spellElement.SpellScript, params);
 	if (script.errortext)
 		// If there is an error, this is pretty serious so send to console.
 		print(who.name + " was unable to start [" + spellElement.SpellScript + "] -> " + script.errortext);
@@ -27,7 +32,7 @@ program castSpell(who, spell_id)
 
 	return 1;
 	/*
-	// Distro way of starting spell scripts. We dont need to use it yet. 
+	// Distro way of starting spell scripts. We dont need to use it yet.
 	var script := Start_Script("spellStarter", {who, spell_id});
 	if ( script.errortext )
 		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);

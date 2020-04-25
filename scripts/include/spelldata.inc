@@ -1262,7 +1262,7 @@ function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0
 	endif
 
 	//Consume the reagents
-	if( !FindOption( options, CASTINGOPT_NO_REAGENTS ) && !no_regs)
+	if( !FindOption( options, CASTINGOPT_NO_REAGENTS ) && !no_regs && !caster.isA(POLCLASS_NPC))
                 if( !ConsumeReagents( caster, spell ) )
 			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
 			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
