@@ -1,6 +1,7 @@
 use uo;
 use os;
 use math;
+use party;
 
 include "include/dotempmods";
 include "include/attributes";
@@ -21,7 +22,6 @@ include "include/queststone";
 include "include/war";
 include "include/speedhackRecallCheck";
 include "../../pkg/opt/barnsitems/monsterDuelGate";
-include "../../pkg/opt/party/party";
 
 
 program chrdeath(corpse,ghost)
@@ -29,17 +29,18 @@ program chrdeath(corpse,ghost)
 	set_critical(1);
 
 	var affectKarmaFame := 0;
+	var party := ghost.party;
+
 	if (GetObjProperty(ghost, "dontAffectKarmaFame"));
 		EraseObjProperty(ghost, "dontAffectKarmaFame");
 	else
 		affectKarmaFame := 1;
 	endif
-	
-	if (GetObjProperty( ghost, "KilledBy" ))
-		PartyShout(ghost, "I was just killed by " + GetObjProperty( ghost, "KilledBy" ), 33);
-	else
-		PartyShout(ghost, "I just died" , 33);
 
+	if (GetObjProperty( ghost, "KilledBy" ))
+		SendPartyMsg(party, ghost, "I was just killed by " + GetObjProperty( ghost, "KilledBy" ));
+	else
+		SendPartyMsg(party, ghost, "I just died");
 	endif
 
 	EraseObjProperty( ghost, "KilledBy" );
@@ -115,9 +116,9 @@ program chrdeath(corpse,ghost)
 			free_death:=1;
 		endif
 	endif
-		
+
 	var autotelequest;
-	
+
 	//made more complex because now onquest is an array.. and many quests could have autotele setting
 	if (onquest)
 		autotelequest := IsAutoTeleQuest(ghost);	//returns first queststone object that the player is to be transported to
@@ -162,7 +163,7 @@ program chrdeath(corpse,ghost)
 		SetStamina(ghost,GetMaxStamina(ghost));
 		ghost.warmode:= 0;
 		ghost.hidden := 1;
-		
+
 
 		//get back onto mounts.. as opposed to leave annoying graphics
 		foreach item in ListRootItemsInContainerOfObjtype(corpse,0xf021)
@@ -189,7 +190,7 @@ program chrdeath(corpse,ghost)
 			newbie_res_pos :=SplitWords(newbie_res_pos);
 			if (newbie_res_pos)
 				MoveObjectToLocation( ghost, CInt(newbie_res_pos[1]), CInt(newbie_res_pos[2]), CInt(newbie_res_pos[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
-			endif 
+			endif
 			SendSysMessage(ghost, "You have been saved from the void by the healers of Haven!");
 		elseif (PSIONIC_Reincarnation)
                         var charspot := {ghost.x, ghost.y, ghost.z}
@@ -212,11 +213,11 @@ program chrdeath(corpse,ghost)
 			var monsterDuelController := SystemFindObjectBySerial(inDuelGate);
 			EndMonsterDuel(monsterDuelController, ghost);
 			SendSysMessage(ghost, "You have been defeated by the warriors within the Gate, and have been expelled!",3,53);
-			PlaySoundEffect(ghost, 0x217);	
+			PlaySoundEffect(ghost, 0x217);
 		elseif (autotelequest && !inDuelGate)//teleports quester to queststone
 			SetSpeedCheckNote(ghost);
 			MoveObjectToLocation( ghost, autotelequest.x, autotelequest.y, autotelequest.z, _DEFAULT_REALM, 	MOVEOBJECT_FORCELOCATION); //AutoConversion
-			SendSysMessage(ghost, "You have been saved from annihilation by the power of the quest!",3,53);	
+			SendSysMessage(ghost, "You have been saved from annihilation by the power of the quest!",3,53);
 		elseif (waractive && samewaroppteams && !inDuelGate) //teleports war people killed to war stone
 			//Broadcast("warstone: "  + warstone);
 			if (warstone)
@@ -227,17 +228,17 @@ program chrdeath(corpse,ghost)
 				else
 					MoveObjectToLocation( ghost, warstone.x, warstone.y, warstone.z, _DEFAULT_REALM, 	MOVEOBJECT_FORCELOCATION); //AutoConversion
 				endif
-			endif	
-			SendSysMessage(ghost, "Your death in war will always be remembered.",3,53);	
+			endif
+			SendSysMessage(ghost, "Your death in war will always be remembered.",3,53);
 		endif
-		
+
 		DestroyItem(corpse);
 		PlayObjectCenteredEffect(ghost, FX_SPELL_BLESS, SPEED_SPELL_BLESS, LOOP_SPELL_BLESS);
 		PlaySoundEffect(ghost, SFX_SPELL_BLESS);
-			
+
 		return;
 	endif
-	
+
 	// Added death sound - removed from core.
 	if (ghost.gender)
 		PlaySoundEffect( ghost, SFX_15B ); // Female death
@@ -318,8 +319,8 @@ program chrdeath(corpse,ghost)
 //			endif
 		endif
 	endif
-	
-	
+
+
 
 	set_critical(1);
 	EraseObjProperty(ghost,"mr");

@@ -1,6 +1,7 @@
 use cfgfile;
 use uo;
 use os;
+use party;
 
 include ":hooks:zhaSpecialMonsterAttacks";
 //include ":hooks:zhaArchery";
@@ -12,24 +13,25 @@ include "include/pol95";
 
 var cfg := ReadConfigFile(":combat:itemdesc");
 
-program zhaAttack() 
-   Print( "Using zhaAttack..." );  // this is printed on startup 
-   return 1; 
-endprogram 
+program zhaAttack()
+   Print( "Using zhaAttack..." );  // this is printed on startup
+   return 1;
+endprogram
 
-exported function ZHAAttackfunc( attacker, defender ) 
+exported function ZHAAttackfunc( attacker, defender )
 	if (attacker == defender)
 		return 1;
 	endif
-	
+
 	if (!CheckLineOfSight95(attacker, defender))
 		return 1;
 	endif
-	
-	if (NotInSameParty(attacker, defender))
-		PartyShout(defender, "I am being attacked by " + attacker.name +"!!!", 48);
+
+	//party notification here
+	if (attacker.party != defender.party)
+		SendPartyMsg(defender.party, defender, "" + attacker.name + " cast a spell on me!");
 	endif
-	
+
 	if (attacker.acct && defender.acct)
 		if (AutoCallGuardCheck(attacker, defender, 1))
 			return 1;
@@ -37,8 +39,8 @@ exported function ZHAAttackfunc( attacker, defender )
 	endif
 
 	var weaponType := cfg[attacker.weapon.objtype];
-	
-	
+
+
 	if (attacker.npctemplate) //special attack styles.. currently in for monsters with anim probs
 		if (GetObjProperty(attacker, "SpecialAttack"))
 			DoSpecialMonsterAttack(attacker, defender, weaponType, GetObjProperty(attacker, "SpecialAttack"));
@@ -46,18 +48,18 @@ exported function ZHAAttackfunc( attacker, defender )
 		else
 			return 0;
 		endif
-	endif	
-	
+	endif
+
 
 	if (weaponType.Attribute=="Archery")
 		ArcheryAttack( attacker, defender );
 		return 1;
 	endif
-	
+
 	//var thiefmod := GetObjProperty( attacker , CLASSEID_THIEF );
 	//	MeleeAttack( attacker, defender );
 		return 0;
-endfunction 
+endfunction
 
 
 

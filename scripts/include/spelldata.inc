@@ -12,6 +12,7 @@ use os;
 use util;
 use basic;
 use cfgfile;
+use party;
 
 include "include/client";
 //include "include/attributes";
@@ -112,14 +113,14 @@ function ApplyElementalDamage( caster, cast_on, circle, dmg, element, affectsHid
 
 		dmg := basedamage - CInt(dmg * resultprot * 25 / 100);
 		basedamage:=dmg;
-		db(caster, "Base damage: "+dmg);		
+		db(caster, "Base damage: "+dmg);
 		// Modify damage based on victim's class resistance
 		var mult:=GetResistanceMultiplier(cast_on, element);
 		if (mult < 0)
 			extra := (basedamage * (1 + abs(mult))) - basedamage;
 		else
 			extra := (basedamage / (1 + mult)) - basedamage;
-		endif	
+		endif
 		dmg:=dmg+extra;
 		db(caster, "Resistance: "+extra);
 		// Modify damage based caster's class modifier
@@ -128,10 +129,10 @@ function ApplyElementalDamage( caster, cast_on, circle, dmg, element, affectsHid
 			extra := (basedamage / (1 + abs(mult))) - basedamage;
 		else
 			extra := (basedamage * (1.2 + mult)) - basedamage;
-		endif	
+		endif
 		dmg:=CInt(dmg+extra);
-		db(caster, "Bonus: "+extra);	
-		db(caster, "Total: "+dmg);	
+		db(caster, "Bonus: "+extra);
+		db(caster, "Total: "+dmg);
 		ApplyTheDamage( cast_on, caster, Resisted(caster, cast_on, circle, dmg), DMGID_MAGIC + element );
 	else
 		HealDamage( cast_on, CInt(dmg * (resultprot - 4) * 0.25) );
@@ -156,7 +157,7 @@ function ApplyElementalDamageNoResist( on_who, by_who, dmg, element, affectsHidd
 			dmg := dmg * (1 + abs(mult));
 		else
 			dmg := dmg / (1 + mult);
-		endif			
+		endif
 		ApplyTheDamage( on_who, by_who, dmg, element );
 	else
 		HealDamage( on_who, CInt(dmg * (resultprot - 4) * 0.25) );
@@ -166,7 +167,7 @@ endfunction
 
 
 function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, affectsHidden := 0 )
-	
+
 	if(caster.dead) return; endif
 	if(cast_on.dead) return; endif
 	if(cast_on.hidden /*&& !affectsHidden*/) return; endif
@@ -186,12 +187,12 @@ function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, affectsHidden :
 	//var cast_on_deathknightlevel := Cint(GetObjProperty(cast_on, CLASSEID_DEATHKNIGHT));
 	//var cast_on_paladinlevel := Cint(GetObjProperty(cast_on, CLASSEID_PALADIN));
 	//var cast_on_clericlevel := Cint(GetObjProperty(cast_on, CLASSEID_PRIEST));
-	
+
 	if( resultprot < 4 )
 		dmg := basedmg - CInt(dmg * resultprot * 25 / 100);
 		basedmg:=dmg;
 		var extra;
-		db(caster, "Base damage: "+dmg);			
+		db(caster, "Base damage: "+dmg);
 		// Modify damage based on victim's class modifier
 		var mult:=GetResistanceMultiplier(cast_on, plane);
 		if (mult < 0)
@@ -200,16 +201,16 @@ function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, affectsHidden :
 			extra := (basedmg / (1 + mult)) - basedmg;
 		endif
 		dmg:=dmg+extra;
-		db(caster, "Damage after defender resistance: "+dmg);		
+		db(caster, "Damage after defender resistance: "+dmg);
 		// Modify damage based caster's class modifier
 		mult:=GetResistanceMultiplier(caster, plane);
 		if (mult < 0)
 			extra := (basedmg / (1 + abs(mult))) - basedmg;
 		else
 			extra := (basedmg * (1.2 + mult)) - basedmg;
-		endif	
+		endif
 		dmg:=dmg+extra;
-		db(caster, "Damage after attacker bonus: "+dmg);		
+		db(caster, "Damage after attacker bonus: "+dmg);
 		/*
 		if (plane==NECRO)
 			if (cast_on_necromancerlevel>0)
@@ -217,7 +218,7 @@ function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, affectsHidden :
 			elseif (cast_on_deathknightlevel>0)
 				dmg := CInt( dmg / (1 + ClasseBonus( cast_on, CLASSEID_DEATHKNIGHT )/2) ); //1/2 the bonus
 			endif
-			
+
 		elseif(plane == HOLY)
 			if (cast_on_clericlevel>0)
 				dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_PRIEST ) );
@@ -257,12 +258,12 @@ function CalcSpellDamage( caster, cast_on, circle, area_spell := SINGLE_TARGET_S
 	if(caster.dead) return 0; endif
 	if(cast_on.dead) return 0; endif
 	if(cast_on.hidden /* && !area_spell*/) return 0; endif
-	
+
 
 	if( area_spell ) circle := circle-3; endif
 
 	if( circle < 1 ) circle := 1; endif
-	
+
 	var dmg;
 
 	if (GetObjProperty(caster, "UsingBardInstrument")==1)
@@ -441,8 +442,8 @@ function CanTargetSpell( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
 
    if (caster.acct && cast_on.acct)//both players
 	//party notification here
-	 if (NotInSameParty(caster, cast_on))
-		PartyShout(cast_on, "" + caster.name + " cast a spell on me!", 48);
+	 if (caster.party != cast_on.party)
+	 	SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
 	 endif
   endif
 
@@ -592,7 +593,7 @@ function GetMagicEfficiencyPenalty( who )
 	if (GetsNoArmorPenalty(who))
 		return 0;
 	endif
-	
+
 	foreach item in ListEquippedItems( who )
 		if( GetObjProperty( item, "MagicPenalty" ) )
 			penalty := penalty + GetObjProperty( item, "MagicPenalty" );
@@ -634,7 +635,7 @@ function GetProtLevel( cast_on, element )
 
 		HOLY:	prot := GetObjProperty( cast_on, "HolyProtection" );
 			break;
-			
+
 		ACID:	prot := GetObjProperty( cast_on, "AcidProtection" );
 			break;
 
@@ -653,7 +654,7 @@ endfunction
 
 function GetResultingElementalProt( cast_on, element )
 
-/* 
+/*
 	var complementary;
 	var opposed;
 	case( element )
@@ -735,11 +736,7 @@ endfunction
 
 
 function IsProtected( caster, cast_on, circle )
-	//party notification here - could be causing bug
-	/*if (NotInSameParty(caster, cast_on))
-		PartyShout(cast_on, "" + caster.name + " cast a spell on me!", 48);
-	endif
-	*/
+
 	var protserial := GetObjProperty( cast_on, "MagicImmunity" );
 	var protlvl	 := Cint(GetObjProperty( cast_on, "PermMagicImmunity" ));
 	if( !protlvl )
@@ -1029,14 +1026,14 @@ function Resisted( caster, cast_on, circle, dmg )
 		if( dmg < 1 )
 			dmg := 1;
 		endif
-	
+
 		if( !caster.multi && !cast_on.multi )
 			AwardSkillPoints( cast_on, SKILLID_MAGICRESISTANCE, points * 3 );
 		endif
 	endif
 
 	dmg := CInt( dmg * (1 + (evalint - resist) / 200) );
-	
+
 	/*
 	if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
 		dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_MAGE ) );
@@ -1148,7 +1145,7 @@ endfunction
 
 
 function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0)
-	
+
 	//barns- added no_regs and no_mana options... if set to 1 then no mana or regs requirements.
 	//safer than setting no reg or mana prop on a player... :)
 
@@ -1229,7 +1226,7 @@ function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0
 		elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
 			spelldelay := CInt( spelldelay * ClasseBonus( caster, CLASSEID_WARRIOR ) );
 		endif
-		
+
 		while( spelldelay >= 500 )
 			sleepms( 500 );
 			spelldelay := spelldelay - 500;
@@ -1339,8 +1336,8 @@ function ModifyWithNewClassMagicEfficiency( who, val, casting_skill)
 	//else they get penalty like a warrior.
 
 	var myclasseid :=GetClass(who);
-	
-	if (casting_skill in GetClasseSkills(GetClass(who)))		
+
+	if (casting_skill in GetClasseSkills(GetClass(who)))
 		val := CInt(val * ClasseBonus( who, myclasseid ));
 	endif
 
@@ -1353,11 +1350,11 @@ function ModifyWithNewClassMagicEfficiency( who, val, casting_skill)
 
 		return CInt( val * ( 100 - penalty ) / 100 );
 	endif
-	
+
 	return CInt( val );
 
 endfunction
-	
+
 function NewClassCanCast( me, circle, returnBool := 1 )
 	if(returnBool && me.dead)
 		return 0;
@@ -1386,7 +1383,7 @@ function NewClassSpellCast( caster, spell, castingskillid := SKILLID_MAGERY, no_
 	//modified version of TryToCast
 	//includes gets anim from spell entry
 	//gets classes with spell speed bonus
-	//gets skill id to check	
+	//gets skill id to check
 	//Broadcast("1");
 	//Variables declaration and initialisation
 	var conf	 := ReadConfigFile( ":*:spells" );
@@ -1394,11 +1391,11 @@ function NewClassSpellCast( caster, spell, castingskillid := SKILLID_MAGERY, no_
 	var circ	 := GetConfigInt( elem, "Circle" );
 	var anim	 := GetConfigInt( elem, "Animation" );
 	conf	 	 := ReadConfigFile( ":*:circles" );
-	var spelldelay	 := CInt( conf[circ].Delay); 
+	var spelldelay	 := CInt( conf[circ].Delay);
 	var value	 := CInt( conf[circ].PointValue );
 	var manacost	 := CInt( conf[circ].mana );
 	var difficulty := CInt( conf[circ].Difficulty );
-	
+
 	//Casting Options management
 	var options := GetObjProperty( caster, CASTINGOPT_PROP_NAME );
 	if( !options )
@@ -1480,7 +1477,7 @@ function NewClassSpellCast( caster, spell, castingskillid := SKILLID_MAGERY, no_
 			endif
 
 			if( caster.x != sx || caster.y != sy || caster.z != sz )
-				SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );				
+				SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
 				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
 				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
 				return INTERRUPTED;
@@ -1564,9 +1561,9 @@ function IsAMageryBuffer(who)
 		CLASSEID_MAGE:
 		CLASSEID_PRIEST:	return 1;
 	endcase
-	
+
 	return 0;
-	
+
 endfunction
 
 function IsAMagerySummoner(who)
@@ -1576,8 +1573,8 @@ function IsAMagerySummoner(who)
 		CLASSEID_MAGE:
 		CLASSEID_DRUID:		return 1;
 	endcase
-	
+
 	return 0;
-	
+
 endfunction
 
