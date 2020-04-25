@@ -3,16 +3,17 @@ use os;
 use file;
 use util;
 include "include/cmdlevel_check";
+include ":gumps:old-gumps";
 
 program ItemReportPage(thestring)
 
-	
+
 	var params:= SplitWords(thestring);
 	var who:= SystemFindObjectBySerial(CInt(params[1]));
 	var itemNum := CInt(params[2]);
 	var searchstring:= params[3];
 	SendSysMessage(who, "Loading report...");
-	if (len(params)>3)	
+	if (len(params)>3)
 		for k:=4 to len(params)
 			searchstring := searchstring + " " + params[k];
 		endfor
@@ -48,7 +49,7 @@ program ItemReportPage(thestring)
 		name:= "Can't find";
 	endif
 	var x, y, z, container:=0, words:=0, bankowner:=0, rootcontainer:=0, carriedby:=0, equipped:="Carried by", lastequip:=0;
-	
+
 	if (item.container)
 		rootcontainer:=FindRootContainer(item.container);
 		if (TypeOf(rootcontainer)=="MobileRef" || TypeOf(rootcontainer)=="OfflineMobileRef")  // mobileref
@@ -70,7 +71,7 @@ program ItemReportPage(thestring)
 			container:=rootcontainer;
 			x:=container.x;
 			y:=container.y;
-			z:=container.z;		
+			z:=container.z;
 		endif
 	elseif (item.container.serial)
 		carriedby:=SystemFindObjectBySerial(item.container.serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
@@ -90,8 +91,8 @@ program ItemReportPage(thestring)
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_BLACKSLAB, 450, 280);
 	var button1, button2, button3, button4, button5;
-	
-	GFTextLine(40, Ygump, 1000, "Search String: '"+searchstring+"'");	
+
+	GFTextLine(40, Ygump, 1000, "Search String: '"+searchstring+"'");
 	Ygump := Ygump + 20;
 	GFTextLine(40, Ygump, 68, "Item: " + name);
 	Ygump := YGump + 20;
@@ -100,12 +101,12 @@ program ItemReportPage(thestring)
 	if (equipped != "Equipped by" && lastequip)
 		GFTextLine(40, Ygump, 5, "Last equipped by: "+lastequip);
 		Ygump:=Ygump+20;
-	endif	
+	endif
 	if (bankowner)
 		GFTextLine(40, Ygump, 5, "Location: Bankbox of "+bankowner.name+" (Account: "+bankowner.acct.name+")");
 	elseif (carriedby)
-		GFTextLine(40, Ygump, 5, "Location: "+equipped+" "+carriedby.name+" (Account: "+carriedby.acct.name+")");	
-	elseif	(container)	
+		GFTextLine(40, Ygump, 5, "Location: "+equipped+" "+carriedby.name+" (Account: "+carriedby.acct.name+")");
+	elseif	(container)
 		GFTextLine(40, Ygump, 5, "Location: In "+container.desc+" ("+container.serial+")");
 	else
 		GFTextLine(40, Ygump, 5, "Location: On Ground");
@@ -115,10 +116,10 @@ program ItemReportPage(thestring)
 	Ygump := YGump + 40;
 	GFTextLine(55, Ygump, 5, " Go to these coordinates");
 	button3:= GFButtonID(40, YGump+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
-	Ygump := YGump + 20;	
+	Ygump := YGump + 20;
 	GFTextLine(55, Ygump, 5, " Put item in your backpack");
 	button4:= GFButtonID(40, Ygump+5, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1);
-	Ygump:= YGump + 20;	
+	Ygump:= YGump + 20;
 	GFTextLine(200, 230, 1000, itemNum+" of "+len(itemArray));
 	var others;
 	if (bankowner)
@@ -139,7 +140,7 @@ program ItemReportPage(thestring)
 	endif
 	var result := GFSendGump(who);
 	if (result[button1.keyid])
-		
+
 		start_script("searchreport2", CStr(CStr(who.serial)+" "+CStr(itemNum-1)+" "+searchstring));
 	endif
 	if (result[button2.keyid])
@@ -172,7 +173,7 @@ program ItemReportPage(thestring)
 		start_script("listitems", CStr(who.serial)+" "+CStr(item.container.serial)+" 1");
 	endif;
 
-endprogram	
+endprogram
 
 function FindRootContainer(container)
 

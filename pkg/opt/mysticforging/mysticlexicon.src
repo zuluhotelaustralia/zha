@@ -2,6 +2,7 @@ use uo;
 use os;
 include "include/classes";
 include "include/client";
+include ":gumps:old-gumps";
 const RNDGEM := 0xc53a;
 const ETSGEM := 0xc538;
 const DSRGEM := 0xc539;
@@ -32,8 +33,8 @@ program mystic_creation_lexicon (user, lexicon)
 	if (!GetObjProperty(user, CLASSEID_CRAFTER))
 		SendSysMessage(user, "The lexicon is beyond your comprehension");
 		return;
-	endif	
-	
+	endif
+
 	GFInitGump();
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_PAPER_EX, 235, 250);
@@ -59,10 +60,10 @@ program mystic_creation_lexicon (user, lexicon)
 	endif
 	if (result[button3.keyid])
 		CreateAnvil(user,lexicon);
-	endif	
+	endif
 	if (result[button4.keyid])
 		CreateMysticHammer(user, lexicon);
-	endif	
+	endif
 
 endprogram
 
@@ -75,7 +76,7 @@ function ReadLexiconPageOne(user, lexicon);
 	GFTextLine(20, 50, 0, "This old and crumpled manual was written by an");
 	GFTextLine(20, 70, 0, "ancient artificer of great wisdom and skill.");
 	GFTextLine(20, 90, 0, "It details the processes involved in harnessing");
-	GFTextLine(20, 110, 0, "elemental power, and infusing it into weapons"); 
+	GFTextLine(20, 110, 0, "elemental power, and infusing it into weapons");
 	GFTextLine(20, 130, 0, "and breastplates.");
 	GFTextLine(20, 150, 0, "The key to this process is a substance known");
 	GFTextLine(20, 170, 0, "as mystic crystal. Mystic crystals can be used");
@@ -92,16 +93,16 @@ function ReadLexiconPageOne(user, lexicon);
 	GFTextLine(20, 390, 0, "be created using all of the elemental weapons");
 	GFTextLine(20, 410, 0, "as the materials.");
 	GFTextLine(290, 450, 0, "Next Page");
-	var button1  := GFButtonID( 370, 450, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);	
-	
+	var button1  := GFButtonID( 370, 450, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);
+
 
 	var result:=GFSendGump(user);
-	
+
 	if (result[button1.keyid])
 		ReadLexiconPageTwo(user, lexicon);
 	endif
 	return;
-	
+
 endfunction
 
 function ReadLexiconPageTwo(user, lexicon);
@@ -113,7 +114,7 @@ function ReadLexiconPageTwo(user, lexicon);
 	GFTextLine(20, 50, 0, "Thirdly, one must make the mystic hammer itself");
 	GFTextLine(20, 70, 0, "which is used to store the energy and then infuse");
 	GFTextLine(20, 90, 0, "an item with the power. Creating the hammer");
-	GFTextLine(20, 110, 0, "requires a great deal of mystic crystal shards."); 
+	GFTextLine(20, 110, 0, "requires a great deal of mystic crystal shards.");
 	GFTextLine(20, 130, 0, "Once the hammer and anvil are created, one");
 	GFTextLine(20, 150, 0, "must use the hammer on an elemental weapon in an");
 	GFTextLine(20, 170, 0, "attempt to extract its energy. If successful, ");
@@ -129,18 +130,18 @@ function ReadLexiconPageTwo(user, lexicon);
 	GFTextLine(20, 390, 0, "Skill Used: Carpentry");
 	GFTextLine(20, 410, 0, "Tool used: Lexicon of Mystic Forging");
 	GFTextLine(290, 450, 0, "Next Page");
-	var button1  := GFButtonID( 370, 450, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);	
+	var button1  := GFButtonID( 370, 450, G_GREEN_ARROW_RIGHT_0, G_GREEN_ARROW_RIGHT_1, 1);
 	GFTextLine(55, 450, 0, "Prev Page");
-	var button2  := GFButtonID( 30, 450, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);	
+	var button2  := GFButtonID( 30, 450, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);
 
 	var result:=GFSendGump(user);
-	
+
 	if (result[button1.keyid])
 		ReadLexiconPageThree(user, lexicon);
 	endif
 	if (result[button2.keyid])
 		ReadLexiconPageOne(user, lexicon);
-	endif	
+	endif
 	return;
 endfunction
 
@@ -152,7 +153,7 @@ function ReadLexiconPageThree(user, lexicon);
 	GFTextLine(20, 30, 103, "Mystic Smithy Hammer");
 	GFTextLine(20, 50, 0, "Materials: 150 mystic crystal shards");
 	GFTextLine(20, 70, 0, "Skill used: Tinkering");
-	GFTextLine(20, 90, 0, "Tool used: Lexicon of Mystic Forging"); 
+	GFTextLine(20, 90, 0, "Tool used: Lexicon of Mystic Forging");
 	GFTextLine(20, 110, 103, "Mine Mystic Crystal");
 	GFTextLine(20, 130, 0, "Tool used: Enchanted Pickaxe");
 	GFTextLine(20, 150, 0, "Used on: Mystic Crystal in dungeon somewhere");
@@ -170,10 +171,10 @@ function ReadLexiconPageThree(user, lexicon);
 	GFTextLine(20, 390, 0, "- GM weapons CANNOT be enhanced");
 	GFTextLine(20, 410, 0, "- GM breastplates CAN be enhanced");
 	GFTextLine(55, 450, 0, "Prev Page");
-	var button1  := GFButtonID( 30, 450, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);	
+	var button1  := GFButtonID( 30, 450, G_RED_ARROW_LEFT_0, G_RED_ARROW_LEFT_1, 1);
 
 	var result:=GFSendGump(user);
-	
+
 	if (result[button1.keyid])
 		ReadLexiconPageTwo(user, lexicon);
 	endif
@@ -253,7 +254,7 @@ function CreatePickaxe(user)
 endfunction
 
 function CreateAnvil(user, lexicon)
-	
+
 	var weaps := array;
 	var numitems := 0;
 	var failed :=0;
@@ -309,7 +310,7 @@ function CreateAnvil(user, lexicon)
 		PlaySoundEffect(user, 0x101);
 		SendSysMessage(user, "You have failed!", 3, 55);
 		for (i:=1; i<7; i:=i+1)
-			if (Random(2)) 
+			if (Random(2))
 				SendSysMessage(user, "The "+GetElem(i)+" is destroyed!", 3, GetColor(i));
 				SubtractAmount(weaps[i], 1);
 			endif
@@ -357,10 +358,10 @@ function CreateMysticHammer(user, lexicon)
 		SendSysMessage(user, "Cancelled");
 		DestroyItem(hammer);
 		return;
-	endif	
-	
+	endif
+
 endfunction
-		
+
 function GetElem(num)
 	case (num)
 		1:	return "Katana of Fire";
@@ -382,4 +383,4 @@ function GetColor(num)
 		6:	return 1;
 	endcase
 endfunction
-		
+

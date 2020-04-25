@@ -6,7 +6,8 @@ use uo;
 use os;
 
 include "include/cmdlevel_check";
-include "include/gumps";
+include ":gumps:gumps";
+include ":gumps:yesNoSizable";
 
 
 program textcmd_leavemessage(who, text)
@@ -40,7 +41,7 @@ program textcmd_leavemessage(who, text)
   for (i:=2; i<=7; i:=i+1)
     theArray[i] := " ";
   endfor
-  
+
   i := 1;
   while ((len(theString) > 0) && (i <= 7))
     i := i + 1;

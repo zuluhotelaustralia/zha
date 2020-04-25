@@ -15,6 +15,7 @@ include "include/client";
 include "ai/setup/modsetup";
 include "include/random";
 include "include/queststone";
+include ":gumps:old-gumps";
 
 const SYSEVENT_UPDATEMUSIC:=0x0001234;
 const HALT_THRESHOLD := 10; // how close before he barks?
@@ -62,18 +63,18 @@ program Musician()
 						if (!ev.source.isA(POLCLASS_NPC))
 							if (!Random(4))
 								say ("Ask me to play if you want to hear my beautiful music!");
-     						endif				
+     						endif
 							playlute();
-						endif          
+						endif
 					SYSEVENT_SPEECH:
 		    			if (!ev.source.isA(POLCLASS_NPC))
 		    				if (lower(ev.text) == "set quest" && ev.source.cmdlevel >=2)
 								AssociateQuest(ev.source);
 		    				endif
 		    				if (lower(ev.text) == "play")
-								playlute();	
+								playlute();
 							endif
-		    			endif	
+		    			endif
             SYSEVENT_ENGAGED:
 					 say("Gaahhh! Do not hurt a simple musician!");
                 Run( ev.source );
@@ -99,7 +100,7 @@ program Musician()
 				playlute();
 			endif
 		endif
-	endif 
+	endif
         // TODO: ReturnToPost();
     endwhile
 endprogram
@@ -137,7 +138,7 @@ function Run( opponent )
                         endif
                     endif
                 endif
-            SYSEVENT_OPPONENT_MOVED:               
+            SYSEVENT_OPPONENT_MOVED:
             SYSEVENT_ENTEREDAREA:
             SYSEVENT_LEFTAREA:
                 // ignore both of these
@@ -157,7 +158,7 @@ endfunction
 function OpenDistance( opponent )
     case (Distance( me, opponent )) //Conversion
         10:
-            return 1;       
+            return 1;
         default:
             RunAwayFrom( opponent );
             return 0;
@@ -171,7 +172,7 @@ function ChooseSong(songnum)
 		2 :return {"E2", "P", "A2", "A1", "P", "D2", "B1", "P", "C2", "C1", "P", "B2", "B1"};
 		3 :return {"G1", "P", "D2", "P", "C2", "P", "G2", "P", "F2", "P", "C3", "P", "A#2", "P", "G1"};
 		4 :return {"A1", "B1", "C2", "D2", "E2", "P", "E1", "P", "A1"};
-		5 :return {"A1", "C#2", "E2", "P", "D2", "F#2", "A2", "P", "E2", "G#2", "B2", "P", "D2", "F#2", "A2"}; 
+		5 :return {"A1", "C#2", "E2", "P", "D2", "F#2", "A2", "P", "E2", "G#2", "B2", "P", "D2", "F#2", "A2"};
 		6 :return {"E1", "B1", "E2", "F#2", "G2", "P", "E2", "B2", "P", "B1", "P", "E2"};
 		default: return 0;
 	endcase
@@ -188,13 +189,13 @@ function RandomTune()
 	var note;
 	while (i<=songlength)
 		note:=validnotes[CInt(RandomInt(validnotes.size())+1)];
-		
+
 		if (note!="P")
 			while (AnotherNoteOfSameTypeWithin5Elements(note, songarray))
 				note:=validnotes[CInt(RandomInt(validnotes.size())+1)];
 			endwhile
 		endif
-		
+
 		songarray.append(note);
 		i:=i+1;
 	endwhile
@@ -257,9 +258,9 @@ function GetSFXFromNote(note)
 		"G1": return 1045;
 		"G2": return 1046;
 		"G#1": return 1047;
-		"G#2": return 1048;		
+		"G#2": return 1048;
 	endcase
-	
+
 endfunction
 
 function AssociateQuest(who)
@@ -267,8 +268,8 @@ function AssociateQuest(who)
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_SCROLL, 600, 530);
 	GFTextMid(100, 10, 200, 10, "Associate Song and Quest for " + me.name);
-		
-		
+
+
 	GFTextLine(50, 30, 53, "Choose song 1" );
 	var song1 := GFButtonID(40, 35, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	GFTextLine(50, 60, 53, "Choose song 2" );
@@ -279,17 +280,17 @@ function AssociateQuest(who)
 	var song4 := GFButtonID(40, 125, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	GFTextLine(50, 150, 53, "Choose song 5" );
 	var song5 := GFButtonID(40, 155, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	GFTextLine(50, 180, 53, "Choose song 6" );	
+	GFTextLine(50, 180, 53, "Choose song 6" );
 	var song6 := GFButtonID(40, 185, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	GFTextLine(50, 210, 53, "Compose Random Song" );	
+	GFTextLine(50, 210, 53, "Compose Random Song" );
 	var randsong := GFButtonID(40, 215, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 
 	//associate quest
 	GFTextLine(50, 490, 53, "ASSOCIATE QUEST STONE [DO THIS FIRST!!!]" );
 	var assocqueststone := GFButtonID(40, 495, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	
+
 	var choice := GFSendGump(who);
-	
+
 	//return values
 	if(choice[assocqueststone.keyid])
 		associateQuestStone(who);
@@ -308,14 +309,14 @@ function AssociateQuest(who)
 	elseif(choice[song6.keyid])
 		SetObjProperty(me, "music", ChooseSong(6));
 	endif
-	
+
 	return 0;
 endfunction
 
 function associateQuestStone(who)
 	SendSysMessage( who, "Select Queststone." );
 	var qstone := Target( who );
-	
+
    if( !qstone || qstone.objtype != 41762) // queststone objtype
    	SendSysMessage( who, "canceled." );
      	return;
@@ -351,7 +352,7 @@ function CompareSongs()
 			counter:=counter+1;
 		endif
 	endfor
-	
+
 	if (counter==mymusic.size())
 		if (me.graphic==400)
 			PlaySoundEffect(me,1098); //yeh
@@ -370,7 +371,7 @@ function CompareSongs()
 		endif
 		return;
 	endif
-	
+
 	if (counter>=(mymusic.size()/1.5))
 		//getting there
 		if (me.graphic==400)

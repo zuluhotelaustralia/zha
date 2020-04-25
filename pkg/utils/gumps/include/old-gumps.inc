@@ -2,7 +2,7 @@
 //
 // GUMPS.INC - v2.6
 //
-// Gump Functions - to make life easier! :) 
+// Gump Functions - to make life easier! :)
 //	-Myr
 // Tastes good with ketchup too.
 //	-Austin
@@ -35,7 +35,7 @@
 // Updated: 26-Nov-2001, Austin
 // - Fixed a lot of the {} syntax into array() and struct.
 // - Added ability to arbitrarily assign return values for buttons
-// - Fixed text area. Will set it to "" if nothing is passed 
+// - Fixed text area. Will set it to "" if nothing is passed
 //   for the default text.
 // - 'local' updated to 'var'
 //
@@ -124,68 +124,7 @@ use uo;
 use os;
 use basic;
 
-// Constants (for GF[Get|Set]NextIndex)
-/////////////////////////////////////////////////////////////////
-const GFIDX_TEXT        := 0x01;	// Static Text (TextLine)
-const GFIDX_TEXTENTRY   := 0x02;	// Return Text (TextEntry)
-const GFIDX_BUTTON      := 0x03;	// Action Buttons (ButtonID)
-const GFIDX_CHECKBOX    := 0x04;	// Check-boxes
-const GFIDX_RADIO       := 0x05;	// Radio Buttons
-/////////////////////////////////////////////////////////////////
-
-// Constants for index starting values (SHOULD be enough! Heh!)
-/////////////////////////////////////////////////////////////////
-const GFINIT_TEXT       := 0x000;	// Static Text (GFdata[])
-const GFINIT_TEXTENTRY  := 0x201;	// Return Text (GFdata[])
-const GFINIT_BUTTON     := 0x401;	// Action Buttons (KeyIDs)
-const GFINIT_CHECKBOX   := 0x601;	// Check-boxes (KeyIDs)
-const GFINIT_RADIO      := 0x801;	// Radio Buttons (KeyIDs)
-/////////////////////////////////////////////////////////////////
-
-// 'gumpid' Constants for the GFResizePic() function
-/////////////////////////////////////////////////////////////////
-const BKGND_SILVERTRIM          := 83;    // Fancy, dark-grey backing
-const BKGND_SCROLL              := 2520;  // UO journal scroll
-const BKGND_OLD_JOURNAL_SCROLL  := 5150;  // Old journal scroll
-const BKGND_GOLDTRIM            := 2620;  // Gold-press, black backing
-const BKGND_PAPER               := 3000;  // Very thin edging
-const BKGND_PAPER_EX            := 3500;  //  \_with fancy inner border
-const BKGND_BLACKSLAB           := 3600;  // Raised edge (blocky)
-const BKGND_STONESLAB           := 5054;  // Plain, small corners
-const BKGND_STONE               := 5100;  // Marble stone, rounded edge
-const BKGND_DARK_STONE          := 5120;  // Same as previous, but much darker
-/////////////////////////////////////////////////////////////////
-
-// added by Jouni Airaksinen
-//const BKGND_GRAY_SILVER                := 9100; // crashed client (?)
-//const BKGND_GRAY_GOLD                  := 9150; // crashed client (?)
-const BKGND_STONESLAB2                 := 9200; // transparent corners
-const BKGND_SMOOTH_DARK_STONE          := 9250;
-const BKGND_SMOOTH_DARK_STONE_BEIGE    := 9260;
-const BKGND_BLACKHARD                  := 9270;
-const BKGND_BEIGE_PAPER                := 9300;
-const BKGND_WHITE_PAPER                := 9350;
-const BKGND_BEIGE_SCROLL               := 9380;
-const BKGND_WHITE_SCROLL               := 9390;
-const BKGND_GRAY_GOLDROUNDED           := 9400;
-const BKGND_GRAY_LIGHT_GOLDROUNDED     := 9450;
-const BKGND_GRAY_PRESSED_GOLDROUNDED   := 9500;
-const BKGND_GRAY_SILVERROUNDED         := 9550;
-const BKGND_GRAY_LIGHT_SILVERROUNDED   := 9559;
-const BKGND_GRAY_PRESSED_SILVERROUNDED := 9568;
-
-//Standard text colors on TSSE
-/////////////////////////////////////////////////////////////////
-const StdColor := 1890;
-const HeaderColor := 1890;
-const SelectedColor := 1720;
-/////////////////////////////////////////////////////////////////
-
-// CONSTants for the GFAddButton() function
-CONST GF_PAGE_BTN	:= 0x0;
-CONST GF_CLOSE_BTN	:= 0x1;
-CONST GF_DUMMY_BTN	:= 0x2;
-
+include ":gumps:old/old-constants";
 
 // Function List
 /////////////////////////////////////////////////////////////////
@@ -417,10 +356,10 @@ function GFHTMLArea(x, y, width, height, background:=1, scroll_bar:=1, text:="")
 	line := line+" "+CStr(GFdtidx);
 	line := line+" "+CStr(CInt(background))+" "+CStr(CInt(scroll_bar));
 	GFlayout.append(line);
-	
+
 	GFdtidx := GFdtidx + 1;		// Update index into GFdata[]
 	GFdata[GFdtidx] := text;	// arrays start at #1... id#0 goes into [1]!!
-	
+
 	return XGFRetVal( GFlayout.size(), GFdtidx - 1 );
 endfunction
 
@@ -526,7 +465,7 @@ function GFTextEntry( x, y, w, h, colour, text := "" )
 	else
 		text := CStr(text);
 	endif
-	
+
 	var line := "textentry " + CStr(GFref.x + CInt(x)) + " " + CStr(GFref.y + CInt(y));
 	line := line + " " + CStr(CInt(w)) + " " + CStr(CInt(h)) + " " + CStr(CInt(colour));
 	line := line + " " + CStr(GFtxtid) + " " + CStr(GFdtidx);
@@ -606,7 +545,7 @@ function GFCheckBox( x, y, off, on, state, id := 0)
 	id := Cint(id);
 	if (id < 1)
 		id := GFcbxid;
-		GFcbxid := GFcbxid + 1;	
+		GFcbxid := GFcbxid + 1;
 	endif
 	line := line + CStr(id);
 
@@ -639,7 +578,7 @@ function GFRadioButton( x, y, off, on, state, id := 0)
 		GFradid := GFradid + 1;
 	endif
 	line := line + CStr(id);
-	
+
 	GFlayout.append( line );
 	return XGFRetVal( GFlayout.size(), -1, id );
 endfunction
@@ -1015,10 +954,10 @@ function GFCreateGump(x:=0, y:=0, width:=0, height:=0)
 	gump.+data	:= array;	// Storage array for static-text and
 					// text-entry initialisation strings
 					// Indexes/KeyIDs for...
-	
+
 	// Starting points for data values
 	gump.+data_id	:= 1;
-	
+
 	// Current page the gump is writing to
 	gump.+cur_page := 0;
 
@@ -1070,7 +1009,7 @@ endfunction
  * Purpose
  * Rather than have a lot of CONSTants at the top for
  * different gump images, they are placed in GumpInfo.cfg
- * and retrieved with this function. 
+ * and retrieved with this function.
  * The idea is that it is easier to update GumpInfo.cfg than
  * to recompile all scripts that use these includes.
  *
@@ -1087,17 +1026,17 @@ function GetCfgConst(elem_name, prop_name)
 	if ( cfg.errortext )
 		return XGFError("GetCfgConst():: Unable to open GumpInfo.cfg -> "+cfg.errortext);
 	endif
-	
+
 	var elem := cfg[elem_name];
 	if ( elem.errortext )
 		return XGFError("GetCfgConst():: Unable to find GumpInfo.cfg["+elem_name+"] ->"+elem.errortext);
 	endif
-	
+
 	var value := GetConfigInt(elem, prop_name);
 	if ( !value )
 		return XGFError("GetCfgConst():: Unable to find property ["+prop_name+"] in elem ["+elem_name+"]");
 	endif
-	
+
 	return value;
 endfunction
 
@@ -1293,7 +1232,7 @@ function GFSendGump2(who, byref gump)
 		SendSysMessage(who, "Error - Unable to display gump.");
 		SendSysMessage(who, "Error text is ->"+ret_val.errortext);
 	endif
-	
+
 	return ret_val;
 endfunction
 
@@ -1312,7 +1251,7 @@ endfunction
  */
 function XGFError(text)
 	var temp := error{"errortext":=text};
-	
+
 	SysLog("Gump Error:: "+text);
 
 	return temp;
@@ -1376,7 +1315,7 @@ endfunction
 
 
 
-/* 
+/*
  * GumpPrompt(mobile, text, movable:=0, hue:=1153)
  *
  * Purpose
@@ -1400,16 +1339,16 @@ function GumpPrompt(mobile, text, movable:=0, hue:=1153)
 	endif
 	GFResizePic2(gump_prompt, 0, 0, GetCfgConst("Defaults", "BackGround"), 300, 160);
 	GFResizePic2(gump_prompt, 15, 15, GetCfgConst("Defaults", "ForeGround"), 270, 130);
-		
+
 	var y_pos := 25;
 	foreach line in (GFWordWrap(text, 260))
 		GFTextLine2(gump_prompt, 20, y_pos, hue, line);
 		y_pos := y_pos+20;
 		SleepMS(2);
 	endforeach
-	
+
 	GFAddButton(gump_prompt, 120, 120, 2128, 2129, GF_CLOSE_BTN, 1);
-	
+
 	var prompt_input := GFSendGump2(mobile, gump_prompt);
 	return prompt_input[0];
 endfunction

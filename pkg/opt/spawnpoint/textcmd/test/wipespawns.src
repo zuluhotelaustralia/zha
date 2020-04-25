@@ -4,6 +4,7 @@ use os;
 include "include/constants/propids";
 include "include/managers";
 include "include/cmdlevel_check";
+include ":gumps:yesNo";
 
 program goto_spawnpoint( who, text )
 	if (!checkStaff(who, "gotospawnpoint", CMDLEVEL_DEVELOPER))
@@ -51,7 +52,7 @@ program goto_spawnpoint( who, text )
 				pt_data[14] := "";	// Notes
 				SetObjProperty( point, PROPID_SPAWNPOINT_SETTING, pt_data );
 			endif
-		
+
 			if( pt_data[2] == wanted )
 				found.append(point);
 			endif
@@ -79,7 +80,7 @@ program goto_spawnpoint( who, text )
 		DestroyItem(spawn);
 		killedspawns := killedspawns+1;
 	endforeach
-	endif	
+	endif
 	endif
 	SendSysMessage(who, "A Total of "+killedspawns+" spawnpoints of npctemplate "+wanted+" were destroyed.");
 

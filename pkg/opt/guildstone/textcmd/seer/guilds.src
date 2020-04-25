@@ -3,6 +3,7 @@ use guilds;
 
 include "include/client";
 include "include/cmdlevel_check";
+include ":gumps:old-gumps";
 
 program guilds ( who )
 	if (!checkStaff(who, "guilds", CMDLEVEL_SEER))
@@ -14,9 +15,9 @@ program guilds ( who )
 	var retrieve:=21;//retrieves 21 max.. displays 20
 	var title:="ZHA GUILDS";
 	var guilds:=EnumerateAllGuilds(start, retrieve);
-	
+
 	var res:=guildsgump(who, guilds, page, title);
-	
+
 	while (res)
 		if (res<=20)
 			//detailed guild info
@@ -31,7 +32,7 @@ program guilds ( who )
 				res:=guildsgump(who, guilds, page, title);
 			endif
 		elseif (res==22) //next
-			if (guilds.size()>20) 
+			if (guilds.size()>20)
 				page:=page+1;
 				start:=start+(retrieve-1);
 				guilds:=EnumerateAllGuilds(start, retrieve);
@@ -44,15 +45,15 @@ program guilds ( who )
 endprogram
 
 function guildsgump(who, guilds, page, title)
-	
+
 	GFInitGump();
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_SCROLL, 400, 500);
 	GFTextMid(100, 10, 200, 10, title);
-	
+
 	var i;
 	var y := 40;
-	
+
 	//because 21 max are taken but 20 only are to be displayed
 	//21st indicates more available for next gump
 	//so:
@@ -62,47 +63,47 @@ function guildsgump(who, guilds, page, title)
 	else
 		hSize:=guilds.size();
 	endif
-	
-	
+
+
 	var outString;
 	var hButton:=array;
-	
+
 	for(i:=1;i<=hSize;i:=i+1)
 		outString := guilds[i].getprop("guildname") + " ["+guilds[i].getprop("guildabv")+"]";
 		GFTextLine(50, y, 5, outString);
 		hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
 		y:=y+20;
 	endfor
-	
+
 	//prev and next page buttons
 	var prevButton, nextButton;
-	
+
 	if (page>0)
 		GFTextLine(20, 480, 4, "PREVIOUS" );
 		prevButton := GFButtonID(10, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	endif
-	
+
 	if (guilds.size()>20)
 		GFTextLine(280, 480, 4, "NEXT" );
 		nextButton := GFButtonID(270, 483, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	endif
-	
+
 	var choice := GFSendGump(who);
-	
-	
-	
+
+
+
 	//return values
-	
+
 	if (choice[prevButton.keyid])
 		return 21;
 	endif
-	
+
 	if (choice[nextButton.keyid])
 		return 22;
 	endif
-	
+
 	var counter:=0;
-	
+
 	foreach b in hButton
 		counter:=counter+1;
     		if (choice[b.keyid])
@@ -110,17 +111,17 @@ function guildsgump(who, guilds, page, title)
 		endif
 	endforeach
 	return 0;
-	
+
 endfunction
 
 function EnumerateAllGuilds(start, returnSize)
 	var guilds:= ListGuilds();
 
-	
+
 	var i:=0;
 
 	var myguilds:=array;
-	
+
 	for(i:=start;i<=len(guilds)&&myguilds.size()<returnSize;i:=i+1)
 		myguilds.append(guilds[i]);
 	endfor

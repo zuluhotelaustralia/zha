@@ -3,6 +3,7 @@ use os;
 use math;
 use basic;
 use cfgfile;
+use party;
 
 include "include/areas";
 include "include/attributes";
@@ -21,7 +22,7 @@ function GetScriptBard( songid )
 endfunction
 
 function TryToCastBard( caster, song )
-	
+
 	//Variables declaration and initialisation
 	var conf	 := ReadConfigFile( "songs" );
 	var elem	 := FindConfigElem( conf, song );
@@ -45,8 +46,8 @@ function TryToCastBard( caster, song )
 		difficulty := difficulty + 10;
 		spelldelay := spelldelay + 2000;
 		statcost := statcost +20;
-	endif	
-	
+	endif
+
 	//Check backpack for the right instrument
 	if( !FindObjtypeInContainer( caster.backpack, instrument ) )
 		SendSysMessage( caster, "You do not have the required magical instrument!" );
@@ -61,13 +62,13 @@ function TryToCastBard( caster, song )
 				return 0;
 		endif
 	endif
-   	
+
 	//Speak the power words
 	PrintTextAbove(caster, powerwords );
 
 	//Delay and interruption management
 	var shp := GetHp(caster);
-		
+
 	while( spelldelay >= 500 )
 		sleepms( 500 );
 		spelldelay := spelldelay - 500;
@@ -210,8 +211,8 @@ function CanTargetSpellBard( caster )
 
    if (caster.acct && cast_on.acct)//both players
 	//party notification here
-	 if (NotInSameParty(caster, cast_on))
-		PartyShout(cast_on, "" + caster.name + " cast a spell on me!", 48);
+	 if (caster.party != cast_on.party)
+	 	SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
 	 endif
   endif
 

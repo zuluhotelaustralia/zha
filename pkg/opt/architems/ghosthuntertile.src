@@ -2,6 +2,7 @@ use uo;
 use os;
 
 include "include/cmdlevel_check";
+include ":gumps:old-gumps";
 
 program ghost_hunter_usescript(who, tile)
 
