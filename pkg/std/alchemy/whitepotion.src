@@ -17,17 +17,22 @@ program drink_white (character, potion)
 
 	else
 		var power := GetPotionStrength( potion );
-		EmptyBottle( character, potion );
+		if( EmptyBottle( character, potion ) )
 
-		if( !CanMod( character, "str" ) )
-			SendSysMessage( character, "Already under the influence!" );
+			if( !CanMod( character, "str" ) )
+				SendSysMessage( character, "Already under the influence!" );
+			else
+				PlayObjectCenteredEffect( character, FX_BLESS_EFFECT, SPEED_SPELL_BLESS, LOOP_SPELL_BLESS );
+				var duration	:= power * DURATION_MULTIPLIER;
+				var thestring	:= CStr(power * 2) + "d5";
+				var agil_gain	:= RandomDiceStr( thestring );
+
+				DoTempMod( character, "str", agil_gain, duration );
+			endif
+
 		else
-			PlayObjectCenteredEffect( character, FX_BLESS_EFFECT, SPEED_SPELL_BLESS, LOOP_SPELL_BLESS );
-			var duration	:= power * DURATION_MULTIPLIER;
-			var thestring	:= CStr(power * 2) + "d5";
-			var agil_gain	:= RandomDiceStr( thestring );
-
-			DoTempMod( character, "str", agil_gain, duration );
+			SendSysMessage(character, "You fail to consume the potion.");
+			return;
 		endif
 	endif
 

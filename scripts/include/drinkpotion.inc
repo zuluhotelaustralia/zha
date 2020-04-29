@@ -19,24 +19,23 @@ function CheckIfCanDrink( character )
 		SetObjProperty( character, "#potion", ReadGameClock() + DELAY_BETWEEN_DRINK );
 		return 1;
 	endif
-	
+
 endfunction
 
 
 function CanDrink( character )
 
 	EraseObjProperty( character, "#potion" );
-	
+
 endfunction
 
 
 function EmptyBottle( character, potion )
 
-	ReserveItem( potion );
-	PlaySoundEffect( character, DRINK_SOUND );
-	CreateItemInBackpack( character, UOBJ_EMPTY_BOTTLE, 1 );
-	DestroyItem( potion );
-	ReleaseItem( potion );
+	if( ConsumeSubstance(character.backpack, CInt(potion.objtype), 1) )
+		PlaySoundEffect( character, DRINK_SOUND );
+		CreateItemInBackpack( character, UOBJ_EMPTY_BOTTLE, 1 );
+	endif
 
 endfunction
 
@@ -52,11 +51,11 @@ function GetPotionStrength( potion )
 		if( !power )
 			return 0;
 		endif
-	
+
 		if( GetObjProperty( potion, "ByTrueMage" ) )
 			power := power + CInt(GetObjProperty( potion, "ByTrueMage" ));
 		endif
-	
+
 		return power;
 	endif
 
@@ -66,7 +65,7 @@ endfunction
 function IsPoison( potion )
 
 	return GetObjProperty( potion, "Poisoned" );
-	
+
 endfunction
 
 

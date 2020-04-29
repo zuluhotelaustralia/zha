@@ -17,12 +17,16 @@ program drink_green( character, potion )
 		return;
 	endif
 
-	EmptyBottle( character, potion );
+	if( EmptyBottle( character, potion ) )
 
-	SetPoison( character, plvl, "You've been poisoned!" );
+		SetPoison( character, plvl, "You've been poisoned!" );
 
-	Detach();
-	sleep( DELAY_BETWEEN_DRINK );
-	CanDrink( character );
+		Detach();
+		sleep( DELAY_BETWEEN_DRINK );
+		CanDrink( character );
+	else
+		SendSysMessage(character, "You fail to consume the potion.");
+		return;
+	endif
 
 endprogram
