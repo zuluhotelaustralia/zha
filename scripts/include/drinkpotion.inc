@@ -35,7 +35,10 @@ function EmptyBottle( character, potion )
 	if( ConsumeSubstance(character.backpack, CInt(potion.objtype), 1) )
 		PlaySoundEffect( character, DRINK_SOUND );
 		CreateItemInBackpack( character, UOBJ_EMPTY_BOTTLE, 1 );
+		return 1;
 	endif
+
+	return 0;
 
 endfunction
 
