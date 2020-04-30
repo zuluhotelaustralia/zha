@@ -12,8 +12,8 @@ function updateDecayStatus(signserial)
 	const DECAY_DAYS_NORMAL:=35; //days sign normal coloured
 	const DECAY_DAYS_ALERT:=7; //days alert colour
 
-	
-	var sign:=SystemFindObjectBySerial(signserial);
+
+	var sign:=SystemFindObjectBySerial(CInt(signserial));
 	if (!sign)
 		return 0;
 	endif
@@ -30,7 +30,7 @@ function updateDecayStatus(signserial)
 	if (compareDateTimeStrings(NowString(), lastupdated) <> 0)
 		numberDaysDecayed := numberDaysDecayed +1;
 	endif
-	
+
 	if (numberDaysDecayed>DECAY_DAYS_NORMAL+DECAY_DAYS_ALERT)
 		//house has not been clicked for normal and alert times
 		var house := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "house_serial")));
@@ -42,13 +42,13 @@ function updateDecayStatus(signserial)
 	if (numberDaysDecayed>DECAY_DAYS_NORMAL)
 		//house has not been clicked before alert time
 		AddToDecayingHouses(sign.serial);
-		sign.color:=1305;	
+		sign.color:=1305;
 
 	endif
 
 	if (numberDaysDecayed>DECAY_DAYS_NORMAL-DECAY_DAYS_ALERT)
 		//house has not been clicked before alert time minus - time to decay (so this is yellow alert)
-		sign.color:=53;	
+		sign.color:=53;
 	endif
 
 	SetObjProperty(sign, "NumberDecayDays", numberDaysDecayed );
@@ -70,7 +70,7 @@ function AddToDecayingHouses(signser)
 	var decayhouses := GetGlobalProperty("decayingSigns");
 	if (!decayhouses||decayhouses==error)
 		SetGlobalProperty("decayingSigns", {signser});
-		return;	
+		return;
 	endif
 	foreach sser in decayhouses
 		if (sser==signser)
@@ -85,7 +85,7 @@ function RemoveFromDecayingHouses(signser)
 	var decayhouses := GetGlobalProperty("decayingSigns");
 	var tempdhouses := array;
 	if (!decayhouses||decayhouses==error)
-		return;	
+		return;
 	endif
 	foreach sser in decayhouses
 		if (sser!=signser)

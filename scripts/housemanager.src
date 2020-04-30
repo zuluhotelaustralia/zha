@@ -1,7 +1,7 @@
 //Barnabus 21/3/2003 - Is a shard wide house decay manager. Works slowly to offset any lag effects, and really only needs
 //update a house sign once a day. Basically works by have a sign remmber when it was last clicked, and last checked by
 //the decay manager. Everytime the sign is checked and the last checked date is not now then its no. days decayed counter
-//is incremented. When its over a certain time  (see /pkg/std/housing/housemanagement.inc) the house is deleted. 
+//is incremented. When its over a certain time  (see /pkg/std/housing/housemanagement.inc) the house is deleted.
 
 
 use uo;
@@ -18,13 +18,13 @@ program start_housemanager()
 	sleep(300); //5 minute wait for boot up
 
 	var i;
-	var signs; 
+	var signs;
 
 	while (1) //loops continuously
 		sleep(60);
 
 		signs:= GetGlobalProperty("signs"); //refreshes the signs global prop each major loop because
-		//houses may have been deleted or added.	
+		//houses may have been deleted or added.
 		for(i:=getGlobalHouseCounter();i<=signs.size();i:=i+1)
 			updateDecayStatus(signs[i]);
 			sleep(60); //does one house a minute
@@ -40,7 +40,7 @@ endprogram
 //a global prop is saved at each iteration because if we test 1 house a minute then if the shard
 //has 400 houses then each loop through all houses will take 6.5 hours. As such wed expect houses at end
 //of the array to get checked less often due to shard falling over within that time. To make sure all houses are
-//checked equally the counter for the start_housemanager script must be saved and retrieved. 
+//checked equally the counter for the start_housemanager script must be saved and retrieved.
 
 function getGlobalHouseCounter()
 
@@ -49,12 +49,12 @@ function getGlobalHouseCounter()
 		SetGlobalProperty("globalHouseCounter", 1);
 		globalHouseCounter:=1;
 	endif
-	
+
 	return globalHouseCounter;
 endfunction
-	
+
 function setGlobalHouseCounter(counter)
-	
+
 	if (counter)
 		SetGlobalProperty("globalHouseCounter", counter);
 		return 1;
@@ -62,4 +62,3 @@ function setGlobalHouseCounter(counter)
 	return 0;
 
 endfunction
-	

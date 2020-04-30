@@ -10,9 +10,7 @@ var npc := Self();
 
 program herdedai()
 	if( !GetObjProperty(npc, "#hearded") )
-		npc.script := GetObjProperty(npc, "originalscript");
-		RestartScript(npc);
-		SendEvent(npc, SYSEVENT_DAMAGED);
+		ReturnToNormalOrDie(npc);
 		return;
 	endif
 
@@ -34,7 +32,6 @@ function herdedLoop()
 	var x := CInt(GetObjProperty(npc, "locationx"));
 	var y := CInt(GetObjProperty(npc, "locationy"));
 
-	var originalscript := GetObjProperty(npc, "originalscript");
 
 	if ((!x) || (!y))
 		return;
@@ -48,23 +45,34 @@ function herdedLoop()
 		case (ev.type)
 			SYSEVENT_ENGAGED:
 			SYSEVENT_DAMAGED:
-						npc.script := originalscript;
-						RestartScript(npc);
-						SendEvent(npc, ev);
+						ReturnToNormalOrDie(npc, ev);
 						return;
 		endcase
 		if( CheckLosAt(npc, x, y, GetWorldHeight(x, y, npc.realm)))
 			RunTowardLocation(x, y);
 			sleepms(2);
 		else
-			npc.script := originalscript;
-			RestartScript(npc);
-			SendEvent(npc, SYSEVENT_DAMAGED);
+			ReturnToNormalOrDie(npc);
 			return;
 		endif
 
 	until (d<=2);
 
+	ReturnToNormalOrDie( npc );
+endfunction
+
+function ReturnToNormalOrDie( npc, ev := SYSEVENT_DAMAGED )
+
+
+	var originalscript := GetObjProperty(npc, "originalscript");
+
+	if( originalscript == ":herding:herdedai")
+		npc.kill();
+		return;
+	endif
 	npc.script := originalscript;
 	RestartScript(npc);
+	SendEvent(npc, ev);
+	return;
+
 endfunction
