@@ -22,7 +22,7 @@ program herd(who)
     SendSysMessage(who, "You can't herd that!");
     return;
   endif
-  if ((npc.script == "tamed") || (npc.script == "herdedai") || (npc.script == "totem"))
+  if ((npc.script == "tamed") || (npc.script == "herdedai") || (npc.script == "totem") || (npc.script == ":herding:herdedai"))
     SendSysMessage(who, "You can't herd that!");
     return;
   endif
@@ -38,6 +38,7 @@ program herd(who)
     SetObjProperty(npc, "locationx", location.x);
     SetObjProperty(npc, "locationy", location.y);
     SetObjProperty(npc, "originalscript", npc.script);
+    SetObjProperty(npc, "#hearded", 1);
     npc.script := ":herding:herdedai";
     RestartScript(npc);
     PrintTextAbove(npc, "*"+ npc.name +" is herded by "+ who.name +"*");

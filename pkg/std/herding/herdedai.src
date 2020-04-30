@@ -9,34 +9,41 @@ include "include/dist";
 var npc := Self();
 
 program herdedai()
+	if( !GetObjProperty(npc, "#hearded") )
+		npc.script := GetObjProperty(npc, "originalscript");
+		RestartScript(npc);
+		SendEvent(npc, SYSEVENT_DAMAGED);
+		return;
+	endif
+
 	SetObjProperty(npc, "dont_restart_vitals", 1); // So vitals are not reset to maximum!
 
 	EnableEvents( SYSEVENT_ENGAGED + SYSEVENT_DAMAGED );
 	SetWarMode( 0 );
 
 	herdedLoop();
-  
+
 	EraseObjProperty(npc, "loctionx");
 	EraseObjProperty(npc, "loctiony");
 	EraseObjProperty(npc, "originalscript");
-	
+
 	DisableEvents( SYSEVENT_ENGAGED + SYSEVENT_DAMAGED );
 endprogram
 
 function herdedLoop()
 	var x := CInt(GetObjProperty(npc, "locationx"));
 	var y := CInt(GetObjProperty(npc, "locationy"));
-	
+
 	var originalscript := GetObjProperty(npc, "originalscript");
-	
+
 	if ((!x) || (!y))
 		return;
 	endif
-	
+
 	var ev, d;
 	repeat
 		d := coordist(npc.x, npc.y, x, y);
-		
+
 		ev := wait_for_event(0.1);
 		case (ev.type)
 			SYSEVENT_ENGAGED:
@@ -46,10 +53,18 @@ function herdedLoop()
 						SendEvent(npc, ev);
 						return;
 		endcase
-		
-		RunTowardLocation(x, y);
+		if( CheckLosAt(npc, x, y, GetWorldHeight(x, y, npc.realm)))
+			RunTowardLocation(x, y);
+			sleepms(2);
+		else
+			npc.script := originalscript;
+			RestartScript(npc);
+			SendEvent(npc, SYSEVENT_DAMAGED);
+			return;
+		endif
+
 	until (d<=2);
-	
+
 	npc.script := originalscript;
 	RestartScript(npc);
 endfunction
