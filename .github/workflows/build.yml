@@ -1,0 +1,67 @@
+name: Compile test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Compile
+      run: |
+        ./scripts/ecompile -C setup/ecompile.cfg
+        tar -czvf ecl-archive.tgz `find . | egrep ".*\.ecl"`
+    - name: Create live update package
+      if: github.ref == 'refs/heads/live-updates'
+      uses: actions/upload-artifact@v1
+      with:
+        name: ecl-archive-${{ github.sha }}
+        path: ecl-archive.tgz
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: zuluhotelaustralia/zha/server
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+
+  notify_on_failure:
+    needs: build
+    runs-on: "ubuntu-latest"
+    if: failure()
+    steps:
+      - name: Discord notification failure
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: failure
+          job: Build
+          nofail: false
+  notify_on_success:
+    needs: build
+    runs-on: "ubuntu-latest"
+    if: success()
+    steps:
+      - name: Discord notification success
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: success
+          job: Build
+          nofail: false
+  notify_on_cancel:
+    needs: build
+    runs-on: "ubuntu-latest"
+    if: cancelled()
+    steps:
+      - name: Discord notification cancelled
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: cancelled
+          job: Build
+          nofail: false
