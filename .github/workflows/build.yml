@@ -12,7 +12,7 @@ jobs:
       with:
         path: |
           **/*.ecl
-      key: ${{ runner.os }}-${{ hashFiles('**/*.ecl') }}
+        key: ${{ runner.os }}-${{ hashFiles('**/*.ecl') }}
     - name: Install latest ecompile
       run: |
         pushd /tmp
