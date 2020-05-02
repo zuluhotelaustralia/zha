@@ -105,7 +105,7 @@ function Fight( opponent )
 			loops := loops +1;
 			waittime := 1;
 			RunTowardLocation(me.x+(Random(3)-1), me.y+(Random(3)-1));
-		endif		
+		endif
 	2:
 		//closedistance returned 2, which means the mob was peacemade:
 		PeaceMade();
@@ -125,10 +125,10 @@ function Fight( opponent )
 	//		DoTeleport(me,opponent);
   //   return;
 	//	else
-	
+
 			DoRecall(me);
       return;
-  
+
    // endif
 	endcase
 
@@ -156,7 +156,7 @@ function Fight( opponent )
     endwhile
 
     post_combat();
-     
+
 endfunction
 
 function EnableCombatEvents()
@@ -187,7 +187,7 @@ function flee(opponent)
 			// MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			ApplyDamage( me, GetMaxHp(me) + 3 );
+			me.kill();
 		else
 			numflees := numflees + 1;
 		endif
@@ -326,7 +326,7 @@ var spawnpoint := 0;
 	endif
 //Recalling only for healers with spawnpoints
 		if(spawnpoint != error && spawnpoint != 0)
-			GoToSpawnPoint(spawnpoint);				
+			GoToSpawnPoint(spawnpoint);
 // harlz - a check if the npc has no spawnpoint set by the end of this function he'll just die without leaving a body
 		elseif (((spawnpoint == error) || (spawnpoint == 0)) && (me.script !="tamed") && (me.npctemplate))
 	   RevokePrivilege( me, "invul" );

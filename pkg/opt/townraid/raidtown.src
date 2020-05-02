@@ -375,7 +375,7 @@ function SpawnNPC(type, spawnaguard := 0, spawnpoints:= 0, spawnchance := 0)
 				setObjProperty(thecritter, "QuestStoneSerial", 0x6C361768);
 				setObjProperty(thecritter,"AiSerial", thecritter.serial);
 				setObjProperty(thecritter,"RemoveFromQuestAfterDeath", 1);
-				
+
 				var stone := systemfindobjectbyserial( 0x6C361768 );
 				var qObjectives:=GetObjProperty(stone, "Objectives");
 				qObjectives.append( thecritter.serial );
@@ -468,7 +468,7 @@ endfunction
 function KillIt(me)
 	MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SetObjProperty(me,"guardkill",1);
-	ApplyDamage( me, GetMaxHp(me) + 3 );
+	me.kill();
 endfunction
 
 function staffreport(text)
@@ -628,9 +628,9 @@ function AutoRewardSystem(initialgold, isthereareward)
 		else
 			SendSysMessage(dude, "You recive " + gp + " quest points for your efforts in the raid.");
 			sleep(1);
-			//SendSysMessage(dude, "There were " + ppl-1 + " other defenders in the raid.");	
+			//SendSysMessage(dude, "There were " + ppl-1 + " other defenders in the raid.");
 			//sleep(1);
-			//SendSysMessage(dude, (initialgold-endgold) + "gp was looted by the monsters.");	
+			//SendSysMessage(dude, (initialgold-endgold) + "gp was looted by the monsters.");
 			AwardQuestPoints(0x6C361768, dude.serial, gp);
 			//CreateItemInBackpack( dude, 0xeed, gp );
 		endif

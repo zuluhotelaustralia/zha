@@ -40,19 +40,19 @@ function main_AI_loop()
 						RevokePrivilege( me, "invul" );
 						//MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 						SetObjProperty(me,"guardkill",1);
-						ApplyDamage( me, GetMaxHp(me) + 3 );
+						me.kill();
 					endif
 				else
 					if (!master)
 						MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 						SetObjProperty(me,"guardkill",1);
-						ApplyDamage( me, GetMaxHp(me) + 3 );
+						me.kill();
 					endif
 				endif
 			else
 				MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 				SetObjProperty(me,"guardkill",1);
-				ApplyDamage( me, GetMaxHp(me) + 3 );
+				me.kill();
 			endif
 			endif
 			ev := sleepmode();
@@ -104,9 +104,9 @@ function main_AI_loop()
         until (! (ev := os::wait_for_event(2)) );
 	endif
 
-   endwhile     
+   endwhile
 
-endfunction       
+endfunction
 
 function look_around()
 

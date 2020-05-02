@@ -10,7 +10,7 @@
  -Shout out how much gold is left
  -give an aproxamation on how many enemys are left
  -patrol around gold area
- 
+
 
 */
 
@@ -107,7 +107,7 @@ program RaidDefendPlayers()
 
         until (!(ev := os::wait_for_event(1)) );
 
-   endwhile     
+   endwhile
 
 
 endprogram
@@ -122,7 +122,7 @@ function CloseDistance( opponent )
 	endif
 
     case (Distance( me, opponent )) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
             return 1;
         default:
@@ -156,7 +156,7 @@ function KillMe()
 	DisableMainEvents();
 	MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SetObjProperty(me,"guardkill",1);
-	ApplyDamage( me, GetMaxHp(me) + 3 );
+	me.kill();
 endfunction
 
 function DistanceToLocation( locx, locy )
@@ -359,7 +359,7 @@ function Say_random_string(stnumber,target1)
 				1:  say("Die you " + TruncateArticle(target1.name) + "!");
 				2:  say("Prepare to die, " + TruncateArticle(target1.name) + "!");
 			endcase
-	
+
 
 		default: return;
 	endcase

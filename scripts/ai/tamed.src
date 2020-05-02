@@ -108,8 +108,8 @@ program TamedAI()
 		else
 			AddToMastersTamedArray();
 		endif
-	endif 
-	
+	endif
+
 	if (master.isA(POLCLASS_NPC) && !GetObjProperty(me,"Legion"))
 		if (GetObjProperty(me,"#restarting"))
 			GoWild();
@@ -237,7 +237,7 @@ function Fight( opponent )
 						endif
 					endif
 					TurnToward( opponent );
-				endif				
+				endif
 			EVID_PEACEMADE:
 				SetWarMode( 0 );
 				opponent := 0;
@@ -318,7 +318,7 @@ function Transfer()
 
 	if( GetObjProperty( me, "summoned" ) ||
 	    GetObjProperty( me, "animated" ) ||
-	    GetObjProperty( me, "charmed" ) || 
+	    GetObjProperty( me, "charmed" ) ||
 	    GetObjProperty( me, "specialsteed" ))
 		return;
 	endif
@@ -387,7 +387,7 @@ function Release()
 			PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
 			MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
-			ApplyDamage( me, GetMaxHp(me) + 3 );
+			me.kill();
 			set_critical(0);
 		else
 			say("*Argh*");
@@ -582,15 +582,15 @@ endfunction
 
 
 function OpenMyPack();
-	
-	
+
+
 	if (!master)
 		master := SystemFindObjectBySerial( masterserial );
 		me.setmaster( master );
 	endif
 
-	
-	
+
+
 	if (Distance(me,master) > 1)
 		return;
 	endif
@@ -623,19 +623,19 @@ function OpenMyPack();
 		elseif (me.npctemplate=="paladinsteed" && GetClass(master)!=CLASSEID_PALADIN)
 			SendSysMessage(master, "The animal refuses to accept you as a rider");
 		endif
-	endif			
+	endif
 	master.hidden := 0;
 
 	var alreadymounted := GetEquipmentByLayer( master, 25 );
 	if (alreadymounted)
 		return;
 	endif
-	
+
 	if (master.dead)
-	
+
 		return;
 	endif
-	
+
 	if (master.z != me.z)
 		return;
 	endif
@@ -718,7 +718,7 @@ function OpenMyPack();
 			EquipItem(master,mount);
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			ApplyDamage( me, GetMaxHp(me) + 3 );
+			me.kill();
 
 			set_critical(0);
 			sleep(1);
@@ -726,7 +726,7 @@ function OpenMyPack();
 			MoveObjectToLocation(me, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			ApplyDamage( me, GetMaxHp(me) + 3 );
+			me.kill();
 			RemoveFromMastersTamedArray();
 
 		endif
@@ -1193,7 +1193,7 @@ function flee(opponent)
 				MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 				RevokePrivilege( me, "invul" );
 				SetObjProperty(me,"guardkill",1);
-				ApplyDamage( me, GetMaxHp(me) + 3 );
+				me.kill();
 			endif
 		else
 			numflees := numflees + 1;
@@ -1233,8 +1233,8 @@ function GoWild()
 	if (IsASkillTamedOrSpellboundMonster())
 		RemoveFromMastersTamedArray();
 	endif
-	
-	
+
+
 	me.script := npccfg[me.npctemplate].script;
 	me.name := npccfg[me.npctemplate].name;
 	if( me.name["<random>"] )
@@ -1304,7 +1304,7 @@ function criminalCheck(attacker)
 				endif
 			endif
 		endif
-	
+
 		if( !master.criminal )
 			// Set criminal only if the the master is not a criminal
 			attacker.SetCriminal(1);
@@ -1319,5 +1319,5 @@ endfunction
 
 function AttemptPossession(who, me)
 	SendSysMessage(who, "You attempt to possess " + who.me);
-	
+
 endfunction

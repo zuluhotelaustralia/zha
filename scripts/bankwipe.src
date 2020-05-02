@@ -1,6 +1,6 @@
 use os;
 use uo;
-use vitals; 
+use vitals;
 use storage;
 
 program storagewipe()
@@ -16,7 +16,7 @@ return;
 	endnum := npctest.serial;
 	RevokePrivilege( npctest, "invul" );
 	SetObjProperty(npctest, "guardkill", 1);
-	ApplyDamage( npctest, 510 );
+	npctest.kill();
 
 	print("Wiping orphaned bank storage locations");
 

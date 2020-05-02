@@ -790,7 +790,7 @@ program textcmd_info( character, whom )
     if (tempitem!="") data[154] := who.title_race; endif
 
     var guild_id:=GetObjProperty(who,"guild_id");
-   
+
     if (guild_id.errortext)
     layout[13]:="";
     layout[14]:="";
@@ -812,7 +812,7 @@ else
     data[146] :="n/a";
 endif
 
-    var result := SendDialogGump( character, layout, data );  
+    var result := SendDialogGump( character, layout, data );
     var reskey;
 
     foreach key in (result.keys)
@@ -1129,7 +1129,7 @@ endif
 if (result[0]==33) // notes *****************************************************************************
 
 	if (who.isA(POLCLASS_NPC)) return; endif
-	
+
 	var notes := UnPack(acc.GetProp("Notes"));
 	if (!notes)
 		notes := array;
@@ -1140,7 +1140,7 @@ if (result[0]==33) // notes ****************************************************
 		notes[1] := firstnote;
 	endif
 	var currentpage := 1; // Sno 24/1/03 - making more than 1 page for notes.
-	
+
 	while (1)
 		SetNotes(notes[currentpage]);
 		testdata[15] := CStr(currentpage);
@@ -1148,7 +1148,7 @@ if (result[0]==33) // notes ****************************************************
 
 		var subnote, i;
 		notes[currentpage] := "";
-		
+
 		for (i:=2; i<=12; i:=i+1)
 			subnote := whataction[i];
 			subnote[1, find(subnote, ": ", 1)+1] := "";
@@ -1157,7 +1157,7 @@ if (result[0]==33) // notes ****************************************************
 			endif
 		endfor
 		acc.setprop("Notes", Pack(notes));
-	
+
 		case(whataction[0])
 			1:
 				return;
@@ -1241,7 +1241,7 @@ endif
 if (!who.dead)
 RevokePrivilege( who, "invul" );
 SetObjProperty(who, "guardkill", 1);
-ApplyDamage( who, GetHp(who) ); // Updated from old Damage call, ensure logic is the same. - Seravy
+who.kill();
 SendSysMessage( character, whoname + " has been killed!" );
 else
 SendSysMessage( character, whoname + " is not dead!" );
@@ -1395,7 +1395,7 @@ function FillInSkills( who )
        data[datindx] := CInt(skillvalue/10) + "." + CInt(skillvalue%10);
        skillindx := skillindx + 1;
    endfor
-   
+
    //temporary skill mods
    for( skillindx := 0; skillindx <= 48; skillindx := skillindx + 1 )
    	var sign := "+";
@@ -1448,8 +1448,8 @@ function FillInWeapon( who )
 
       if(who.isA(POLCLASS_NPC)) //Hi, i'm an NPC
            var dam := npcfile[who.npctemplate].AttackDamage;
-           var weap := npcfile[who.npctemplate].AttackSkillId;     
-           var ar := npcfile[who.npctemplate].AR;     
+           var weap := npcfile[who.npctemplate].AttackSkillId;
+           var ar := npcfile[who.npctemplate].AR;
 
            if( weap )
               data[138] := weap;
@@ -1482,7 +1482,7 @@ function FillInProts(who)
 	var mr2 := GetObjProperty(who, "SpellReflect");
 	var pi2 := GetObjProperty(who, "PoisonImmunity");
 	var free := GetObjProperty(who, "FreeAction");
-	
+
 	if (earth)
 		data[169] := CStr(earth);
 	endif
@@ -1525,7 +1525,7 @@ function FillInProts(who)
 	if (free)
 		data[195] := CStr(free);
 	endif
-	
+
 endfunction
 
 function EditStat( who, character, result )

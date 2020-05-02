@@ -101,7 +101,7 @@ function CloseDistance( opponent )
   if (sleepdelay < 0) sleepdelay := 0; endif
 
 	var weprange;
-	if (!weaponType.maxrange)	
+	if (!weaponType.maxrange)
 		weprange:=1;
 	else
 		weprange:=weaponType.maxrange;
@@ -113,7 +113,7 @@ function CloseDistance( opponent )
 		WalkToward( opponent );
 		sleepms(sleepdelay);
 		return 0;
-	endif 
+	endif
 
    /* case Distance( me, opponent )
         1:
@@ -137,7 +137,7 @@ function Fetch()
 	endif
 
 	var tobj := Target(master);   //object I'm supposed to get
-	if (tobj.container)       
+	if (tobj.container)
 		return;
 	endif
 
@@ -388,7 +388,7 @@ function ProcessSpeech(ev)
 		staying := 1;
 	endif
 
-	
+
 endfunction
 
 function AllCommand(evtype,what)
@@ -414,7 +414,7 @@ function cast_meteor()
     foreach mobile in targets
 	   var dmg := Random((CInt( CInt(GetMaxHp(me)/2.5) * GetHp(me))/GetMaxHp(me)))+5;
 	   PlayMovingEffect(me, mobile,MOVING_EFFECT_FIREBALL, 10,1,1);
-	   ApplyDamage(mobile, dmg);          
+	   ApplyDamage(mobile, dmg);
     endforeach
 
 endfunction
@@ -422,7 +422,7 @@ endfunction
 
 
 function Fight( opponent )
-	
+
 	var targetname := opponent.name;
 	var oldfollowing := following;
 
@@ -490,7 +490,7 @@ function Fight( opponent )
 						endif
 					endif
 					TurnToward( opponent );
-				endif				
+				endif
 			EVID_PEACEMADE:
 				SetWarMode( 0 );
 				opponent := 0;
@@ -565,7 +565,7 @@ function SayOk()
 
 	if (me.graphic == 0x3a)
 		PlaySoundEffect( me, 0x1d4 );//wisp
-	
+
 	elseif(GetObjProperty(me, "Type")=="Orc") // for goblin guard
 		PlaySoundEffect( me, 0x178 );
 	else
@@ -765,13 +765,13 @@ endfunction
 
 function freezeMe()
 	set_critical(1);
-	
+
 	if (!me.frozen)
 		me.frozen := 1;
 		PrintTextAbovePrivate(me, "Your follower is now frozen in place.", master);
 		SetObjProperty(me, "#FrozenByMaster", 1);
 	endif
-	
+
 	set_critical(0);
 endfunction
 
@@ -783,7 +783,7 @@ function thawMe()
 		PrintTextAbovePrivate(me, "Your follower is now moving freely.", master);
 		EraseObjProperty(me, "#FrozenByMaster");
 	endif
-	
+
 	set_critical(0);
 endfunction
 
@@ -807,7 +807,7 @@ function criminalCheck(attacker)
 				endif
 			endif
 		endif
-	
+
 		if( !master.criminal )
 			// Set criminal only if the the master is not a criminal
 			attacker.SetCriminal(1);
@@ -842,7 +842,7 @@ function flee(opponent)
 				MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 				RevokePrivilege( me, "invul" );
 				SetObjProperty(me,"guardkill",1);
-				ApplyDamage( me, GetMaxHp(me) + 3 );
+				me.kill();
 			endif
 		else
 			numflees := numflees + 1;

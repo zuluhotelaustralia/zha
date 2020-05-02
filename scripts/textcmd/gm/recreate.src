@@ -9,21 +9,21 @@ program textcmd_kill( who )
 	if (!checkStaff(who, "recreate", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
-	
+
     var tgt := TargetCoordinates( who );
-   
+
     if (tgt.mobile)
         var obj := tgt.mobile.npctemplate;
         var x := tgt.mobile.x;
         var y := tgt.mobile.y;
         var z := tgt.mobile.z;
-       
+
         var mob := tgt.mobile;
 
-      
+
             RevokePrivilege( mob, "invul" );
             SetObjProperty(mob, "guardkill", 1);
-            ApplyDamage( mob, GetHp(mob) ); // Updated from old Damage call, ensure logic is the same.
+            mob.kill();
             Detach();
             sleep(2);
             CreateNpcFromTemplate(obj,x,y,z);

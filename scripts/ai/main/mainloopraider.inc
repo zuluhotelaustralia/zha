@@ -122,7 +122,7 @@ function main_AI_loop()
 		else
 			ev := os::wait_for_event( 1 );
 		endif
-	
+
 		if ((ev) && (ev.source))
 			case (ev.type)
 				SYSEVENT_ENTEREDAREA: //this is clogging up when there are alot on npcs in one area
@@ -171,9 +171,9 @@ function main_AI_loop()
 			look_around();
 		endif
 
-   endwhile     
+   endwhile
 
-endfunction      
+endfunction
 
 
 function FindPathZHA() //Finds way along path to goal and check los if we stay in the same point for too long
@@ -414,7 +414,7 @@ function KillME()
 	DisableMainEvents();
 	MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SetObjProperty(me,"guardkill",1);
-	ApplyDamage( me, GetMaxHp(me) + 8 );
+	me.kill();
 endfunction
 
 function RemoveDEXUpgd()

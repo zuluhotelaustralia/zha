@@ -77,7 +77,7 @@ function QuestieSetup()
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
 			// MoveObjectToLocation(me,5288 , 1176 , 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
-			ApplyDamage( me, GetMaxHp(me) + 3 );
+			me.kill();
 		endif
 	else
 		master := me;

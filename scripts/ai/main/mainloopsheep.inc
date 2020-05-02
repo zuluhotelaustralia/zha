@@ -72,9 +72,9 @@ function main_AI_loop()
 		endcase
 	endif
 
-   endwhile     
+   endwhile
 
-endfunction       
+endfunction
 
 function RunLikeHell(opponent)
 
@@ -128,8 +128,8 @@ function CheckSheepAmount()
 		endif
 	endforeach
 
-	if ( Random(500) < deathchance )		
-		ApplyDamage( me, GetMaxHp(me) + 3 );
+	if ( Random(500) < deathchance )
+		me.kill();
 	endif
 
 endfunction

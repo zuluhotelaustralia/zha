@@ -39,9 +39,9 @@ function Fight( opponent )
 
 	var wasmoving:=1;
 
-    while ( (opponent) and not 
-	    (opponent.dead or opponent.hidden or opponent.concealed) and 
-	    (distance(me,opponent) < 20) ) 
+    while ( (opponent) and not
+	    (opponent.dead or opponent.hidden or opponent.concealed) and
+	    (distance(me,opponent) < 20) )
 
 		if (Random(50) == 1)
 			PeaceMade();
@@ -56,7 +56,7 @@ function Fight( opponent )
 		loops := loops + 1;
 		steps := steps + 1;
 		waittime := 0;
-		if ( ( oldx >= (opponent.x-1) and (oldx <= opponent.x+1)) and 
+		if ( ( oldx >= (opponent.x-1) and (oldx <= opponent.x+1)) and
 		     ( oldy >= (opponent.y-1) and (oldy <= opponent.y+1)) and (oldd > 1) )
 			//our opponent hasn't moved much but we did, so:
 			if ( (steps > 4) and (oldd <= distance(me,opponent)) )
@@ -105,7 +105,7 @@ function Fight( opponent )
 			loops := loops +1;
 			waittime := 1;
 			RunTowardLocation(me.x+(Random(3)-1), me.y+(Random(3)-1));
-		endif			
+		endif
 	2:
 		//closedistance returned 2, which means the mob was peacemade:
 		PeaceMade();
@@ -143,7 +143,7 @@ function Fight( opponent )
     endwhile
 
     post_combat();
-      
+
 endfunction
 
 function EnableCombatEvents()
@@ -174,7 +174,7 @@ function flee(opponent)
 			// MoveObjectToLocation(me,5288,1176,0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me,"guardkill",1);
-			ApplyDamage( me, me.maxhp + 3 );
+			me.kill();
 		else
 			numflees := numflees + 1;
 		endif

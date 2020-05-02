@@ -233,9 +233,9 @@ function sleepmode()
 		endcase
 		endif
 		until (! (ev := os::wait_for_event(120)) );
-	endwhile     
+	endwhile
 
-endfunction      
+endfunction
 
 function SetMeUp()
 
@@ -863,7 +863,7 @@ function ObeyCommand(ev)
 				guarding := what;
 				say("Gotcha covered, " + guarding.name);
 			endif
-		endif	
+		endif
 	elseif (evtext["all guard"])
 		if (evtext["guard me"])
 			guarding := you;
@@ -873,7 +873,7 @@ function ObeyCommand(ev)
 			if (GetHp(what))
 				AllCommand(EVID_ALL_GUARD_CMD, what);
 			endif
-		endif	
+		endif
 	elseif (evtext[mename + " fetch"]  || (evtext[mename + " get"]))
 		TurnToward(you);
 		say("Are you talking to me?");
@@ -887,7 +887,7 @@ function ObeyCommand(ev)
 			if ( Dismount(me,mount) )
 				say("all transfer");
 			endif
-		endif	
+		endif
 	elseif ( (evtext[mename + " ride"]) || (evtext[mename + " mount"]) )
 		TurnToward(you);
 		var alreadymounted := GetEquipmentByLayer( me, 25 );
@@ -1090,14 +1090,14 @@ function MountHorse(horse)
 			MoveObjectToLocation(horse, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			RevokePrivilege( horse, "invul" );
 			SetObjProperty(horse,"guardkill",1);
-			ApplyDamage(horse,GetMaxHp(horse)+3);
+			horse.kill();
 			EquipItem(me,mount);
 
 			if (horse)
 				MoveObjectToLocation(horse, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
 				RevokePrivilege(horse, "invul" );
 				SetObjProperty(horse,"guardkill",1);
-				ApplyDamage(horse,GetMaxHp(horse)+3);
+				horse.kill();
 			endif
 			set_critical(0);
 		endif
@@ -1330,7 +1330,7 @@ function DrinkHeal()
 				heal_amount := RandomDiceStr("2d12+3");
 			else
 				heal_amount := RandomDiceStr("5d12+3");
-			endif		
+			endif
 			HealDamage(me, heal_amount);
 			DestroyItem(item);
 			PlaySoundEffect( me,  SOUND_EFFECT_HEAL );

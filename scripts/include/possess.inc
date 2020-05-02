@@ -173,7 +173,7 @@ function unpossess( me )
 	foreach item in ListRootItemsInContainer(npc.backpack)
 		if (item.newbie) MoveItemToContainer(item, me.backpack); endif
 	endforeach
-	
+
 	SetHp(me, GetMaxHP(me));
 	SetMana(me, GetMaxMana(me));
 	SetStamina(me, GetMaxStamina(me));
@@ -244,7 +244,7 @@ function unpossesscorpse( me, corpse )
 	MoveObjectToLocation(npc, 5288, 1176, 0, _DEFAULT_REALM, 0x40000000); //AutoConversion
 	SetObjProperty(npc, "guardkill", 1);
 	RevokePrivilege( npc, "invul" );
-	ApplyDamage( npc, GetHp(npc) );
+	npc.kill();
 
 	var i;
 	for (i := 0; i <= SKILLID__HIGHEST; i := i + 1)

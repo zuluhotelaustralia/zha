@@ -80,7 +80,7 @@ program RaidDefendPlayers()
 
         until (!(ev := os::wait_for_event(1)) );
 
-   endwhile     
+   endwhile
 
 
 endprogram
@@ -95,7 +95,7 @@ function CloseDistance( opponent )
 	endif
 
     case (Distance( me, opponent )) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
             return 1;
         default:
@@ -126,12 +126,12 @@ function cleareventque()
 endfunction
 
 function KillMe()
-	//NOT NEAR PLAYERS	
+	//NOT NEAR PLAYERS
 
 	DisableMainEvents();
 	MoveObjectToLocation(me,5288, 1176, 0, _DEFAULT_REALM,MOVEOBJECT_FORCELOCATION); //AutoConversion
 	SetObjProperty(me,"guardkill",1);
-	ApplyDamage( me, GetMaxHp(me) + 3 );
+	me.kill();
 endfunction
 
 function DistanceToLocation( locx, locy )

@@ -92,7 +92,7 @@ program merchant()
 							buyitem(ev.source, ev.item);
 						endif
 					endif
-			endcase 
+			endcase
 			sleep(1);
 		endif
 
@@ -101,7 +101,7 @@ program merchant()
 			nextpay := ReadGameClock()+10800; //3 hours so 1600gp a day
 			SetObjProperty(me, "nextpay", nextpay);
 		endif
-       
+
 	endwhile
 
 endprogram
@@ -203,7 +203,7 @@ function ProcessSpeech(byref ev);
 
 		var this := Target(ev.source);
 		var i;
-	
+
 		for( i := LAYER_START; i <= LAYER_END; i := i + 1 )
 		var equiped_item := GetEquipmentByLayer((ev.source), i );
 		if( this == equiped_item )
@@ -215,7 +215,7 @@ function ProcessSpeech(byref ev);
 
 
 		wear_item(this);
-	
+
 	elseif ((ev.text["strip"]) && (ev.source.serial == master))
 		TurnToward( ev.source );
 		say("Ooh, I think I feel a draft!");
@@ -250,7 +250,7 @@ function ProcessSpeech(byref ev);
 	elseif (ev.text["log"])
 		TurnToward( ev.source );
 		ViewMessageLog(ev.source);
-	
+
 	elseif ((ev.text["colour"] || ev.text["color"]) && (ev.source.serial == master))
 		TurnToward( ev.source );
 		ChangeMerchantColour(ev.source);
@@ -331,7 +331,7 @@ function StockItem(byref item, byref seller)
 		say("I am only permitted to sell 10 different items at one time.");
 		return;
 	endif
-	
+
 	if (item.objtype == UOBJ_GOLD_COIN)
 		TakeGold(item);
 		return;
@@ -506,7 +506,7 @@ function GetPay()
 			me.hidden := 1;
 			RevokePrivilege( me, "invul" );
 			SetObjProperty(me, "guardkill", 1);
-			ApplyDamage( me, GetHp(me) +3);
+			me.kill();
 		endif
 	else
 		EraseObjProperty(me,"pastdue");
@@ -597,7 +597,7 @@ function Fireme(byref ev)
 	MoveObjectToLocation(me, 5288, 1176, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 	RevokePrivilege(me, "invul");
 	SetObjProperty(me, "guardkill", 1);
-	ApplyDamage(me, GetHp(me) +3);
+	me.kill();
 
 endfunction
 
@@ -640,7 +640,7 @@ function AddThingsToBuy()
 				newbuyobj.append (buyobj[i]);
 			endif
 		endfor
-	
+
 		if (!len(newbuylist))
 			EraseObjProperty(me, "buylist");
 			EraseObjProperty(me, "buyprice");
@@ -973,7 +973,7 @@ function buyitem(byref you, byref it)
 		mygold := 0;
 	endif
 
-//zeeber code 
+//zeeber code
 //Well they trying to top up since they can't bug abuse no more well no cash for them :)
     if( buyprice[index] < 0 )
       mygold :=0;
@@ -1066,7 +1066,7 @@ endfunction
 
 
 ///////////////////
-//  called at merchant AI startup, this function writes all the items the vendor is carrying to 
+//  called at merchant AI startup, this function writes all the items the vendor is carrying to
 //  a config file, which can then be used to make a webpage
 // NOT USED ON ZHA!!! Barns
 ///////////////////
@@ -1155,19 +1155,19 @@ function ChangeMerchantName(master)
 	if (!vname || vname == error)
 		return;
 	endif
-	
+
 	//checking for validity
-	
+
 	var hisname := lower(vname);
 	var cfg := ReadConfigFile("badnames");
 	var elem := FindConfigElem(cfg, hisname);
-	
+
 	var badname := (elem || !NameValidation(hisname));
 
 	if (badname)
 
 		while (badname)
-			SendSysMessage(master, "You have chosen an invalid name for this shard"); 	
+			SendSysMessage(master, "You have chosen an invalid name for this shard");
 			vname := SendTextEntryGump(master, "New vendor name:",	TE_CANCEL_ENABLE, TE_STYLE_NORMAL);
          hisname:=lower(vname);
 			var elem := FindConfigElem(cfg, lower(hisname));
@@ -1183,11 +1183,11 @@ function NameValidation(thestring)
   	var i, validstr:={"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", " ", "-", ".", "'"};
   	thestring:=lower(thestring);
   	for(i:=1;i<=len(thestring);i:=i+1)
-    	if(!(thestring[i] in validstr)) 
-			return 0; 
+    	if(!(thestring[i] in validstr))
+			return 0;
 		endif
   	endfor
-	
+
 	var name:=upper(thestring);
 	if (name["GM"])
 		return 0;
@@ -1210,7 +1210,7 @@ function NameValidation(thestring)
 	elseif (name["COUNS"])
 		return 0;
 	endif
-	
+
 	return 1;
 endfunction
 
@@ -1243,9 +1243,9 @@ function GiveSelling(master)
 endfunction
 
 function LogCheater(who, item)
-	
+
 	var desc := who.name + " / " + who.acctname;
-	
+
 	var elemkey := desc;
 	var props := array;
 	var prop := array;
@@ -1267,11 +1267,11 @@ function LogCheater(who, item)
 	prop.pname := "Item Sold";
 	prop.pvalue := item.desc;
 	props[4] := prop;
-	
+
 	prop.pname := "Item Serial";
 	prop.pvalue := item.serial;
 	props[5] := prop;
-	
+
 	prop.pname := "Occured At";
 	prop.pvalue := who.x + " " + who.y + " " + who.z;
 	props[6] := prop;
@@ -1279,11 +1279,11 @@ function LogCheater(who, item)
 	prop.pname := "Vendor Name";
 	prop.pvalue := me.name;
 	props[7] := prop;
-	
+
 	prop.pname := "Vendor Owner";
 	prop.pvalue := "" + GetObjProperty(me, "mn") + " (" + GetObjProperty(me, "master") + ")";
 	props[8] := prop;
-	
+
 	prop.pname := "Date/Time";
 	prop.pvalue := NowString();
 	props[9] := prop;

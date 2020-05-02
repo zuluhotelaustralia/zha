@@ -13,7 +13,7 @@ var me := Self();
 
 program listener()
 
-ApplyDamage(me, GetMaxHp(me) + 10000);
+me.kill();
 print("Listener died!");
 endprogram
 
