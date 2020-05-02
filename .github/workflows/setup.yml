@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 jobs:
   main:
+    runs-on: ubuntu-latest
     steps:
     - name: docker-login
       uses: azure/docker-login@v1
