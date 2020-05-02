@@ -4,8 +4,6 @@ jobs:
   build:
     using: 'docker'
     image: 'docker://docker.pkg.github.com/zuluhotelaustralia/zha/server:latest'
-    - name: Checkout
-      uses: actions/checkout@master
     - name: Compile
       run: |
         ./scripts/ecompile -C setup/ecompile.cfg
