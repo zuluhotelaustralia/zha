@@ -1,17 +1,11 @@
-name: Compile test
-
-on: [push, pull_request]
+name: Build
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: azure/docker-login@v1
-      with:
-        login-server: docker.pkg.github.com # default: index.docker.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - uses: actions/checkout@master
+    using: 'docker'
+    image: 'docker://docker.pkg.github.com/zuluhotelaustralia/zha/server:latest'
+    - name: Checkout
+      uses: actions/checkout@master
     - name: Compile
       run: |
         ./scripts/ecompile -C setup/ecompile.cfg
@@ -29,43 +23,3 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
-
-  notify_on_failure:
-    needs: build
-    runs-on: "ubuntu-latest"
-    if: failure()
-    steps:
-      - name: Discord notification failure
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: turleypol/actions-status-discord@master
-        with:
-          status: failure
-          job: Build
-          nofail: false
-  notify_on_success:
-    needs: build
-    runs-on: "ubuntu-latest"
-    if: success()
-    steps:
-      - name: Discord notification success
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: turleypol/actions-status-discord@master
-        with:
-          status: success
-          job: Build
-          nofail: false
-  notify_on_cancel:
-    needs: build
-    runs-on: "ubuntu-latest"
-    if: cancelled()
-    steps:
-      - name: Discord notification cancelled
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: turleypol/actions-status-discord@master
-        with:
-          status: cancelled
-          job: Build
-          nofail: false

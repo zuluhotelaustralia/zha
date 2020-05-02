@@ -1,0 +1,57 @@
+name: Setup
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    steps:
+    - name: docker-login
+      uses: azure/docker-login@v1
+      with:
+        login-server: docker.pkg.github.com # default: index.docker.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: docker-pull
+      run: |
+        docker pull docker.pkg.github.com/zuluhotelaustralia/zha/server:latest
+    - name: Build
+      uses: ./build
+  # notify_on_failure:
+  #   needs: main
+  #   runs-on: "ubuntu-latest"
+  #   if: failure()
+  #   steps:
+  #     - name: Discord notification failure
+  #       env:
+  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+  #       uses: turleypol/actions-status-discord@master
+  #       with:
+  #         status: failure
+  #         job: Build
+  #         nofail: false
+  # notify_on_success:
+  #   needs: main
+  #   runs-on: "ubuntu-latest"
+  #   if: success()
+  #   steps:
+  #     - name: Discord notification success
+  #       env:
+  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+  #       uses: turleypol/actions-status-discord@master
+  #       with:
+  #         status: success
+  #         job: Build
+  #         nofail: false
+  # notify_on_cancel:
+  #   needs: main
+  #   runs-on: "ubuntu-latest"
+  #   if: cancelled()
+  #   steps:
+  #     - name: Discord notification cancelled
+  #       env:
+  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+  #       uses: turleypol/actions-status-discord@master
+  #       with:
+  #         status: cancelled
+  #         job: Build
+  #         nofail: false
