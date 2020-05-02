@@ -4,6 +4,7 @@
 ## Use the \dev folder to put any interm scripts or items to not commit to git.
 
 # System files
+ecl-archive.tgz
 /pol.cfg
 /POLHook.cfg
 /pol.exe
