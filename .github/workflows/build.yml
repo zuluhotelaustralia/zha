@@ -5,8 +5,12 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest
     steps:
+    - uses: azure/docker-login@v1
+      with:
+        login-server: docker.pkg.github.com # default: index.docker.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/checkout@master
     - name: Compile
       run: |
