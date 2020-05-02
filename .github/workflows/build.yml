@@ -49,7 +49,7 @@ jobs:
   notify_discord:
     needs: build
     runs-on: "ubuntu-latest"
-    #if: github.ref == 'refs/heads/live-updates'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Discord notification ${{ needs.build.result }}
         env:
