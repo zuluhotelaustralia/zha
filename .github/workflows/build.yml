@@ -5,7 +5,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest
+    container:
+      image: node:10.16-jessie
     - uses: actions/checkout@master
     - name: Compile
       run: |
