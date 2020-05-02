@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest AS polserver
+FROM docker.pkg.github.com/zuluhotelaustralia/polcore/polcore:latest AS polserver
 
 FROM ubuntu:eoan
 

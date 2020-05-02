@@ -1,24 +1,29 @@
-name: Main
+name: Build
 
 on: [push, pull_request]
 
 jobs:
-  main:
+  build:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@master
-    - name: docker-login
-      uses: azure/docker-login@v1
+    container: docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest
+    - uses: actions/checkout@master
+    - name: Compile
+      run: |
+        ./scripts/ecompile -C setup/ecompile.cfg
+        tar -czvf ecl-archive.tgz `find . | egrep ".*\.ecl"`
+    - name: Create live update package
+      if: github.ref == 'refs/heads/live-updates'
+      uses: actions/upload-artifact@v1
       with:
-        login-server: docker.pkg.github.com # default: index.docker.io
+        name: ecl-archive-${{ github.sha }}
+        path: ecl-archive.tgz
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: zuluhotelaustralia/zha/server
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: docker-pull
-      run: |
-        docker pull docker.pkg.github.com/zuluhotelaustralia/zha/server:latest
-    - name: Build
-      uses: ./.github/workflows/build
+        registry: docker.pkg.github.com
 
 
   # notify_on_failure:
