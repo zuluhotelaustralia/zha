@@ -17,6 +17,8 @@ jobs:
         docker pull docker.pkg.github.com/zuluhotelaustralia/zha/server:latest
     - name: Build
       uses: ./build
+
+
   # notify_on_failure:
   #   needs: main
   #   runs-on: "ubuntu-latest"
