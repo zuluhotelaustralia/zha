@@ -26,7 +26,9 @@ jobs:
         cp /tmp/*.em scripts/
     - name: Compile
       run: |
-        scripts/ecompile -C setup/ecompile.cfg
+        pushd setup
+        ../scripts/ecompile -C ecompile.cfg
+        popd
         tar -czf ecl-archive.tgz `find . | egrep ".*\.ecl"`
     - name: Upload live update package
       #if: github.ref == 'refs/heads/live-updates'
