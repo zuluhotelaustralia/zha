@@ -26,23 +26,23 @@ jobs:
     - name: Compile
       run: |
         scripts/ecompile -A -T
-    - name: Create compiled script archive
-      run: |
-        tar -czvf ecl-archive.tgz `find . | egrep ".*\.ecl"`
+        tar -czf ecl-archive.tgz `find . | egrep ".*\.ecl"`
     - name: Upload live update package
-      if: github.ref == 'refs/heads/live-updates'
+      #if: github.ref == 'refs/heads/live-updates'
       uses: actions/upload-artifact@v1
       with:
         name: ecl-archive-${{ github.sha }}
         path: ecl-archive.tgz
     - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
+      uses: docker/build-push-action@v1
       with:
-        name: zuluhotelaustralia/zha/server
+        repository: zuluhotelaustralia/zha/server
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
-
+        tag_with_ref: true
+        tag_with_sha: true
+        add_git_labels: true
 
   # notify_on_failure:
   #   needs: main
