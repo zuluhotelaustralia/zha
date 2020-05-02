@@ -30,8 +30,7 @@ jobs:
         ../scripts/ecompile -C ecompile.cfg
         popd
         tar -czf ecl-archive.tgz `find . | egrep ".*\.ecl"`
-    - name: Upload live update package
-      #if: github.ref == 'refs/heads/live-updates'
+    - name: Upload compiled ecls
       uses: actions/upload-artifact@v1
       with:
         name: ecl-archive-${{ github.sha }}
@@ -47,42 +46,16 @@ jobs:
         tag_with_sha: true
         add_git_labels: true
 
-  # notify_on_failure:
-  #   needs: main
-  #   runs-on: "ubuntu-latest"
-  #   if: failure()
-  #   steps:
-  #     - name: Discord notification failure
-  #       env:
-  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-  #       uses: turleypol/actions-status-discord@master
-  #       with:
-  #         status: failure
-  #         job: Build
-  #         nofail: false
-  # notify_on_success:
-  #   needs: main
-  #   runs-on: "ubuntu-latest"
-  #   if: success()
-  #   steps:
-  #     - name: Discord notification success
-  #       env:
-  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-  #       uses: turleypol/actions-status-discord@master
-  #       with:
-  #         status: success
-  #         job: Build
-  #         nofail: false
-  # notify_on_cancel:
-  #   needs: main
-  #   runs-on: "ubuntu-latest"
-  #   if: cancelled()
-  #   steps:
-  #     - name: Discord notification cancelled
-  #       env:
-  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-  #       uses: turleypol/actions-status-discord@master
-  #       with:
-  #         status: cancelled
-  #         job: Build
-  #         nofail: false
+  notify_discord:
+    needs: build
+    runs-on: "ubuntu-latest"
+    #if: github.ref == 'refs/heads/live-updates'
+    steps:
+      - name: Discord notification ${{ needs.build.result }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: ${{ needs.build.result }}
+          job: Build
+          nofail: false
