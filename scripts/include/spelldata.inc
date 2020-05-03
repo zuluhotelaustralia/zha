@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////////////////////////////////////
-//										//
-//	spelldata.inc : 							//
-//										//
-//	This file include all the constant related to existing spells, as	//
-//	well as useful fuction about spells. The first line of each spell	//
-//	is the spellid, then his SFX anf finally his FX				//
-//										//
+//                                      //
+//  spelldata.inc :                             //
+//                                      //
+//  This file include all the constant related to existing spells, as   //
+//  well as useful fuction about spells. The first line of each spell   //
+//  is the spellid, then his SFX anf finally his FX             //
+//                                      //
 //////////////////////////////////////////////////////////////////////////////////
 use uo;
 use os;
@@ -67,587 +67,587 @@ const SPELL_DAMAGES_DICE_TYPE         := 5; // type of dices to throw
 //const SPELL_AFFECTS_HIDDEN       := 1;
 
 // Immunities constants
-const IMMUNED	:= 1;
-const CURSED	:= 2;
+const IMMUNED   := 1;
+const CURSED    := 2;
 
 
 // Elements contants
-const FIRE	:= 0x01;
-const AIR	:= 0x02;
-const EARTH	:= 0x04;
-const WATER	:= 0x08;
-const NECRO	:= 0x10;
-const HOLY	:= 0x20;
-const ACID	:= 0x80;
+const FIRE  := 0x01;
+const AIR   := 0x02;
+const EARTH := 0x04;
+const WATER := 0x08;
+const NECRO := 0x10;
+const HOLY  := 0x20;
+const ACID  := 0x80;
 
 // Error messages
-const ERROR_MSG_ANTI_MAGIC_AREA		:= "Spells cannot be cast here.";
-const ERROR_MSG_FIZZLE			:= "The spell fizzles";
-const ERROR_MSG_INTERRUPTED		:= "You were interrupted during the casting";
-const ERROR_MSG_LOST_CONCENTRATION	:= "You've lost your concentration!";
-const ERROR_MSG_NOT_ENOUGH_REAGENTS	:= "Insufficient Reagents.";
-const ERROR_MSG_NOT_ENOUGH_MANA		:= "Insufficient Mana.";
-const ERROR_MSG_NOT_ENOUGH_SKILL	:= "This spell is above yours magical capacities.";
-const ERROR_MSG_NOT_IN_SIGHT		:= "You can't see that.";
-const ERROR_MSG_WRONG_EQUIPMENT		:= "Your hands must be free to cast spells.";
+const ERROR_MSG_ANTI_MAGIC_AREA     := "Spells cannot be cast here.";
+const ERROR_MSG_FIZZLE          := "The spell fizzles";
+const ERROR_MSG_INTERRUPTED     := "You were interrupted during the casting";
+const ERROR_MSG_LOST_CONCENTRATION  := "You've lost your concentration!";
+const ERROR_MSG_NOT_ENOUGH_REAGENTS := "Insufficient Reagents.";
+const ERROR_MSG_NOT_ENOUGH_MANA     := "Insufficient Mana.";
+const ERROR_MSG_NOT_ENOUGH_SKILL    := "This spell is above yours magical capacities.";
+const ERROR_MSG_NOT_IN_SIGHT        := "You can't see that.";
+const ERROR_MSG_WRONG_EQUIPMENT     := "Your hands must be free to cast spells.";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Spell functions :										//
-//	This include all functions from spellrestrictions.inc, plus some more.			//
-//	Don't erase the spellrestrictions however, unless you are certain that you changed	//
-//	include "include/spellrestrictions" from ALL pkgs that used it.	Some parameters of	//
-//	the functions changed however.								//
+// Spell functions :                                        //
+//  This include all functions from spellrestrictions.inc, plus some more.          //
+//  Don't erase the spellrestrictions however, unless you are certain that you changed  //
+//  include "include/spellrestrictions" from ALL pkgs that used it. Some parameters of  //
+//  the functions changed however.                              //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 function ApplyElementalDamage( caster, cast_on, circle, dmg, element, affectsHidden := 0 )
 
-	if(caster.dead) return; endif
-	if(cast_on.dead) return; endif
-	if(cast_on.hidden /*&& !affectsHidden*/) return; endif
-	var basedamage:=dmg;
-	var extra;
-	var resultprot := GetResultingElementalProt( cast_on, element );
-	if( resultprot <= 4 )
+    if(caster.dead) return; endif
+    if(cast_on.dead) return; endif
+    if(cast_on.hidden /*&& !affectsHidden*/) return; endif
+    var basedamage:=dmg;
+    var extra;
+    var resultprot := GetResultingElementalProt( cast_on, element );
+    if( resultprot <= 4 )
 
-		dmg := basedamage - CInt(dmg * resultprot * 25 / 100);
-		basedamage:=dmg;
-		db(caster, "Base damage: "+dmg);
-		// Modify damage based on victim's class resistance
-		var mult:=GetResistanceMultiplier(cast_on, element);
-		if (mult < 0)
-			extra := (basedamage * (1 + abs(mult))) - basedamage;
-		else
-			extra := (basedamage / (1 + mult)) - basedamage;
-		endif
-		dmg:=dmg+extra;
-		db(caster, "Resistance: "+extra);
-		// Modify damage based caster's class modifier
-		mult:=GetResistanceMultiplier(caster, element);
-		if (mult < 0)
-			extra := (basedamage / (1 + abs(mult))) - basedamage;
-		else
-			extra := (basedamage * (1.2 + mult)) - basedamage;
-		endif
-		dmg:=CInt(dmg+extra);
-		db(caster, "Bonus: "+extra);
-		db(caster, "Total: "+dmg);
-		ApplyTheDamage( cast_on, caster, Resisted(caster, cast_on, circle, dmg), DMGID_MAGIC + element );
-	else
-		HealDamage( cast_on, CInt(dmg * (resultprot - 4) * 0.25) );
-	endif
+        dmg := basedamage - CInt(dmg * resultprot * 25 / 100);
+        basedamage:=dmg;
+        db(caster, "Base damage: "+dmg);
+        // Modify damage based on victim's class resistance
+        var mult:=GetResistanceMultiplier(cast_on, element);
+        if (mult < 0)
+            extra := (basedamage * (1 + abs(mult))) - basedamage;
+        else
+            extra := (basedamage / (1 + mult)) - basedamage;
+        endif
+        dmg:=dmg+extra;
+        db(caster, "Resistance: "+extra);
+        // Modify damage based caster's class modifier
+        mult:=GetResistanceMultiplier(caster, element);
+        if (mult < 0)
+            extra := (basedamage / (1 + abs(mult))) - basedamage;
+        else
+            extra := (basedamage * (1.2 + mult)) - basedamage;
+        endif
+        dmg:=CInt(dmg+extra);
+        db(caster, "Bonus: "+extra);
+        db(caster, "Total: "+dmg);
+        ApplyTheDamage( cast_on, caster, Resisted(caster, cast_on, circle, dmg), DMGID_MAGIC + element );
+    else
+        HealDamage( cast_on, CInt(dmg * (resultprot - 4) * 0.25) );
+    endif
 
 endfunction
 
 
 function ApplyElementalDamageNoResist( on_who, by_who, dmg, element, affectsHidden := 0 )
 
-	if(by_who.dead) return; endif
-	if(on_who.dead) return; endif
-	if(on_who.hidden /*&& !affectsHidden*/) return; endif
+    if(by_who.dead) return; endif
+    if(on_who.dead) return; endif
+    if(on_who.hidden /*&& !affectsHidden*/) return; endif
 
-	var resultprot := GetResultingElementalProt( on_who, element );
+    var resultprot := GetResultingElementalProt( on_who, element );
 
-	if( resultprot < 4 )
-		dmg := dmg - CInt(dmg * resultprot * 25 / 100);
-		var mult:=GetResistanceMultiplier(on_who, element);
+    if( resultprot < 4 )
+        dmg := dmg - CInt(dmg * resultprot * 25 / 100);
+        var mult:=GetResistanceMultiplier(on_who, element);
 
-		if (mult < 0)
-			dmg := dmg * (1 + abs(mult));
-		else
-			dmg := dmg / (1 + mult);
-		endif
-		ApplyTheDamage( on_who, by_who, dmg, element );
-	else
-		HealDamage( on_who, CInt(dmg * (resultprot - 4) * 0.25) );
-	endif
+        if (mult < 0)
+            dmg := dmg * (1 + abs(mult));
+        else
+            dmg := dmg / (1 + mult);
+        endif
+        ApplyTheDamage( on_who, by_who, dmg, element );
+    else
+        HealDamage( on_who, CInt(dmg * (resultprot - 4) * 0.25) );
+    endif
 
 endfunction
 
 
 function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, affectsHidden := 0 )
 
-	if(caster.dead) return; endif
-	if(cast_on.dead) return; endif
-	if(cast_on.hidden /*&& !affectsHidden*/) return; endif
-	var basedmg:=dmg;
-	var resultprot := GetResultingPlaneProtection( cast_on, plane );
+    if(caster.dead) return; endif
+    if(cast_on.dead) return; endif
+    if(cast_on.hidden /*&& !affectsHidden*/) return; endif
+    var basedmg:=dmg;
+    var resultprot := GetResultingPlaneProtection( cast_on, plane );
 
-	//caster bonus damages
-	/*
-	if (plane==NECRO)
-		dmg := CInt( dmg * ClasseBonus( caster, CLASSEID_NECROMANCER ) );
-	elseif(plane==HOLY)
-		dmg := CInt( dmg * ClasseBonus( caster, CLASSEID_PRIEST ) );
-	endif
-	*/
-	//caston class bonus 'tolerances'
-	//var cast_on_necromancerlevel := Cint(GetObjProperty(cast_on, CLASSEID_NECROMANCER));
-	//var cast_on_deathknightlevel := Cint(GetObjProperty(cast_on, CLASSEID_DEATHKNIGHT));
-	//var cast_on_paladinlevel := Cint(GetObjProperty(cast_on, CLASSEID_PALADIN));
-	//var cast_on_clericlevel := Cint(GetObjProperty(cast_on, CLASSEID_PRIEST));
+    //caster bonus damages
+    /*
+    if (plane==NECRO)
+        dmg := CInt( dmg * ClasseBonus( caster, CLASSEID_NECROMANCER ) );
+    elseif(plane==HOLY)
+        dmg := CInt( dmg * ClasseBonus( caster, CLASSEID_PRIEST ) );
+    endif
+    */
+    //caston class bonus 'tolerances'
+    //var cast_on_necromancerlevel := Cint(GetObjProperty(cast_on, CLASSEID_NECROMANCER));
+    //var cast_on_deathknightlevel := Cint(GetObjProperty(cast_on, CLASSEID_DEATHKNIGHT));
+    //var cast_on_paladinlevel := Cint(GetObjProperty(cast_on, CLASSEID_PALADIN));
+    //var cast_on_clericlevel := Cint(GetObjProperty(cast_on, CLASSEID_PRIEST));
 
-	if( resultprot < 4 )
-		dmg := basedmg - CInt(dmg * resultprot * 25 / 100);
-		basedmg:=dmg;
-		var extra;
-		db(caster, "Base damage: "+dmg);
-		// Modify damage based on victim's class modifier
-		var mult:=GetResistanceMultiplier(cast_on, plane);
-		if (mult < 0)
-			extra := (basedmg * (1 + abs(mult))) - basedmg;
-		else
-			extra := (basedmg / (1 + mult)) - basedmg;
-		endif
-		dmg:=dmg+extra;
-		db(caster, "Damage after defender resistance: "+dmg);
-		// Modify damage based caster's class modifier
-		mult:=GetResistanceMultiplier(caster, plane);
-		if (mult < 0)
-			extra := (basedmg / (1 + abs(mult))) - basedmg;
-		else
-			extra := (basedmg * (1.2 + mult)) - basedmg;
-		endif
-		dmg:=dmg+extra;
-		db(caster, "Damage after attacker bonus: "+dmg);
-		/*
-		if (plane==NECRO)
-			if (cast_on_necromancerlevel>0)
-				dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_NECROMANCER ) );
-			elseif (cast_on_deathknightlevel>0)
-				dmg := CInt( dmg / (1 + ClasseBonus( cast_on, CLASSEID_DEATHKNIGHT )/2) ); //1/2 the bonus
-			endif
+    if( resultprot < 4 )
+        dmg := basedmg - CInt(dmg * resultprot * 25 / 100);
+        basedmg:=dmg;
+        var extra;
+        db(caster, "Base damage: "+dmg);
+        // Modify damage based on victim's class modifier
+        var mult:=GetResistanceMultiplier(cast_on, plane);
+        if (mult < 0)
+            extra := (basedmg * (1 + abs(mult))) - basedmg;
+        else
+            extra := (basedmg / (1 + mult)) - basedmg;
+        endif
+        dmg:=dmg+extra;
+        db(caster, "Damage after defender resistance: "+dmg);
+        // Modify damage based caster's class modifier
+        mult:=GetResistanceMultiplier(caster, plane);
+        if (mult < 0)
+            extra := (basedmg / (1 + abs(mult))) - basedmg;
+        else
+            extra := (basedmg * (1.2 + mult)) - basedmg;
+        endif
+        dmg:=dmg+extra;
+        db(caster, "Damage after attacker bonus: "+dmg);
+        /*
+        if (plane==NECRO)
+            if (cast_on_necromancerlevel>0)
+                dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_NECROMANCER ) );
+            elseif (cast_on_deathknightlevel>0)
+                dmg := CInt( dmg / (1 + ClasseBonus( cast_on, CLASSEID_DEATHKNIGHT )/2) ); //1/2 the bonus
+            endif
 
-		elseif(plane == HOLY)
-			if (cast_on_clericlevel>0)
-				dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_PRIEST ) );
-			elseif (cast_on_paladinlevel>0)
-				dmg := CInt( dmg / (1 + ClasseBonus( cast_on, CLASSEID_PALADIN )/2) ); //1/2 the bonus
-			endif
-		endif
-		*/
-		ApplyTheDamage( cast_on, caster, Resisted( caster, cast_on, circle, dmg ), DMGID_MAGIC + plane );
-	else
-		HealDamage( cast_on, CInt(dmg * (resultprot - 4) * 25 / 100) );
-	endif
+        elseif(plane == HOLY)
+            if (cast_on_clericlevel>0)
+                dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_PRIEST ) );
+            elseif (cast_on_paladinlevel>0)
+                dmg := CInt( dmg / (1 + ClasseBonus( cast_on, CLASSEID_PALADIN )/2) ); //1/2 the bonus
+            endif
+        endif
+        */
+        ApplyTheDamage( cast_on, caster, Resisted( caster, cast_on, circle, dmg ), DMGID_MAGIC + plane );
+    else
+        HealDamage( cast_on, CInt(dmg * (resultprot - 4) * 25 / 100) );
+    endif
 
 endfunction
 
 
 function BurnSelf( caster, circle )
 
-	if(caster.dead) return; endif
+    if(caster.dead) return; endif
 
-	var dmg;
-	var cast_on := caster;
+    var dmg;
+    var cast_on := caster;
         dmg := CalcSpellDamage( caster, cast_on, circle );
         if( GetObjProperty( caster, CLASSEID_MAGE ) )
-        	dmg := CInt( dmg / ClasseBonus( caster, CLASSEID_MAGE ) );
+            dmg := CInt( dmg / ClasseBonus( caster, CLASSEID_MAGE ) );
         elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
-        	dmg := CInt( dmg * ClasseBonus( caster, CLASSEID_WARRIOR ) );
+            dmg := CInt( dmg * ClasseBonus( caster, CLASSEID_WARRIOR ) );
         endif
 
-	ApplyRawDamage( caster, Resisted( caster, circle, cast_on, CInt(dmg / 2) ) );
+    ApplyRawDamage( caster, Resisted( caster, circle, cast_on, CInt(dmg / 2) ) );
 
 endfunction
 
 
 function CalcSpellDamage( caster, cast_on, circle, area_spell := SINGLE_TARGET_SPELL, skillid:=SKILLID_MAGERY )
 
-	if(caster.dead) return 0; endif
-	if(cast_on.dead) return 0; endif
-	if(cast_on.hidden /* && !area_spell*/) return 0; endif
+    if(caster.dead) return 0; endif
+    if(cast_on.dead) return 0; endif
+    if(cast_on.hidden /* && !area_spell*/) return 0; endif
 
 
-	if( area_spell ) circle := circle-3; endif
+    if( area_spell ) circle := circle-3; endif
 
-	if( circle < 1 ) circle := 1; endif
+    if( circle < 1 ) circle := 1; endif
 
-	var dmg;
+    var dmg;
 
-	if (GetObjProperty(caster, "UsingBardInstrument")==1)
-		dmg := RandomDiceRoll(
-		 circle * SPELL_DAMAGES_CIRCLE_MULTIPLIER+"d"+
-		 SPELL_DAMAGES_DICE_TYPE+"+"+
-		 CInt( GetEffectiveSkill(caster, SKILLID_ENTICEMENT) / SPELL_DAMAGES_MAGERY_DIVIDER )
-		 ); //bard instrument
-	else
-		dmg := RandomDiceRoll(
-		circle * SPELL_DAMAGES_CIRCLE_MULTIPLIER+"d"+
-		SPELL_DAMAGES_DICE_TYPE+"+"+
-		CInt( GetEffectiveSkill(caster, skillid) / SPELL_DAMAGES_MAGERY_DIVIDER )
-		);
-	endif
+    if (GetObjProperty(caster, "UsingBardInstrument")==1)
+        dmg := RandomDiceRoll(
+         circle * SPELL_DAMAGES_CIRCLE_MULTIPLIER+"d"+
+         SPELL_DAMAGES_DICE_TYPE+"+"+
+         CInt( GetEffectiveSkill(caster, SKILLID_ENTICEMENT) / SPELL_DAMAGES_MAGERY_DIVIDER )
+         ); //bard instrument
+    else
+        dmg := RandomDiceRoll(
+        circle * SPELL_DAMAGES_CIRCLE_MULTIPLIER+"d"+
+        SPELL_DAMAGES_DICE_TYPE+"+"+
+        CInt( GetEffectiveSkill(caster, skillid) / SPELL_DAMAGES_MAGERY_DIVIDER )
+        );
+    endif
 
 
-	if( dmg > CInt(circle * (13 + circle)) ) dmg := CInt(circle * (13 + circle)); endif
+    if( dmg > CInt(circle * (13 + circle)) ) dmg := CInt(circle * (13 + circle)); endif
 
-	dmg := ModifyWithMagicEfficiency( caster, dmg );
+    dmg := ModifyWithMagicEfficiency( caster, dmg );
 
-	if( !cast_on.isA(POLCLASS_NPC) ) dmg := CInt(dmg / SPELL_DAMAGES_ON_PLAYER_DIVIDER); endif
+    if( !cast_on.isA(POLCLASS_NPC) ) dmg := CInt(dmg / SPELL_DAMAGES_ON_PLAYER_DIVIDER); endif
 
-	if (GetObjProperty(caster,"#ctftech") =="quadUSED")
-	  dmg:=dmg*3;
-	  PlaySoundEffect(caster,262);
-	endif
+    if (GetObjProperty(caster,"#ctftech") =="quadUSED")
+      dmg:=dmg*3;
+      PlaySoundEffect(caster,262);
+    endif
 
-	if (GetObjProperty(caster,"#ctftech") =="haste")
-	  dmg:=dmg*1.5;
-	  PlaySoundEffect(caster,259);
-	endif
+    if (GetObjProperty(caster,"#ctftech") =="haste")
+      dmg:=dmg*1.5;
+      PlaySoundEffect(caster,259);
+    endif
 
-	var teamcolor:=33,fixit:=0;
+    var teamcolor:=33,fixit:=0;
 
-	if (GetObjProperty(cast_on,"#ctftech") =="disrupt")
-	  if (random(4)>=2)
-	    if(GetObjProperty(cast_on,"team")=="BLUE") teamcolor:=4; endif
-	    fixit:=1;
-	    colorstuff(cast_on,70);
-	    dmg:=dmg/2;
-	    PlaySoundEffect(cast_on,305);
-	    sleepms(500);
-	  endif
-	endif
+    if (GetObjProperty(cast_on,"#ctftech") =="disrupt")
+      if (random(4)>=2)
+        if(GetObjProperty(cast_on,"team")=="BLUE") teamcolor:=4; endif
+        fixit:=1;
+        colorstuff(cast_on,70);
+        dmg:=dmg/2;
+        PlaySoundEffect(cast_on,305);
+        sleepms(500);
+      endif
+    endif
 
-	if (fixit) colorstuff(cast_on,teamcolor); endif
+    if (fixit) colorstuff(cast_on,teamcolor); endif
 
-	return dmg;
+    return dmg;
 
 endfunction
 
 function colorstuff(who,ncolor)
 
-	var item,i,armor:={0x03,0x04,0x05,0x06,0x07,0x0a,0x0c,0x0d,0x0e,0x11,0x13,0x14,0x16,0x17,0x18};
+    var item,i,armor:={0x03,0x04,0x05,0x06,0x07,0x0a,0x0c,0x0d,0x0e,0x11,0x13,0x14,0x16,0x17,0x18};
 
-	for(i:=1;i<=15;i:=i+1)
-		item:=GetEquipmentByLayer(who,armor[i]);
+    for(i:=1;i<=15;i:=i+1)
+        item:=GetEquipmentByLayer(who,armor[i]);
 
-		if (ncolor>=0)
-			item.color:=ncolor;
-			SetObjProperty(item,"X6",1);
-		else
-			DestroyItem(item);
-		endif
+        if (ncolor>=0)
+            item.color:=ncolor;
+            SetObjProperty(item,"X6",1);
+        else
+            DestroyItem(item);
+        endif
 
-	endfor
+    endfor
 
 endfunction
 
 // returnBool is set if the function is not being called from TryToCast
 function can_cast( me, circle, returnBool := 1 )
-	if(returnBool && me.dead)
-		return 0;
-	endif
+    if(returnBool && me.dead)
+        return 0;
+    endif
 
-	if( !me.cmdlevel )
-		if( IsInAntiMagicArea( me ) )
-			if (returnBool)
-				SendSysMessage( me, ERROR_MSG_ANTI_MAGIC_AREA );
-				return 0;
-			else
-				return IN_ANTIMAGIC_AREA;
-			endif
-		endif
-	endif
+    if( !me.cmdlevel )
+        if( IsInAntiMagicArea( me ) )
+            if (returnBool)
+                SendSysMessage( me, ERROR_MSG_ANTI_MAGIC_AREA );
+                return 0;
+            else
+                return IN_ANTIMAGIC_AREA;
+            endif
+        endif
+    endif
 
-	var max_circle := GetMaxCircle( me );
-	if( max_circle )
-		if( circle > max_circle )
-			PlayObjectCenteredEffect( me, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect( me, SFX_SPELL_FIZZLE );
-			SendSysMessage( me, ERROR_MSG_NOT_ENOUGH_SKILL );
-			if (returnBool)
-				return 0;
-			else
-				return NO_SKILL;
-			endif
-		endif
-	endif
+    var max_circle := GetMaxCircle( me );
+    if( max_circle )
+        if( circle > max_circle )
+            PlayObjectCenteredEffect( me, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect( me, SFX_SPELL_FIZZLE );
+            SendSysMessage( me, ERROR_MSG_NOT_ENOUGH_SKILL );
+            if (returnBool)
+                return 0;
+            else
+                return NO_SKILL;
+            endif
+        endif
+    endif
 
-	if (returnBool)
-		return 1;
-	else
-		return 0; // 0 isn't a return code for TryToCast, so use that.
-	endif
+    if (returnBool)
+        return 1;
+    else
+        return 0; // 0 isn't a return code for TryToCast, so use that.
+    endif
 endfunction
 
 function CanTargetArea( caster, circle := 1 )
 
-	if (!can_cast(caster, circle))
-        	return 0;
-	endif
+    if (!can_cast(caster, circle))
+            return 0;
+    endif
 
-	var cx := caster.x;
-	var cy := caster.y;
-	var shp := GetHp(caster);
+    var cx := caster.x;
+    var cy := caster.y;
+    var shp := GetHp(caster);
 
-	var cast_loc := TargetCoordinates( caster );
-	if( !cast_loc.x )
-		return 0;
-	endif
+    var cast_loc := TargetCoordinates( caster );
+    if( !cast_loc.x )
+        return 0;
+    endif
 
         // Seravy: Z Hack fix.
-	cast_loc.z := GetStandingHeight( cast_loc.x, cast_loc.y, cast_loc.z ).z;
+    cast_loc.z := GetStandingHeight( cast_loc.x, cast_loc.y, cast_loc.z ).z;
 
-	if( !caster.cmdlevel )
-		if ( caster.x>=2555 && caster.y>=478 && caster.x <= 2615 && caster.y <= 3886 )
-			SendSysMessage( caster, "Spell disabled in this area");
-			return 0;
-		endif
-	endif
+    if( !caster.cmdlevel )
+        if ( caster.x>=2555 && caster.y>=478 && caster.x <= 2615 && caster.y <= 3886 )
+            SendSysMessage( caster, "Spell disabled in this area");
+            return 0;
+        endif
+    endif
 
-	if( (cx != caster.x) || (cy != caster.y) || (shp > GetHp(caster)) )
-		SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
-		return 0;
-	endif
+    if( (cx != caster.x) || (cy != caster.y) || (shp > GetHp(caster)) )
+        SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+        return 0;
+    endif
 
-	if( !CheckLosAt( caster, cast_loc.x, cast_loc.y, cast_loc.z ) )
-        	SendSysMessage( caster, ERROR_MSG_NOT_IN_SIGHT );
-		return 0;
-	endif
+    if( !CheckLosAt( caster, cast_loc.x, cast_loc.y, cast_loc.z ) )
+            SendSysMessage( caster, ERROR_MSG_NOT_IN_SIGHT );
+        return 0;
+    endif
 
-	return cast_loc;
+    return cast_loc;
 
 endfunction
 
 
 function CanTargetSpell( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
 
-	if (!can_cast(caster, circle))
-        	return 0;
-	endif
+    if (!can_cast(caster, circle))
+            return 0;
+    endif
 
 
-	var cx := caster.x;
-	var cy := caster.y;
-	var shp := GetHp(caster);
+    var cx := caster.x;
+    var cy := caster.y;
+    var shp := GetHp(caster);
 
-	var cast_on := Target95( caster, targopt );
-	if(!cast_on  || !GetStrength(cast_on) || cast_on.hidden)
-		return 0;
-	endif
+    var cast_on := Target95( caster, targopt );
+    if(!cast_on  || !GetStrength(cast_on) || cast_on.hidden)
+        return 0;
+    endif
 
-	if( !caster.cmdlevel )
-		if ( caster.x>=2555 && caster.y>=478 && caster.x <= 2615 && caster.y <= 3886 )
-			SendSysMessage( caster, "Spell disabled in this area");
-			return 0;
-		endif
-	endif
+    if( !caster.cmdlevel )
+        if ( caster.x>=2555 && caster.y>=478 && caster.x <= 2615 && caster.y <= 3886 )
+            SendSysMessage( caster, "Spell disabled in this area");
+            return 0;
+        endif
+    endif
 
-	if ( (cx != caster.x) || (cy != caster.y) || (shp > GetHp(caster)) )
-		SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
-		return 0;
-	endif
+    if ( (cx != caster.x) || (cy != caster.y) || (shp > GetHp(caster)) )
+        SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+        return 0;
+    endif
 
    if (caster.acct && cast_on.acct)//both players
-	//party notification here
-	 if (caster.party != cast_on.party)
-	 	SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
-	 endif
+    //party notification here
+     if (caster.party != cast_on.party)
+        SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
+     endif
   endif
 
 
-	return cast_on;
+    return cast_on;
 
 endfunction
 
 
 function CanTargetThing( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
 
-	var cx := caster.x;
-	var cy := caster.y;
-	var shp := GetHp(caster);
+    var cx := caster.x;
+    var cy := caster.y;
+    var shp := GetHp(caster);
 
-	if(!can_cast(caster, circle))
-        	return 0;
-	endif
+    if(!can_cast(caster, circle))
+            return 0;
+    endif
 
-	var cast_on := Target( caster, targopt );
+    var cast_on := Target( caster, targopt );
 
-	if(!cast_on)
-		return 0;
-	endif
-	if( !caster.cmdlevel )
-		if ( caster.x>=2555 && caster.y>=478 && caster.x <= 2615 && caster.y <= 3886 )
-			SendSysMessage( caster, "Spell disabled in this area");
-			return 0;
-		endif
-	endif
-	if ( (cx != caster.x) || (cy != caster.y) || (shp > GetHp(caster)) )
-		SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
-		return 0;
-	endif
+    if(!cast_on)
+        return 0;
+    endif
+    if( !caster.cmdlevel )
+        if ( caster.x>=2555 && caster.y>=478 && caster.x <= 2615 && caster.y <= 3886 )
+            SendSysMessage( caster, "Spell disabled in this area");
+            return 0;
+        endif
+    endif
+    if ( (cx != caster.x) || (cy != caster.y) || (shp > GetHp(caster)) )
+        SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+        return 0;
+    endif
 
-	return cast_on;
+    return cast_on;
 
 endfunction
 
 
 function CheckForAnotherProtItem( who, item, prot )
 
-	var prots := { "PoisonImmunity",
-			 "MagicImmunity",
-			 "SpellReflect" };
+    var prots := { "PoisonImmunity",
+             "MagicImmunity",
+             "SpellReflect" };
 
-	if( !(prot in prots) )
-		return 0;
-	endif
+    if( !(prot in prots) )
+        return 0;
+    endif
 
-	EraseObjProperty( who, prot );
-	foreach thing in ListEquippedItems( who )
-		if( GetObjProperty( thing, prot ) )
-			SetObjProperty( who, prot, thing.serial );
-			break;
-		endif
-	endforeach
+    EraseObjProperty( who, prot );
+    foreach thing in ListEquippedItems( who )
+        if( GetObjProperty( thing, prot ) )
+            SetObjProperty( who, prot, thing.serial );
+            break;
+        endif
+    endforeach
 
-	return 1;
+    return 1;
 
 endfunction
 
 
 function ExtractName( name )
 
-	var words := SplitWords( name );
+    var words := SplitWords( name );
 
-	//Trunc the articles
-	if( (words[1] == "A") || (words[1] == "a") || (words[1] == "An") || (words[1] == "an") )
-		name := words[2];
-		var i := 3;
-		for( i; i <= len(words); i := i + 1 )
-			name := name + " " + words[i];
-		endfor
-	endif
-
-
-	//Remove the "corpse of" from the name
-	words := SplitWords( name );
-	if( (words[1] == "corpse") && (words[2] == "of") )
-		name := words[3];
-		var i := 4;
-		if( words[3] == "a" )
-			name := words[4];
-			i := 5;
-		endif
-
-		for( i; i <= len(words); i := i + 1)
-			name := name + " " + words[i];
-		endfor
-	endif
+    //Trunc the articles
+    if( (words[1] == "A") || (words[1] == "a") || (words[1] == "An") || (words[1] == "an") )
+        name := words[2];
+        var i := 3;
+        for( i; i <= len(words); i := i + 1 )
+            name := name + " " + words[i];
+        endfor
+    endif
 
 
-	//Remove the "Reanimated" or "conjured" from the name
-	words := SplitWords( name );
-	if( (words[1] == "Reanimated") || (words[1] == "conjured") )
-		name := words[2];
-		var i := 3;
-		for( i; i <= len(words); i := i + 1 )
-			name := name + " " + words[i];
-		endfor
-	endif
+    //Remove the "corpse of" from the name
+    words := SplitWords( name );
+    if( (words[1] == "corpse") && (words[2] == "of") )
+        name := words[3];
+        var i := 4;
+        if( words[3] == "a" )
+            name := words[4];
+            i := 5;
+        endif
 
-	if( !name )
-		name := "creature";
-	endif
+        for( i; i <= len(words); i := i + 1)
+            name := name + " " + words[i];
+        endfor
+    endif
 
-	return name;
+
+    //Remove the "Reanimated" or "conjured" from the name
+    words := SplitWords( name );
+    if( (words[1] == "Reanimated") || (words[1] == "conjured") )
+        name := words[2];
+        var i := 3;
+        for( i; i <= len(words); i := i + 1 )
+            name := name + " " + words[i];
+        endfor
+    endif
+
+    if( !name )
+        name := "creature";
+    endif
+
+    return name;
 
 endfunction
 
 
 function FindOption( options, wanted )
 
-	if( options[wanted] )
-		return 1;
-	else
-		return 0;
-	endif
+    if( options[wanted] )
+        return 1;
+    else
+        return 0;
+    endif
 
 endfunction
 
 
 function GetCircle( spell )
 
-	var conf   	:= ReadConfigFile(":*:spells");
-	var elem   	:= FindConfigElem(conf, spell);
-	var circ 	:= GetConfigString(elem, "Circle");
-	conf		:= ReadConfigFile(":*:circles");
-	var circle	:= conf[circ].UseCircle;
-	if (!circle)
-		circle 	:= circ;
-	endif
-	return CInt(circle);
+    var conf    := ReadConfigFile(":*:spells");
+    var elem    := FindConfigElem(conf, spell);
+    var circ    := GetConfigString(elem, "Circle");
+    conf        := ReadConfigFile(":*:circles");
+    var circle  := conf[circ].UseCircle;
+    if (!circle)
+        circle  := circ;
+    endif
+    return CInt(circle);
 
 endfunction
 
 
 function GetMagicEfficiencyPenalty( who )
 
-	var penalty := 0;
+    var penalty := 0;
 
-	if(who.dead) return 0; endif
+    if(who.dead) return 0; endif
 
-	if( who.isA(POLCLASS_NPC) ) return 0; endif
+    if( who.isA(POLCLASS_NPC) ) return 0; endif
 
-	if (GetsNoArmorPenalty(who))
-		return 0;
-	endif
+    if (GetsNoArmorPenalty(who))
+        return 0;
+    endif
 
-	foreach item in ListEquippedItems( who )
-		if( GetObjProperty( item, "MagicPenalty" ) )
-			penalty := penalty + GetObjProperty( item, "MagicPenalty" );
-		endif
-	endforeach
-	if (GetObjProperty( who, "MagicBonus") )
-		penalty := penalty - GetObjProperty( who, "MagicBonus" );
-	endif
+    foreach item in ListEquippedItems( who )
+        if( GetObjProperty( item, "MagicPenalty" ) )
+            penalty := penalty + GetObjProperty( item, "MagicPenalty" );
+        endif
+    endforeach
+    if (GetObjProperty( who, "MagicBonus") )
+        penalty := penalty - GetObjProperty( who, "MagicBonus" );
+    endif
 
-	if( penalty > 100 )
-		penalty := 100;
-	endif
+    if( penalty > 100 )
+        penalty := 100;
+    endif
 
-	return CInt(penalty);
+    return CInt(penalty);
 
 endfunction
 
 
 function GetProtLevel( cast_on, element )
 
-	var prot;
+    var prot;
 
-	case( element )
+    case( element )
 
-		FIRE:	prot := GetObjProperty( cast_on, "FireProtection" );
-			break;
+        FIRE:   prot := GetObjProperty( cast_on, "FireProtection" );
+            break;
 
-		AIR:	prot := GetObjProperty( cast_on, "AirProtection" );
-			break;
+        AIR:    prot := GetObjProperty( cast_on, "AirProtection" );
+            break;
 
-		EARTH:	prot := GetObjProperty( cast_on, "EarthProtection" );
-			break;
+        EARTH:  prot := GetObjProperty( cast_on, "EarthProtection" );
+            break;
 
-		WATER:	prot := GetObjProperty( cast_on, "WaterProtection" );
-			break;
+        WATER:  prot := GetObjProperty( cast_on, "WaterProtection" );
+            break;
 
-		NECRO:	prot := GetObjProperty( cast_on, "NecroProtection" );
-			break;
+        NECRO:  prot := GetObjProperty( cast_on, "NecroProtection" );
+            break;
 
-		HOLY:	prot := GetObjProperty( cast_on, "HolyProtection" );
-			break;
+        HOLY:   prot := GetObjProperty( cast_on, "HolyProtection" );
+            break;
 
-		ACID:	prot := GetObjProperty( cast_on, "AcidProtection" );
-			break;
+        ACID:   prot := GetObjProperty( cast_on, "AcidProtection" );
+            break;
 
-		default:
+        default:
 
-	endcase
+    endcase
 
-	if( !prot )
-		prot := 0;
-	endif
+    if( !prot )
+        prot := 0;
+    endif
 
-	return prot;
+    return prot;
 
 endfunction
 
@@ -655,37 +655,37 @@ endfunction
 function GetResultingElementalProt( cast_on, element )
 
 /*
-	var complementary;
-	var opposed;
-	case( element )
-		FIRE:	complementary 	:= WATER;
-			opposed		:= AIR;
-			break;
+    var complementary;
+    var opposed;
+    case( element )
+        FIRE:   complementary   := WATER;
+            opposed     := AIR;
+            break;
 
-		AIR:	complementary 	:= FIRE;
-			opposed		:= EARTH;
-			break;
+        AIR:    complementary   := FIRE;
+            opposed     := EARTH;
+            break;
 
-		EARTH:	complementary 	:= AIR;
-			opposed		:= WATER;
-			break;
+        EARTH:  complementary   := AIR;
+            opposed     := WATER;
+            break;
 
-		WATER:	complementary 	:= EARTH;
-			opposed		:= FIRE;
-			break;
-	endcase
+        WATER:  complementary   := EARTH;
+            opposed     := FIRE;
+            break;
+    endcase
 
-	var eprot := GetProtLevel( cast_on, element );
-	var cprot := GetProtLevel( cast_on, complementary );
-	var oprot := GetProtLevel( cast_on, opposed );
+    var eprot := GetProtLevel( cast_on, element );
+    var cprot := GetProtLevel( cast_on, complementary );
+    var oprot := GetProtLevel( cast_on, opposed );
 
-	if( oprot < 0 )
-		oprot := 6 - oprot;
-	endif
+    if( oprot < 0 )
+        oprot := 6 - oprot;
+    endif
 
-	var resultprot := eprot + CInt(cprot / 2) -  CInt(oprot / 2);
+    var resultprot := eprot + CInt(cprot / 2) -  CInt(oprot / 2);
 */
-	return GetProtLevel( cast_on, element);
+    return GetProtLevel( cast_on, element);
 
 endfunction
 
@@ -693,888 +693,889 @@ endfunction
 function GetResultingPlaneProtection( cast_on, plane )
 
 /*
-	var opposed;
-	if( plane == NECRO )
-		opposed := HOLY;
-	elseif( plane == HOLY )
-		opposed := NECRO;
-	else
-		return 0;
-	endif
+    var opposed;
+    if( plane == NECRO )
+        opposed := HOLY;
+    elseif( plane == HOLY )
+        opposed := NECRO;
+    else
+        return 0;
+    endif
 
-	var planeprot := GetProtLevel( cast_on, plane );
-	var opposedprot := GetProtLevel( cast_on, opposed );
+    var planeprot := GetProtLevel( cast_on, plane );
+    var opposedprot := GetProtLevel( cast_on, opposed );
 
-	if( opposedprot < 0 )
-		opposedprot := 6 - opposedprot;
-	endif
+    if( opposedprot < 0 )
+        opposedprot := 6 - opposedprot;
+    endif
 
-	var resultingprot := planeprot - opposedprot;
+    var resultingprot := planeprot - opposedprot;
 */
-	return GetProtLevel(cast_on, plane);
+    return GetProtLevel(cast_on, plane);
 
 endfunction
 
 
 function GetScript( spellid )
 
-	var spellcfg := ReadConfigFile( ":*:spells" );
-	var script := spellcfg[spellid].script;
-	if( spellid <= MAX_NORMAL_SPELL )
-		script := ":spells:" + script;
-	elseif( spellid <= MAX_NECRO_SPELL )
-		script := ":necro:" + script;
-	elseif( spellid <= MAX_EARTH_SPELL )
-		script := ":earth:" + script;
-	elseif( spellid <= MAX_RITUAL_SPELL )
-		script := ":artificier:" + script;
-	endif
+    var spellcfg := ReadConfigFile( ":*:spells" );
+    var script := spellcfg[spellid].script;
+    if( spellid <= MAX_NORMAL_SPELL )
+        script := ":spells:" + script;
+    elseif( spellid <= MAX_NECRO_SPELL )
+        script := ":necro:" + script;
+    elseif( spellid <= MAX_EARTH_SPELL )
+        script := ":earth:" + script;
+    elseif( spellid <= MAX_RITUAL_SPELL )
+        script := ":artificier:" + script;
+    endif
 
-	return script;
+    return script;
 
 endfunction
 
 
 function IsProtected( caster, cast_on, circle )
 
-	var protserial := GetObjProperty( cast_on, "MagicImmunity" );
-	var protlvl	 := Cint(GetObjProperty( cast_on, "PermMagicImmunity" ));
-	if( !protlvl )
-		protlvl := 0;
-	endif
+    var protserial := GetObjProperty( cast_on, "MagicImmunity" );
+    var protlvl  := Cint(GetObjProperty( cast_on, "PermMagicImmunity" ));
+    if( !protlvl )
+        protlvl := 0;
+    endif
 
-	circle := circle * ClasseBonus( cast_on, CLASSEID_WARRIOR );
+    circle := circle * ClasseBonus( cast_on, CLASSEID_WARRIOR );
 
-	var cmi := 0 - protlvl;
-	var item;
-	var charges;
-	var cursed;
+    var cmi := 0 - protlvl;
+    var item;
+    var charges;
+    var cursed;
 
-	if( protserial )
-		foreach thing in ListEquippedItems( cast_on )
-			if( thing.serial == protserial )
-				item := thing;
-				charges := CInt( GetObjProperty( item, "MagicImmunity" ) );
-				cursed := GetObjProperty( item, "Cursed" );
-				if( !charges )
-					EraseObjProperty( cast_on, "MagicImmunity" );
-					EraseObjProperty( item, "MagicImmunity" );
-					PrintTextAbovePrivate(item, CStr(item.desc + " is out of charges!"), cast_on );
-					CheckForAnotherProtItem( cast_on, item, "MagicImmunity" );
-				endif
-				break;
-			endif
-		endforeach
-	endif
+    if( protserial )
+        foreach thing in ListEquippedItems( cast_on )
+            if( thing.serial == protserial )
+                item := thing;
+                charges := CInt( GetObjProperty( item, "MagicImmunity" ) );
+                cursed := GetObjProperty( item, "Cursed" );
+                if( !charges )
+                    EraseObjProperty( cast_on, "MagicImmunity" );
+                    EraseObjProperty( item, "MagicImmunity" );
+                    PrintTextAbovePrivate(item, CStr(item.desc + " is out of charges!"), cast_on );
+                    CheckForAnotherProtItem( cast_on, item, "MagicImmunity" );
+                endif
+                break;
+            endif
+        endforeach
+    endif
 
-	if( charges >= circle )
-		charges := charges - circle;
-		SetObjProperty( item, "MagicImmunity", charges );
-		if( !cursed )
-			PrintTextAbovePrivate( cast_on, CStr("Your " + item.desc + " protected you from the spell!"), cast_on );
-			return IMMUNED;
-		else
-			return CURSED;
-		endif
+    if( charges >= circle )
+        charges := charges - circle;
+        SetObjProperty( item, "MagicImmunity", charges );
+        if( !cursed )
+            PrintTextAbovePrivate( cast_on, CStr("Your " + item.desc + " protected you from the spell!"), cast_on );
+            return IMMUNED;
+        else
+            return CURSED;
+        endif
 
-	elseif( cmi >= circle )
-		return CURSED;
+    elseif( cmi >= circle )
+        return CURSED;
 
-	elseif( protlvl >= circle )
-		PrintTextAbovePrivate( cast_on, CStr(caster.name + "'s spell is absorbed by your magical protection!"), cast_on );
-		PrintTextAbovePrivate( cast_on, CStr("The spell dissipates upon contact with " + cast_on.name + "'s magical barrier!"), caster );
-		return IMMUNED;
-	endif
+    elseif( protlvl >= circle )
+        PrintTextAbovePrivate( cast_on, CStr(caster.name + "'s spell is absorbed by your magical protection!"), cast_on );
+        PrintTextAbovePrivate( cast_on, CStr("The spell dissipates upon contact with " + cast_on.name + "'s magical barrier!"), caster );
+        return IMMUNED;
+    endif
 
-	return 0;
+    return 0;
 
 endfunction
 
 
 function ModifyWithMagicEfficiency( who, val )
 
-	/*
-	if( GetObjProperty( who, CLASSEID_MAGE ) )
-		val := CInt(val * ClasseBonus( who, CLASSEID_MAGE ));
-	elseif( GetObjProperty( who, CLASSEID_WARRIOR ) )
-		val := CInt(val / ClasseBonus( who, CLASSEID_WARRIOR ));
-	elseif( GetObjProperty(who, "UsingBardInstrument")==1)
-		val := CInt(val * ClasseBonus( who, CLASSEID_BARD ));
-	endif
-	*/
-	var penalty:=0;
-	penalty := CInt( GetMagicEfficiencyPenalty( who ) );
+    /*
+    if( GetObjProperty( who, CLASSEID_MAGE ) )
+        val := CInt(val * ClasseBonus( who, CLASSEID_MAGE ));
+    elseif( GetObjProperty( who, CLASSEID_WARRIOR ) )
+        val := CInt(val / ClasseBonus( who, CLASSEID_WARRIOR ));
+    elseif( GetObjProperty(who, "UsingBardInstrument")==1)
+        val := CInt(val * ClasseBonus( who, CLASSEID_BARD ));
+    endif
+    */
+    var penalty:=0;
+    penalty := CInt( GetMagicEfficiencyPenalty( who ) );
 
-	if( penalty >= 100 )
-		return 0;
-	endif
+    if( penalty >= 100 )
+        return 0;
+    endif
 
-	return CInt( val * ( 100 - penalty ) / 100 );
+    return CInt( val * ( 100 - penalty ) / 100 );
 
 endfunction
 
 
 function PolymorphMobile( cast_on, new_form, new_color, duration, mod := 0 )
 
-	var parms := {};
+    var parms := {};
 
-	parms[1] := cast_on;
-	parms[2] := CInt( new_form );
-	parms[3] := CInt( new_color );
-	parms[4] := CInt( duration );
-	if( mod )
-		parms[5] := mod;
-	endif
+    parms[1] := cast_on;
+    parms[2] := CInt( new_form );
+    parms[3] := CInt( new_color );
+    parms[4] := CInt( duration );
+    if( mod )
+        parms[5] := mod;
+    endif
 
-	start_script( ":summoning:polymorphing", parms );
+    start_script( ":summoning:polymorphing", parms );
 
 endfunction
 
 
 function Reflect( source, targ )
 
-	if(source.dead) return; endif
-	if(targ.dead) return; endif
+    if(source.dead) return; endif
+    if(targ.dead) return; endif
 
-	PlaySoundEffect( source, SFX_SPELL_MAGIC_REFLECTION );
-	PlayObjectCenteredEffect( source, FX_SPELL_MAGIC_REFLECTION, SPEED_SPELL_MAGIC_REFLECTION, LOOP_SPELL_MAGIC_REFLECTION );
-	SendSysMessage( source, "Your magic reflect spell saved you!" );
+    PlaySoundEffect( source, SFX_SPELL_MAGIC_REFLECTION );
+    PlayObjectCenteredEffect( source, FX_SPELL_MAGIC_REFLECTION, SPEED_SPELL_MAGIC_REFLECTION, LOOP_SPELL_MAGIC_REFLECTION );
+    SendSysMessage( source, "Your magic reflect spell saved you!" );
         if( SPELL_EFFECT_TYPE_MOVING == 1 )
-        	sleep( 1 );
-        	PlayMovingEffect(source,
-				 targ,
-				 SPELL_EFFECT_ID,
-				 SPELL_EFFECT_SPEED,
-				 SPELL_EFFECT_LOOP,
-				 explode := 0);
-	endif
+            sleep( 1 );
+            PlayMovingEffect(source,
+                 targ,
+                 SPELL_EFFECT_ID,
+                 SPELL_EFFECT_SPEED,
+                 SPELL_EFFECT_LOOP,
+                 explode := 0);
+    endif
 
 endfunction
 
 
 function Reflected( caster, cast_on, circle )
 
-	var source	:= caster;
-	var targ	:= cast_on;
-	var wasreflected;
+    var source  := caster;
+    var targ    := cast_on;
+    var wasreflected;
 
         if( SPELL_EFFECT_TYPE_MOVING == 1 )
-        	PlayMovingEffect(source,
-				 targ,
-				 SPELL_EFFECT_ID,
-				 SPELL_EFFECT_SPEED,
-				 SPELL_EFFECT_LOOP,
-				 explode := 0);
-	endif
+            PlayMovingEffect(source,
+                 targ,
+                 SPELL_EFFECT_ID,
+                 SPELL_EFFECT_SPEED,
+                 SPELL_EFFECT_LOOP,
+                 explode := 0);
+    endif
 
-	if( source == targ )
-		if( !SPELL_EFFECT_TYPE_MOVING && SPELL_EFFECT_ID )
-			PlayObjectCenteredEffect(targ,
-						 SPELL_EFFECT_ID,
-						 SPELL_EFFECT_SPEED,
-						 SPELL_EFFECT_LOOP);
-
-		elseif( SPELL_EFFECT_TYPE_MOVING == 2 )
-			PlayLightningBoltEffect( targ );
-			PlaySoundEffect( targ, SFX_SPELL_LIGHTNING );
-
-		elseif( SPELL_EFFECT_TYPE_MOVING == 3 )
-			PlayLightningBoltEffect( targ );
-			PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
-			PlayLightningBoltEffect( targ );
-			PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
-
-		elseif( SPELL_EFFECT_TYPE_MOVING == 4 )
-			PlayStationaryEffect( targ.x, targ.y, targ.z, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP );
-
-		endif
-
-		return targ;
-	endif
-
-	var permmr   := CInt( GetObjProperty( targ, "Permmr" ) );
-	var corrupmr := CInt( 0 - permmr );
-	var protserial := CInt( GetObjProperty( targ, "SpellReflect") );
-	var item;
-	var cursed;
-	var charges;
-	if( protserial )
-		set_critical(1);
-		foreach thing in ListEquippedItems( targ )
-			if( thing.serial == protserial )
-				item := thing;
-				cursed  := GetObjProperty( item, "Cursed" );
-				charges := CInt( GetObjProperty( item, "SpellReflect" ) );
-				if( !charges )
-					EraseObjProperty( item, "SpellReflect" );
-					EraseObjProperty( targ, "SpellReflect" );
-					PrintTextAbovePrivate( item, CStr(item.desc + " is out of charges!"), targ );
-					CheckForAnotherProtItem( targ, item, "SpellReflect" );
-				endif
-				break;
-			endif
-		endforeach
-		set_critical(0);
-	endif
-
-
-	if( charges && charges >= circle )
-		charges := CInt(charges - circle);
-		SetObjProperty( item, "SpellReflect", charges );
-		if( !cursed )
-			PrintTextAbovePrivate( targ, CStr("Your " + item.desc + " reflected the spell!"), targ );
-			source := cast_on;
-			targ := caster;
-			Reflect( source, targ );
-			//ReflectBack( caster, cast_on, source, targ, circle );
-		else
-			PrintTextAbovePrivate( targ, CStr("Your " + item.desc + " prevent all reflections!"), targ );
-		endif
-
-	elseif( corrupmr >= circle )
-		PrintTextAbovePrivate( targ, CStr("One of your item prevent all reflections!"), targ );
-
-	elseif( CInt(GetObjProperty( targ, "mr" )) >= circle )
-		EraseObjProperty(targ, "mr");
-		source := cast_on;
-		targ := caster;
-		Reflect( source, targ );
-		//ReflectBack( caster, cast_on, source, targ, circle );
-
-	elseif( permmr >= circle )
-		source := cast_on;
-		targ := caster;
-		Reflect( source, targ );
-		//ReflectBack( caster, cast_on, source, targ, circle );
-	endif
-
-
-	if( targ == caster )
-		SendSysMessage( caster, "The spell is reflected back to you!" );
-	endif
-
-	if( !SPELL_EFFECT_TYPE_MOVING && SPELL_EFFECT_ID )
-		PlayObjectCenteredEffect(targ,
-					 SPELL_EFFECT_ID,
-					 SPELL_EFFECT_SPEED,
-					 SPELL_EFFECT_LOOP);
+    if( source == targ )
+        if( !SPELL_EFFECT_TYPE_MOVING && SPELL_EFFECT_ID )
+            PlayObjectCenteredEffect(targ,
+                         SPELL_EFFECT_ID,
+                         SPELL_EFFECT_SPEED,
+                         SPELL_EFFECT_LOOP);
 
         elseif( SPELL_EFFECT_TYPE_MOVING == 2 )
-		PlayLightningBoltEffect( targ );
-		PlaySoundEffect( targ, SFX_SPELL_LIGHTNING );
+            PlayLightningBoltEffect( targ );
+            PlaySoundEffect( targ, SFX_SPELL_LIGHTNING );
 
-	elseif( SPELL_EFFECT_TYPE_MOVING == 3 )
-		PlayLightningBoltEffect( targ );
-		PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
-		PlayLightningBoltEffect( targ );
-		PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
+        elseif( SPELL_EFFECT_TYPE_MOVING == 3 )
+            PlayLightningBoltEffect( targ );
+            PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
+            PlayLightningBoltEffect( targ );
+            PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
 
-	elseif( SPELL_EFFECT_TYPE_MOVING == 4 )
-		PlayStationaryEffect( targ.x, targ.y, targ.z, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP );
+        elseif( SPELL_EFFECT_TYPE_MOVING == 4 )
+            PlayStationaryEffect( targ.x, targ.y, targ.z, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP );
 
-	endif
+        endif
 
-	return targ;
+        return targ;
+    endif
+
+    var permmr   := CInt( GetObjProperty( targ, "Permmr" ) );
+    var corrupmr := CInt( 0 - permmr );
+    var protserial := CInt( GetObjProperty( targ, "SpellReflect") );
+    var item;
+    var cursed;
+    var charges;
+    if( protserial )
+        set_critical(1);
+        foreach thing in ListEquippedItems( targ )
+            if( thing.serial == protserial )
+                item := thing;
+                cursed  := GetObjProperty( item, "Cursed" );
+                charges := CInt( GetObjProperty( item, "SpellReflect" ) );
+                if( !charges )
+                    EraseObjProperty( item, "SpellReflect" );
+                    EraseObjProperty( targ, "SpellReflect" );
+                    PrintTextAbovePrivate( item, CStr(item.desc + " is out of charges!"), targ );
+                    CheckForAnotherProtItem( targ, item, "SpellReflect" );
+                endif
+                break;
+            endif
+        endforeach
+        set_critical(0);
+    endif
+
+
+    if( charges && charges >= circle )
+        charges := CInt(charges - circle);
+        SetObjProperty( item, "SpellReflect", charges );
+        if( !cursed )
+            PrintTextAbovePrivate( targ, CStr("Your " + item.desc + " reflected the spell!"), targ );
+            source := cast_on;
+            targ := caster;
+            Reflect( source, targ );
+            //ReflectBack( caster, cast_on, source, targ, circle );
+        else
+            PrintTextAbovePrivate( targ, CStr("Your " + item.desc + " prevent all reflections!"), targ );
+        endif
+
+    elseif( corrupmr >= circle )
+        PrintTextAbovePrivate( targ, CStr("One of your item prevent all reflections!"), targ );
+
+    elseif( CInt(GetObjProperty( targ, "mr" )) >= circle )
+        EraseObjProperty(targ, "mr");
+        source := cast_on;
+        targ := caster;
+        Reflect( source, targ );
+        //ReflectBack( caster, cast_on, source, targ, circle );
+
+    elseif( permmr >= circle )
+        source := cast_on;
+        targ := caster;
+        Reflect( source, targ );
+        //ReflectBack( caster, cast_on, source, targ, circle );
+    endif
+
+
+    if( targ == caster )
+        SendSysMessage( caster, "The spell is reflected back to you!" );
+    endif
+
+    if( !SPELL_EFFECT_TYPE_MOVING && SPELL_EFFECT_ID )
+        PlayObjectCenteredEffect(targ,
+                     SPELL_EFFECT_ID,
+                     SPELL_EFFECT_SPEED,
+                     SPELL_EFFECT_LOOP);
+
+        elseif( SPELL_EFFECT_TYPE_MOVING == 2 )
+        PlayLightningBoltEffect( targ );
+        PlaySoundEffect( targ, SFX_SPELL_LIGHTNING );
+
+    elseif( SPELL_EFFECT_TYPE_MOVING == 3 )
+        PlayLightningBoltEffect( targ );
+        PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
+        PlayLightningBoltEffect( targ );
+        PlaySoundEffect( targ, SFX_SPELL_CALL_LIGHTNING );
+
+    elseif( SPELL_EFFECT_TYPE_MOVING == 4 )
+        PlayStationaryEffect( targ.x, targ.y, targ.z, SPELL_EFFECT_ID, SPELL_EFFECT_SPEED, SPELL_EFFECT_LOOP );
+
+    endif
+
+    return targ;
 
 endfunction
 
 
 function Resisted( caster, cast_on, circle, dmg )
 
-	if( cast_on.dead ) return 0; endif
-	if(caster.dead) return 0; endif
+    if( cast_on.dead ) return 0; endif
+    if(caster.dead) return 0; endif
 
-	var multiplier;
-	var points 	:= circle * 40;
-	var magery 	:= GetEffectiveSkill( caster, SKILLID_MAGERY );
-	var evalint 	:= GetEffectiveSkill( caster, SKILLID_EVALINT );
-	var resist 	:= GetEffectiveSkill( cast_on, SKILLID_MAGICRESISTANCE );
-	var skillid := SKILLID_MAGICRESISTANCE;
-	var chance 	:= CInt( resist / 6);
-	var chance2 	:= CInt( resist - ((magery / 4) + (circle * 6)) );
+    var multiplier;
+    var points  := circle * 40;
+    var magery  := GetEffectiveSkill( caster, SKILLID_MAGERY );
+    var evalint     := GetEffectiveSkill( caster, SKILLID_EVALINT );
+    var resist  := GetEffectiveSkill( cast_on, SKILLID_MAGICRESISTANCE );
+    var skillid := SKILLID_MAGICRESISTANCE;
+    var chance  := CInt( resist / 6);
+    var chance2     := CInt( resist - ((magery / 4) + (circle * 6)) );
 
-	if( chance2 > chance )
-		chance := chance2;
-	endif
+    if( chance2 > chance )
+        chance := chance2;
+    endif
 
-	if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
-		chance := CInt( chance * ClasseBonus( cast_on, CLASSEID_MAGE ) );
-	elseif( GetObjProperty( cast_on, CLASSEID_WARRIOR ) )
-		var bonus := ClasseBonus( cast_on, CLASSEID_WARRIOR );
-		chance := CInt( chance / bonus / 2 );
-		resist := CInt( resist / bonus );
-	endif
+    if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
+        chance := CInt( chance * ClasseBonus( cast_on, CLASSEID_MAGE ) );
+    elseif( GetObjProperty( cast_on, CLASSEID_WARRIOR ) )
+        var bonus := ClasseBonus( cast_on, CLASSEID_WARRIOR );
+        chance := CInt( chance / bonus / 2 );
+        resist := CInt( resist / bonus );
+    endif
 
-	if( GetObjProperty( caster, CLASSEID_MAGE ) )
-		chance := CInt( chance / ClasseBonus( caster, CLASSEID_MAGE ) );
-	elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
-		var bonus := ClasseBonus( caster, CLASSEID_WARRIOR );
-		chance := CInt( chance * bonus * 2 );
-		resist := CInt( resist * bonus );
-	endif
-	points:=FameExperiencePointModifier(cast_on, skillid, points);
-	points:=DKSMod(cast_on, skillid, points);
-	if( resist < 25 )
-		AwardSkillPoints( cast_on, skillid, CInt( points / 3 ) *3);
-	endif
+    if( GetObjProperty( caster, CLASSEID_MAGE ) )
+        chance := CInt( chance / ClasseBonus( caster, CLASSEID_MAGE ) );
+    elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
+        var bonus := ClasseBonus( caster, CLASSEID_WARRIOR );
+        chance := CInt( chance * bonus * 2 );
+        resist := CInt( resist * bonus );
+    endif
+    points:=FameExperiencePointModifier(cast_on, skillid, points);
+    points:=DKSMod(cast_on, skillid, points);
+    if( resist < 25 )
+        AwardSkillPoints( cast_on, skillid, CInt( points / 3 ) *3);
+    endif
 
-	if( random(100)+1 <= chance )
-		SendSysMessage( cast_on, "You feel yourself resisting magical energy!" );
-		PlaySoundEffect( cast_on, SFX_SPELL_WEAKEN );
-		PlayObjectCenteredEffect( cast_on, FX_SPELL_CURSE, 5, 5 );
-		dmg := CInt( dmg / 2 );
-		if( dmg < 1 )
-			dmg := 1;
-		endif
+    if( random(100)+1 <= chance )
+        SendSysMessage( cast_on, "You feel yourself resisting magical energy!" );
+        PlaySoundEffect( cast_on, SFX_SPELL_WEAKEN );
+        PlayObjectCenteredEffect( cast_on, FX_SPELL_CURSE, 5, 5 );
+        dmg := CInt( dmg / 2 );
+        if( dmg < 1 )
+            dmg := 1;
+        endif
 
-		if( !caster.multi && !cast_on.multi )
-			AwardSkillPoints( cast_on, SKILLID_MAGICRESISTANCE, points * 3 );
-		endif
-	endif
+        if( !caster.multi && !cast_on.multi )
+            AwardSkillPoints( cast_on, SKILLID_MAGICRESISTANCE, points * 3 );
+        endif
+    endif
 
-	dmg := CInt( dmg * (1 + (evalint - resist) / 200) );
+    dmg := CInt( dmg * (1 + (evalint - resist) / 200) );
 
-	/*
-	if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
-		dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_MAGE ) );
-	elseif( GetObjProperty( cast_on, CLASSEID_WARRIOR ) )
-		dmg := CInt( dmg * ClasseBonus( cast_on, CLASSEID_WARRIOR ) );
-	endif
-	*/
-	if( dmg < 0 )
-		dmg := 0;
-	endif
+    /*
+    if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
+        dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_MAGE ) );
+    elseif( GetObjProperty( cast_on, CLASSEID_WARRIOR ) )
+        dmg := CInt( dmg * ClasseBonus( cast_on, CLASSEID_WARRIOR ) );
+    endif
+    */
+    if( dmg < 0 )
+        dmg := 0;
+    endif
 
-	return dmg;
+    return dmg;
 
 endfunction
 
 
 function ResistedDefinedSkillGain( caster, cast_on, dmg, diff, points := 0 )
 
-	if( cast_on.dead ) return 0; endif
-	if(caster.dead) return 0; endif
+    if( cast_on.dead ) return 0; endif
+    if(caster.dead) return 0; endif
 
-	var evalint;
-	if( caster )
-		evalint := GetEffectiveSkill( caster, SKILLID_EVALINT );
-	endif
+    var evalint;
+    if( caster )
+        evalint := GetEffectiveSkill( caster, SKILLID_EVALINT );
+    endif
 
-	if( !evalint )
-		evalint := 0;
-	endif
+    if( !evalint )
+        evalint := 0;
+    endif
 
-	var resist	:= GetEffectiveSkill( cast_on, SKILLID_MAGICRESISTANCE );
+    var resist  := GetEffectiveSkill( cast_on, SKILLID_MAGICRESISTANCE );
 
-	if( CheckSkill( cast_on, SKILLID_MAGICRESISTANCE, diff, points ) )
-		dmg := CInt( dmg / 2 );
-		if( dmg < 1 )
-			dmg := 1;
-		endif
-	endif
+    if( CheckSkill( cast_on, SKILLID_MAGICRESISTANCE, diff, points ) )
+        dmg := CInt( dmg / 2 );
+        if( dmg < 1 )
+            dmg := 1;
+        endif
+    endif
 
-	dmg := CInt( dmg * (1 + (evalint - resist) / 200) );
-	/*
-	if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
-		dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_MAGE ) );
-	elseif( GetObjProperty( cast_on, CLASSEID_WARRIOR ) )
-		dmg := CInt( dmg * ClasseBonus( cast_on, CLASSEID_WARRIOR ) );
-	endif
-	*/
-	if( dmg < 0 )
-		dmg := 0;
-	endif
+    dmg := CInt( dmg * (1 + (evalint - resist) / 200) );
+    /*
+    if( GetObjProperty( cast_on, CLASSEID_MAGE ) )
+        dmg := CInt( dmg / ClasseBonus( cast_on, CLASSEID_MAGE ) );
+    elseif( GetObjProperty( cast_on, CLASSEID_WARRIOR ) )
+        dmg := CInt( dmg * ClasseBonus( cast_on, CLASSEID_WARRIOR ) );
+    endif
+    */
+    if( dmg < 0 )
+        dmg := 0;
+    endif
 
-	return dmg;
+    return dmg;
 
 endfunction
 
 
 function Send_Attack( ttarget, source, spellid := 0 )
 
-	var ev := array;
-	ev.+type;
-	ev.+source;
+    var ev := array;
+    ev.+type;
+    ev.+source;
 
-	ev.type := SYSEVENT_ENGAGED;
-	ev.source := source;
-	SendEvent( ttarget, ev );
+    ev.type := SYSEVENT_ENGAGED;
+    ev.source := source;
+    SendEvent( ttarget, ev );
 
- 	if (spellid)
-         	ev.+spell;
-         	ev.type := 0x0800; //spell attack
-         	ev.spell := spellid;
-         	SendEvent(ttarget, ev);
- 	endif
+    if (spellid)
+            ev.+spell;
+            ev.type := 0x0800; //spell attack
+            ev.spell := spellid;
+            SendEvent(ttarget, ev);
+    endif
 
 endfunction
 
 
 function SummonCreature( caster, npctemplate, cast_loc, sfx := 0x0218, delay := 0 )
 
-	var parms := {};
+    var parms := {};
 
-	parms[1] := caster;
-	parms[2] := npctemplate;
-	parms[3] := cast_loc;
-	parms[4] := sfx;
-	parms[5] := delay;
+    parms[1] := caster;
+    parms[2] := npctemplate;
+    parms[3] := cast_loc;
+    parms[4] := sfx;
+    parms[5] := delay;
 
-	start_script( ":summoning:summoning", parms );
+    start_script( ":summoning:summoning", parms );
 
 endfunction
 
 
 function TruncPkgName( name )
 
-	if( name[1] == ":" )
-		var i;
-		for( i := 2; i <= len(name); i := i + 1 )
-			if( name[i] == ":" )
-				break;
-			endif
-		endfor
+    if( name[1] == ":" )
+        var i;
+        for( i := 2; i <= len(name); i := i + 1 )
+            if( name[i] == ":" )
+                break;
+            endif
+        endfor
 
-		return name[i+1,len(name)];
+        return name[i+1,len(name)];
 
-	else
-		return name;
-	endif
+    else
+        return name;
+    endif
 
 endfunction
 
 
 function TryToCast( caster, spell, anim := ANIM_CAST_DIR, no_regs:=0, no_mana:=0)
 
-	//barns- added no_regs and no_mana options... if set to 1 then no mana or regs requirements.
-	//safer than setting no reg or mana prop on a player... :)
+    //barns- added no_regs and no_mana options... if set to 1 then no mana or regs requirements.
+    //safer than setting no reg or mana prop on a player... :)
 
-	//Variables declaration and initialisation
-	var conf	 := ReadConfigFile( ":*:spells" );
-	var elem	 := FindConfigElem( conf, spell );
-	var circ	 := GetConfigInt( elem, "Circle" );
-	conf	 	 := ReadConfigFile( ":*:circles" );
-	var spelldelay := CInt( conf[circ].Delay );
-	var value	 := CInt( conf[circ].PointValue );
-	var manacost	 := CInt( conf[circ].mana );
-	var difficulty := CInt( conf[circ].Difficulty );
+    //Variables declaration and initialisation
+    var conf     := ReadConfigFile( ":*:spells" );
+    var elem     := FindConfigElem( conf, spell );
+    var circ     := GetConfigInt( elem, "Circle" );
+    conf         := ReadConfigFile( ":*:circles" );
+    var spelldelay := CInt( conf[circ].Delay );
+    var value    := CInt( conf[circ].PointValue );
+    var manacost     := CInt( conf[circ].mana );
+    var difficulty := CInt( conf[circ].Difficulty );
 
-	//Casting Options management
-	var options := GetObjProperty( caster, CASTINGOPT_PROP_NAME );
-	if( !options )
-		options := GetObjProperty( caster, PERM_CASTINGOPT_PROP_NAME );
-		if( !options )
-			options := "";
-		endif
-	else
-		EraseObjProperty( caster, CASTINGOPT_PROP_NAME );
-	endif
+    //Casting Options management
+    var options := GetObjProperty( caster, CASTINGOPT_PROP_NAME );
+    if( !options )
+        options := GetObjProperty( caster, PERM_CASTINGOPT_PROP_NAME );
+        if( !options )
+            options := "";
+        endif
+    else
+        EraseObjProperty( caster, CASTINGOPT_PROP_NAME );
+    endif
 
-	var caster_cancast := can_cast(caster, circ, 0);
-	case(caster_cancast)
-		IN_ANTIMAGIC_AREA:
-			SendSysMessage(caster, ERROR_MSG_ANTI_MAGIC_AREA);
-			return caster_cancast;
-		NO_SKILL:
-			SendSysMessage(caster, ERROR_MSG_NOT_ENOUGH_SKILL);
-			return caster_cancast;
-	endcase
+    var caster_cancast := can_cast(caster, circ, 0);
+    case(caster_cancast)
+        IN_ANTIMAGIC_AREA:
+            SendSysMessage(caster, ERROR_MSG_ANTI_MAGIC_AREA);
+            return caster_cancast;
+        NO_SKILL:
+            SendSysMessage(caster, ERROR_MSG_NOT_ENOUGH_SKILL);
+            return caster_cancast;
+    endcase
 
-	//Try to cast the spell
-	if (caster.graphic==400 || caster.graphic==401)
-		PerformAction( caster, anim );
-	endif
+    //Try to cast the spell
+    if (caster.graphic==400 || caster.graphic==401)
+        PerformAction( caster, anim );
+    endif
 
-	//Speak the power words
-	if ( !FindOption( options, CASTINGOPT_NO_WORDS ) )
-                SpeakPowerWords( caster, spell );
-	endif
+    //Speak the power words
+    if ( !FindOption( options, CASTINGOPT_NO_WORDS ) )
+        SpeakPowerWords( caster, spell );
+    endif
 
-	//Check for the equipment in hands
-	if( !FindOption( options, CASTINGOPT_ANY_EQUIPMENT ) )
-		var hand1	:= GetEquipmentByLayer( caster, LAYER_HAND1 );
-		var hand2	:= GetEquipmentByLayer( caster, LAYER_HAND2 );
-		if( hand1 || hand2 )
-			var weapcfg := ReadConfigFile( ":*:itemdesc" );
+    //Check for the equipment in hands
+    if( !FindOption( options, CASTINGOPT_ANY_EQUIPMENT ) )
+        var hand1   := GetEquipmentByLayer( caster, LAYER_HAND1 );
+        var hand2   := GetEquipmentByLayer( caster, LAYER_HAND2 );
+        if( hand1 || hand2 )
+            var weapcfg := ReadConfigFile( ":*:itemdesc" );
 
-			if( hand1 && weapcfg[hand1.objtype].BlocksCastingIfInHand != 0 )
-				SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
-				PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
-				return INVALID_EQUIPMENT;
-			endif
+            if( hand1 && weapcfg[hand1.objtype].BlocksCastingIfInHand != 0 )
+                SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
+                PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
+                return INVALID_EQUIPMENT;
+            endif
 
-			if( hand2 && weapcfg[hand2.objtype].BlocksCastingIfInHand != 0)
-				SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
-				PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
-				return INVALID_EQUIPMENT;
-			endif
-		endif
-	endif
+            if( hand2 && weapcfg[hand2.objtype].BlocksCastingIfInHand != 0)
+                SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
+                PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
+                return INVALID_EQUIPMENT;
+            endif
+        endif
+    endif
 
-	//Delay and interruption management
-	if( !FindOption( options, CASTINGOPT_NO_DELAY ) )
-		var shp := GetHp(caster);
-		var sx := caster.x;
-		var sy := caster.y;
-		var sz := caster.z;
+    //Delay and interruption management
+    if( !FindOption( options, CASTINGOPT_NO_DELAY ) )
+        var shp := GetHp(caster);
+        var sx := caster.x;
+        var sy := caster.y;
+        var sz := caster.z;
 
-		//True mages cast faster
-		if( GetObjProperty( caster, CLASSEID_MAGE ) )
-			spelldelay := CInt( spelldelay / ClasseBonus( caster, CLASSEID_MAGE ) );
-		elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
-			spelldelay := CInt( spelldelay * ClasseBonus( caster, CLASSEID_WARRIOR ) );
-		endif
+        //True mages cast faster
+        if( GetObjProperty( caster, CLASSEID_MAGE ) )
+            spelldelay := CInt( spelldelay / ClasseBonus( caster, CLASSEID_MAGE ) );
+        elseif( GetObjProperty( caster, CLASSEID_WARRIOR ) )
+            spelldelay := CInt( spelldelay * ClasseBonus( caster, CLASSEID_WARRIOR ) );
+        endif
 
-		while( spelldelay >= 500 )
-			sleepms( 500 );
-			spelldelay := spelldelay - 500;
-			if(!IsNormalSpell(spell) && (GetHp(caster) < shp))
-				SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
-				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-				return INTERRUPTED;
-			endif
+        while( spelldelay >= 500 )
+            sleepms( 500 );
+            spelldelay := spelldelay - 500;
+            if(!IsNormalSpell(spell) && (GetHp(caster) < shp))
+                SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
+                PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+                return INTERRUPTED;
+            endif
 
-			if(!IsNormalSpell(spell) && (caster.x != sx || caster.y != sy || caster.z != sz))
-				SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-				return INTERRUPTED;
-			endif
-		endwhile
+            if(!IsNormalSpell(spell) && (caster.x != sx || caster.y != sy || caster.z != sz))
+                SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+                PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+                return INTERRUPTED;
+            endif
+        endwhile
 
-		sleepms( spelldelay );
+        sleepms( spelldelay );
 
-		if(!IsNormalSpell(spell) && (GetHp(caster) < shp))
-			SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			return INTERRUPTED;
-		endif
+        if(!IsNormalSpell(spell) && (GetHp(caster) < shp))
+            SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            return INTERRUPTED;
+        endif
 
-		if(!IsNormalSpell(spell) && (caster.x != sx || caster.y != sy || caster.z != sz))
-			SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			return INTERRUPTED;
-		endif
-	endif
+        if(!IsNormalSpell(spell) && (caster.x != sx || caster.y != sy || caster.z != sz))
+            SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            return INTERRUPTED;
+        endif
+    endif
 
-	//Consume the reagents
-	if( !FindOption( options, CASTINGOPT_NO_REAGENTS ) && !no_regs && !caster.isA(POLCLASS_NPC))
-                if( !ConsumeReagents( caster, spell ) )
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_REAGENTS );
-			return NO_REGS;
-		endif
-	endif
+    //Consume the reagents
+    if( !FindOption( options, CASTINGOPT_NO_REAGENTS ) && !no_regs && !caster.isA(POLCLASS_NPC))
+        if( !ConsumeReagents( caster, spell ) )
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_REAGENTS );
+            return NO_REGS;
+        endif
+    endif
 
-	//Consume the mana
-	if( !FindOption( options, CASTINGOPT_NO_MANA )  && !no_mana)
-                if( !ConsumeMana( caster, spell ) )
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE);
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_MANA );
-			return NO_MANA;
-		endif
-	endif
+    //Consume the mana
+    if( !FindOption( options, CASTINGOPT_NO_MANA )  && !no_mana)
+        if( !ConsumeMana( caster, spell ) )
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE);
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_MANA );
+            return NO_MANA;
+        endif
+    endif
 
-	//Do the skill check and return mana if failure occur
-	if( !FindOption( options, CASTINGOPT_NO_SKILL_CHECK ) )
-        	if( !CheckSkill( caster, SKILLID_MAGERY, difficulty, value ) )
-			SetMana(caster, GetMana(caster) + manacost);
-			if( GetMana(caster) > GetMaxMana(caster) )
-				SetMana(caster, GetMaxMana(caster));
-			endif
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
-			SendSysMessage( caster, ERROR_MSG_FIZZLE );
-			return NO_SKILL;
-		endif
-	endif
+    //Do the skill check and return mana if failure occur
+    if( !FindOption( options, CASTINGOPT_NO_SKILL_CHECK ) )
+        if( !CheckSkill( caster, SKILLID_MAGERY, difficulty, value ) )
+            SetMana(caster, GetMana(caster) + manacost);
+            if( GetMana(caster) > GetMaxMana(caster) )
+                SetMana(caster, GetMaxMana(caster));
+            endif
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
+            SendSysMessage( caster, ERROR_MSG_FIZZLE );
+            return NO_SKILL;
+        endif
+    endif
 
-	return SUCCESS;
+    return SUCCESS;
 endfunction
 
 function IsNormalSpell(spellId)
-	return spellId >= 1 && spellId <= 64;
+    return spellId >= 1 && spellId <= 64;
 endfunction
 
 //These are new versions of other spelldata functions that support new class spellbooks
 
 function GetSkillSpellModDuration( caster, casting_skill )
-	var castingskillval := GetEffectiveSkill( caster, casting_skill );
-	var duration := castingskillval * 4;
-	duration := ModifyWithNewClassMagicEfficiency( caster, duration, casting_skill );
-	if( !duration )
-		duration := 1;
-	endif
+    var castingskillval := GetEffectiveSkill( caster, casting_skill );
+    var duration := castingskillval * 4;
+    duration := ModifyWithNewClassMagicEfficiency( caster, duration, casting_skill );
+    if( !duration )
+        duration := 1;
+    endif
 
-	return CInt(duration);
+    return CInt(duration);
 endfunction
 
 function GetSkillSpellModAmount(caster, casting_skill)
-	var castingskillval := GetEffectiveSkill( caster, casting_skill );
-	var amount := RandomInt(10) + CInt(castingskillval/10) + 5;
+    var castingskillval := GetEffectiveSkill( caster, casting_skill );
+    var amount := RandomInt(10) + CInt(castingskillval/10) + 5;
 
-	amount := ModifyWithNewClassMagicEfficiency( caster, amount, casting_skill );
+    amount := ModifyWithNewClassMagicEfficiency( caster, amount, casting_skill );
 
-	if( !amount )
-		amount := 1;
-	endif
+    if( !amount )
+        amount := 1;
+    endif
 
-	return CInt(amount);
+    return CInt(amount);
 
 
 endfunction
 
 function ModifyWithNewClassMagicEfficiency( who, val, casting_skill)
-	//to simplify
-	//if castingskill is a classe skill then they get a bonus equivalent to being a mage
-	//else they get penalty like a warrior.
+    //to simplify
+    //if castingskill is a classe skill then they get a bonus equivalent to being a mage
+    //else they get penalty like a warrior.
 
-	var myclasseid :=GetClass(who);
+    var myclasseid :=GetClass(who);
 
-	if (casting_skill in GetClasseSkills(GetClass(who)))
-		val := CInt(val * ClasseBonus( who, myclasseid ));
-	endif
+    if (casting_skill in GetClasseSkills(GetClass(who)))
+        val := CInt(val * ClasseBonus( who, myclasseid ));
+    endif
 
-	if (casting_skill==SKILLID_PSIONICS)
+    if (casting_skill==SKILLID_PSIONICS)
 
-		var penalty := CInt( GetMagicEfficiencyPenalty( who ) );
-		if( penalty >= 100 )
-			return 0;
-		endif
+        var penalty := CInt( GetMagicEfficiencyPenalty( who ) );
+        if( penalty >= 100 )
+            return 0;
+        endif
 
-		return CInt( val * ( 100 - penalty ) / 100 );
-	endif
+        return CInt( val * ( 100 - penalty ) / 100 );
+    endif
 
-	return CInt( val );
+    return CInt( val );
 
 endfunction
 
 function NewClassCanCast( me, circle, returnBool := 1 )
-	if(returnBool && me.dead)
-		return 0;
-	endif
+    if(returnBool && me.dead)
+        return 0;
+    endif
 
-	if( !me.cmdlevel )
-		if( IsInAntiMagicArea( me ) )
-			if (returnBool)
-				SendSysMessage( me, ERROR_MSG_ANTI_MAGIC_AREA );
-				return 0;
-			else
-				return IN_ANTIMAGIC_AREA;
-			endif
-		endif
-	endif
+    if( !me.cmdlevel )
+        if( IsInAntiMagicArea( me ) )
+            if (returnBool)
+                SendSysMessage( me, ERROR_MSG_ANTI_MAGIC_AREA );
+                return 0;
+            else
+                return IN_ANTIMAGIC_AREA;
+            endif
+        endif
+    endif
 
-	if (returnBool)
-		return 1;
-	else
-		return 0; // 0 isn't a return code for TryToCast, so use that.
-	endif
+    if (returnBool)
+        return 1;
+    else
+        return 0; // 0 isn't a return code for TryToCast, so use that.
+    endif
 endfunction
 
 
 function NewClassSpellCast( caster, spell, castingskillid := SKILLID_MAGERY, no_regs:=0, no_mana:=0)
-	//modified version of TryToCast
-	//includes gets anim from spell entry
-	//gets classes with spell speed bonus
-	//gets skill id to check
-	//Broadcast("1");
-	//Variables declaration and initialisation
-	var conf	 := ReadConfigFile( ":*:spells" );
-	var elem	 := FindConfigElem( conf, spell );
-	var circ	 := GetConfigInt( elem, "Circle" );
-	var anim	 := GetConfigInt( elem, "Animation" );
-	conf	 	 := ReadConfigFile( ":*:circles" );
-	var spelldelay	 := CInt( conf[circ].Delay);
-	var value	 := CInt( conf[circ].PointValue );
-	var manacost	 := CInt( conf[circ].mana );
-	var difficulty := CInt( conf[circ].Difficulty );
+    //modified version of TryToCast
+    //includes gets anim from spell entry
+    //gets classes with spell speed bonus
+    //gets skill id to check
+    //Broadcast("1");
+    //Variables declaration and initialisation
+    var conf     := ReadConfigFile( ":*:spells" );
+    var elem     := FindConfigElem( conf, spell );
+    var circ     := GetConfigInt( elem, "Circle" );
+    var anim     := GetConfigInt( elem, "Animation" );
+    conf         := ReadConfigFile( ":*:circles" );
+    var spelldelay   := CInt( conf[circ].Delay);
+    var value    := CInt( conf[circ].PointValue );
+    var manacost     := CInt( conf[circ].mana );
+    var difficulty := CInt( conf[circ].Difficulty );
 
-	//Casting Options management
-	var options := GetObjProperty( caster, CASTINGOPT_PROP_NAME );
-	if( !options )
-		options := GetObjProperty( caster, PERM_CASTINGOPT_PROP_NAME );
-		if( !options )
-			options := "";
-		endif
-	else
-		EraseObjProperty( caster, CASTINGOPT_PROP_NAME );
-	endif
+    //Casting Options management
+    var options := GetObjProperty( caster, CASTINGOPT_PROP_NAME );
+    if( !options )
+        options := GetObjProperty( caster, PERM_CASTINGOPT_PROP_NAME );
+        if( !options )
+            options := "";
+        endif
+    else
+        EraseObjProperty( caster, CASTINGOPT_PROP_NAME );
+    endif
 
-	var caster_cancast := NewClassCanCast(caster, circ, 0);
-	case(caster_cancast)
-		IN_ANTIMAGIC_AREA:
-			SendSysMessage(caster, ERROR_MSG_ANTI_MAGIC_AREA);
-			return caster_cancast;
-		NO_SKILL:
-			SendSysMessage(caster, ERROR_MSG_NOT_ENOUGH_SKILL);
-			return caster_cancast;
-	endcase
+    var caster_cancast := NewClassCanCast(caster, circ, 0);
+    case(caster_cancast)
+        IN_ANTIMAGIC_AREA:
+            SendSysMessage(caster, ERROR_MSG_ANTI_MAGIC_AREA);
+            return caster_cancast;
+        NO_SKILL:
+            SendSysMessage(caster, ERROR_MSG_NOT_ENOUGH_SKILL);
+            return caster_cancast;
+    endcase
 
-	//Try to cast the spell
-	if (!anim||anim==error)
-		anim:=0x10;
-	endif
-	if (caster.graphic==400 || caster.graphic==401)
-		PerformAction( caster, anim );
-	endif
-	//Speak the power words
-	if ( !FindOption( options, CASTINGOPT_NO_WORDS ) )
-                SpeakPowerWords( caster, spell );
-	endif
+    //Try to cast the spell
+    if (!anim||anim==error)
+        anim:=0x10;
+    endif
+    if (caster.graphic==400 || caster.graphic==401)
+        PerformAction( caster, anim );
+    endif
+    //Speak the power words
+    if ( !FindOption( options, CASTINGOPT_NO_WORDS ) )
+        SpeakPowerWords( caster, spell );
+    endif
 
-	//Check for the equipment in hands
-	if( !FindOption( options, CASTINGOPT_ANY_EQUIPMENT ) )
-		var hand1	:= GetEquipmentByLayer( caster, LAYER_HAND1 );
-		var hand2	:= GetEquipmentByLayer( caster, LAYER_HAND2 );
-		if( hand1 || hand2 )
-			var weapcfg := ReadConfigFile( ":*:itemdesc" );
+    //Check for the equipment in hands
+    if( !FindOption( options, CASTINGOPT_ANY_EQUIPMENT ) )
+        var hand1   := GetEquipmentByLayer( caster, LAYER_HAND1 );
+        var hand2   := GetEquipmentByLayer( caster, LAYER_HAND2 );
+        if( hand1 || hand2 )
+            var weapcfg := ReadConfigFile( ":*:itemdesc" );
 
-			if( hand1 && weapcfg[hand1.objtype].BlocksCastingIfInHand != 0 )
-				SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
-				PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
-				return INVALID_EQUIPMENT;
-			endif
+            if( hand1 && weapcfg[hand1.objtype].BlocksCastingIfInHand != 0 )
+                SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
+                PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
+                return INVALID_EQUIPMENT;
+            endif
 
-			if( hand2 && weapcfg[hand2.objtype].BlocksCastingIfInHand != 0)
-				SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
-				PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
-				return INVALID_EQUIPMENT;
-			endif
-		endif
-	endif
+            if( hand2 && weapcfg[hand2.objtype].BlocksCastingIfInHand != 0)
+                SendSysMessage( caster, ERROR_MSG_WRONG_EQUIPMENT );
+                PlayObjectCenteredEffect( caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
+                return INVALID_EQUIPMENT;
+            endif
+        endif
+    endif
 
-	//Delay and interruption management
-	if( !FindOption( options, CASTINGOPT_NO_DELAY ) )
-		var shp := GetHp(caster);
-		var sx := caster.x;
-		var sy := caster.y;
-		var sz := caster.z;
+    //Delay and interruption management
+    if( !FindOption( options, CASTINGOPT_NO_DELAY ) )
+        var shp := GetHp(caster);
+        var sx := caster.x;
+        var sy := caster.y;
+        var sz := caster.z;
 
-		//Preferred class casts faster, other classes cast slower
-		var playerclass := GetClass(caster);
-		if (castingskillid in GetClasseSkills(playerclass))
-			spelldelay := CInt( spelldelay / ClasseBonus( caster, playerclass ) );
-		else
-			spelldelay := CInt( spelldelay * ClasseBonus( caster, playerclass ) );
-		endif
-		while( spelldelay >= 500 )
-			sleepms( 500 );
-			spelldelay := spelldelay - 500;
-			if( GetHp(caster) < shp )
-				SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
-				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-				return INTERRUPTED;
-			endif
+        //Preferred class casts faster, other classes cast slower
+        var playerclass := GetClass(caster);
+        if (castingskillid in GetClasseSkills(playerclass))
+            spelldelay := CInt( spelldelay / ClasseBonus( caster, playerclass ) );
+        else
+            spelldelay := CInt( spelldelay * ClasseBonus( caster, playerclass ) );
+        endif
+        while( spelldelay >= 500 )
+            sleepms( 500 );
+            spelldelay := spelldelay - 500;
+            if( GetHp(caster) < shp )
+                SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
+                PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+                return INTERRUPTED;
+            endif
 
-			if( caster.x != sx || caster.y != sy || caster.z != sz )
-				SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
-				PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-				PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-				return INTERRUPTED;
-			endif
-		endwhile
+            if( caster.x != sx || caster.y != sy || caster.z != sz )
+                SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+                PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+                PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+                return INTERRUPTED;
+            endif
+        endwhile
 
-		sleepms( spelldelay );
+        sleepms( spelldelay );
 
-		if( GetHp(caster) < shp )
-			SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			return INTERRUPTED;
-		endif
+        if( GetHp(caster) < shp )
+            SendSysMessage( caster, ERROR_MSG_INTERRUPTED );
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            return INTERRUPTED;
+        endif
 
-		if( caster.x != sx || caster.y != sy || caster.z != sz )
-			SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			return INTERRUPTED;
-		endif
-	endif
+        if( caster.x != sx || caster.y != sy || caster.z != sz )
+            SendSysMessage( caster, ERROR_MSG_LOST_CONCENTRATION );
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            return INTERRUPTED;
+        endif
+    endif
 
-	//Consume the reagents
-	if( !FindOption( options, CASTINGOPT_NO_REAGENTS ) && !no_regs)
-		var conregs := ConsumeReagents( caster, spell ) ;
-		//Broadcast(conregs);
+    //Consume the reagents
+    if( !FindOption( options, CASTINGOPT_NO_REAGENTS ) && !no_regs)
+        var conregs := ConsumeReagents( caster, spell ) ;
+        //Broadcast(conregs);
      //if( !ConsumeReagents( caster, spell ) )
-	  if( !conregs )
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_REAGENTS );
-			return NO_REGS;
-		endif
-	endif
+      if( !conregs )
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_REAGENTS );
+            return NO_REGS;
+        endif
+    endif
 
-//	Broadcast("Spelldid: "+ spell);
-	//Consume the mana
-	if( !FindOption( options, CASTINGOPT_NO_MANA )  && !no_mana)
-  		var temp :=    ConsumeMana( caster, spell );
+//  Broadcast("Spelldid: "+ spell);
+    //Consume the mana
+    if( !FindOption( options, CASTINGOPT_NO_MANA )  && !no_mana)
+        var temp :=    ConsumeMana( caster, spell );
 //Broadcast(temp);
-		if( !temp )
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE);
-			PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
-			SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_MANA );
-			return NO_MANA;
-		endif
-	endif
+        if( !temp )
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE);
+            PlaySoundEffect(caster, SFX_SPELL_FIZZLE);
+            SendSysMessage( caster, ERROR_MSG_NOT_ENOUGH_MANA );
+            return NO_MANA;
+        endif
+    endif
 
-	if (no_regs)
-		if (difficulty > 20)
-			difficulty := difficulty - 20;
-		else
-			difficulty := 0;
-		endif
-	endif
+    if (no_regs)
+        if (difficulty > 20)
+            difficulty := difficulty - 20;
+        else
+            difficulty := 0;
+        endif
+    endif
 
 
-	//Do the skill check and return mana if failure occur
-	if( !FindOption( options, CASTINGOPT_NO_SKILL_CHECK ) )
-        	if( !CheckSkill( caster, castingskillid, difficulty, value ) )
-			SetMana(caster, GetMana(caster) + manacost);
-			if( GetMana(caster) > GetMaxMana(caster) )
-				SetMana(caster, GetMaxMana(caster));
-			endif
-			PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
-			PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
-			SendSysMessage( caster, ERROR_MSG_FIZZLE );
-			return NO_SKILL;
-		endif
-	endif
+    //Do the skill check and return mana if failure occur
+    if( !FindOption( options, CASTINGOPT_NO_SKILL_CHECK ) )
+            if( !CheckSkill( caster, castingskillid, difficulty, value ) )
+            SetMana(caster, GetMana(caster) + manacost);
+            if( GetMana(caster) > GetMaxMana(caster) )
+                SetMana(caster, GetMaxMana(caster));
+            endif
+            PlayObjectCenteredEffect(caster, FX_SPELL_FIZZLE, SPEED_SPELL_FIZZLE, LOOP_SPELL_FIZZLE );
+            PlaySoundEffect( caster, SFX_SPELL_FIZZLE );
+            SendSysMessage( caster, ERROR_MSG_FIZZLE );
+            return NO_SKILL;
+        endif
+    endif
 
-	return SUCCESS;
+    return SUCCESS;
 
 endfunction
 
 function IsAMageryBuffer(who)
 
-	var class:=GetClass(who);
-	case (class)
-		CLASSEID_MAGE:
-		CLASSEID_PRIEST:	return 1;
-	endcase
+    var class:=GetClass(who);
+    case (class)
+        CLASSEID_MAGE:
+        CLASSEID_PRIEST:    return 1;
+    endcase
 
-	return 0;
+    return 0;
 
 endfunction
 
 function IsAMagerySummoner(who)
 
-	var class:=GetClass(who);
-	case (class)
-		CLASSEID_MAGE:
-		CLASSEID_DRUID:		return 1;
-	endcase
+    var class:=GetClass(who);
+    case (class)
+        CLASSEID_MAGE:
+        CLASSEID_DRUID:     return 1;
+    endcase
 
-	return 0;
+    return 0;
 
 endfunction
 
