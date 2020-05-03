@@ -2,9 +2,9 @@
 //
 //	Author: Archaean
 //	email: lex@lateralsystems.net
-//	
+//
 //	Generic functions for artifacts
-//	
+//
 ////////////////////////////////////////////////////////////////
 
 use uo;
@@ -97,7 +97,7 @@ function CheckControl(user, artifact)
 
 	SendSysMessage(user, "Control chance: "+CStr(controlchance)+"%");
 	SendSysMessage(user, "You attempt to control the artifact's power...");
-	
+
 	PlaySoundEffect(user, 0x222);
 	sleep(2);
 	if (Random(100)+1 > controlchance)
@@ -108,16 +108,16 @@ function CheckControl(user, artifact)
 	endif
 	SendSysMessage(user, "You bring the artifact under your control!");
 	return 1;
-	
+
 endfunction
 
 
 function RetributiveStrike (artifact, user, victim := 0)
-	
+
 	if (victim)
 		if (YesNo(user, "Are you sure?") && !getCommandLevel(victim))
 			// Kill victim
-			ApplyDamage(victim, 9999);
+			victim.kill();
 			PlaySoundEffect(victim, 0x11E);
 			PlayObjectCenteredEffect (victim, 0x36b0, 1, 0);
 		else
@@ -126,10 +126,10 @@ function RetributiveStrike (artifact, user, victim := 0)
 		endif
 	endif
 	// Kill user
-	ApplyDamage(user, 9999);
+	user.kill();
 	PlaySoundEffect(user, 0x11E);
 	PlayObjectCenteredEffect (user, 0x36b0, 1, 0);
-	DestroyItem(artifact);	
+	DestroyItem(artifact);
 
 endfunction
 
@@ -137,7 +137,7 @@ endfunction
 function GetPrimeStat(user, artclass)
 
 	case (artclass)
-		CLASSEID_BARD: 
+		CLASSEID_BARD:
 			return CInt((GetBaseIntelligence(user) + GetBaseDexterity(user)) / 2);
 		CLASSEID_CRAFTER:
 			return GetBaseStrength(user);
@@ -159,9 +159,9 @@ function MatchArtifactToQuestWinner(artifact)
 	var notetext:= GetObjProperty(artifact, "QuestNote");
 	var notearray := SplitWords(notetext);
 	var playerserial := CInt(notearray[3]);
-	
+
 	var player := SystemFindObjectBySerial(playerserial);
-	
+
 	if (!player)
 		player := SystemFindObjectBySerial(playerserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if (!player)
@@ -181,14 +181,14 @@ function MatchArtifactToQuestWinner(artifact)
 		"Goblin":	artrace := "a Goblin";
 	endcase
 	artifact.name := artrace + " " + GetClasseName(GetClass(artifact)) + "'s " + GetObjProperty(artifact, "IsGMItem");
-	artifact.color := 1298;	
+	artifact.color := 1298;
 	EraseObjProperty(artifact, "EnchantColor");
 	return;
 
 endfunction
 
 function AssignRandomClassRace(artifact)
-	
+
 	var artrace, raceSpec, artclass;
 
 	var i := Random(8);
