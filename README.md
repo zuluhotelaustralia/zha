@@ -59,12 +59,22 @@ Stop the server (save first):
 docker-compose down
 ```
 
-
 #### POL base image ###
-As there's no official docker image for POL we use our own one located in [Dockerfile.pol](./Dockerfile.pol) and tagged in the registry as `docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest`.
-The image is built and published manually using the follow commands:
+As there's no official docker image for POL we use our own one located in the [polcore](https://github.com/ZuluHotelAustralia/polcore) repository. The image is published as `docker.pkg.github.com/zuluhotelaustralia/polcore/polcore:latest`
 
+### Live Updates with Docker ###
+To do live updates to the running scripts on the shard you can copy the `live-update.sh` script to the server to copy in compiled scripts (`*.ecl`) from a newer docker image.
+
+You will need `socat` installed in order to run the script.
+
+**Installation:**
 ```bash
-docker build --tag docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest - < Dockerfile.pol
-docker push docker.pkg.github.com/zuluhotelaustralia/zha/pol:latest
+sudo apt-get install socat
+wget https://raw.githubusercontent.com/ZuluHotelAustralia/zha/master/live-update.sh
+chmod +x live-update.sh
+```
+
+**Run update**
+```bash
+./live-update <target-branch>
 ```

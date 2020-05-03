@@ -34,4 +34,4 @@ if [ -d ../shard/config ]; then
     cp -f ../shard/config/*.cfg ./config/
 fi
 
-./pol
+exec ./pol

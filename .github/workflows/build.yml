@@ -7,34 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Restore compilation cache
-      uses: actions/cache@master
-      with:
-        path: |
-          **/*.ecl
-        key: ${{ runner.os }}-${{ hashFiles('**/*.ecl') }}
-    - name: Install latest ecompile
-      run: |
-        pushd /tmp
-        wget -q https://github.com/polserver/polserver/releases/download/NightlyRelease/Nightly-Linux-clang.zip
-        unzip Nightly-Linux-clang.zip
-        rm -f *_dbg.zip
-        rm -f Nightly-Linux-clang.zip
-        unzip -j -o *.zip
-        popd
-        cp /tmp/ecompile scripts/
-        cp /tmp/*.em scripts/
-    - name: Compile
-      run: |
-        pushd setup
-        ../scripts/ecompile -C ecompile.cfg
-        popd
-        tar -czf ecl-archive.tgz `find . | egrep ".*\.ecl"`
-    - name: Upload compiled ecls
-      uses: actions/upload-artifact@v1
-      with:
-        name: ecl-archive-${{ github.sha }}
-        path: ecl-archive.tgz
     - name: Publish to Registry
       uses: docker/build-push-action@v1
       with:

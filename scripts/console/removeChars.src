@@ -1,5 +1,6 @@
 use uo;
 use os;
+use util;
 
 program remove_chars(cmd)
 	print("System Message: Remove all online characters");
