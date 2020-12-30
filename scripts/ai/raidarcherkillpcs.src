@@ -22,7 +22,7 @@ program KillPlayers()
 
 	SetWarMode( 0 );
     	main_AI_loop();
-       
+
 endprogram
 
 function CloseDistance( opponent )
@@ -31,7 +31,7 @@ function CloseDistance( opponent )
 
     if ( (runaway < 100) || (!theammo) )
     	if (edist <= 4)
-	
+
 		if (DistanceToLocation( goalx, goaly ) < 10)
 			RunAwayFrom(opponent);
 		else
@@ -78,7 +78,7 @@ function CloseDistance( opponent )
 
 endfunction
 
-function in_combat_event_loop2(opponent, loops)
+function in_combat_event_loop2( unused opponent, loops)
 
 	if ( loops > 100 )
 		SetWarMode(0);

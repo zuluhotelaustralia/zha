@@ -69,16 +69,16 @@ while (1)
         case (ev.type)
             SYSEVENT_SPEECH:
                 TurnToward(ev.source);
-                
+
                 if (ev.text["buy"])
 		    foreach item in (ev.source.backpack)
 		    	if(item.objtype == 0xeed)
 				ReserveItem(item);
 		    	endif
 		    endforeach
-		    
+
                     res := SendBuyWindow( ev.source, inv_fs, Self(), inv_pb );
-                    
+
 		    foreach item in (ev.source.backpack)
 			if(item.objtype == 0xeed)
 				ReleaseItem(item);
@@ -87,7 +87,7 @@ while (1)
                     if (!res)
                         print( "SendBuyWindow failed: " + res.errortext );
                     endif
-                    
+
 		elseif (ev.text["sell containers"])
 			BuyContainers(ev.source);
 		elseif (ev.text["sell all"])
@@ -115,16 +115,16 @@ while (1)
             SYSEVENT_MERCHANT_SOLD:
                 TurnToward( ev.source );
                 PrintTextAbovePrivate( Self(), "The total of thy purchase is " + ev.amount, ev.source );
-                
+
                 foreach item in EnumerateItemsInContainer(ev.source.backpack)
 			if (isHair(item))
-				
+
 				if (item.objtype == 0x2004)
 					DestroyItem(item);
 					DestroyItem(GetEquipmentByLayer(ev.source, LAYER_HAIR));
 					continue;
 				endif
-				
+
 				var oldhair := GetEquipmentByLayer(ev.source, LAYER_HAIR);
 				if (oldhair)
 					item.color := oldhair.color;
@@ -133,7 +133,7 @@ while (1)
 					item.color := CInt(GetObjProperty(ev.source, "HairColour"));
 				endif
 				EquipItem(ev.source, item);
-				
+
 			elseif (isBeard(item))
 				if (ev.source.gender == 1)
 					DestroyItem(item);
@@ -145,7 +145,7 @@ while (1)
 						DestroyItem(GetEquipmentByLayer(ev.source, LAYER_BEARD));
 						continue;
 					endif
-					
+
 					var oldbeard := GetEquipmentByLayer(ev.source, LAYER_BEARD);
 					if (oldbeard)
 						item.color := oldbeard.color;
@@ -359,14 +359,14 @@ endfunction
 
 // Used to determine cost for raising the pc's skill to the level of the NPC.
 // Note: This function is designed to handle different skills have different rates at different levels, etc.
-function GoldForSkillGain( npc_skill, pc_skill, skillid )
+function GoldForSkillGain( npc_skill, pc_skill, unused skillid )
   var maxskill := npc_skill - pc_skill;
   return maxskill*10; // Cost equals ten times the difference.
 endfunction
 
 // Used to determine what the skill level of the PC will be for the amount of gold they gave
 // Note: This function is designed to handle different skills have different rates at different levels, etc.
-function SkillGainForGold(npc_level, pc_level, trainskillid, goldreceived)
+function SkillGainForGold(unused npc_level, pc_level, unused trainskillid, goldreceived)
   return (goldreceived/10) + pc_level;
 endfunction
 
@@ -438,7 +438,7 @@ var elemkey := desc;
     prop.pname := "sell price:";
     prop.pvalue := sellprice;
     props[5] := prop;
-   
+
 
     AppendConfigFileElem( "sell-logger", "res", elemkey, props );
 
@@ -682,7 +682,7 @@ function BuyContainers( you )
 	if (!itemprice)
 		return;
 	endif
-//zeeber changed this bit same again	
+//zeeber changed this bit same again
 	var totalsale := 0;
 	var itemamount := 0;
 	foreach item in EnumerateItemsInContainer(you.backpack)
@@ -782,9 +782,9 @@ function sell(me, you)
 						endif
 						endforeach
 						syslog("_POSSIBLE_ sell bug detected for chracter " + you.name + " : " + di.errotext + " for item : " + tgt + " " + tgt.serial);
-						return;	
+						return;
 				endif
-			
+
 					if(sale>60000)
 						var newamount := sale;
 
@@ -794,7 +794,7 @@ function sell(me, you)
 							endwhile
 							CreateItemInBackpack(you, "goldcoin", newamount);
 					else
-						
+
 
 						CreateItemInBackpack(you, "goldcoin", sale);
 

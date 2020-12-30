@@ -119,7 +119,7 @@ program merchantai()
 				EraseObjProperty(me, "restock");
 			endif
 			next_restock := ReadGameClock() + RESPAWN_MINUTES*60;
-			
+
 		endif
 
 	endwhile
@@ -140,13 +140,13 @@ function BuyMany(you)
 		return;
 	endif
 
-	var itemprice := GetConfigInt(elem, "vendorbuysfor");	
-	itemprice := CInt(itemprice * GetEconomyValueMod(items.objtype));	
+	var itemprice := GetConfigInt(elem, "vendorbuysfor");
+	itemprice := CInt(itemprice * GetEconomyValueMod(items.objtype));
 
 	if (itemprice<1)
 		itemprice:=1;
 	endif
-		
+
 	var theobjtype := items.objtype;
 	var thecolor := items.color;
 	var thecontainer := items.container.serial;
@@ -217,7 +217,7 @@ function BuyAll(you)
 	endif
 
 	var itemprice := GetConfigInt(elem, "vendorbuysfor");
-	
+
 	if (!itemprice) return; endif
 	itemprice := Cint(itemprice * GetEconomyValueMod(items.objtype));
 	if (itemprice<1)
@@ -277,7 +277,7 @@ function BuyAll(you)
 	endforeach
 
 	PrintTextAbovePrivate( me, "The total of your sale is " + totalsale, you );
-	
+
 	CreateItemInContainer(you.backpack, "goldcoin", totalsale);
 	SetEconomyAmount(Hex(theobjtype), totalitemamount, 0);
 	LogSold(you);
@@ -391,7 +391,7 @@ function BuyBag(you)
 
 	PrintTextAbovePrivate( me, "The total of your sale is " + totalsale, you );
 	CreateItemInContainer(you.backpack, "goldcoin", totalsale);
-	
+
 
 	LogSold(you);
 
@@ -459,19 +459,19 @@ function ProcessEvent(byref ev, byref mydestx, byref mydesty, byref steps)
 			me.hidden := 0;
 
 		SYSEVENT_ENTEREDAREA:
-			
-			
+
+
 			foreach mob in ListMobilesInLineOfSight( me, 8)
-				
+
 				if (mob.npctemplate)
-					
+
 					if (mob.script=="killpcs" || mob.script=="killpcsTeleporter" ||
 					mob.script=="spellkillpcs" || mob.script=="spellkillpcsTeleporter"
 					||mob.script=="firebreather")
 						say("Guards!!!");
 						CallGuardOnNPC(mob, me);
 					endif
-			
+
 				endif
 			endforeach
 			YellToFriend(ev.source);
@@ -540,7 +540,7 @@ function ProcessEvent(byref ev, byref mydestx, byref mydesty, byref steps)
 
 		SYSEVENT_MERCHANT_SOLD:
 			TurnToward( ev.source );
-			PrintTextAbovePrivate( me, "The total of your purchase is " + ev.amount, ev.source );									
+			PrintTextAbovePrivate( me, "The total of your purchase is " + ev.amount, ev.source );
 			SetObjProperty(me, "restock", 1);
 
 		SYSEVENT_ITEM_GIVEN:
@@ -834,14 +834,14 @@ endfunction
 
 // Used to determine cost for raising the pc's skill to the level of the NPC.
 // Note: This function is designed to handle different skills have different rates at different levels, etc.
-function GoldForSkillGain( npc_skill, pc_skill, skillid )
+function GoldForSkillGain( npc_skill, pc_skill, unused skillid )
 	var maxskill := npc_skill - pc_skill;
 	return maxskill*10; // Cost equals ten times the difference.
 endfunction
 
 // Used to determine what the skill level of the PC will be for the amount of gold they gave
 // Note: This function is designed to handle different skills have different rates at different levels, etc.
-function SkillGainForGold(npc_level, pc_level, trainskillid, goldreceived)
+function SkillGainForGold(unused npc_level, pc_level, unused  trainskillid, goldreceived)
 	return (goldreceived/10) + pc_level;
 endfunction
 
@@ -883,7 +883,7 @@ function BuyContainers( you )
 	var thecolor := items.color;
 	var thecontainer := items.container.serial;
 
-//zeeber changed this bit same again	
+//zeeber changed this bit same again
 	var totalsale := 0;
 	var itemamount := 0;
 	var totalitemamount:=0; //barns
@@ -927,11 +927,11 @@ function BuyContainers( you )
 endfunction
 
 function sell(me, you)
-	
+
 	var itemdesc := ReadConfigFile("::itemdesc");
 	PrintTextAbovePrivate( me, "Can i help thee?", you);
 	var tgt := Target(you);
-	
+
 
 	if ( (!tgt) || (not Accessible(you, tgt)) )
 		return;
@@ -958,7 +958,7 @@ function sell(me, you)
 
 	var itemprice := GetConfigInt(elem, "vendorbuysfor");
 	var myobjtype:=tgt.objtype; //had to do this cos for some reason gets lost for economy save
-	
+
 	if(!itemprice)
 		return;
 	endif
@@ -966,7 +966,7 @@ function sell(me, you)
 	if (itemprice*tgt.amount<tgt.amount)
 		itemprice:=1; //get at least 1gp per item sold
 	endif
-	
+
 	var amount := tgt.amount;
 	var sale;
 
@@ -983,7 +983,7 @@ function sell(me, you)
 	if(amount)
 		sale := CInt(itemprice * amount);
 	endif
-	
+
 
 	if ( (itemprice) && (!tgt.newbie) &&	(tgt.objtype != 0xeed) && (!IsMagic(tgt)) )
 				LogIt(you, tgt, sale);
@@ -995,26 +995,26 @@ function sell(me, you)
 						endif
 						endforeach
 						syslog("_POSSIBLE_ sell bug detected for chracter " + you.name + " : " + di.errotext + " for item : " + tgt + " " + tgt.serial);
-						return;	
+						return;
 				endif
-				
+
 				if(sale>60000)
-				
+
 					var newamount := sale;
 							while( newamount > 60000 )
 							CreateItemInBackpack( you, UOBJ_GOLD_COIN, 60000 );
 							newamount := newamount - 60000;
 						endwhile
 						CreateItemInBackpack(you, "goldcoin", newamount);
-						
+
 				else
-								
+
 					CreateItemInBackpack(you, "goldcoin", sale);
-					
+
 				endif
 
 				PrintTextAbove( me, "The total of your sale is " + sale);
-				
+
 				SetEconomyAmount(myobjtype, amount, 0);
 	else
 
@@ -1054,7 +1054,7 @@ var elemkey := desc;
     prop.pname := "sell price:";
     prop.pvalue := sellprice;
     props[5] := prop;
-   
+
 
     AppendConfigFileElem( "sell-logger", "res", elemkey, props );
 
@@ -1070,7 +1070,7 @@ function EconomyRecalcVendorSellsAt()
 	foreach item in EnumerateItemsInContainer(inv_fs)
 		//Broadcast(item.desc);
 		var elem := FindConfigElem(itemdesc, item.objtype);
-		
+
 		if (elem)
 			var itemprice := GetConfigInt(elem, "vendorsellsfor");
 			//Broadcast(item.desc + " was valued at " + itemprice);
@@ -1089,7 +1089,7 @@ function EconomyRecalcVendorBuysAt()
 	foreach item in EnumerateItemsInContainer(inv_fs)
 		//Broadcast(item.desc);
 		var elem := FindConfigElem(itemdesc, item.objtype);
-		
+
 		if (elem)
 			var itemprice := GetConfigInt(elem, "vendorsbuysfor");
 			//Broadcast(item.desc + " was valued at " + itemprice);
@@ -1104,4 +1104,3 @@ function EconomyRecalcVendorBuysAt()
 endfunction
 
 
-		

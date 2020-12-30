@@ -52,7 +52,7 @@ function in_combat_event_loop(opponent)
 
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
 	if( !MagicResistant())
 		CastSpell( me, me, "reflect" );
 	endif
@@ -89,5 +89,5 @@ function post_combat()
 
 	sleep(1);
 	look_around();
- 
+
 endfunction

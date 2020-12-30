@@ -76,7 +76,7 @@ var data2 := {
 "Welcome to the Element Help System", //0
 "What to do with all 9 Earth Pentagram pieces?", //1
 "  Bring them to me and drop them on me.", //2
-"  You do not have to bring them all at the same time or", //3 
+"  You do not have to bring them all at the same time or", //3
 "  to the same Earth Element Shrine Lord.", //4
 "Where can you find the 9 Earth Pentagram pieces?", //5
 "  Pentagram pieces can be found on stronger monsters.", //6
@@ -278,7 +278,7 @@ return res[0];
 endfunction
 
 
-function MakeWeapon(who,fish)
+function MakeWeapon(who, unused fish)
 var item, title:="";
 if (who.title_prefix) title:=who.title_prefix; endif
 say( title + " I will create your items."); sleep(1);
@@ -294,7 +294,7 @@ item :=CreateItemInContainer( who.backpack, 0xf055, 1 );
 endfunction
 
 
-function MakeArmor(who,fish)
+function MakeArmor(who, unused fish)
 var item, title:="";
 if (who.title_prefix) title:=who.title_prefix; endif
 say( title + " I will create your items."); sleep(1);
@@ -321,7 +321,7 @@ item :=CreateItemInContainer( who.backpack, 0xf054, 1 );
 
 endfunction
 
-function MakePlate(who,fish)
+function MakePlate(who, unused fish)
 var item, title:="";
 if (who.title_prefix) title:=who.title_prefix; endif
 say( title + " I will create your items."); sleep(1);

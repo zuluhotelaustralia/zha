@@ -51,10 +51,10 @@ function in_combat_event_loop(opponent)
 
 	spellattack(opponent);
 
-endfunction      
+endfunction
 
 function post_combat()
- 
+
 	DisableCombatEvents();
 	EnableMainEvents();
 
@@ -68,7 +68,7 @@ function post_combat()
 
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight( unused opponent)
 
 	if (GetObjProperty(me, "mr") != "1")
 		SetObjProperty(me, "mr", "1");
@@ -81,16 +81,16 @@ endfunction
 
 function breathe_meteor( caster )
     var parms := array;
-   
+
 
     var targets := ListMobilesInLineOfSight(me, 4);
     PerformAction(me,0x0c);
 
     foreach mobile in targets
-     
+
 	   var dmg := Random((CInt(70* GetHp(me))/GetMaxHp(me)))+5;
 	   PlayMovingEffect(caster, mobile,MOVING_EFFECT_FIREBALL, 10,1,1);
-	   ApplyDamage(mobile, dmg);         
+	   ApplyDamage(mobile, dmg);
 
     endforeach
 

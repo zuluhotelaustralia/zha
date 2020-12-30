@@ -46,7 +46,7 @@ function CloseDistance( opponent )
 
 endfunction
 
-function in_combat_event_loop2(opponent, loops)
+function in_combat_event_loop2( unused opponent, loops)
 
 	if ( loops > 100 )
 		SetWarMode(0);

@@ -1,6 +1,6 @@
 include "include/areas";
 
-function CallGuardOnNPC(npc, caller)
+function CallGuardOnNPC(npc, unused caller)
 //used by merchants
 	if (!npc.npctemplate)
 		return;
@@ -8,7 +8,7 @@ function CallGuardOnNPC(npc, caller)
 	if (GetObjProperty(npc, "guardignore"))
 		return;
 	endif
-	
+
 	set_critical(1);
 	var guard := CreateNpcFromTemplate( "guard", npc.x, npc.y, npc.z );
 	if( guard )
@@ -17,24 +17,24 @@ function CallGuardOnNPC(npc, caller)
 	endif
 	set_critical(0);
 	return 1;
-	
+
 endfunction
 
 function AutoCallGuardCheck(attacker, defender, melee_mode:=0)
 	//modified from pkg/opt/areas/callguards.src
 	//returns 1 if attack is by a crim in a guarded area and summons guard onto them
-	//otherwise 0		
+	//otherwise 0
 	if (getglobalproperty( "autoguardsoff") == 1)
 		return 0;
 	endif
 	if(attacker.IsA(POLCLASS_NPC) || defender.IsA(POLCLASS_NPC))
 		return 0;
 	endif
-		
+
 	if(! IsInGuardedArea(attacker) )
 		return 0;
 	endif
-	
+
 	var guard;
 	/*if (!defender && attacker.acct) //no defender and attacker is player
 			set_critical(1);
@@ -48,14 +48,14 @@ function AutoCallGuardCheck(attacker, defender, melee_mode:=0)
 			return 1;
 	endif
 	*/
-	
+
 	var npc_cfg := ReadConfigFile(":*:npcdesc");
 	var elem;
-	
+
 	if (defender.criminal)
 		return 0;
 	endif
-	
+
 	//guild check
 	var guild1id := GetObjProperty(attacker, "guild_id");
 	var guild2id := GetObjProperty(defender, "guild_id");
@@ -64,7 +64,7 @@ function AutoCallGuardCheck(attacker, defender, melee_mode:=0)
 			return 0;
 		endif
 	endif
-	
+
 	//allied guilds check
 	var guild1 := FindGuild(guild1id);
 	var guild2 := FindGuild(guild2id);
@@ -125,7 +125,7 @@ function InAttackersArray(defender, attacker_serial)
 	if( !attacklist  )
 		return 0;
 	endif
-	
+
 	foreach apr in attacklist
 		if (apr[1]==attacker_serial)
 			if (CInt(ReadGameClock()-apr[2])<120)   //less than 2 min old
@@ -133,7 +133,7 @@ function InAttackersArray(defender, attacker_serial)
 			endif
 			return 0;
 		endif
-	
+
 	endforeach
 
 	return 0;
@@ -173,7 +173,7 @@ function ReplaceOldestInAttacklist( byref attacklist, serial )
 			attacklist[current][2] := ReadGameClock();
 
 			return attacklist;
-		
+
 		elseif( attacklist[current][2] < min_timer )
 			min_timer := attacklist[current][2];
 			min_pos   := current;
@@ -189,7 +189,7 @@ function ReplaceOldestInAttacklist( byref attacklist, serial )
 
 endfunction
 
-		
+
 function AddSerialToAttacklist( byref attacklist, serial)
 	foreach arr in attacklist
 		if( arr[1] == serial )

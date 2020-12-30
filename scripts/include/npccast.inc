@@ -69,7 +69,7 @@ function castspell( caster, cast_on, spellname )
 
 endfunction
 
-function SummonSkel(me, onwho)
+function SummonSkel(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 
@@ -93,7 +93,7 @@ function SummonSkel(me, onwho)
 
 endfunction
 
-function SummonBalronSpawn(me, onwho)
+function SummonBalronSpawn(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 
@@ -117,7 +117,7 @@ function SummonBalronSpawn(me, onwho)
 
 endfunction
 
-function SummonEleLord(me, onwho)
+function SummonEleLord(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 
@@ -145,7 +145,7 @@ function SummonEleLord(me, onwho)
 
 endfunction
 
-function SummonElf(me, onwho)
+function SummonElf(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 
@@ -169,7 +169,7 @@ function SummonElf(me, onwho)
 
 endfunction
 
-function SummonDarkElf(me, onwho)
+function SummonDarkElf(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 	if (!timescasted) timescasted :=0; endif
@@ -192,7 +192,7 @@ function SummonDarkElf(me, onwho)
 
 endfunction
 
-function SummonSpider(me, onwho)
+function SummonSpider(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 
@@ -211,7 +211,7 @@ function SummonSpider(me, onwho)
 
 endfunction
 
-function SummonUndead(me, onwho)
+function SummonUndead(me, unused onwho)
 
 	var timescasted := GetObjProperty(me, "timescasted");
 
@@ -237,7 +237,7 @@ function SummonUndead(me, onwho)
 
 endfunction
 
-function SummonDarkElfQueen (caster, cast_on)
+function SummonDarkElfQueen (caster, unused cast_on)
 	var timescasted := GetObjProperty(caster, "timescasted");
 	if (!timescasted) timescasted :=0; endif
 	timescasted := timescasted +1;
@@ -257,7 +257,7 @@ function TeleToPlayer(caster, cast_on)
 	MoveObjectToLocation(caster, cast_on.x, cast_on.y, cast_on.z, _DEFAULT_REALM); //AutoConversion
 endfunction
 
-function SummonElfLord (caster, cast_on)
+function SummonElfLord (caster, unused cast_on)
 	var timescasted := GetObjProperty(caster, "timescasted");
 	if (!timescasted) timescasted :=0; endif
 	timescasted := timescasted +1;
@@ -270,7 +270,7 @@ function SummonElfLord (caster, cast_on)
 	NpcSummonCreature(caster, "elflord");
 endfunction
 
-function SummonJuggernaught (caster, cast_on)
+function SummonJuggernaught (caster, unused cast_on)
 	var timescasted := GetObjProperty(caster, "timescasted");
 	if (!timescasted) timescasted :=0; endif
 	timescasted := timescasted +1;
@@ -487,7 +487,7 @@ function CastOnAllPlayersSpell(caster, spellid)
 	endforeach
 endfunction
 
-function IncreaseHoardeDemonSize(caster, cast_on)
+function IncreaseHoardeDemonSize(caster, unused cast_on)
 	var targettemplate;
 	case (caster.npctemplate)
 		"smallhoardedemon":

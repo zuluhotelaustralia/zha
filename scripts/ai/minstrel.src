@@ -5,7 +5,7 @@
 //
 // He also runs like heck if you try to attack him :)
 //
-//	NOTE: Be careful about adding new midi files to the list in PlayMidi(). 
+//	NOTE: Be careful about adding new midi files to the list in PlayMidi().
 //	      When you use the death.mid it runs through the death cycle.......
 //
 // TODO: put all keyword / response text in a cfg file.
@@ -85,7 +85,7 @@ program Minstrel()
 	if (ReadGameClock() >= next_wander)
 		wander();
 		next_wander := ReadGameClock() + 1;
-	endif 
+	endif
         // TODO: ReturnToPost();
     endwhile
 endprogram
@@ -123,7 +123,7 @@ function Run( opponent )
                         endif
                     endif
                 endif
-            SYSEVENT_OPPONENT_MOVED:               
+            SYSEVENT_OPPONENT_MOVED:
             SYSEVENT_ENTEREDAREA:
             SYSEVENT_LEFTAREA:
                 // ignore both of these
@@ -143,14 +143,14 @@ endfunction
 function OpenDistance( opponent )
     case (Distance( me, opponent )) //Conversion
         10:
-            return 1;       
+            return 1;
         default:
             RunAwayFrom( opponent );
             return 0;
     endcase
 endfunction
 
-function singsongs(character, tonedeaf)
+function singsongs(character, unused tonedeaf)
 	var counting := 1;
 	// var numsongs := 4;
 	var songcfg  := ReadConfigFile("songs");

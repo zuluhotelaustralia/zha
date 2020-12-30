@@ -52,9 +52,9 @@ function in_combat_event_loop(opponent)
 
 	spellattack(opponent);
 
-endfunction      
+endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
 
 	if( !GetObjProperty( me, "mr" ) )
 		CastSpell( me, me, "reflect" );
@@ -86,7 +86,7 @@ function healerstuff(mobile)
 if (!mobile.npctemplate || mobile.npctemplate["guard"] || mobile.script == "tamed")
         return;
 endif
-  
+
 	if( (mobile.poisoned) && (CheckLineOfSight95(me,mobile)) )
 		TurnToward(mobile);
 		CastSpell(me,mobile,"cure");
@@ -94,5 +94,5 @@ endif
 		TurnToward(mobile);
 		CastSpell(me,mobile,"gheal");
 	endif
-   
+
 endfunction

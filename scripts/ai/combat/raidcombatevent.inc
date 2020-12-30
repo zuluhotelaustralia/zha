@@ -1,8 +1,8 @@
-function process_combat_event(ev)
+function process_combat_event( unused ev)
 
 endfunction
 
-function in_combat_event_loop2(opponent, loops)
+function in_combat_event_loop2( unused opponent, loops)
 
 	if ( loops > 100 )
 		SetWarMode(0);
@@ -24,7 +24,7 @@ function post_combat()
 
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight( unused opponent)
 
 	DisableMainEvents();
 	EnableCombatEvents();

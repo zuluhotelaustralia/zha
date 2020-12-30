@@ -7,9 +7,9 @@ include "include/attributes";
 
 const MAX_LOSS_PERCENT	:= 0.5;
 
-function ResurrectMobile( who, by_who := 0 )
+function ResurrectMobile( who, unused by_who := 0 )
 
-//Harl - added if statement as it was resurrect was still res'ing 
+//Harl - added if statement as it was resurrect was still res'ing
 //dead people and i cant figure out why in the spell itself.
 if (who.dead)
 	Resurrect( who );
@@ -20,7 +20,7 @@ if (who.dead)
 	//MurdererStatLoss( who );
 
 	//more thing to do on res
-	
+
 	CheckResRobe(who);
 else
 	return;

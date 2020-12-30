@@ -29,7 +29,7 @@ endfunction
 function in_combat_event_loop(opponent)
 
 	do_damage(opponent);
-       
+
 endfunction
 
 function post_combat()
@@ -45,7 +45,7 @@ function post_combat()
 
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight( unused opponent)
 
 	DisableMainEvents();
 	EnableCombatEvents();
@@ -78,7 +78,7 @@ function do_damage(evsource)
 
 endfunction
 
-function CanEat(character, item)
+function CanEat( unused character, item)
 
 	if ( ( item.objtype >= 0x2030 ) && (item.objtype <= 0x2060) )
 		return 0;

@@ -14,7 +14,7 @@ function process_combat_event(ev)
 
 endfunction
 
-function spellattack(opponent);
+function spellattack(unused opponent);
 
         cast_meteor(me);
 
@@ -23,10 +23,10 @@ endfunction
 function in_combat_event_loop(opponent)
 
 	spellattack(opponent);
-        
+
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
 
 	DisableMainEvents();
 	EnableCombatEvents();
@@ -61,7 +61,7 @@ function cast_meteor( caster )
 	PerformAction(me,0x0c);
 
 	var dmg := CInt( GetHp(me) / 15 ) + RandomDiceStr("1d15");
-	
+
 	foreach mobile in targets
 		if ( (mobile) && (!mobile.npctemplate || mobile.script == "tamed") && (!mobile.cmdlevel))
 			PlayMovingEffect(caster, mobile,MOVING_EFFECT_FIREBALL, 10,1,1);

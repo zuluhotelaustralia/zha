@@ -5,7 +5,7 @@
 //
 // He also runs like heck if you try to attack him :)
 //
-//	NOTE: Be careful about adding new midi files to the list in PlayMidi(). 
+//	NOTE: Be careful about adding new midi files to the list in PlayMidi().
 //	      When you use the death.mid it runs through the death cycle.......
 //
 // TODO: put all keyword / response text in a cfg file.
@@ -70,13 +70,13 @@ program Performer()
 	//if (readgameclock() >= next_wander)
 	//	wander();
 	//	next_wander := readgameclock() + 1;
-	//endif  
+	//endif
         // TODO: ReturnToPost();
     endwhile
 endprogram
 
 
-function singsongs(character, tonedeaf)
+function singsongs(character, unused tonedeaf)
 	var counting := 1;
 	// var numsongs := 4;
 	var songcfg  := ReadConfigFile("songs");

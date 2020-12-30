@@ -90,7 +90,7 @@ var layout := array(
     "text 80 330 800 32"
 );
 
-var data := array( 
+var data := array(
     "Dealer:",
     "30000",
     "Player:",
@@ -286,7 +286,7 @@ case (box[0])
 	    dealer(who);
 	    LookAtHands(who);
 	   endif
-	  
+
 	105: //bet
 	if(gameover)
 		SendSysMessage( who, "Hand in Play!");
@@ -298,7 +298,7 @@ case (box[0])
 	    youbet :=value;
 	    data[31] := youbet;
 	endif
-	   
+
 	666:
 	PlaySoundEffect(who, 0x1ea );
 	gameover := 0;
@@ -320,7 +320,7 @@ endfunction
 
 
 function GetPayment(who, price)
-  
+
    if (who.spendgold( price ))
 	CreateItemInBackpack(me, MONEY, (price));
    	return 1;
@@ -415,7 +415,7 @@ else
 endif
 endfunction
 
-function cardValue(card,value)
+function cardValue(card, unused value)
 
 if(card==1)
   return 11;

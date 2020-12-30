@@ -5,7 +5,7 @@ include "include/time";
 include "include/objtype";
 
 //program oninsertscript(who, container, item, movetype)
-program onInsert( who, container, movetype, INSERT_ADD_ITEM, item )
+program onInsert( who, container, unused movetype, unused INSERT_ADD_ITEM, item )
 	if (GetGlobalProperty("CounselorBackpackLog") && (who.cmdlevel == CMDLEVEL_COUNSELOR) && !isAcceptableItem(item))
 		var parent := container.container;
 		if (parent.serial == who.serial)
@@ -23,7 +23,7 @@ function isAccompanied(who)
 			return 1;
 		endif
 	endforeach
-	
+
 	return 0;
 endfunction
 
@@ -31,25 +31,25 @@ function isAcceptableItem(item)
 	return (GetObjtype(item) in {UOBJ_GOLD_COIN, 0x204F/*staff robe*/, 0x9B00/*staff handbook*/});
 endfunction
 
-function log(who, item)	
-	
+function log(who, item)
+
 	var props := array;
 	var prop := array;
 	prop .+ pname;
 	prop .+ pvalue;
-	
+
 	prop.pname := "char name";
 	prop.pvalue := who.name;
 	props[1] := prop;
-	
+
 	prop.pname := "char serial";
 	prop.pvalue := who.serial;
 	props[2] := prop;
-	
+
 	prop.pname := "char account";
 	prop.pvalue := who.acctname;
 	props[3] := prop;
-	
+
 	prop.pname := "item desc";
 	if (item.desc)
 		prop.pvalue := item.desc;
@@ -57,19 +57,19 @@ function log(who, item)
 		prop.pvalue := item.name;
 	endif
 	props[4] := prop;
-	
+
 	prop.pname := "item serial";
 	prop.pvalue := item.serial;
 	props[5] := prop;
-	
+
 	prop.pname := "location";
 	prop.pvalue := who.x + " " + who.y + " " + who.z;
 	props[6] := prop;
-	
+
 	prop.pname := "datetime";
 	prop.pvalue := NowString();
 	props[7] := prop;
-	
+
 	AppendConfigFileElem("counselorbackpacks", "insertion", "", props );
 	UnloadConfigFile("counselorbackpacks");
 endfunction

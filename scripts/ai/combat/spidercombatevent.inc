@@ -21,7 +21,7 @@ function in_combat_event_loop(opponent)
 	send_web(opponent);
 	DoPoison(opponent);
 
-endfunction      
+endfunction
 
 
 
@@ -35,10 +35,10 @@ function post_combat()
 
 	sleep(1);
 	look_around();
-  
+
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight( unused opponent)
 
 	DisableMainEvents();
 	EnableCombatEvents();
@@ -82,7 +82,7 @@ function send_web(opponent)
 			endcase
 		endif
 	endif
-		
+
 endfunction
 
 function DoPoison(you)

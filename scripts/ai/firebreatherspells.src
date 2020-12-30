@@ -45,13 +45,13 @@ endprogram
 
 function CloseDistance( opponent )
 //  return 4 if they went onto a multi
-	
+
 	if  (opponent.multi.serial != me.multi.serial)
 		return 4;
 	endif
 
     case (Distance( me, opponent )) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
             return 1;
         default:
@@ -64,12 +64,12 @@ function CloseDistance( opponent )
 		Return 1;
 		endif
 		Return 0;
-		
+
     endcase
 
 endfunction
 
-function TitanStomp(me, opponent)
+function TitanStomp(me, unused opponent)
 
 	var utterance := Random(4);
 
@@ -83,19 +83,19 @@ function TitanStomp(me, opponent)
 	var circle  := 8;
 
 	var fromhit;
-	
+
 	var victims := ListMobilesNearLocation( CInt(me.x), CInt(me.y), CInt(me.z), 6);
 	var dmg := 40+Random(30);
-	var okay;	
+	var okay;
 
 	PlaySoundEffect( me, SFX_SPELL_EARTHQUAKE1 );
 	sleepms(100);
 	PerformAction( me, ANIM_CAST_DIR );
 	foreach mobile in victims
 		if(mobile.isA(POLCLASS_NPC))
-			okay := 0;			
+			okay := 0;
 		else
-			ApplyTheDamage( mobile, me, dmg, DMGID_PHYSICAL );	
+			ApplyTheDamage( mobile, me, dmg, DMGID_PHYSICAL );
 			PlaySoundEffect( mobile, SFX_SPELL_EARTHQUAKE1 );
 			PlayObjectCenteredEffect( mobile, FX_SPELL_EARTHQUAKE, SPEED_SPELL_EARTHQUAKE, LOOP_SPELL_EARTHQUAKE );
 			PrintTextAbovePrivate( mobile, "The ground shakes as the Titan stomps!", mobile );
@@ -117,5 +117,5 @@ function TitanStomp(me, opponent)
                 	DestroyItem(item);
 		endif
         endforeach
-       
+
 endfunction

@@ -2,7 +2,7 @@ use uo;
 
 include "include/clock";
 
-program about( cmd )
+program about( unused cmd )
 
     var system := polcore();
 

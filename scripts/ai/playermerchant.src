@@ -698,7 +698,7 @@ function AddThingsToBuy()
 
 endfunction
 
-function SpoutBuyList(byref you)
+function SpoutBuyList(unused  you)
 
 	var buylist := {};
 	var buyprice := {};

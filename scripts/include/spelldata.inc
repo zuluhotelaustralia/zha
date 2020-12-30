@@ -141,7 +141,7 @@ function ApplyElementalDamage( caster, cast_on, circle, dmg, element, affectsHid
 endfunction
 
 
-function ApplyElementalDamageNoResist( on_who, by_who, dmg, element, affectsHidden := 0 )
+function ApplyElementalDamageNoResist( on_who, by_who, dmg, element, unused affectsHidden := 0 )
 
 	if(by_who.dead) return; endif
 	if(on_who.dead) return; endif

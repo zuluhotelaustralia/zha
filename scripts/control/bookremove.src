@@ -5,7 +5,7 @@
 use uo;
 use os;
 
-program on_remove(who, backpack, item)
+program on_remove(who, backpack, unused item)
   if(who.cmdlevel>=2 || GetObjProperty(backpack,"casecity")!=1)
     return 1;
   else

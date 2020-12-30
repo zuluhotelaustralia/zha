@@ -54,7 +54,7 @@ while (1)
 
 endwhile
 
-function tellinfo(who)
+function tellinfo( unused who)
 say("You can now get a new title.");
 //sleep(2);
 //say("Type title and select your new skill title.");
@@ -95,14 +95,14 @@ function titlegump(who);
 				"resizepic 150   0 2600 320 405",
 				"resizepic 210 360 5100 200  25",
 				"text 220 30 0 0",
-			
+
 				"page 1",
 				"button 220 65 2118 2117 1 1 2",
 				"text 240 60 600 1" };
-			
+
 	var data := {	"Please select your Title",
 			"Remove Title"};
-		
+
 	FillInArrays( who, layout, data );
 
 	var res := SendDialogGump( who, layout, data );
@@ -178,11 +178,11 @@ function FillInArrays( who, byref layout, byref data )
 		if( prefix && suffix )
 			title := prefix + " " + suffix;
 		endif
-		
+
 		if( title )
 			FillInData( title, layout, data, done, pagecount, rowcount );
 		endif
-	
+
 		k := k - 1;
 		level := CInt( skill_array[k][1] / 15 );
 		if( level > 8 )
@@ -197,46 +197,46 @@ function FillInArrays( who, byref layout, byref data )
 	var classe_title;
 	if( GetObjProperty( who, CLASSEID_BARD ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_BARD )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+1 ];
-		
+
 	elseif(	GetObjProperty( who, CLASSEID_CRAFTER ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_CRAFTER )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+2 ];
-			
+
 	elseif( GetObjProperty( who, CLASSEID_MAGE ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_MAGE )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+3 ];
-			
+
 	elseif( GetObjProperty( who, CLASSEID_RANGER ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_RANGER )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+4 ];
-			
+
 	elseif( GetObjProperty( who, CLASSEID_THIEF ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_THIEF )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+5 ];
-			
+
 	elseif( GetObjProperty( who, CLASSEID_WARRIOR ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_WARRIOR )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+6 ];
-			
+
 	elseif( GetObjProperty( who, CLASSEID_POWERPLAYER ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_POWERPLAYER )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+7 ];
-	
+
 	elseif( GetObjProperty( who, CLASSEID_DRUID ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_DRUID )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+8 ];
-	
+
 	elseif( GetObjProperty( who, CLASSEID_DEATHKNIGHT ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_DEATHKNIGHT )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+9 ];
-	
+
 	elseif( GetObjProperty( who, CLASSEID_MONK ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_MONK )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+10 ];
-	
+
 	elseif( GetObjProperty( who, CLASSEID_NECROMANCER ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_NECROMANCER  )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+11 ];
-	
+
 	elseif( GetObjProperty( who, CLASSEID_NINJA ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_NINJA )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+12 ];
-	
+
 	elseif( GetObjProperty( who, CLASSEID_PALADIN ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_PALADIN )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+13 ];
-		
+
 	elseif( GetObjProperty( who, CLASSEID_PRIEST ) )
 		classe_title := leveltitles[ GetObjProperty( who, CLASSEID_PRIEST )+3 ] + " " + skilltitles[ SKILLID__HIGHEST+14 ];
-		
+
 	endif
 
 
@@ -265,5 +265,5 @@ function FillInData( titlename, byref layout, byref data, byref done, byref page
 	data.append( titlename );
 	layout.append( "button 220 " + (rowcount+5) + " 2118 2117 1 1 " + len(data) );
 	rowcount := rowcount +20;
-     
+
 endfunction
