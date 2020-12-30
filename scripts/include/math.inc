@@ -35,7 +35,7 @@ function Sin(b, c)
 // (We convert to Rads)  Given the angle, sin is computed as:
 //      sin(x) = x - x^3/3! + x^5/5! - x^7/7! + x^9/9! - x^11/11!
 // which is pretty accurate for all intensive purposes, at least to
-// four decimal places.  If b and c are given, b = opposite side, 
+// four decimal places.  If b and c are given, b = opposite side,
 // c = hypotenuse.
 
 	var i, x, theta;
@@ -71,7 +71,7 @@ function Cos(a, c)
 // (We convert to Rads)  Given the angle, cos is computed as:
 //      cos(x) = 1 - x^2/2! + x^4/4! - x^6/6! + x^8/8! - x^10/10!
 // which is pretty accurate for all intensive purposes, at least to
-// four decimal places.  If a and c are given, a = adjacent side, 
+// four decimal places.  If a and c are given, a = adjacent side,
 // c = hypotenuse.
 
 	var i, x, theta := 1;
@@ -298,7 +298,7 @@ function YRoot(x, y)
 	var success := 0;
 
 
-	while (success == 0)	
+	while (success == 0)
 
 		n := Exp(root, y);
 		i := x - n;
@@ -330,7 +330,7 @@ function Sqr(x)
 	var root := 2.000;
 	var success := 0;
 
-	while (success == 0)	
+	while (success == 0)
 
 		n := Exp(root, 2);
 		i := x - n;
@@ -392,7 +392,7 @@ endfunction
 function ZTest(arrayx, mu, sigma)
 
 // Returns the test statistic for a ZTest.   This is used to show
-// the likelihood that a sample is drawn from the population.  The 
+// the likelihood that a sample is drawn from the population.  The
 // mean and standard deviation for the population must be known.
 // The z-statistic is computed as follows:
 //
@@ -413,7 +413,7 @@ function ZTest(arrayx, mu, sigma)
 
 	z := i/n;
 
-	return := z;
+	return z;
 
 endfunction
 
@@ -421,7 +421,7 @@ endfunction
 function TTest(arrayx, mu)
 
 // Returns the test statistic for a TTest.   This is used to show
-// the likelihood that a sample is drawn from the population, when 
+// the likelihood that a sample is drawn from the population, when
 // the mean and standard deviation for the entire population are
 // unknown.  The t-statistic is computed as follows:
 //
@@ -444,7 +444,7 @@ function TTest(arrayx, mu)
 
 	t := i/n;
 
-	return := t;
+	return t;
 
 endfunction
 
@@ -452,7 +452,7 @@ function BitIn(arrayx)
 
 // Takes an array of 8 bits and converts them into an integer.
 // This is used for the flag support.  IMPORTANT: bit positon is
-// *NOT* the same thing as the array position!   The first bit in 
+// *NOT* the same thing as the array position!   The first bit in
 // the flag is the 8th bit in the array, and vice versa.  This is
 // because it processes the bit values in the following order:
 // 128, 64, 32, 16, 8, 4, 2, 1.
@@ -480,7 +480,7 @@ endfunction
 function BitOut(x)
 
 // This function takes an unsigned, short integer (0-255) and returns
-// an array containing the individual bit values.   IMPORTANT: the 
+// an array containing the individual bit values.   IMPORTANT: the
 // first element of the array is NOT the first bit, it is the 8th
 // bit, and so on down.   See the desc for BitIn for the details.
 
@@ -538,15 +538,15 @@ endfunction
 function BitOr(x, y)
 
 // Performs a bitwise logical disjunction for two unsigned, short
-// integers (0-255).  If either value (or both values) for a 
-// position are set, then that position in the result is set.   If 
+// integers (0-255).  If either value (or both values) for a
+// position are set, then that position in the result is set.   If
 // both are reset, then the position in the result is reset.
 
 	var arrayx := BitOut(x);
 	var arrayy := BitOut(y);
 	var z := 0;
 	var loop := 1;
-	locan n;
+	var n;
 
 	while (loop <= 8)
 
@@ -567,7 +567,7 @@ function BitXor(x, y)
 
 // Performs a bitwise logical exclusion for two unsigned, short
 // integers (0-255).  If one and ONLY one value for a position is
-// set, then that position in the result is set.   If both are 
+// set, then that position in the result is set.   If both are
 // either set or reset, then the position in the result is reset.
 
 	var arrayx := BitOut(x);
@@ -595,7 +595,7 @@ function BitEqv(x, y)
 
 // Performs a bitwise logical equivalence for two unsigned, short
 // integers (0-255).  If one and ONLY one value for a position is
-// set, then that position in the result is reset.   If both are 
+// set, then that position in the result is reset.   If both are
 // either set or reset, then the position in the result is set.
 
 	var arrayx := BitOut(x);
@@ -652,7 +652,7 @@ function BitNot(x)
 
 // Performs a logical negation on a short, unsigned integer (0-255).
 // If a position in the integer is set, then that position in the
-// result is reset.  Conversely, if a position in the integer is 
+// result is reset.  Conversely, if a position in the integer is
 // reset, then that position in the result is set.
 
 	var arrayx := BitOut(x);

@@ -137,10 +137,10 @@ var data := array(
        "Dupe Item",            //24
        "",                     //25 SetNewbie
        "Bounce Item in Backpack",  //26
-       "",                     //27 SetMovable 
+       "",                     //27 SetMovable
        "Create Stack in Backpack", //28
        "0",                       //29
-       "Dupe Item in Backpack",    //30 
+       "Dupe Item in Backpack",    //30
        "",                     //31
        "",                     //32 Ar/Dmg Modifier
        "",                     //33 Ar/Dmg Modifier Value
@@ -159,7 +159,7 @@ program textcmd_info( character )
 	endif
 
     var item;
-   
+
     SendSysMessage( character, "Select an Item." );
     item :=  Target( character, TGTOPT_NOCHECK_LOS );
 
@@ -194,13 +194,13 @@ program textcmd_info( character )
 
     General( item );
 
-    var result := SendDialogGump( character, layout, data );  
+    var result := SendDialogGump( character, layout, data );
     var reskey;
 
     if (result[0]  > 0)
 	SetObjProperty(item, "LFucker", character.name + character.serial);
     endif
-    	
+
     case( result[0] )
          1:  //fall through intentional
          2:
@@ -216,7 +216,6 @@ program textcmd_info( character )
         12:
         13:
         14:
-        13:
         15: EditItem( item, character, result[0] );
         16: if (character.cmdlevel > 2)
             var tmpname := item.desc, tmpcolor := item.color;
@@ -247,7 +246,7 @@ program textcmd_info( character )
             endif
             endif
     endcase
- 
+
 endprogram
 
 
@@ -261,7 +260,7 @@ var amount := GetAmount( item );
    if(GetHp(item))
     data[16] := GetHp(item) + "/" + GetMaxHp(item);
    else
-    data[16] := "n/a";   
+    data[16] := "n/a";
     layout[36] := 0;
    endif
    var weapfile := ReadConfigFile( ":combat:itemdesc" );
@@ -304,7 +303,7 @@ function EditItem( item, character, result )
         SendSysMessage( character, "Changes are made immediately , Integers only. Hit Esc to cancel." );
         var val := CInt(RequestInput( character, character.backpack, "Enter a new value."));
 
-   
+
     if( !val )
        if ( result == 8 )
          item.color := val;
@@ -316,9 +315,9 @@ function EditItem( item, character, result )
 
     case( result )
          1: CreateItemInInventory( character.backpack, item.objtype, val ); //SetAmount(item):= val;
-	    
+
 	    var newname := "";
-	   
+
             if(item.amount>1)
             	var count := SplitWords(item.desc);
             	var i;
@@ -329,18 +328,18 @@ function EditItem( item, character, result )
             else
             	PrintTextAbovePrivate( character, "You have just created " + val + " " + item.desc + " in your backpack.", character);
             endif
-           
+
          2: MoveObjectToLocation( item, val, item.y, item.z, _DEFAULT_REALM, 0); //AutoConversion
          3: MoveObjectToLocation( item, item.x, val, item.z, _DEFAULT_REALM, 0); //AutoConversion
          4: MoveObjectToLocation( item, item.x, item.y, val, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
          5: SetHp(item, val);
          6: if(!item.ar)
              item.dmg_mod := val;
-            else            
+            else
              item.ar_mod := val;
             endif
          7: item.graphic := val;
-         8: item.color := val;        
+         8: item.color := val;
     endcase
     endif
 endfunction

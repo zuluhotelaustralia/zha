@@ -118,7 +118,6 @@ function Fight( opponent )
 		waittime := 0;
 		wasmoving := 1;
 	4:
-	4:
 		//closedistance returned 4, which means the opponent went onto a multi
 		// edit by harlz to stop them wandering around and remove the recall onto boats which was being abused
 	// if (opponent.multi.isA(POLCLASS_BOAT))

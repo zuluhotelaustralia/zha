@@ -7,6 +7,7 @@ include "customspells";
 include "include/gumps";
 include "include/client";
 include "include/objtype";
+include "include/nameValidation";
 
 const RENAME_BOOK		:= 0x01;
 const RECALL_WITH_CHARGES	:= 0x10;
@@ -334,7 +335,7 @@ endfunction
 function RenameBook( who, runebook )
 
 	var name := SendTextEntryGump( who, "Enter the new name of the runebook. ", TE_CANCEL_ENABLE, TE_STYLE_NORMAL );
-	if( name && NameValidation(name))
+	if( name && ValidStr(name))
 		SetObjProperty( runebook, "name", name );
 		return 1;
 	else
@@ -662,17 +663,4 @@ function TruncName( name )
 
 	return the_name;
 
-endfunction
-
-function NameValidation(thestring)
-  var i, validstr := {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "a", "b", "c",
-  		      "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
-  		      "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", ",", ".", "?",
-  		      "/", "\\", "[", "]", "(", ")", "%", "$", "#", "@", "!", "^", "&",
-  		      "*", ":", ";", "+", "-", "'", "`", " "};
-  thestring:=lower(thestring);
-  for(i:=1;i<=len(thestring);i:=i+1)
-    if(!(thestring[i] in validstr)) return 0; endif
-  endfor
-  return 1;
 endfunction

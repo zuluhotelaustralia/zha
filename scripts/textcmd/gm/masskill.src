@@ -4,15 +4,15 @@ include "include/attributes";
 include "include/cmdlevel_check";
 
 
-program cast_fireball( caster,)
+program cast_fireball( caster )
 	if (!checkStaff(caster, "masskill", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
-	
+
  	foreach mob in ListMobilesNearLocation(caster.x,caster.y,caster.z, 20)
 		if( !mob.acct)
 			ApplyRawDamage( mob, GetMaxHp(mob) + 10  ); // note this is raw damage
 		endif
 	endforeach
-  
+
 endprogram

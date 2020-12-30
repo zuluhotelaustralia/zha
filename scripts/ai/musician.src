@@ -60,6 +60,7 @@ program Musician()
 						say("Hmmm");
 						CompareSongs();
 					SYSEVENT_ENTEREDAREA:
+						playlute();
 						if (!ev.source.isA(POLCLASS_NPC))
 							if (!Random(4))
 								say ("Ask me to play if you want to hear my beautiful music!");
@@ -86,8 +87,6 @@ program Musician()
                 else
                     say( "What evil thou art!" );
                 endif
-            SYSEVENT_ENTEREDAREA:
-					playlute();
 	    SYSEVENT_LEFTAREA:
 			endcase
 	if (ReadGameClock() >= next_wander)

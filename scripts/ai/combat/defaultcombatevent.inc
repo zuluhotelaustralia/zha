@@ -29,7 +29,7 @@ function post_combat()
 
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
 
 	DisableMainEvents();
 	EnableCombatEvents();

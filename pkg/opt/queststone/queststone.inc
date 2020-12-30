@@ -21,7 +21,7 @@ const REWARDQUESTITEMS_COMPLETED :=2; //completed players only can buy quest ite
 
 //Finalise Option constants
 const FINALOPTION_NONE :=0;
-const FINALOPTION_PERSCOMPLNALLOBJS :=1; 
+const FINALOPTION_PERSCOMPLNALLOBJS :=1;
 const FINALOPTION_PERSCOMPLN1OBJ :=2;
 const FINALOPTION_PERSMAXQP :=3;
 const FINALOPTION_ALLCOMPLNALLOBJS :=4;
@@ -30,13 +30,13 @@ const FINALOPTION_ALLMAXQP :=6;
 
 //Registration Condition constants
 const REGCONDITION_NONE :=0;
-const REGCONDITION_NEWBIE :=1; 
-const REGCONDITION_BARD :=2; 
-const REGCONDITION_CRAFTER :=3; 
-const REGCONDITION_MAGE :=4; 
-const REGCONDITION_RANGER :=5; 
-const REGCONDITION_THIEF :=6; 
-const REGCONDITION_WARRIOR :=7; 
+const REGCONDITION_NEWBIE :=1;
+const REGCONDITION_BARD :=2;
+const REGCONDITION_CRAFTER :=3;
+const REGCONDITION_MAGE :=4;
+const REGCONDITION_RANGER :=5;
+const REGCONDITION_THIEF :=6;
+const REGCONDITION_WARRIOR :=7;
 const REGCONDITION_RACE:=8;
 const REGCONDITION_LEVELONLY:=9;
 const REGCONDITION_POWERPLAYER:=10;
@@ -119,7 +119,7 @@ function AddPlayerData(stone, player)
 	var qpoints:=GetObjProperty(stone, "playerquestpoints");
 	var psize:=pserials.size();
 	if (!pserials[1])
-		//Broadcast("nothing in pserial[1]"); 
+		//Broadcast("nothing in pserial[1]");
 		SetObjProperty(stone, "playerserials",{player.serial});
 		SetObjProperty(stone, "playerquestpoints",{0}); //0 points is starting default
 		//SetObjProperty(player, "Quester", stone.serial);//done in AddQuest
@@ -143,7 +143,7 @@ function RemovePlayerData(stone, player_serial)
 	var tempPSerials:=array;
 	var tempQPs:=array;
 	var i:=1;
-	
+
 	foreach p in pserials
 		if (p!=player_serial)
 			tempPSerials.append(p);
@@ -151,18 +151,18 @@ function RemovePlayerData(stone, player_serial)
 		endif
 		i:=i+1;
 	endforeach
- 
+
         var player := SystemFindObjectBySerial( player_serial , SYSFIND_SEARCH_OFFLINE_MOBILES);
         var questarr := GetObjProperty(player, "Quester");
         var tempq := array;
-        
+
 	foreach q in questarr
 		var stone := SystemFindObjectBySerial(q);
 		if (q != cint(stone.serial))
                    tempq.append(q);
 		endif
 	endforeach
- 
+
         SetObjProperty(player, "Quester", tempq);
 	SetObjProperty(stone, "playerserials",tempPSerials);
 	SetObjProperty(stone, "playerquestpoints",tempQPs);
@@ -180,8 +180,8 @@ function ClearPlayerData(stone)
 		player := SystemFindObjectBySerial(p, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		EraseObjProperty(player, "qPObjComp"+stone.serial); //remove personal objectives completed prop
 		RemoveQuest(player, stone.serial); //remove quest stone prop
-	endforeach		
-	
+	endforeach
+
 	EraseObjProperty(stone, "playerserials");
 	EraseObjProperty(stone, "playerquestpoints");
 	EraseObjProperty(stone, "CompletedPlayers");
@@ -222,13 +222,13 @@ function AddBannedPlayer(stone, player_serial)
 	var qBannedPlayers:=GetObjProperty(stone, "BannedPlayers"); //list of banned player serials
 
 	if (!qBannedPlayers[1])
-		//Broadcast("nothing in pserial[1]"); 
+		//Broadcast("nothing in pserial[1]");
 		SetObjProperty(stone, "BannedPlayers",{player_serial});
 		return;
 	endif
-	
+
 	qBannedPlayers.append(player_serial);
-	
+
 	SetObjProperty(stone, "BannedPlayers",qBannedPlayers);
 	return 1;
 endfunction
@@ -245,7 +245,7 @@ function RemoveBannedPlayer(stone, player_serial)
 			result:=1; //found banned player
 		endif
 	endforeach
-	
+
 	SetObjProperty(stone, "BannedPlayers",tempBanned);
 	return result;
 endfunction
@@ -262,25 +262,25 @@ function AddQuestSpawnPoint(who, stone, spawn)
 	var qObjectives:=GetObjProperty(stone, "Objectives");
 
 	if (!qSpawnPoints[1])
-		//Broadcast("nothing in pserial[1]"); 
+		//Broadcast("nothing in pserial[1]");
 		SetObjProperty(stone, "SpawnPoints",{spawn.serial});
 		SetObjProperty(spawn, "QuestStoneSerial", stone.serial); //0 points is starting default
 		PrintTextAbove(spawn, "Spawnpoint added to quest");
                 RunSpawnEditGump(who, spawn, stone);
 		return;
 	endif
-	
+
 	if (IsSpawnInQuest(stone, spawn.serial))
 		PrintTextAbove(stone, "Spawnpoint already listed for quest");
 		return 0;
 	endif
-	
+
 	qSpawnPoints.append(spawn.serial);
-	
+
 	SetObjProperty(spawn, "QuestStoneSerial", stone.serial);
 	SetObjProperty(stone, "SpawnPoints",qSpawnPoints);
 	PrintTextAbove(stone, "Spawnpoint added to quest");
- 
+
         RunSpawnEditGump(who, spawn, stone);
 	return 1;
 endfunction
@@ -288,9 +288,9 @@ endfunction
 function RemoveQuestSpawnPoint(stone, spawn)
 	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");
   var activespawns := GetObjProperty(stone, "SpawnActive");
-        
+
 	var tempQSPoints:=array;
- 
+
 	foreach q in qSpawnPoints
 		if (q!=spawn.serial)
 			tempQSPoints.append(q);
@@ -312,14 +312,14 @@ function deleteAllQuestSpawnPointsRefs(stone)
 		spawn := SystemFindObjectBySerial(q);
 		RemoveQuestSpawnPoint(stone, spawn);
 	endforeach
-	
+
 	EraseObjProperty(stone, "SpawnPoints");
 endfunction
 
 function IsSpawnInQuest(stone, spawnserial)
 	//returns whether a spawn serial is already listed in registered list
 	//0 =not registered, >0 indicates index number
-	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");	
+	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");
 	//Broadcast("spawnserial : " +spawnserial);
 	spawnserial := CInt(spawnserial);
 	var result :=0;
@@ -344,15 +344,15 @@ function QuestAwardNPCDeath(queststone_serial, corpse_serial, player_serial, spa
 		//Broadcast("stone not deployed");
 		return 0; //if quest has not been deployed then no questpoints can be obtained.
 	endif
- 
+
         if (!player_serial)
 	        player_serial :=GetNPCKiller(corpse_serial);
         endif
-        
+
 	if (!IsRegistered(stone, player_serial))
 		debugmessage("not registered");
 		return 0;
-	endif	
+	endif
         //Check To See If Spawn Is Active For This Quest
         If(!IsSpawnActive(stone, spawn_serial))
         debugmessage("spawninactive");
@@ -377,22 +377,22 @@ endfunction
 
 function DetermineNPCTemplateQPs(npctemplate)
 	var questPoints:=0;
-	var npc_cfg	:= ReadConfigFile( "::npcdesc" ); //find monsters desc info	
+	var npc_cfg	:= ReadConfigFile( "::npcdesc" ); //find monsters desc info
 	var magicitemlevel	:= npc_cfg[npctemplate].magicitemlevel; // magic item level
 	var monsterInt := npc_cfg[npctemplate].int;
 	var monsterStr := npc_cfg[npctemplate].str;
-	
+
 	//Broadcast("monster item level : " + magicitemlevel);
 	//Broadcast("monster int : " + monsterInt);
 	//Broadcast("monster str : " + monsterStr);
-	
+
 	//points awarded is greater of magicitemlevel*75, int/5, and str/5
 	questPoints := magicitemlevel*75; //somewhere between 75 (lvl 1) and 450 (lvl 6)
-		
+
 	if (questPoints<monsterInt/5) //somewhere between 7 for an orc, and 400 for a balron
 		questPoints :=monsterInt/5;
 	endif
-	
+
 	if(questPoints<monsterStr/5) //about 200 for a balron
 		questPoints :=monsterStr/5;
 	endif
@@ -444,13 +444,13 @@ endfunction
 function AddNewObjective(queststone_serial, objective, type, questpoints)
 	//has a parrallel array of objectives, completion status, and messages
 	var stone := SystemFindObjectBySerial(queststone_serial);
-	
+
 	var qObjectives:=GetObjProperty(stone, "Objectives");
 	var qObjComplete:=GetObjProperty(stone, "ObjCompleteStatus"); //parrallel array for objective data. 0 if incomplete, 1 if complete.
 	var qObjCompleteMessages := GetObjProperty(stone, "ObjCompletedMessages"); //parrallel array of objective completed strings
-	
+
 	if (!qObjectives[1])
-		//Broadcast("nothing in pserial[1]"); 
+		//Broadcast("nothing in pserial[1]");
 		SetObjProperty(stone, "Objectives",{objective.serial});
 		SetObjProperty(stone, "ObjCompleteStatus",{0});
 		SetObjProperty(stone, "ObjCompletedMessages", {""});
@@ -460,20 +460,20 @@ function AddNewObjective(queststone_serial, objective, type, questpoints)
 		PrintTextAbove(stone, "Objective added to quest");
 		return;
 	endif
-	
+
 	if (IsObjectiveRegistered(stone, objective.serial))
 		PrintTextAbove (stone, "That objective has already been registered.");
 		return 0;
 	endif
-	
+
 	qObjectives.append(objective.serial);
 	qObjComplete.append(0); //default incomplete
 	qObjCompleteMessages.append(""); //adds a placeholding null string in position that can be set later
-	
+
 	SetObjProperty(stone, "Objectives",qObjectives);
-	SetObjProperty(stone, "ObjCompleteStatus",qObjComplete); 
+	SetObjProperty(stone, "ObjCompleteStatus",qObjComplete);
 	SetObjProperty(stone, "ObjCompletedMessages", qObjCompleteMessages);
-	SetObjProperty(objective, "QuestStoneSerial", stone.serial); 
+	SetObjProperty(objective, "QuestStoneSerial", stone.serial);
 	SetObjProperty(objective, "QuestPoints", questpoints);
 	SetObjProperty(objective, "QuestObjectiveType", type);
 	PrintTextAbove(stone, "Objective added to quest");
@@ -495,9 +495,9 @@ function	deleteAllOneOffObjectives(stone)
 			//destroy it
 			DestroyItem( objective );
 		endif
-	endforeach	
+	endforeach
 endfunction
-	
+
 function	deletePersonalObjectives(stone)
 //destroys all personal objectives
 	var objective;
@@ -536,18 +536,18 @@ function AddNewPersonalObjective(stone_serial, objective, objectivetype, questpo
 		PrintTextAbove(stone, "Objective added to quest");
 		return;
 	endif
-	
+
 	if (IsPersonalObjectiveRegistered(stone, objective.serial))
 		PrintTextAbove (stone, "That objective has already been registered.");
 		return 0;
 	endif
-	
+
 	qObjectives.append(objective.serial);
 	qObjCompleteMessages.append(""); //place holder message string
-	
+
 	SetObjProperty(stone, "PersonalObjectives",qObjectives);
 	SetObjProperty(stone, "PersonalObjMessages", qObjCompleteMessages);
-	SetObjProperty(objective, "QuestStoneSerial", stone.serial); 
+	SetObjProperty(objective, "QuestStoneSerial", stone.serial);
 	SetObjProperty(objective, "QuestPoints", questpoints);
 	SetObjProperty(objective, "QuestObjectiveType", objectivetype);
 	PrintTextAbove(stone, "Objective added to quest");
@@ -565,7 +565,7 @@ function RemoveObjective(queststone_serial, objective_serial)
 	var tempObjCompStatus := array;
 	var qObjectives:=GetObjProperty(stone, "Objectives");
 	var qObjCompleteMessage := GetObjProperty(stone, "ObjCompletedMessages"); //parrallel array of objective completed strings
-	var qObjCompleteStatus := GetObjProperty(stone, "ObjCompleteStatus"); 
+	var qObjCompleteStatus := GetObjProperty(stone, "ObjCompleteStatus");
 	var i:=1;
 	foreach q in qObjectives
 		if (q!=objective_serial)
@@ -578,7 +578,7 @@ function RemoveObjective(queststone_serial, objective_serial)
 
 	EraseObjProperty(objective, "QuestPoints");
 	EraseObjProperty(objective, "QuestObjectiveType");
-	EraseObjProperty(objective, "QuestStoneSerial"); 
+	EraseObjProperty(objective, "QuestStoneSerial");
 	SetObjProperty(stone, "Objectives", tempObj);
 	SetObjProperty(stone, "ObjCompletedMessages", tempObjCompMessage);
 	SetObjProperty(stone, "ObjCompleteStatus", tempObjCompStatus);
@@ -595,7 +595,7 @@ function RemovePersonalObjective(stone, objective_serial)
 	var tempObj := array;
 	var tempCompMessages := array;
 	var i:=1;
-		
+
 	foreach q in qObjectives
 		if (q!=objective_serial)
 			tempObj.append(q);
@@ -605,10 +605,10 @@ function RemovePersonalObjective(stone, objective_serial)
 	endforeach
 	EraseObjProperty(objective, "QuestPoints");
 	EraseObjProperty(objective, "QuestObjectiveType");
-	EraseObjProperty(objective, "QuestStoneSerial"); 
+	EraseObjProperty(objective, "QuestStoneSerial");
 	SetObjProperty(stone, "PersonalObjectives", tempObj);
 	SetObjProperty(stone, "PersonalObjMessages", tempCompMessages);
-	
+
 	PrintTextAbove(stone, "Objective removed from quest");
 endfunction
 
@@ -713,11 +713,11 @@ endfunction
 function ReturnQuestItemObjective(stone_serial, player_serial, item_serial)
 	//should do one-off quest items and personal obj type items
 	var stone := SystemFindObjectBySerial(stone_serial);
-	
+
 	if (!IsRegistered(stone, player_serial))
 		return 0;
 	endif
-	
+
 	//completed players cant completed objectives
 	if (IsCompleted(stone, player_serial))
 			return 0;
@@ -726,10 +726,10 @@ function ReturnQuestItemObjective(stone_serial, player_serial, item_serial)
 	if (!IsQuestDeployed(stone))
 		return 0; //if quest has not been deployed then no objectives can be completed.
 	endif
-	
+
 	var item := SystemFindObjectBySerial(item_serial);
 	var item_points := GetObjProperty(item, "QuestPoints");
-	
+
 	if (IsObjectiveRegistered(stone, item_serial))
 		if (!IsObjectiveCompleted(stone, item_serial))
 			SetObjectiveComplete(stone, item_serial);
@@ -750,28 +750,28 @@ function ReturnQuestMonsterObjective(stone_serial, player_serial, monster_serial
 //this is called when a monster is killed (death.src) from global scripts in /include/queststone.inc
 	//Broadcast("stone_serial " + stone_serial + " player_serial " + player_serial + " monster_serial " + monster_serial + " questpoints " + questpoints);
 	var stone := SystemFindObjectBySerial(stone_serial);
-	
+
 	if (!stone || stone==error)
 		Broadcast("cant find stone error");
 		return 0;
 	endif
-	
+
 	if (!IsRegistered(stone, player_serial))
 		//Broadcast("not reged");
 		return 0;
 	endif
-	
+
 	//completed players cant complete objectives
 	if (IsCompleted(stone, player_serial))
 			//Broadcast("completed quest");
 			return 0;
 	endif
-	
+
 	if (!IsQuestDeployed(stone))
 	//	Broadcast("not deployed");
 		return 0; //if quest has not been deployed then no objectives can be completed.
 	endif
-	
+
 	if (!IsObjectiveRegistered(stone, monster_serial))
 		//Broadcast("objective not registered");
 		return;//objective not found
@@ -802,7 +802,7 @@ function CreateOneOffLocationObjective(stone, loc, questpoints)
 	else
 		questlocation.name := "a quest location";
 	endif
-	
+
 	if (questlocation)
 		AddNewObjective(stone.serial, questlocation, "OneOffLocation", questpoints);
 	endif
@@ -819,23 +819,23 @@ endfunction
 
 function ReturnQuestLocationObjective(stone_serial, player_serial, location_serial, questpoints, questobjtype)
 	//this is called when a questlocationtile is walked on
-	
+
 	var stone := SystemFindObjectBySerial(stone_serial);
-	
+
 	//unregistered cant completed objectives
 	if (!IsRegistered(stone, player_serial))
 		return 0;
 	endif
-	
+
 	//completed players cant completed objectives
 	if (IsCompleted(stone, player_serial))
 			return 0;
 	endif
-		
+
 	if (!IsQuestDeployed(stone))
 		return; //if quest has not been deployed then no objectives can be completed.
 	endif
-	
+
 	if (questobjtype == "OneOffLocation")
 		if (!IsObjectiveRegistered(stone, location_serial))
 			return 0;//objective not found
@@ -854,9 +854,9 @@ function ReturnQuestLocationObjective(stone_serial, player_serial, location_seri
 		var player := SystemFindObjectBySerial(player_serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if (!IsPersonalObjectiveCompleted(player, location_serial, stone_serial))
 			SetPersonalObjectiveComplete(player, location_serial, stone_serial);
-			BroadcastPersonalCompletedMessage(stone, location_serial, player);	
+			BroadcastPersonalCompletedMessage(stone, location_serial, player);
 			AwardQuestPoints(stone_serial, player_serial, questpoints);
-			return 1;	
+			return 1;
 		endif
 	endif
 endfunction
@@ -877,9 +877,9 @@ function IsPersonalObjectiveCompleted(who, objective_serial, stone_serial)
 		endif
 		index:=index+1;
 	endforeach
-	//Broadcast("result " +result);	
+	//Broadcast("result " +result);
 	return result;
-	
+
 	//returns the index of the objective if in the completed list
 	//else returns 0
 endfunction
@@ -936,7 +936,7 @@ function SetObjectiveComplete(stone, item_serial)
 		endif
 		index:=index+1;
 	endforeach
-	var qObjComplete:=GetObjProperty(stone, "ObjCompleteStatus");	
+	var qObjComplete:=GetObjProperty(stone, "ObjCompleteStatus");
 	qObjComplete[result]:=1; 	//set to complete
 	SetObjProperty(stone, "ObjCompleteStatus", qObjComplete);
 endfunction
@@ -991,11 +991,11 @@ function GetRegisteredPlayers(stone_serial, start, returnSize)
 	var player;
 	var i;
 	var maxPlayers:=playerserials.size();
-	
+
 	if (!playerserials[1])
 		return;
 	endif
-		
+
 	for(i:=start;i<=maxPlayers&&players.size()<returnSize;i:=i+1)
 		player:=SystemFindObjectBySerial(CInt(playerserials[i]), SYSFIND_SEARCH_OFFLINE_MOBILES);
 		players.append(player);
@@ -1053,11 +1053,11 @@ function GetOneOffObjectives(stone_serial, start, returnSize)
 	var tempObj;
 	var i;
 	var maxObjs:=qObjectiveSerials.size();
-	
+
 	if (!qObjectiveSerials[1])
 		return;
 	endif
-		
+
 	for(i:=start;i<=maxObjs&&tempObjectiveserials.size()<returnSize;i:=i+1)
 		//tempObj:=SystemFindObjectBySerial(CInt(qObjectiveSerials[i]));
 		//tempObjectiveObjs.append(tempObj);
@@ -1074,11 +1074,11 @@ function GetPersonalObjectives(stone_serial, start, returnSize)
 	var tempObjectivesers := array;
 	var i;
 	var maxSers:=qObjectiveSerials.size();
-	
+
 	if (!qObjectiveSerials[1])
 		return;
 	endif
-		
+
 	for(i:=start;i<=maxSers&&tempObjectivesers.size()<returnSize;i:=i+1)
 		tempObjectivesers.append(qObjectiveSerials[i]);
 	endfor
@@ -1095,11 +1095,11 @@ function GetSpawns(stone_serial, start, returnSize)
 	var temp;
 	var i;
 	var maxQS:=qSpawnRefs.size();
-	
+
 	if (!qSpawnRefs[1])
 		return;
 	endif
-		
+
 	for(i:=start;i<=maxQS&&tempSpawns.size()<returnSize;i:=i+1)
 		temp:=SystemFindObjectBySerial(CInt(qSpawnRefs[i]));
 		if( !temp.serial)
@@ -1144,7 +1144,7 @@ function DestroyStorageArea(stone)
 	foreach item in backpackitems
 		DestroyItem(item);
 	endforeach
-	
+
 	var storage:= FindStorageArea("Merchant Storage");
 	DestroyRootItemInStorageArea(storage, "temp " + stone.serial);
 endfunction
@@ -1206,8 +1206,10 @@ function BuyQuestRewardItem(item,stone,who)
 	return 0;
 endfunction
 
-function QuestBroadcast(stone, sending, receiving, txtcolor, message)
-	
+function QuestBroadcast(stone, sending:= "", receiving := 1, txtcolor := 63, message)
+	if( sending == "" )
+		sending := GetQuestTitle(stone);
+	endif
 case(receiving)
 		1:
 			Broadcast( cstr(sending) + ": " + cstr(message), 3 , txtcolor);
@@ -1241,7 +1243,7 @@ function BroadcastOneOffCompletedMessage(stone, objective_serial)
 	if (!message||message=="")
 		return;
 	endif
-	QuestBroadcast(stone, , , , message);
+	QuestBroadcast(stone, message := message);
 endfunction
 
 function BroadcastPersonalCompletedMessage(stone, objective_serial, who)
@@ -1283,7 +1285,7 @@ function SetRewardQuestItems(queststone, val)
 //REWARDQUESTITEMS_NO :=0; //noone can buy quest items yet
 //REWARDQUESTITEMS_ALL :=1; // all players can buy quest items with quest points
 //REWARDQUESTITEMS_COMPLETED :=2; //completed players only can buy quest items with quest points
-	
+
 	SetObjProperty(queststone, "RewardQuestItems", CInt(val));
 endfunction
 
@@ -1297,10 +1299,10 @@ function MakeBookContentsArray(contentsString)
 	var wordsArray:= SplitWords(contentsString);//now broken into an array of words
 	//Broadcast("wordsArray: ", wordsArray);
 	var tempContentArray:=array;
-	
+
 	//var i:=1;
 	var tempString:="";
-	
+
 	foreach word in wordsArray
 		//Broadcast("word: " + word + "   size: " + len(word));
 		if (len(tempString)+len(word)<30)
@@ -1311,12 +1313,12 @@ function MakeBookContentsArray(contentsString)
 			//Broadcast("tempString: " + tempString);
 			tempString:=word;
 			//i:=i+1; //next line of content
-		endif		
+		endif
 	endforeach
-	
+
 	//last word
 	tempContentArray.append(tempString);
-		
+
 	return tempContentArray;
 endfunction
 
@@ -1388,7 +1390,7 @@ function GetFinalOptionString(stone)
 		break;
 		default:
 			return "Dont autofinalise... Ill stop the quest manually";
-	endcase	
+	endcase
 endfunction
 
 function CheckFinaliseQuest(queststone, player)
@@ -1401,14 +1403,14 @@ function CheckFinaliseQuest(queststone, player)
 
 //for PERSONAL FINALISE OPTIONS -- single player finalises...
 												//player is added to completed list
-												
+
 //for ALL FINALISE OPTIONS -- 		//all players are added to completed list
 												//registration closed
 	if (IsCompleted(queststone, player.serial))
 		return; //if player has already completed then dont check that finalise conditions met
 	endif
 	var finaliseoption := GetFinaliseOption(queststone);
-	
+
 	case (finaliseoption)
 		FINALOPTION_PERSCOMPLNALLOBJS:
 			if (IsAllPersonalObjectivesComplete(queststone, player))
@@ -1445,7 +1447,7 @@ function CheckFinaliseQuest(queststone, player)
 			return 0;
 	endcase
 
-	
+
 endfunction
 
 function DoPrivateFinal(stone, player)
@@ -1460,18 +1462,18 @@ function DoPrivateFinal(stone, player)
 if( tox && toy && toz)
 	MoveObjectToLocation( player, tox, toy, toz, _DEFAULT_REALM); //AutoConversion
 endif
-	
+
 endfunction
 
 function DoPublicFinal(stone, player)
-	QuestBroadcast(stone, , , , "The quest has been completed. The final objective was achieved by " + player.name);	
-	QuestBroadcast(stone, , , , "The quest and all protections will officially end in 2 minutes");
+	QuestBroadcast(stone, message := "The quest has been completed. The final objective was achieved by " + player.name);
+	QuestBroadcast(stone,  message := "The quest and all protections will officially end in 2 minutes");
 	sleep(60);
-	QuestBroadcast(stone, , , , "The quest and all protections will officially end in 1 minute");
+	QuestBroadcast(stone,  message := "The quest and all protections will officially end in 1 minute");
 	sleep(60);
 	CompleteAllPlayers(stone);
 	SetRegistrationOpen(stone, 0);
-	QuestBroadcast(stone, , , , "The quest has been completed. The final objective was achieved by " + player.name);
+	QuestBroadcast(stone,  message := "The quest has been completed. The final objective was achieved by " + player.name);
 	SendFinalPublicMessage(stone);
 	SendSoundEffectAll(stone, 0x003e);
 endfunction
@@ -1498,7 +1500,7 @@ function SendFinalPublicMessage(stone)
 	sleep(5); //a bit of delay so that objective met message and final message are separate
 	var finalmessage := GetQuestFinal(stone);
 	if (finalmessage)
-		QuestBroadcast(stone, , , , finalmessage);
+		QuestBroadcast(stone, message := finalmessage);
 	endif
 endfunction
 
@@ -1525,7 +1527,7 @@ function IsAllOneOffObjectivesComplete(queststone)
 	foreach obj in objectives
 		if (!IsObjectiveCompleted(queststone, obj))
 			return 0;
-		endif			
+		endif
 	endforeach
 	return 1;
 endfunction
@@ -1535,7 +1537,7 @@ function IsAllPersonalObjectivesComplete(queststone, player)
 	foreach obj in persObjectives
 		if (!IsPersonalObjectiveCompleted(player, obj, queststone.serial))
 			return 0;
-		endif			
+		endif
 	endforeach
 	return 1;
 endfunction
@@ -1579,11 +1581,11 @@ function AddCompletedPlayer(stone, player_serial)
 	var qCompletedPlayers:=GetObjProperty(stone, "CompletedPlayers"); //list of banned player serials
 
 	if (!qCompletedPlayers[1])
-		//Broadcast("nothing in pserial[1]"); 
+		//Broadcast("nothing in pserial[1]");
 		SetObjProperty(stone, "CompletedPlayers",{player_serial});
 		return;
 	endif
-	
+
 	qCompletedPlayers.append(player_serial);
 	var player:=SystemFindObjectBySerial(player_serial);
 	SetObjProperty(stone, "CompletedPlayers",qCompletedPlayers);
@@ -1602,7 +1604,7 @@ function RemoveCompletedPlayer(stone, player_serial)
 			result:=1; //found completed player
 		endif
 	endforeach
-	
+
 	SetObjProperty(stone, "CompletedPlayers",tempCompleted);
 	return result;
 endfunction
@@ -1681,7 +1683,7 @@ function CheckRegistrationCondition(who, stone)
 	case (regcondition)
 		REGCONDITION_NEWBIE:
 			if (GetObjProperty(who, "newbie")==1)
-				return 1;	
+				return 1;
 			else
 				return 0;
 			endif
@@ -1698,7 +1700,7 @@ function CheckRegistrationCondition(who, stone)
 			if (charLevel>=requiredLevel)
 				return 1;
 			endif
-			return 0;	
+			return 0;
 		break;
 		REGCONDITION_MAGE:
 			charLevel := GetObjProperty( who, "IsMage" );
@@ -1712,28 +1714,28 @@ function CheckRegistrationCondition(who, stone)
 			if (charLevel>=requiredLevel)
 				return 1;
 			endif
-			return 0;		
+			return 0;
 		break;
 		REGCONDITION_THIEF:
 			charLevel := GetObjProperty( who, "IsThief");
 			if (charLevel>=requiredLevel)
 				return 1;
 			endif
-			return 0;	
+			return 0;
 		break;
 		REGCONDITION_WARRIOR:
 			charLevel := GetObjProperty( who, "IsWarrior" );
 			if (charLevel>=requiredLevel)
 				return 1;
 			endif
-			return 0;		
+			return 0;
 		break;
 		REGCONDITION_POWERPLAYER:
 			charLevel := GetObjProperty( who, "IsPowerPlayer" );
 			if (charLevel>=requiredLevel)
 				return 1;
 			endif
-			return 0;		
+			return 0;
 			break;
 		REGCONDITION_RACE:
 			return (CheckRaceRegistrationCondition(stone, who));
@@ -1748,7 +1750,7 @@ function CheckRegistrationCondition(who, stone)
 				return 1;
 			endif
 			return 0;
-		break;	
+		break;
 		default:
 			return 1; //none set
 	endcase
@@ -1761,7 +1763,7 @@ function CheckRaceRegistrationCondition(stone, who)
 	if (who.title_race==stonerace)
 		return 1;
 	endif
-	return 0;	
+	return 0;
 endfunction
 
 function SetRaceRegistrationCondition(stone, race)
@@ -1826,12 +1828,12 @@ function AddNewPersonalObjectTypeObjective(stone, object_type, objdesc, questpoi
 		PrintTextAbove(stone, "Objective added to quest");
 		return;
 	endif
-	
+
 	if (IsPersonalObjectiveRegistered(stone, object_type))
 		PrintTextAbove (stone, "That objective has already been registered.");
 		return 0;
 	endif
-	
+
 	qObjectives.append(object_type);
 	qObjCompleteMessages.append(""); //place holder message string
 	AddNewObjectTypeData(stone, object_type, objdesc, questpoints);
@@ -1849,7 +1851,7 @@ function RemovePersonalObjectTypeObjective(stone, object_type)
 	var tempObj := array;
 	var tempCompMessages := array;
 	var i:=1;
-		
+
 	foreach q in qObjectives
 		if (q!=object_type)
 			tempObj.append(q);
@@ -1897,8 +1899,8 @@ function GetObjTypeData(stone, obj_type)
 	if (!qObjectTypeData)
 		return 0; //error no data
 	endif
-	
-	var i;	
+
+	var i;
 	for (i:=1; i<=len(qObjectTypeData); i:=i+1)
 		if (qObjectTypeData[i].objtype==obj_type)
 			return qObjectTypeData[i];
@@ -1915,8 +1917,8 @@ function GetObjTypeIndex(stone, obj_type)
 	if (!qObjectTypeData)
 		return -1; //error no data
 	endif
-	
-	var i;	
+
+	var i;
 	for (i:=1; i<=len(qObjectTypeData); i:=i+1)
 		if (qObjectTypeData[i].objtype==obj_type)
 			return i;
@@ -1932,7 +1934,7 @@ function SetObjTypeData(stone, objtypestruct)
 	if (!qObjectTypeData)
 		return -1; //error no data
 	endif
-	
+
 	var index:=  GetObjTypeIndex(stone, objtypestruct.objtype);
 	if (index<=0)
 		return; //not found
@@ -1954,17 +1956,17 @@ function RemoveObjectTypeData(stone, obj_type)
 			tempArray.append(q);
 		endif
 	endforeach
-	SetObjProperty(stone, "ObjectTypeData",tempArray);	
+	SetObjProperty(stone, "ObjectTypeData",tempArray);
 endfunction
 
 function ReturnQuestObjectTypeObjective(stone_serial, player, item)
 	//should do one-off quest items and personal obj type items
 	var stone := SystemFindObjectBySerial(stone_serial);
-	
+
 	if (!IsRegistered(stone, player.serial))
 		return 0;
 	endif
-	
+
 	//completed players cant completed objectives
 	if (IsCompleted(stone, player.serial))
 			return 0;
@@ -1973,17 +1975,17 @@ function ReturnQuestObjectTypeObjective(stone_serial, player, item)
 	if (!IsQuestDeployed(stone))
 		return 0; //if quest has not been deployed then no objectives can be completed.
 	endif
-	
+
 	var objtype := item.objtype;
-	
+
 	//get stored data
-	
+
 	if (IsPersonalObjectiveRegistered(stone, objtype))
 		if (!IsPersonalObjectiveCompleted(player, objtype, stone.serial)||MultipleObjTypeReturnsAllowed(stone))
 			var objtypedata := GetObjTypeData(stone, objtype);
 			if (objtypedata)
 				//check additional conditions
-							
+
 				if (objtypedata.specificname) //check for specific name condition
 					if (!(item.desc==objtypedata.specificname || item.name==objtypedata.specificname))
 						//doesnt meet specific name condition;
@@ -2012,7 +2014,7 @@ function ReturnQuestObjectTypeObjective(stone_serial, player, item)
 				endif
 				//grants points, send message, set completed
 				SetPersonalObjectiveComplete(player, objtype, stone.serial);
-				BroadcastPersonalCompletedMessage(stone, objtype, player);	
+				BroadcastPersonalCompletedMessage(stone, objtype, player);
 				AwardQuestPoints(stone.serial, player.serial, objtypedata.questpoints);
 				return 1;
 			endif
@@ -2076,12 +2078,12 @@ function AddQuest(player, quest)
 		SetObjProperty(player, "Quester", {quest});
 		return 1;
 	endif
-	
+
 	if (len(oldqarray)>=5)
 		//Broadcast("greater than 5");
 		return 0;
 	endif
-	
+
 	//handle case where player has old Quester prop which wasnt an array
 	if (TypeOf(oldqarray) != "Array")
 		//Broadcast("not type of array");
@@ -2144,7 +2146,7 @@ function GetQuest(player, quest)
 			return 0;
 		endif
 	endif
-	
+
 	//now for array handling
 	foreach q in oldqarray
 		if (q==quest)
@@ -2198,14 +2200,14 @@ function FindSharedQuests(player1, player2)
 endfunction
 
 function myProgressGump(who, stone)
-	
+
 	GFInitGump();
 	GFPage(1);
 	GFResizePic(0, 0, BKGND_SCROLL, 550, 200);
-	
+
 	var questtitle:=GetQuestTitle(stone.serial);
 	GFTextMid(10, 20, 280, 10, "Quest: " + questtitle);
-	
+
 	if (IsRegistered(stone, who.serial))
 		GFTextLine(40, 50, 5, "You currently have " + GetPlayersQuestPoints(stone.serial, who.serial) + " questpoints");
 		var persobjectives:=GetObjProperty(stone, "PersonalObjectives");
@@ -2215,7 +2217,7 @@ function myProgressGump(who, stone)
 			foreach obj in persobjectives
 				if (IsPersonalObjectiveCompleted(who, obj, stone.serial))
 					counter := counter+1;
-				endif			
+				endif
 			endforeach
 			GFTextLine(40, 80, 5, "You have completed " + counter + " of " + persobjectives.size() + " personal objectives.");
 		endif
@@ -2224,24 +2226,24 @@ function myProgressGump(who, stone)
 			foreach obj in objectives
 				if (IsObjectiveCompleted(stone, obj))
 					counter := counter+1;
-				endif			
+				endif
 			endforeach
 			GFTextLine(40, 110, 5, "" + counter + " of the " + objectives.size() + " one-off objectives for this quest have been completed.");
 		endif
 		if (IsCompleted(stone, who.serial))
-			GFTextLine(40, 140, 5, "You have completed this quest.");		
+			GFTextLine(40, 140, 5, "You have completed this quest.");
 		endif
-		
+
 	else
-		GFTextLine(40, 80, 5, "You are not registered for this quest.");	
+		GFTextLine(40, 80, 5, "You are not registered for this quest.");
 	endif
-	
+
 	GFTextLine(55, 170, 5, "Close");
 
-	
+
 
 	var closeButton := GFButtonID( 40, 175, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	
+
 
 	var choice := GFSendGump(who);
 	//if (StoneUserElapsed(stone, who))
@@ -2267,7 +2269,7 @@ function FindAnyClassLevel(who)
 	endif
 
 	return level;
-	
+
 endfunction
 
 function MultipleObjTypeReturnsAllowed(stone)
@@ -2308,7 +2310,7 @@ function	setQuestURL(who, stone)
 			return;
 		endif
 	endif
-	
+
 	SendSysMessage(who, "Enter quest webpage URL. e.g forum.gamiix.com/viewtopic.php?t=17 ... Hit escape to delete webpage.", 3, 53);
 	var newweb :=CStr(RequestInput( who, who.backpack, "URL:" ));
 	if (newweb=="0")
@@ -2475,11 +2477,11 @@ endfunction
 
 Function RemoveDeadSpawn(spawn_serial, stone_serial)
 	var stone := SystemFindObjectBySerial(stone_serial);
-	
+
 	var qSpawnPoints:=GetObjProperty(stone, "SpawnPoints");
-        
+
 	var tempQSPoints:=array;
- 
+
 	foreach q in qSpawnPoints
 		if (q!=spawn_serial)
 			tempQSPoints.append(q);

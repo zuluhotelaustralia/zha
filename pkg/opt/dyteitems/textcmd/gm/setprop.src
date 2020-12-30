@@ -80,12 +80,12 @@ program textcmd_setprop( who, text )
 
 		if( SetObjctProp( obj, propname, amount, amount_str ) );
 			newvalue := GetObjctProp( obj, propname );
-			
+
 			if( newvalue == value )
 				SendSysMessage( who, "Property unchanged." );
 			elseif(newvalue)
 				SendSysMessage( who, propname + " now: " + newvalue );
-				
+
 				//other code required when props modified
 				if (propname=="concealed")
 					SetObjProperty(obj, "#lastconcealed", ReadGameClock());
@@ -94,7 +94,7 @@ program textcmd_setprop( who, text )
 					fixPlayerGraphic(who);
 				endif
 
-				
+
 				SetObjProperty(obj, "LFucker", who.name + who.serial); // Sno 28/2
 			else
 				SendSysMessage( who, "Error occured." );
@@ -200,15 +200,15 @@ function SetObjctProp( obj, propname, amount, amount_str )
 		"x":		MoveObjectToLocation( obj, amount, obj.y, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				MoveObjectToLocation( obj, amount, obj.y, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
-			
+
 		"y":		MoveObjectToLocation( obj, obj.x, amount, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				MoveObjectToLocation( obj, obj.x, amount, obj.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
-			
+
 		"z":		MoveObjectToLocation( obj, obj.x, obj.y, amount, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				MoveObjectToLocation( obj, obj.x, obj.y, amount, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 				break;
-	
+
 		"objtype": 	obj.objtype		:= amount;	break;
 		"color": 	obj.color		:= amount;	break;
 		"facing": 	obj.facing		:= amount;	break;
@@ -248,7 +248,6 @@ function SetObjctProp( obj, propname, amount, amount_str )
 		"name":		SetName( obj, amount_str );		break;
 		"lightlevel":	obj.setlightlevel( CInt(splited[1]), CInt(splited[2]) );	break;
 		"script":	obj.script := amount_str;	break;
-		"name":		obj.name := amount_str;	break;
 		"desc":		obj.desc := amount_str;	break;
 		"controlscript":	obj.controlscript := amount_str;	break;
 		"walkonscript":	obj.walkonscript := amount_str;	break;

@@ -4,11 +4,11 @@ use os;
 function GetRaceProtType(who)
 
 	var race:= who.title_race;
-	var racecfg:= ReadConfigFile ("::races");	
-	
+	var racecfg:= ReadConfigFile ("::races");
+
 	var elem:= FindConfigElem(racecfg, race);
 	return elem.Prot;
-	
+
 endfunction
 
 function GetRaceProtAmount(who)
@@ -18,14 +18,14 @@ function GetRaceProtAmount(who)
 	if (!racecfg)
 		broadcast(racecfg);
 	endif
-	
+
 	var elem:= FindConfigElem(racecfg, race);
 	if (!elem)
 		return 0;
 	endif
-	
+
 	return elem.PerLevel;
-	
+
 endfunction
 
 function GetRaceProtBonus (who)
@@ -41,7 +41,7 @@ function SetRaceProt(who)
 		SetObjProperty (who, GetRaceProtType(who), GetRaceProtBonus(who));
 	endif
 	return;
-	
+
 endfunction
 
 function GetRaces()
@@ -53,8 +53,8 @@ function GetRaces()
 		"Goblin",
 		"Dwarf",
 		"Vampire",
-		"Demon"		}
-		
+		"Demon"		};
+
 endfunction
 
 function IsProhibitedClasseForRace(classeid, race)
@@ -79,9 +79,9 @@ function IsProhibitedClasseForRace(classeid, race)
 					return 1;
 				endif
 	endcase
-	
+
 	return 0;
-	
+
 endfunction
 
 function GetHTMLColor(who)
@@ -98,4 +98,4 @@ function GetHTMLColor(who)
 		default:	return "#000000";
 	endcase
 
-endfunction		
+endfunction

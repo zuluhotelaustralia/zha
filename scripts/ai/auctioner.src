@@ -80,7 +80,7 @@ while (1)
         	SetGlobalProperty("#aucnpc",1);
        		sell_item(who,item);
         	SetGlobalProperty("#aucnpc",0);
-        	
+
                 endif
         endif
   endif
@@ -206,7 +206,7 @@ function sell_item(who,item)
 endfunction
 
 
-function tellplayers(itemname, price, msg, name)
+function tellplayers(itemname, price, msg, unused name)
 sendmsg("New item: "+ itemname+" - "+price, 300);
 //sendmsg("from "+name,300,0);
 if (msg!="<none>") sendmsg("msg: "+msg, 300); endif

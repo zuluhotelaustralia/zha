@@ -10,7 +10,7 @@ function process_combat_event(ev)
 
 endfunction
 
-function in_combat_event_loop(opponent)
+function in_combat_event_loop(unused opponent)
 
 	return;
 
@@ -29,7 +29,7 @@ function post_combat()
 
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
 
 	DisableMainEvents();
 	EnableCombatEvents();

@@ -6,7 +6,7 @@ include "../pkg/opt/queststone/queststone";
 //each word index must be unique
 
 function main_AI_loop()
-	
+
     var ev;
     //var wanders := 60;
     //var next_wander := ReadGameClock();
@@ -29,18 +29,18 @@ function main_AI_loop()
 						if (!ev.source.isA(POLCLASS_NPC))
 							if (!Random(4))
 								say ("Say 'bounty' to me to find out about the current bounty!");
-     						endif				
-						endif          
+     						endif
+						endif
 					SYSEVENT_SPEECH:
 		    			if (!ev.source.isA(POLCLASS_NPC))
 		    				if (lower(ev.text) == "set bounty" && ev.source.cmdlevel >=2)
 								BountyPointInfoGump(ev.source);
 		    				endif
 		    				if (lower(ev.text) == "bounty")
-								TellBounty(ev.source);	
+								TellBounty(ev.source);
 							endif
 		    			endif
-	
+
                SYSEVENT_ENGAGED:
  	            SYSEVENT_DAMAGED:
                    Fight( ev.source );
@@ -50,9 +50,9 @@ function main_AI_loop()
         until (! (ev := os::wait_for_event(2)) );
 	endif
 
-   endwhile     
+   endwhile
 
-endfunction       
+endfunction
 
 function bpsetup()
 	var bountypoints := GetAllBountyPoints();
@@ -96,7 +96,7 @@ endfunction
 function SetBountPointByIndex(index, bpstruct)
 	var bountypoints:=array;
 	bountypoints:=GetObjProperty(me, "bountypoints");
-	bountypoints[index]=bpstruct;
+	bountypoints[index] := bpstruct;
 	SetObjProperty(me, "bountypoints", bountypoints);
 endfunction
 
@@ -125,8 +125,8 @@ function AddBountyPoint(who)
 		SendSysMessage(who, "Only 20 bountypoints per NPC are permitted");
 		return;
 	endif
-	
-	var bp:=enterBountyPoint(who);	
+
+	var bp:=enterBountyPoint(who);
 	bountypoints:=GetObjProperty(me, "bountypoints");
 	bountypoints.append(bp);
 	SetObjProperty(me, "bountypoints", bountypoints);
@@ -137,17 +137,17 @@ function BountyPointInfoGump(who)
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_SCROLL, 600, 530);
 	GFTextMid(100, 10, 200, 10, "Bounty spawn locations for bounty administrator " + me.name);
-	
-	
+
+
 	var bountypoints := GetAllBountyPoints();
-	
+
 	var i;
 	var y := 40;
-	
+
 	var hButton:=array;
 	var tempstr;
 	if (bountypoints)
-		for(i:=1;i<=len(bountypoints);i:=i+1)	
+		for(i:=1;i<=len(bountypoints);i:=i+1)
 			var tempstr:= bountypoints[i].npctemplate + " " + bountypoints[i].x + ", " +	bountypoints[i].y + ", " + bountypoints[i].z +". Last seen: " + bountypoints[i].pos_description;
 			GFTextLine(50, y, 5, i +": " + tempstr);
 			hButton.append(GFButtonID(40, y+3, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
@@ -166,9 +166,9 @@ function BountyPointInfoGump(who)
 	GFTextLine(50, 510, 53, "GO TO CURRENT BOUNTY MONSTER" );
 	var gotomonster:= GFButtonID(40, 515, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 
-	
+
 	var choice := GFSendGump(who);
-	
+
 	//return values
 	if (choice[addnewbutton.keyid])
 		AddBountyPoint(who);
@@ -177,9 +177,9 @@ function BountyPointInfoGump(who)
 	elseif(choice[gotomonster.keyid])
 		GoToCurrentBounty(who);
 	endif
-		
+
 	var counter:=0;
-	
+
 	foreach b in hButton
 		counter:=counter+1;
    	if (choice[b.keyid])
@@ -259,7 +259,7 @@ endfunction
 function associateQuestStone(who)
 	SendSysMessage( who, "Select Queststone." );
 	var qstone := Target( who );
-	
+
    if( !qstone || qstone.objtype != 41762) // queststone objtype
    	SendSysMessage( who, "canceled." );
      	return;
@@ -273,7 +273,7 @@ function GoToCurrentBounty(who)
 	var monster := GetCurrentBountyMonster();
 	if (!monster)
 		SendSysMessage( who, "MONSTER NOT FOUND." );
-		return 0;	
+		return 0;
 	endif
 	MoveObjectToLocation(who, monster.x, monster.y, monster.z, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 endfunction
@@ -306,7 +306,7 @@ function SetNewBountyMonster()
 	var rand_num:= RandomDiceRoll( "1d"+CStr(len(GetAllBountyPoints()) ));
 	var all_bps:=GetAllBountyPoints();
 	var rand_bp:=all_bps[rand_num];
-	
+
 	//spawn monster of that type at location
 	var monst:=CreateNpcFromTemplate( CStr(rand_bp.npctemplate),CInt(rand_bp.x),CInt(rand_bp.y),CInt(rand_bp.z));
 	if (!monst)
@@ -327,7 +327,7 @@ function SetNewBountyMonster()
 	monstanchor.+psub:=50;
 	SetObjProperty(monst, "Anchor", monstanchor);
 	SetObjProperty(monst, "guardignore", 1);
-	SetObjProperty(monst, "RemoveFromQuestAfterDeath", 1);	
+	SetObjProperty(monst, "RemoveFromQuestAfterDeath", 1);
 	AddMonsterObjective(stone_serial, monst, DetermineNPCTemplateQPs(rand_bp.npctemplate));
 	SetObjProperty (monst, "bountyindex", Cint(rand_num));
 	SetObjProperty (me, "currentbountyserial", Cint(monst.serial));
@@ -346,12 +346,12 @@ function QuestCheck(who)
 		endif
 		if (!IsRegistered(stone, who.serial))
 			say("Bounties are only on offer to those registered for the quest.");
-			return 0;			
+			return 0;
 		endif
 		if (!IsQuestDeployed(stone))
 			say("Bounties are only on offer while the quest is deployed.");
-			return 0;			
-		endif	
+			return 0;
+		endif
 	endif
 	return 1;
 endfunction

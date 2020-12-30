@@ -72,9 +72,9 @@ function IsGraveStone( use_on )
 		GSTONE15:
 		GSTONE16:	return 1;
 				break;
-			
+
 		default:	return 0;
-	
+
 	endcase
 
 endfunction
@@ -105,15 +105,15 @@ function ContactUndead( caster, skillid, level )
 
 		var x := caster.x + ( Random(5) - 2 );
 		var y := caster.y + ( Random(5) - 2 );
-	
+
 		if ( (x == caster.x) || (y == caster.y) )
 			mobile := CreateNpcFromTemplate( npctemplate, x, y, caster.z,0 );
 		endif
-	
+
 		if (!mobile)
 			tries := tries + 1;
 		endif
-	
+
 	endwhile
 
 	if( !mobile )
@@ -142,35 +142,35 @@ function ContactUndead( caster, skillid, level )
 
 
 	if( !CheckSkill( caster, skillid, (level * 8), 0 ) )
-	
+
 		PrintTextAbove( mobile, "I give you only death!" );
 		mobile.frozen := 0;
 		EraseObjProperty( mobile, "killme" );
-	
+
 		sleep(1);
-	
+
 		SendEvent( mobile, ev );
-	
+
 		ev.type := SYSEVENT_DAMAGED;
 		SendEvent( mobile, ev );
-	
+
 	else
-	
+
 		PrintTextAbove( mobile,"I give you only this!" );
-	
+
 		var scroll := GetScrollType( level );
 		if ( RandomDiceStr("1d10") == 1 )
 			CreateItemAtLocation( mobile.x, mobile.y, mobile.z, CInt(scroll), 1 );
 		endif
-	
+
 		CreateDonation( mobile, level );
-	
+
 		sleep(2);
-	
+
 		SetObjProperty( mobile, "guardkill", 1 );
-	
+
 		PlaySoundEffect( caster, SFX_SPELL_DISPEL );
-	
+
 		PlayStationaryEffect( mobile.x, mobile.y, mobile.z, 0x3728, 0xa, 0xa );
 		mobile.frozen := 0;
 		MoveObjectToLocation( mobile, 0, 0, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
@@ -237,7 +237,7 @@ function CreateDonation( mobile, level )
 
 	var i;
 	var stacks := RandomDiceStr( "1d" + level );
-	for( i := 1; i <= stack; i := i + 1 )
+	for( i := 1; i <= stacks; i := i + 1 )
 		var stuff;
 		var amt := 3;
 		case( RandomDiceStr( "1d" + level ) )
@@ -259,7 +259,7 @@ function CreateDonation( mobile, level )
 			16:	 stuff	:= 0x0f90;	//Deadwood
 			default: stuff 	:= 0x0f80;	//WormHeart
 		endcase
-	
+
 		CreateItemAtLocation(mobile.x, mobile.y, mobile.z, CInt(stuff), amt );
 	endfor
 

@@ -12,33 +12,32 @@ include "include/random";
 
 program purifyingc( player, crystal )
 
-SendSysMessage( player, "What item do you want to free from all malefic magical influences?" );
-var item := Target(player);
+	SendSysMessage( player, "What item do you want to free from all malefic magical influences?" );
+	var item := Target(player);
 
-if(item)
-	DestroyItem( crystal );
-	SetObjProperty( player, "TargetedItem", item.serial );
-	SetObjProperty( item, "PurifyCrystal", 1 );
-	Purify( player, item);
-else
-	return;
-endif
+	if(item)
+		DestroyItem( crystal );
+		SetObjProperty( player, "TargetedItem", item.serial );
+		SetObjProperty( item, "PurifyCrystal", 1 );
+		Purify( player, item);
+	else
+		return;
+	endif
+endprogram
 
 function Purify( player, item)
 
 	//var itemserial := GetObjProperty( player, "TargetedItem" );
 	//var item := SystemFindObjectBySerial( itemserial );
 	EraseObjProperty( player, "TargetedItem" );
-	
+
 	PlaySoundEffect( player, SFX_SPELL_LIGHTNING );
 
 	sleep( 3 );
 
-		BanishCurse( item );
-		PlaySoundEffect( player, SFX_SPELL_BLESS );
-		PlayObjectCenteredEffect( player, FX_BLESS_EFFECT, 10,10 );
-		SendSysMessage( player, "That item is now completely free from all curses." );
+	BanishCurse( item );
+	PlaySoundEffect( player, SFX_SPELL_BLESS );
+	PlayObjectCenteredEffect( player, FX_BLESS_EFFECT, 10,10 );
+	SendSysMessage( player, "That item is now completely free from all curses." );
 
 endfunction
-
-endprogram

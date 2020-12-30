@@ -39,7 +39,7 @@ function CloseDistance( opponent )
   if (sleepdelay < 0) sleepdelay := 0; endif
 
     case (Distance( me, opponent ))
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
             return 1;
         default:

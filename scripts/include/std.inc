@@ -340,16 +340,17 @@ function MoveItem(item, byref place, flags := MOVEOBJECT_NORMAL)
 		return MoveItemToContainer(item, place);
 	elseif (place==array)
 		case (place.size())
-			0:1:
+			0:
+			1:
 				var result := error;
-				result.+errortext := "Parameter place has less than 2 elements."
+				result.+errortext := "Parameter place has less than 2 elements.";
 				return result;
 			2:
 				place[3] := GetWorldHeight(place[1], place[2]);
 				continue;
 			default:
 				return MoveObjectToLocation(item, place[1], place[2], place[3], _DEFAULT_REALM, flags); //AutoConversion
-		endif
+		endcase
 	endif
 	var result := error;
 	result.+errortext := "Invalid place: expected an ContainerRef or Array, got "+place+".";

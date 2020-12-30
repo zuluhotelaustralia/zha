@@ -8,7 +8,7 @@ function openFile()
 		Broadcast("Creating nameChanges file...");
 		dfile := CreateDataFile( "nameChanges", DF_KEYTYPE_INTEGER );
 	endif
-	
+
 	return dfile;
 endfunction
 
@@ -23,7 +23,7 @@ function addNameChange(who, by)
 	nameChange .+ name;
 	nameChange .+ date;
 	nameChange .+ whoby;
-	
+
 	nameChange.name := who.name;
 	nameChange.date := NowString();
 	if (by.isA(POLCLASS_MOBILE))
@@ -31,7 +31,7 @@ function addNameChange(who, by)
 	else
 		nameChange.whoby	:= by; // it's a string.
 	endif
-	
+
 	var dfile := openFile();
 	var elem;
 	if (!(who.serial in dfile.Keys()))
@@ -39,7 +39,7 @@ function addNameChange(who, by)
 	else
 		elem := dfile.FindElement(who.serial);
 	endif
-	
+
 	var changeList := array;
 	if ("changeList" in elem.PropNames())
 		changeList := elem.GetProp("changeList");
@@ -47,7 +47,7 @@ function addNameChange(who, by)
 	else
 		changeList[1] := Pack(nameChange);
 	endif
-	
+
 	elem.SetProp("changeList", changeList);
 	closeFile();
 endfunction
@@ -55,65 +55,65 @@ endfunction
 // returns: a list of nameChange structs.
 function getNameChanges(who)
 	var dfile := openFile();
-	
+
 	var elem;
 	if (!who.serial in dfile.Keys())
 		elem := dfile.CreateElement(who.serial);
 	else
 		elem := dfile.FindElement(who.serial);
 	endif
-	
+
 	var changeList := array;
 	if ("changeList" in elem.PropNames())
 		changeList := elem.GetProp("changeList");
 	endif
-	
+
 	closeFile();
-	
+
 	var unpackedList := array;
 	foreach change in changeList
 		unpackedList.append(Unpack(change));
 	endforeach
-	
+
 	return unpackedList;
 endfunction
 
 function removeNameChange(who, index)
 	var dfile := openFile();
-	
+
 	var elem;
 	if (!who.serial in dfile.Keys())
 		elem := dfile.CreateElement(who.serial);
 	else
 		elem := dfile.FindElement(who.serial);
 	endif
-	
+
 	var changeList := array;
 	if ("changeList" in elem.PropNames())
 		changeList := elem.GetProp("changeList");
 	endif
-	
-	if ((index > 0) && (index <= len(changeList))
+
+	if ((index > 0) && (index <= len(changeList)))
 		changeList.erase(index);
 		elem.SetProp("changeList", changeList);
 	endif
-	
+
 	closeFile();
 endfunction
 
-// COMPLETELY clears changes. Should only be used by administrator 
+// COMPLETELY clears changes. Should only be used by administrator
 function clearChanges(who)
 	var dfile := openFile();
-	
+
 	var elem;
 	if (!who.serial in dfile.Keys())
 		elem := dfile.CreateElement(who.serial);
 	else
 		elem := dfile.FindElement(who.serial);
 	endif
-	
+
 	var changeList := array; // empty array.
 	elem.SetProp("changeList", changeList);
-	
+
 	closeFile();
 endfunction

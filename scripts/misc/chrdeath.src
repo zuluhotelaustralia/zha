@@ -193,10 +193,10 @@ program chrdeath(corpse,ghost)
 			endif
 			SendSysMessage(ghost, "You have been saved from the void by the healers of Haven!");
 		elseif (PSIONIC_Reincarnation)
-                        var charspot := {ghost.x, ghost.y, ghost.z}
+            var charspot := {ghost.x, ghost.y, ghost.z};
 			EraseObjProperty(ghost, "PSIONIC_Reincarnation");
 			ghost.frozen := 1;
-                        ghost.squelch(10);
+            ghost.squelch(10);
 			var ank := {CreateItemAtLocation(corpse.x+1, corpse.y, corpse.z, 5, 1), CreateItemAtLocation(corpse.x, corpse.y, corpse.z, 4, 1)};
 			ank[1].movable := 0;
 			ank[2].movable := 0;

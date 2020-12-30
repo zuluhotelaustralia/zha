@@ -103,13 +103,14 @@ function elf_AI_loop()
 						endif
 					EVID_ALL_ATTACK_CMD:
 						Fight( ev.source );
-					SYSEVENT_ENGAGED:																	if(GetGlobalProperty("sendwarnings") && !ev.source.npctemplate && isleader)
+					SYSEVENT_ENGAGED:
+						if(GetGlobalProperty("sendwarnings") && !ev.source.npctemplate && isleader)
 							foreach item in ListItemsNearLocation(me.x, me.y, me.z, DIST_TO_QUESTSTONE)
 								if(item.objtype==0xa322) // queststone
 									// send warning message to questers
 									lastwarning := ReadGameClock();
-									if (lastwarning > GetObjProperty(me, "LastWarning")) 
-										QuestBroadcast(item.serial, , , , me.name+": We are being attacked by "+ev.source.name+"!");
+									if (lastwarning > GetObjProperty(me, "LastWarning"))
+										QuestBroadcast( item.serial, "", "", 38, me.name+": We are being attacked by "+ev.source.name+"!" );
 										SetObjProperty(me, "LastWarning", lastwarning +SECS_BETWEEN_WARNINGS);
 									endif
 								endif
@@ -202,7 +203,7 @@ function GetRace()
 
 	if (GetObjProperty(me, "Elf"))
 		return "Elf";
-	else 
+	else
 		return "Dark-Elf";
 	endif
 
@@ -212,7 +213,7 @@ function GetEnemyRace()
 
 	if (GetObjProperty(me, "Elf"))
 		return "Dark-Elf";
-	else 
+	else
 		return "Elf";
 	endif
 
@@ -227,5 +228,5 @@ function RecallToSpawnPoint(spawnpoint)
 	MoveObjectToLocation(me, spawnpoint.x, spawnpoint.y, spawnpoint.z, _DEFAULT_REALM); //AutoConversion
 	PlaySoundEffect(me, SFX_SPELL_RECALL2);
 	return;
-endfunction	
+endfunction
 

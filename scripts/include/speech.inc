@@ -201,7 +201,7 @@ function check_speech(text, speaker)
 
 endfunction
 
-function GreetFriend(text, friend, friendnum)
+function GreetFriend(unused text, friend, friendnum)
 
 	var loyalty := GetObjProperty(me,"loyalty"+friendnum);
 	var nexthello := GetObjProperty(me,"nexthello");
@@ -405,7 +405,7 @@ function BarkToKeyWord(text,speaker)
 
 endfunction
 
-function DefaultHello(text,speaker)
+function DefaultHello(unused text,speaker)
 
 	if ( GetObjProperty(me,"#lastgreet") )
 		if ( ReadGameClock() > GetObjProperty(me,"#lastgreet") )

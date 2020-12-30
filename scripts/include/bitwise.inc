@@ -84,7 +84,7 @@ function YRoot(x, y)
 	var success := 0;
 
 
-	while (success == 0)	
+	while (success == 0)
 
 		n := Pow(root, y);
 		i := x - n;
@@ -154,7 +154,7 @@ function ZTest(arrayx, mu, sigma)
 
 	z := i/n;
 
-	return := z;
+	return z;
 
 endfunction
 
@@ -172,7 +172,7 @@ function TTest(arrayx, mu)
 
 	t := i/n;
 
-	return := t;
+	return t;
 
 endfunction
 
@@ -252,7 +252,7 @@ function BitOr(x, y)
 	var arrayy := BitOut(y);
 	var z := 0;
 	var loop := 1;
-	locan n;
+	var n;
 
 	while (loop <= 8)
 

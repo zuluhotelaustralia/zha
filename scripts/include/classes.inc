@@ -618,7 +618,7 @@ function HaveStatAffinity( who, stat )
 		"dex":	classeids := {  CLASSEID_BARD,
 					CLASSEID_THIEF,
 					CLASSEID_NINJA,
-					CLASSEID_MONK,  };	break;
+					CLASSEID_MONK  };	break;
 
 		"int":	classeids := {  CLASSEID_BARD,
 					CLASSEID_DRUID,
