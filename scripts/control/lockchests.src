@@ -7,7 +7,7 @@ use os;
 include "include/chests";
 include "include/checkcity";
 
-program lockchests(chest)
+program lockchests(unused chest)
 /*
 	if(CheckCity(chest)==1) return;	endif // Changed from =, ensure logic is the same - Seravy
 	if(chest.multi) return; endif

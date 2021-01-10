@@ -2,11 +2,11 @@ use uo;
 include "include/cmdlevel_check";
 
 
-program textcmd_mapinfo( who, text )
+program textcmd_mapinfo( who, unused text )
 	if (!checkStaff(who, "getmapinfo", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
-	
+
 	var where := TargetCoordinates( who );
 	if (where)
 	    var mi := GetMapInfo( where.x, where.y );

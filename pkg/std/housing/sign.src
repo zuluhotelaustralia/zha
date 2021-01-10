@@ -245,7 +245,7 @@ program textcmd_sign( who, sign )
 
 endprogram
 
-function SetPlaqueName( sign, byref layout, byref data )
+function SetPlaqueName( sign, byref unused layout, byref data )
 
 	var signname := sign.name;
 
@@ -898,7 +898,7 @@ endfunction
 
 ///////////////////////////////////////////////////////////////////////
 
-function Demolish(who, house, sign)
+function Demolish(who, house, unused sign)
 
 	var house_objtype := house.objtype; // To create a replacement deed.
 

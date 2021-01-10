@@ -1,4 +1,4 @@
-program tarot( character, item )
+program tarot( unused character, item )
 
     if( item.graphic == 0x12ac )
 	item.graphic := 0x12a6;

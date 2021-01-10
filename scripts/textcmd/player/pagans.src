@@ -146,7 +146,7 @@ function is_a_backpack(what)
 	endif
 endfunction
 
-function store_reags(who, reag)
+function store_reags(unused who, reag)
 
 	case (reag.objtype)
 		PAGAN_WYRMH: gid_reags[1] := gid_reags[1] + reag.amount; break;

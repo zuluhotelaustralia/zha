@@ -1,4 +1,4 @@
-program popupmenu( mobile )
+program popupmenu( unused mobile )
 	//Do nothing.
 	return 1;
 endprogram

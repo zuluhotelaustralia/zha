@@ -3,7 +3,7 @@ use uo;
 include "include/npcbackpacks";
 include "include/cmdlevel_check";
 
-program textcmd_pack( who, template )
+program textcmd_pack( who, unused template )
 	if (!checkStaff(who, "openpack", CMDLEVEL_SEER))
 		return 0;
 	endif

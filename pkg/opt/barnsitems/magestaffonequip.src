@@ -1,14 +1,14 @@
 //script for when staff equipped
 
 
-use uo; 
+use uo;
 use os;
 
-program magestaff(who, staff) 
+program magestaff(who, unused staff)
 	if (GetObjProperty(who, "IsMage")<4)
 		SendSysMessage(who, "A Staff of the Magi can only be equipped by a level 4 mage.",3,53);
 		return 0;
 	endif
 	SendSysMessage(who, "The staff whispers: Master, to find out how to use me, say 'magestaff help'",3,53);
 	return 1;
-endprogram 
+endprogram

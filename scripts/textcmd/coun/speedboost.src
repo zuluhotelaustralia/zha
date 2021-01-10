@@ -5,11 +5,11 @@ use util;
 include "include/cmdlevel_check";
 include "include/packets";
 
-program speedboost( who, text )
+program speedboost( who, unused text )
 	if (!checkStaff(who, "speedboost", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
-	
+
 	var packet := "BF00060026" + "01";
 
 	SendPacket(who, packet);

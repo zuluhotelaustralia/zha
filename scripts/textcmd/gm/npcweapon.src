@@ -2,7 +2,7 @@ use os;
 use uo;
 include "include/cmdlevel_check";
 
-program textcmd_account( who, text )
+program textcmd_account( who, unused text )
 	if (!checkStaff(who, "npcweapon", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif

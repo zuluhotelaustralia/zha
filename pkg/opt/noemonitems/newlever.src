@@ -149,7 +149,7 @@ function SelectTeleport(who,item)
 
     var where := TargetCoordinates( who );
     if (where)
-	
+
 		SetObjProperty( item, "Function", 1);
 		SetObjProperty( item, "LocX", where.x);
 		SetObjProperty( item, "LocY", where.y);
@@ -172,7 +172,7 @@ function SelectNPC(who,item)
 
     var where := TargetCoordinates( who );
     if (where)
-	
+
 		SetObjProperty( item, "Function", 2);
 		SetObjProperty( item, "LocX", where.x);
 		SetObjProperty( item, "LocY", where.y);
@@ -211,7 +211,7 @@ function TeleportChar(who,item)
 
 endfunction
 
-function CreateNPC(who,item)
+function CreateNPC(unused who,item)
 
 	var x:=	GetObjProperty( item, "LocX");
 	var y:=	GetObjProperty( item, "LocY");
@@ -252,9 +252,9 @@ function ChangeLeverState( item,who)
 	if(!status)
 		item.color:=33;
 		SetObjProperty( item, "status", 1);
-	
+
 		ExecuteLeverFunction(who,item);
-	
+
 	else
 		item.color:=0;
 		EraseObjProperty( item, "status");
@@ -294,7 +294,7 @@ function CheckCombination(who,item)
 		if (!obj)
 			return;
 		endif
-	
+
 		status:=CInt(GetObjProperty(obj,"status"));
 		if (status!=combi[n])
 			return;
@@ -416,7 +416,7 @@ function normalusage(who, item)
 
 	ChangeLeverState(item,who);
 	CheckCombination(who,item);
- 
+
 endfunction
 
 function stobj(who, item)
@@ -453,7 +453,7 @@ function trappedswitch(who, item, mid, stt, snd)
          ApplyDamage(who, dmg);
     2:   PlaySoundEffect(who, SFX_232);
          PrintTextAbovePrivate(who, "You set off a poison trap!", who);
-         PlayObjectCenteredEffect( who, FX_POISON_GAS, 10,10);   
+         PlayObjectCenteredEffect( who, FX_POISON_GAS, 10,10);
          var plevel := CInt(GetObjProperty(who, "poison_level"));
          var poisoned := GetObjProperty(who, "#poisonisrunning");
          if (poisoned)
@@ -749,7 +749,7 @@ function teleporter(who, item, mid, stt, snd)
           person.objtype := 0x192;
           person.graphic := 0x192;
         endif
-      endif 
+      endif
     endforeach
     foreach thingie in ListItemsNearLocationOfType(tilea.x, tilea.y, tilea.z, 0, 0x374a )
       DestroyItem(thingie);
@@ -852,7 +852,7 @@ function createpassage(who, item)
   var snd := Target(who);
   var speaker := {};
   speaker.append(snd.x);
-  speaker.append(snd.y); 
+  speaker.append(snd.y);
   speaker.append(snd.z);
   SendSysMessage(who,"now target any other switches you wish to link together.");
   while(1)
@@ -917,7 +917,7 @@ function linkteleport(who, item)
   while(1)
     SendSysMessage(who,"target the departure tile");
     trgd := Target(who);
-    SendSysMessage(who,"target the arrival tile");  
+    SendSysMessage(who,"target the arrival tile");
     trga := Target(who);
     if((!trgd) || (!trga))
       break;

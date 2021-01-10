@@ -1,6 +1,6 @@
 use uo;
 
-program warning_bell(player, bell)
+program warning_bell(unused player, bell)
 
 var town := GetObjProperty(bell, "town");
 

@@ -76,7 +76,7 @@ var data := {
 	"Magincia",
 	""
 };
-program walk_on_moongate(mobile, moongate )
+program walk_on_moongate(mobile, unused moongate )
 
 
     var tox, toy, toz, mobface;
@@ -87,13 +87,13 @@ program walk_on_moongate(mobile, moongate )
 	return;
     endif
 
-    set_critical(1); 
+    set_critical(1);
     SetObjProperty(mobile,"#moved", 1);
     SetSpeedCheckNote(mobile);
 //  MoveObjectToLocation( mobile, toX, toY, toZ, _DEFAULT_REALM); //AutoConversion
     SendGateGump(mobile);
 
-endprogram   
+endprogram
 
 function SendGateGump(who)
 

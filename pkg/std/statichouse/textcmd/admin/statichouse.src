@@ -49,9 +49,9 @@ program buildstatichouse(character)
 	SetObjProperty( staticsign , "tlcy" , tlc.y );
 	SetObjProperty( staticsign , "tlcz" , tlc.z );
 	DecayReset( character, tlc.x, tlc.y, tlc.z, brc.x, brc.y, brc.z, lockid );
-	
+
 if (CInt(GetObjProperty( staticsign, "numrect" )) > 1);
-	
+
 	SendSysmessage(character,"Now select the second bottom right corner of the static house (SE).");
 	var brc2 := Targetcoordinates(character);
 	if (!brc2)
@@ -73,7 +73,7 @@ if (CInt(GetObjProperty( staticsign, "numrect" )) > 1);
 	DecayReset( character, tlc2.x, tlc2.y, tlc2.z, brc2.x, brc2.y, brc2.z, lockid );
 	endif
 endif
-	
+
 
 	SendSysmessage(character,"Now select front door to the static house.");
 	var fdoor := Target(character, TGTOPT_NOCHECK_LOS );
@@ -81,7 +81,7 @@ endif
 	SetObjProperty( staticsign , "fdoor" , fdoor.serial );
 	fdoor.locked :=1;
 	SetObjProperty( fdoor , "lockid" , lockid );
-	
+
 	var price := RequestInput(character, staticsign, "What is the price for this house?");
 	if (!price) SendSysMessage(character, "Canceled"); return; endif
 	SetObjProperty(staticsign, "price", Cint(price) );
@@ -99,18 +99,18 @@ endif
 	SetObjProperty(staticsign, "numlockdowns", CInt(numlockdowns) );
 	SetObjProperty(staticsign, "maxlockdowns", CInt(numlockdowns) );
 	SendSysMessage(character, "Max Lockdowns set.");
-	
+
 	var housename := RequestInput(character, staticsign, "What is the name for this house?");
 	if (!housename) SendSysMessage(character, "Name Set To: Untitled"); housename := "Untitled"; endif
 	SetObjProperty(staticsign, "HouseName", housename );
 	SendSysMessage(character, "House name set to: "+ housename + ".");
-	
+
 	SendSysmessage(character,"Owner? (esc to put on sale)");
 	var player := Target( character, TGTOPT_NOCHECK_LOS );
-	
-	if (!player) 
+
+	if (!player)
 		SendSysMessage(character, "On sale!");
-		SetObjProperty( staticsign , "OnSale" , 1 ); 
+		SetObjProperty( staticsign , "OnSale" , 1 );
 		SetObjProperty( staticsign , "ownerserial", "" );
 		SetObjProperty( staticsign , "owneracct" , "" );
 		SetObjProperty( staticsign , "lockid", lockid );
@@ -118,58 +118,58 @@ endif
 		SetObjProperty( staticsign , "ownerserial", player.serial );
 		SetObjProperty( staticsign , "owneracct" , player.acctname );
 		SendSysMessage(character, "Owner set.");
-		
+
 		var bankbox := FindBankBox( player );
-	   
+
 		var packkey := CreateItemInBackpack( player, UOBJ_GOLD_KEY );
 		if (!packkey)
 		   PrintTextAbovePrivate( player, "Their backpack is too full!", character );
 		   return;
 		endif
-	
+
 		var bankkey := CreateItemInContainer( bankbox, UOBJ_GOLD_KEY );
 		if (!bankkey)
 		     PrintTextAbovePrivate( player, "Their bankbox is too full!", character );
 		     DestroyItem( packkey );
 		     return;
 		endif
-	
+
 		SetObjProperty( packkey, "lockid", lockid );
 		SetObjProperty( bankkey, "lockid", lockid );
-	
+
 	endif
-	
+
 	SetObjProperty( staticsign, "static", "1" );
 	SetObjProperty( staticsign, "house_serial", staticsign.serial);
-	
+
 	var arrayz := array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 	SetObjProperty( staticsign, "friends", arrayz);
 	SetObjProperty( staticsign, "bannedlist", arrayz);
 	SetObjProperty( staticsign, "coowners", arrayz);
 endprogram
 
-function DecayReset( character, tlcx, tlcy, tlcz, brcx, brcy, brcz, lockid )
+function DecayReset( character, tlcx, tlcy, unused tlcz, brcx, unused brcy, brcz, lockid )
 var okdecay, i:=0;
 
 	foreach item in ListObjectsInBox( tlcx,tlcy,0, brcx,brcy,100 )
-	       
+
 		if ((item.invisible!=1) && (!GetIntelligence(item)))
 			okdecay :=1;
 		else
 			okdecay :=0;
 		endif
-	
+
 		if ( ((item.objtype >= UOBJECT_DOORS_START) && (item.objtype <= UOBJECT_DOORS_END)) )
-		okdecay :=0; 
+		okdecay :=0;
 		item.locked :=1;
 		SetObjProperty( item , "lockid" , lockid );
-		
+
 		endif
-		
+
 		if ( (item.objtype == 0x2000) ) okdecay :=0; endif
-		
+
 		if ( ((item.objtype >= UOBJECT_SECURES_START) && (item.objtype <= UOBJECT_SECURES_END)) ) okdecay :=0; endif
-	
+
 		if (okdecay==1)
 			item.decayat := 10;
 			i:=i+1;

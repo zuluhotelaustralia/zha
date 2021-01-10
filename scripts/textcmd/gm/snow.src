@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
-// 
+//
 // .snow command - Begin a snow fall
-// * Last Updated 9/10/99 
+// * Last Updated 9/10/99
 // * GM Runestaff
 //
 //	* Note : Previous version did not start
@@ -14,7 +14,7 @@ use uo;
 use os;
 
 include "include/random";
-program rain(character)
+program rain(unused character)
 
 SetRegionLightLevel( "Background", 12);
 	sleep(8);

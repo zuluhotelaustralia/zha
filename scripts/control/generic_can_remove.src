@@ -1,6 +1,6 @@
 use uo;
 
-program canRemove(who, container, item, movetype)
+program canRemove(who, unused container, unused item, movetype)
 	if (who.cmdlevel)
 		return 1;
 	endif
@@ -13,6 +13,6 @@ program canRemove(who, container, item, movetype)
 			SetObjProperty(who, "#looting", ReadGameClock() + 1); // else set a timeout (just in case the script doesn't end)
 		endif
 	endif
-	
+
 	return 1;
 endprogram

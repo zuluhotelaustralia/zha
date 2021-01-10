@@ -78,7 +78,7 @@ return original;
 endfunction
 
 
-function votemenu(who, item, type)
+function votemenu(unused who, unused item, type)
 //build vote menu
 var i;
 var curpage := 2;

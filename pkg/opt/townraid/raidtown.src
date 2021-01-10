@@ -517,7 +517,7 @@ function CreateWayponts(settings)
 endfunction
 
 
-function FillInRaiderArrays(raiderarray, byref raidertype, byref raiderpoints, byref raideramount, byref raiderchance, totalrebuild := 0)
+function FillInRaiderArrays(raiderarray, byref raidertype, byref raiderpoints, byref raideramount, byref raiderchance, unused totalrebuild := 0)
 
 	var splitter := { };
 	var totaldudes := 0, i;
@@ -567,7 +567,7 @@ endfunction
 
 
 
-function AutoRewardSystem(initialgold, isthereareward)
+function AutoRewardSystem(unused initialgold, isthereareward)
 
 	raidupdateinfo := GetGlobalProperty("raidupdateinfo"+raidid);
 	var endgold := raidupdateinfo[UPD_GOLDLEFT];

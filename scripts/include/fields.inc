@@ -1,7 +1,7 @@
 
 include "include/classes";
 
-function get_direction( character, x, y, z )
+function get_direction( character, x, y, unused z )
 
 	var ns_desc := "";
 	var ew_desc := "";
@@ -18,7 +18,7 @@ function get_direction( character, x, y, z )
 	elseif  (x > character.x)
 		  ew_desc := "east";
 	endif
-	
+
 	if (ns_desc == "" && ew_desc == "")
 		thedesc := "nearby";
 	else
@@ -55,7 +55,7 @@ endfunction
 
 
 function CreateEastWestField( caster, fieldtype, x, y, z, length := 5 )
-	
+
 	var counter := 0;
 	var is_mage := GetObjProperty( caster, CLASSEID_MAGE );
 	var i;

@@ -5,7 +5,7 @@ include "include/client";
 include "include/objtype";
 
 //program on_insert( who, runebook, item )
-program on_insert( who, runebook, movetype, INSERT_ADD_ITEM, item )
+program on_insert( who, runebook, unused movetype, unused INSERT_ADD_ITEM, item )
 	set_critical(1);
 
 	if( !ReserveItem( runebook ) )
@@ -22,14 +22,14 @@ program on_insert( who, runebook, movetype, INSERT_ADD_ITEM, item )
 						return 0;
 					endif
 					break;
-	
+
 		UOBJ_RECALL_SCROLL:	if( RechargeBook( who, runebook, item ) )
 						return 0;
 					else
 						return 0;
 					endif
 					break;
-				
+
 		default:		MoveItemToContainer( item, who.backpack );
 	endcase
 
@@ -67,7 +67,7 @@ function AddRuneToRunebook( runebook, rune )
 	if( !name )
 		name := "a marked recall rune";
 	endif
-		
+
 	var rune_data		:= struct;
 	rune_data.+tox		:= tox;
 	rune_data.+toy		:= toy;
@@ -112,13 +112,13 @@ function RechargeBook( who, runebook, scrolls )
 		SendSysMessage( who, "This runebook is full." );
 		set_critical(0);
 		return 0;
-	
+
 	elseif( amount >= maxamount )
 		var to_substract := maxamount;
 		if( SubtractAmount( scrolls, to_substract ) )
 			charges := maxcharges;
 		endif
-	
+
 	elseif( DestroyItem( scrolls ) )
 		charges := charges + amount;
 	endif

@@ -15,7 +15,7 @@ include "include/speedhackRecallCheck";
 
 var moongates;
 
-program walk_on_moongate( mobile, moongate )
+program walk_on_moongate( mobile, unused moongate )
 
     // these are also defined in the moongates.inc.
     var moongates := {
@@ -45,8 +45,8 @@ program walk_on_moongate( mobile, moongate )
     tox := moongates[ mobface ] [ 1 ];
     toy := moongates[ mobface ] [ 2 ];
     toz := moongates[ mobface ] [ 3 ];
-   
-    set_critical(1); 
+
+    set_critical(1);
     SetObjProperty(mobile,"#moved", 1);
     MoveObjectToLocation( mobile, tox, toy, toz, _DEFAULT_REALM); //AutoConversion
     SetSpeedCheckNote(mobile);

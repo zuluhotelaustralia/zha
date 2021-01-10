@@ -10,7 +10,7 @@ var food_name_dict := define_food_name_dictionary();
 const BUTTON_NEXT_PAGE	:=	"button 294 5 2206 2206 0 2";
 const BUTTON_LAST_PAGE	:=	"button 23 6 2205 2205 0 2";
 
-program display_cookbook (character, book)
+program display_cookbook (character, unused book)
 
 	//call a function that searches through cooking.cfg and uses that information to create an array of
 	//all the recipes that should be shown in the cookbook
@@ -170,7 +170,7 @@ function create_array_of_recipes()
 	//load in the cooking.cfg file that contains all the recipes
 	var recipe_config_file := ReadConfigFile("cooking");
 
-	//find out how many recipes are contained in the cooking.cfg file	
+	//find out how many recipes are contained in the cooking.cfg file
 	var number_of_recipes := GetConfigMaxIntKey(recipe_config_file);
 
 	//this is an array that contains all the recipes that should be displayed in the cookbook.  This

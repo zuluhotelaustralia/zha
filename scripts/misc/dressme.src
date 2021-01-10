@@ -525,7 +525,7 @@ function DressWar(me,gender)
 
 endfunction
 
-function DressMage(me,gender)
+function DressMage(me,unused gender)
 
 	var theitem;
 

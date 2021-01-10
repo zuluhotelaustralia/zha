@@ -79,7 +79,7 @@ function RecalcPhysicalDmg( attacker, defender, weapon, armor, byref basedamage,
 endfunction
 
 
-function RecalcAstralDmg( attacker, defender, weapon, armor, byref basedamage, piercing := 0 )
+function RecalcAstralDmg( attacker, defender, unused weapon, armor, byref basedamage, piercing := 0 )
 
 	var rawdamage;
 	var absorbed := 0;
@@ -176,24 +176,24 @@ function ModByDist( attacker, defender, weapon, basedamage )
 			* ((GetDexterity(attacker) + 60.0) * 0.01)
 			/ ((GetEffectiveSkill( attacker, SKILLID_TACTICS ) + 50.0 + (GetStrength(attacker) / 5.0)) * 0.01);
 		*/
-		
+
 		//basedamage := basedamage * ((GetDexterity(attacker) + 30.0) * 0.01) * 0.5;
-			
+
 		//Broadcast("ModByDist: basedamage " +  basedamage);
 
 		var rlevel := GetObjProperty( attacker, CLASSEID_RANGER );
 		if (rlevel)
-			basedamage := basedamage * ((1+ClasseBonus( attacker, CLASSEID_RANGER ))/2);	
+			basedamage := basedamage * ((1+ClasseBonus( attacker, CLASSEID_RANGER ))/2);
 		else
-			rlevel :=0; //in case is error									
+			rlevel :=0; //in case is error
 		endif
-		
+
 		var dist := Distance( attacker, defender );
 		if( (dist <= 1) || (dist > 10 + (rlevel*RANGER_LEVEL_ARCHERY_RANGE_BONUS)) ) // a bit more long rang for rangers
 			basedamage := basedamage * 0.25;
 		endif
-		
-		
+
+
 	else
 		if( defender.isA(POLCLASS_NPC) )
 			//Broadcast("Before: "+basedamage);
@@ -218,20 +218,20 @@ function ModByDist( attacker, defender, weapon, basedamage )
 			basedamage := WarriorMeleeBonuses(basedamage, attacker, defender);
 			//broadcast("After warrior: "+basedamage);
 		endif
-		
+
 		if (IsNinja(attacker))
-		
+
 			multiplier := BackStabDamageBonus(GetClasseLevel(attacker), attacker, defender);
 			//broadcast("ninja multi: "+multiplier);
 			basedamage := basedamage + multiplier;
 		endif
-	
+
 		if(IsPaladin(attacker))
 			basedamage := PaladinHitscriptBonuses(basedamage, attacker, defender);
 			basedamage := PaladinKarmaBonusDamage(basedamage, attacker, defender);
 			//broadcast("After paladin: "+basedamage);
 		endif
-		
+
 		if (IsPriest(attacker))
 			// tactics compensator
 			multiplier := ((GetEffectiveSkill(attacker, SKILLID_MACEFIGHTING) + GetClasseLevel(attacker)*10) *0.01);
@@ -254,7 +254,7 @@ function ModByDist( attacker, defender, weapon, basedamage )
 				//broadcast("After monk: "+basedamage);
 			endif
 		endif
-					
+
 	endif
 
 	if( GetObjProperty( attacker , CLASSEID_MAGE ) )
@@ -269,13 +269,13 @@ function ModByDist( attacker, defender, weapon, basedamage )
 		endif
 	endif
 
-	
+
 	return basedamage;
 
 endfunction
 
 
-function MaceHit( attacker, defender, weapon, armor, absorbed )
+function MaceHit( attacker, defender, weapon, armor, unused absorbed )
 
 	var archance := 2;
 	var weapchance := 2;
@@ -361,7 +361,7 @@ function GetShieldAbsorption( attacker, defender, weapon, basedamage )
 				if (mlevel>=5)
 					if(defender.weapon.hitscript == "wrestlinghitscript")
 						var weaponType := cfgfile[attacker.weapon.objtype];
-						if (weaponType) 
+						if (weaponType)
 							sleepms((100-weaponType.Speed)/10);
 							DoBowAttack(defender, attacker, weaponType, SKILLID_BATTLE_DEFENSE);
 						endif
@@ -425,7 +425,7 @@ function DealDamage( attacker, defender, weapon, armor, basedamage, rawdamage )
 		endif
 		if( attacker.isA(POLCLASS_NPC) )
 			case (class)
-				CLASSEID_WARRIOR:	
+				CLASSEID_WARRIOR:
 				CLASSEID_PALADIN:
 				CLASSEID_DEATHKNIGHT:	rawdamage := CInt( rawdamage / ClasseSmallBonusByLevel( level ));
 			endcase
@@ -491,21 +491,21 @@ function checkBowUnequip(who, weapon)
 	endif
 
 	set_critical(1);
-	
+
 	if (weapon.serial != lastWeaponChecked)
 		lastWeaponChecked := weapon.serial;
 		haveUnequipped := 0;
 	endif
-	
+
 	set_critical(0);
-	
+
 	sleepms(50);
 
 	if (weaponElem.Attribute == "Archery")
 		var ammoType   := weaponElem.ProjectileType;
 		var ammo       := EnumerateItemsInContainerOfObjtype(who.backpack, ammoType);
 		var weaponIsEquipped := weapon in ListEquippedItems(who);
-		
+
 		if (!ammo.size() && weaponIsEquipped && (haveUnequipped != weapon.serial))
 			if (MoveItemToContainer(weapon, who.backpack))
 				PrintTextAbovePrivate(who, "Having run out of ammunition, you put away your weapon.", who);
@@ -518,16 +518,16 @@ endfunction
 
 function BackStabDamageBonus(ninjalevel, attacker, defender)
 	var backstab:=0;
-	
+
 	if ((ninjalevel && attacker.facing == defender.facing) && (attacker.x!=defender.x || attacker.y!=defender.y))
 		var myfacing := attacker.facing;
-		
+
 		case (myfacing) //Conversion
 		1: //south east
 			if (defender.x > attacker.x && defender.y < attacker.y)
 				backstab:=1;
 			endif
-		2: //south 
+		2: //south
 			if (defender.x > attacker.x)
 				backstab:=1;
 			endif
@@ -535,7 +535,7 @@ function BackStabDamageBonus(ninjalevel, attacker, defender)
 			if (defender.x > attacker.x && defender.y > attacker.y)
 				backstab:=1;
 			endif
-		4: //west 
+		4: //west
 			if (defender.y > attacker.y)
 				backstab:=1;
 			endif
@@ -543,7 +543,7 @@ function BackStabDamageBonus(ninjalevel, attacker, defender)
 			if (defender.x < attacker.x && defender.y > attacker.y)
 				backstab:=1;
 			endif
-		6: //north 
+		6: //north
 			if (defender.x < attacker.x)
 				backstab:=1;
 			endif
@@ -551,13 +551,13 @@ function BackStabDamageBonus(ninjalevel, attacker, defender)
 			if (defender.x < attacker.x && defender.y < attacker.y)
 				backstab:=1;
 			endif
-		8: //east 
+		8: //east
 			if (defender.y < attacker.y)
 				backstab:=1;
 			endif
 		endcase
 	endif
-	
+
 	if (backstab)
 		PrintTextAbove(attacker, "*Backstab!*",3,38);
 		PlaySoundEffect(defender, 0x01cb);
@@ -566,39 +566,39 @@ function BackStabDamageBonus(ninjalevel, attacker, defender)
 	return 0;
 endfunction
 
-function ApplyAmbushEffect(attacker, defender)
+function ApplyAmbushEffect(attacker, unused defender)
 
 	var timeambush := GetObjProperty(attacker, "attackInitiatedWhileHidden");
 	//Broadcast(timeambush + " " + ReadGameClock());
 	if (!timeambush || timeambush ==error)
 		return 0;
-	endif	
+	endif
 	if (timeambush>(ReadGameClock()-5))
 		PrintTextAbove(attacker, "*Ambush!* " ,3,38);
 		EraseObjProperty(attacker, "attackInitiatedWhileHidden");
 		return 1;
 	endif
-			
+
 	return 0;
 endfunction
 
 function PaladinKarmaBonusDamage(basedamage, attacker, defender)
-	//Damage = BaseDamage * (1 + ((PaladinKarma - DefenderKarma) / 20000)) 
+	//Damage = BaseDamage * (1 + ((PaladinKarma - DefenderKarma) / 20000))
 	//MUST BE MOUNTED BY SPECIAL STEED
 	if (! GetObjProperty(GetEquipmentByLayer( attacker, LAYER_MOUNT ), "specialsteed"))
 		return basedamage;
-	endif	
+	endif
 
 	var attacker_karma:=CInt(GetObjProperty( attacker, "Karma"));
 	var defender_karma:=CInt(GetObjProperty( defender, "Karma"));
-	
+
 	var extradmg:= (basedamage * (1.0 + (CDbl(attacker_karma - defender_karma) / PALADIN_KARMA_DAMAGE_MOD_DENOMINATOR)))-basedamage;
 	//broadcast("Karma bonus: "+extradmg);
 	return CInt(basedamage + extradmg);
 endfunction
 
 function PaladinHitscriptBonuses(basedamage, attacker, defender)
-	//Bonus weapon damage per level with Dragonslayer/Silver/Holy (cumulative with other damage bonuses) 
+	//Bonus weapon damage per level with Dragonslayer/Silver/Holy (cumulative with other damage bonuses)
     var slaytype;
     if (attacker.weapon.hitscript == "slayerscript")
 	if (defender.isa(POLCLASS_NPC))
@@ -614,14 +614,14 @@ function PaladinHitscriptBonuses(basedamage, attacker, defender)
  	       "Dragonkin":
                "Undead":
                "Daemon": basedamage:=basedamage * ClasseSmallBonusByLevel( GetClasseLevel(attacker));
-          endcase    
-        endif    
+          endcase
+        endif
     endif
     return basedamage;
 endfunction
 
 function PriestHitscriptBonuses(basedamage, attacker, clevel)
-	//Bonus weapon damage per level with Silver/Holy (cumulative with other damage bonuses) 
+	//Bonus weapon damage per level with Silver/Holy (cumulative with other damage bonuses)
     if (attacker.weapon.hitscript == "slayerscript")
           var slaytype:=GetObjProperty(attacker.weapon, "SlayType");
           case (slaytype)
@@ -645,8 +645,8 @@ function DeathKnightHitscriptBonuses(basedamage, attacker, defender)
  			"lifedrainscript":
       			"manadrainscript":
        			"staminadrainscript": basedamage:=basedamage * ClasseSmallBonusByLevel( GetClasseLevel(attacker));
-	 	endcase	
-	 endif 	
+	 	endcase
+	 endif
     return basedamage;
 endfunction
 

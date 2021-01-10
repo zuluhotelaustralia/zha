@@ -11,7 +11,7 @@ program use_scroll( who, scroll )
 	if (GetObjProperty(who, CLASSEID_DRUID))
 		SendSysMessage(who, "Druids are not able to use scrolls");
 		return;
-	endif	
+	endif
 
 	var shp := GetHp(who);
 	var sx := who.x;
@@ -24,7 +24,7 @@ program use_scroll( who, scroll )
 		return;
     	endif
 	var container := scroll.container;
-	
+
 	if(container.objtype == 0x0EFA)
 		SendSysMessage(who, "This scroll is inside your book.");
 		return;
@@ -135,7 +135,7 @@ function CanReadScroll(me)
 
 endfunction
 
-function manacost(me,spellid)
+function manacost(unused me,spellid)
 
 	var cfg := ReadConfigFile(":spells:spells");
 	var circle := cfg[ spellid ].circle;

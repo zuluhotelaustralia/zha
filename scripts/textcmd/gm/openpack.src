@@ -2,7 +2,7 @@ use uo;
 
 include "include/npcbackpacks";
 
-program textcmd_pack( who, template )
+program textcmd_pack( who, unused template )
 
 	var me := Target( who,TGTOPT_NOCHECK_LOS );
 	if (!me)

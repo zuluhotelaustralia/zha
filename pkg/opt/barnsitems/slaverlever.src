@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-program slaverlever( who, lever)
+program slaverlever( unused who, lever)
 	lever.graphic:=0x108d;
 	sleepms(500);
 	lever.graphic:=0x108c;
@@ -14,5 +14,5 @@ program slaverlever( who, lever)
 			PrintTextAbove(player, "You may now go free!");
 		endif
 	endforeach
-	
+
 endprogram

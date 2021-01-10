@@ -4,7 +4,7 @@ use os;
 include "include/yesno";
 include "include/cmdlevel_check";
 
-program makeallitemsdecorations( who, objtype )
+program makeallitemsdecorations( who, unused objtype )
 	set_critical(1);
 	if (!checkStaff(who, "makeallitemsdecorations", CMDLEVEL_ADMINISTRATOR))
 		return 0;
@@ -19,7 +19,7 @@ program makeallitemsdecorations( who, objtype )
 	var count		:= 0;
 	var timer		:= 0;
 	var clock		:= ReadGameClock();
-	
+
 	SendSysMessage( who, "Starting lock down and decoration cprop, please wait..." );
 
 	foreach obj in ListObjectsInBox(0, 0, -128, 6142, 4094, 128)
@@ -29,7 +29,7 @@ program makeallitemsdecorations( who, objtype )
 		count:=count+1;
 		sleepms( 5 );
 		timer := timer + 5;
-	
+
 		if( timer >= 30000 )
 			timer := timer - 30000;
 			SendSysMessage( who, "decoration specification is still in progress, be patient..." );

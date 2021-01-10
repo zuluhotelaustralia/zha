@@ -6,7 +6,7 @@ include "include/managers";
 include "include/yesno";
 
 
-program textcmd_createworldspawnpoints(who,text)
+program textcmd_createworldspawnpoints(who,unused text)
 	if (!YesNo(who, "REALLY CREATE SPAWNPOINTS ALL OVER WORLD? This should be done only once!"))
 		return;
 	endif
@@ -24,7 +24,7 @@ program textcmd_createworldspawnpoints(who,text)
 			//SendSysMessage(who, "sp_struct:  x: " +sp_struct.x + "  y: " + sp_struct.y + "  z: " + sp_struct.z + "  range: " + sp_struct.range + "  delay: " + sp_struct.delay + "  maxcount: " + sp_struct.maxcount+ "  wander: " + sp_struct.wander+ "  monster: " + sp_struct.monster + "  type: " + sp_struct.type);
 			spawnpoint:=CreateSpawnpoint(getSpawnpointStructFromElem(elem));
 			SendSysMessage(who, spawnpoint.x + ", " + spawnpoint.y + ", " + spawnpoint.z);
-			
+
 			SendSpawnPointEvent( EVID_SPAWNPOINT_CHECK_POINT, spawnpoint );
 		endif
 		count:=count+1;

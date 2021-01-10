@@ -139,7 +139,7 @@ endfunction
 //  called when the originally selected item was a head
 ///////////////////
 
-function MakeSkullOutOfHead(character, head, kettle)
+function MakeSkullOutOfHead(character, head, unused kettle)
 
 	PlaySoundEffect(character, 0x0021);
 	sleep(2);

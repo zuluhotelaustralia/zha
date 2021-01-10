@@ -4,7 +4,7 @@ use os;
 include "include/dotempmods";
 include "include/client";
 
-program walkon_spiderweb(character, web)
+program walkon_spiderweb(character, unused web)
 
 	if (!character.cmdlevel)
         	if (!CheckSkill(character, SKILLID_MAGICRESISTANCE, -1, 0))

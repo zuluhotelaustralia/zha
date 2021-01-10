@@ -5,7 +5,7 @@ include "include/client";
 
 const SPELL_EFFECT_TYPE_MOVING := MOVING_SPELL_LIGHTNING;
 
-program lightning(parms)
+program lightning(unused parms)
 /*
 	var cast_on := parms[1];
 	var caster := parms[2];
@@ -41,7 +41,7 @@ function wears_metallic(who)
 	var item;
 
 	foreach item in ListEquippedItems(who)
-      	if ((cfg[item.objtype].blockcircle) && (cfg[item.objtype].blockcircle <= 2) && (item.layer > 2) ) 
+      	if ((cfg[item.objtype].blockcircle) && (cfg[item.objtype].blockcircle <= 2) && (item.layer > 2) )
             	print (who.name + " was wearing metallic armor, and is gonna be fried");
                 	return 1;
       	endif

@@ -2,7 +2,7 @@ use uo;
 include "include/attributes";
 include "include/cmdlevel_check";
 
-program textcmd_showmods (who, text)
+program textcmd_showmods (who, unused text)
 	if (!checkStaff(who, "showmods", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif

@@ -2,7 +2,7 @@ use uo;
 include "include/cmdlevel_check";
 
 
-program tstsetobjarr( who, params )
+program tstsetobjarr( who, unused params )
 	if (!checkStaff(who, "tstsetobjarr", CMDLEVEL_DEVELOPER))
 		return 0;
 	endif

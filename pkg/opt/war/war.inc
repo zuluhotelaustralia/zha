@@ -1,9 +1,9 @@
 //Barnabus 23/3/2003 - functions for war operations
 
-//essentially a war consists of 3 items: 
+//essentially a war consists of 3 items:
 //1 warball that is used by gms to configure the war and stores data,
-//and 2 war stones.. one for each team that is linked to the warball. 
-//A player can only be in 1 war at a time but there can be several 
+//and 2 war stones.. one for each team that is linked to the warball.
+//A player can only be in 1 war at a time but there can be several
 //wars going at once.
 
 
@@ -18,11 +18,11 @@ include "include/classes";
 
 //War Registration constants
 const WAR_REG_NONE :=0;
-const WAR_REG_BARD :=2; 
-const WAR_REG_MAGE :=4; 
-const WAR_REG_RANGER :=5; 
-const WAR_REG_THIEF :=6; 
-const WAR_REG_WARRIOR :=7; 
+const WAR_REG_BARD :=2;
+const WAR_REG_MAGE :=4;
+const WAR_REG_RANGER :=5;
+const WAR_REG_THIEF :=6;
+const WAR_REG_WARRIOR :=7;
 const WAR_REG_RACE:=8;
 
 
@@ -60,14 +60,14 @@ endfunction
 function SetWarCreator(ball, staffname)
 	SetObjProperty(ball, "warCreatingStaff", staffname);
 endfunction
-	
+
 function SetWarTeamName(ball, index, tname)
 	SetObjProperty(ball, "warTeamName"+index, tname);
 	var myguild := GetWarGuild(ball, index);
 	myguild.setprop( "guildabv", tname );
 	myguild.setprop( "guildname", tname );
 endfunction
-	
+
 function GetWarTeamName(ball, index)
 	return GetObjProperty(ball, "warTeamName"+index);
 endfunction
@@ -106,7 +106,7 @@ function EndWar(ball)
 	if (! IsWar(ball))
 		return;
 	endif
-	
+
 	SetObjProperty(ball, "WarHappening", 0);
 
 	FinaliseAlivePlayers(ball);
@@ -139,8 +139,8 @@ function CreatePlayerDataStruct(player, warteam)
 	var tempRecord:=struct;
 	tempRecord.+playerserial:=player.serial;
 	tempRecord.+team:=warteam;
-	tempRecord.+kills:=0; 
-	tempRecord.+battlepoints:=0; 
+	tempRecord.+kills:=0;
+	tempRecord.+battlepoints:=0;
 	tempRecord.+playersKilled:={};
 	tempRecord.+killed:="alive";
 	tempRecord.+AWOLTime:=0;
@@ -154,8 +154,8 @@ function GetPlayerWData(ball, playerserial)
 	if (!qPData)
 		return -1; //error no data
 	endif
-	
-	var i;	
+
+	var i;
 	for (i:=1; i<=len(qPData); i:=i+1)
 		if (qPData[i].playerserial==playerserial)
 			return qPData[i];
@@ -170,7 +170,7 @@ function SetPlayerWData(ball, playerstruct)
 	if (!qPData)
 		return -1; //error no data
 	endif
-	
+
 	var index:=  GetPlayerDataIndex(ball, playerstruct.playerserial);
 	if (index<=0)
 		return; //not found
@@ -204,7 +204,7 @@ function RemovePlayerWData(ball, playerserial)
 			tempArray.append(q);
 		endif
 	endforeach
-	SetObjProperty(ball, "PlayerData",tempArray);	
+	SetObjProperty(ball, "PlayerData",tempArray);
 endfunction
 
 
@@ -215,8 +215,8 @@ function GetPlayerDataIndex(ball, playerserial)
 	if (!qpData)
 		return 0; //error no data
 	endif
-	
-	var i;	
+
+	var i;
 	for (i:=1; i<=len(qpData); i:=i+1)
 		if (qpData[i].playerserial==playerserial)
 			return i;
@@ -244,11 +244,11 @@ function GetRegisteredWarPlayers(ball, start, returnSize)
 	var player;
 	var i;
 	var maxPlayers:=playerserials.size();
-	
+
 	if (!playerserials[1])
 		return;
 	endif
-		
+
 	for(i:=start;i<=maxPlayers&&players.size()<returnSize;i:=i+1)
 		player:=SystemFindObjectBySerial(CInt(playerserials[i]), SYSFIND_SEARCH_OFFLINE_MOBILES);
 		players.append(player);
@@ -280,13 +280,13 @@ function SetCurrentWarUser(stone, who)
 	SetObjProperty(stone, "currentuser", who.serial);
 endfunction
 
-function ClearCurrentWarUser(stone, who)
+function ClearCurrentWarUser(stone, unused who)
 	//clears props - used when current user stops using stone
 	EraseObjProperty(stone, "#lastclicked");
 	EraseObjProperty(stone, "currentuser");
 endfunction
 
-function CheckCurrentWarUserTimeElapsed(stone, who)
+function CheckCurrentWarUserTimeElapsed(stone, unused who)
 	//returns true if time elapsed
 	var clickMaxTime := CInt(GetObjProperty(stone, "#lastclicked"));
 	if (clickMaxTime<ReadGameClock()) //that is current time is greater than reserved time
@@ -302,7 +302,7 @@ function WarStoneUserElapsed(stone, who)
 	//the current user is set to them....
 	//when a player makes a selection in the player gumps it checks that they're the current player or else it will exit
 	//with a message
-	
+
 	if (!CheckCurrentWarUser(stone, who))
 		SendSysMessage(who, "Time elapsed for using stone. Another user is now using it. Please wait.", 3 ,34);
 		return 1;
@@ -405,8 +405,8 @@ function GetAllRegisteredPlayerSerials(ball)
 	if (!qpData)
 		return 0; //error no data
 	endif
-	
-	var i;	
+
+	var i;
 	for (i:=1; i<=len(qpData); i:=i+1)
 		tempArr.append(qpData[i].playerserial);
 	endfor
@@ -416,15 +416,15 @@ endfunction
 function AwardKill(killer, killed)
 	//ONLY CALLED WHEN KILLER AND KILLED BELONG TO SAME WAR BALL!
 	//award kill to killer based on number of kills killed had
-	
+
 	var warball:=SystemFindObjectBySerial(GetOnPlayerWarSerial(killed));
 	//broadcast
-	var deathmsg := GetOnPlayerRank(killer) + " " + killer.name + " has slain " + GetOnPlayerRank(killed) + " " + killed.name +"!!!"; 
+	var deathmsg := GetOnPlayerRank(killer) + " " + killer.name + " has slain " + GetOnPlayerRank(killed) + " " + killed.name +"!!!";
 	BroadcastToWarParticipants(warball, deathmsg);
-		
+
 	var killerData := GetPlayerWData(warball, killer.serial);
 	var killedData := GetPlayerWData(warball, killed.serial);
-	
+
 	//compare battlepoints
 	var battlePointsGained := calculateBattlePointsEarned(killedData.battlepoints);
 	killerData.kills:=killerData.kills+1;
@@ -445,7 +445,7 @@ endfunction
 function calculateBattlePointsEarned(killedBPs)
 //function designed to counter people cheating through killing dummy chars on other team
 //to get battlepoints
-	
+
 /*
 Rank1 : 0
 Rank2:  1
@@ -505,7 +505,7 @@ Rank11: 55
 Rank12: 66
 */
 	var rank;
-	
+
 	if (killerbps>=66)
 		rank:= "Duke";
 	elseif(killerbps>=55)
@@ -531,7 +531,7 @@ Rank12: 66
 	else
 		rank:= "Private";
 	endif
-	
+
 	if (rank != GetOnPlayerRank(killer))
 		killer.title_guild := GetWarTeamName(warball, teamNum) + " : " + rank;
 		SendSysMessage(killer, "You have been promoted!", 3, 53);
@@ -539,7 +539,7 @@ Rank12: 66
 	endif
 endfunction
 
-//summary stats for team members 
+//summary stats for team members
 function NumberMembersInTeamWhere(ball, teamNum, condition)
 	//assumes each struct is unique elemet
 	//condition is checked on element 6... killedStatus
@@ -682,7 +682,7 @@ function AddPlayerToWarGuild(player, ball, teamnum)
 		oldguild.removemember(player);
 		SendSysMessage(player, "You have temporarily left your guild to join the war! You will be automatically added back to it after your tour is over.", 3, 53);
 	endif
-	
+
 	player.title_guild := GetWarTeamName(ball, teamNum) + " : Private";
 	var warGuild := GetWarGuild(ball, teamNum);
 	SetObjProperty(player, "guild_id", warGuild.guildid);
@@ -711,7 +711,7 @@ function ReturnPlayerToGuild(player)
 		if (oldguild)
 			oldguild.addmember(player);
 			player.title_guild:=GetObjProperty(player, "OldTitleGuild");
-			SendSysMessage(player, "You have rejoined your old guild!", 3, 53);		
+			SendSysMessage(player, "You have rejoined your old guild!", 3, 53);
 		endif
 		EraseObjProperty(player, "OldTitleGuild");
 	else
@@ -738,9 +738,9 @@ function ResetAllPlayersAWOLTime(ball)
 //someone on other team before being ditched
 	var qpData:=GetObjProperty(ball,  "PlayerData");
 	foreach q in qpData
-		q.AWOLTime:=ReadGameClock()+GetAWOLTime(ball); 
+		q.AWOLTime:=ReadGameClock()+GetAWOLTime(ball);
 	endforeach
-	SetObjProperty(ball, "PlayerData",qpData);	
+	SetObjProperty(ball, "PlayerData",qpData);
 
 endfunction
 
@@ -774,7 +774,7 @@ function FinaliseAlivePlayers(ball)
 		if (q.killed == "alive")
 			SetPStructToSurvived(q, ball);
 		endif
-	endforeach	
+	endforeach
 endfunction
 
 function BroadcastToWarParticipants(ball, message)
@@ -807,7 +807,7 @@ endfunction
 //Registration Condition functions
 function GetWarRegistrationConditionString(ball, teamnum)
 	//returns string corresponding to Registration Condition constant
-	
+
 	var tempstr;
 	var regcondition := GetWarRegistrationCondition(ball, teamnum);
 	case (regcondition)
@@ -842,7 +842,7 @@ endfunction
 
 function SetWarRegistrationCondition(ball, val, teamnum)
 	//Sets the stones registration condition (as constant)
-	//WAR_REG_NONE :=0; WAR_REG_BARD :=2; WAR_REG_MAGE :=4; 
+	//WAR_REG_NONE :=0; WAR_REG_BARD :=2; WAR_REG_MAGE :=4;
 	//WAR_REG_RANGER :=5; WAR_REG_THIEF :=6; WAR_REG_WARRIOR :=7; WAR_REG_RACE:=8;
 
 	SetObjProperty(ball, "RegistrationCondition"+teamnum, val);
@@ -852,7 +852,7 @@ function CheckWarRegistrationCondition(who, ball, teamnum)
 	//returns 1 if player can register 0 otherwise
 	var regcondition := GetWarRegistrationCondition(ball, teamnum);
 	var charclass;
-	
+
 	case (regcondition)
 		WAR_REG_BARD:
 			charclass := GetObjProperty( who, "IsBard" );
@@ -887,7 +887,7 @@ function CheckWarRegistrationCondition(who, ball, teamnum)
 			if (charclass)
 				return 1;
 			endif
-			return 0;	
+			return 0;
 		break;
 		WAR_REG_RACE:
 			return (CheckWarRaceRegistrationCondition(ball, who, teamnum));
@@ -904,7 +904,7 @@ function CheckWarRaceRegistrationCondition(ball, who, teamnum)
 	if (who.title_race==warrace)
 		return 1;
 	endif
-	return 0;	
+	return 0;
 endfunction
 
 function SetWarRaceRegistrationCondition(race, ball, teamnum)
@@ -917,7 +917,7 @@ function GetWarRaceRegistrationCondition(ball, teamnum)
 endfunction
 
 function CheckMinimumRegistrationCondition(player)
-	//all wars are offlimits to crafters, classed players under level 3, 
+	//all wars are offlimits to crafters, classed players under level 3,
 	//and unclassed players with less than 2000 skill points
 	if (GetObjProperty(player, "IsCrafter"))
 		SendSysMessage(player, "Crafter cannot enlist in wars!", 3,53);
@@ -977,26 +977,26 @@ function WarSummary(who, ball)
 	GFInitGump();
 	GFPage(1);
 	GFResizePic(0, 0, BKGND_PAPER_EX, 400, 600);
-		
+
 	GFTextMid(10, 10, 400, 53, "Summary for " + GetWarTitle(ball));
 	if (IsWar(ball))
 		GFTextMid(10, 30, 400, 53, "This war is currently being fought!");
 	endif
-	
+
 	GFTextMid(10, 50, 400, 53, "War Team " + GetWarTeamName(ball, 1) + ":-");
 	GFTextMid(10, 75, 400, 10, "Number in team: " + MembersInTeam(ball, 1));
 	GFTextMid(10, 100, 400, 10, "Number alive: " + MembersAliveInTeam(ball, 1));
 	GFTextMid(10, 125, 400, 10, "Number killed: " + MembersKilledInTeam(ball, 1));
 	GFTextMid(10, 150, 400, 10, "Number AWOL: " + MembersAWOLInTeam(ball, 1));
 	GFTextMid(10, 175, 400, 10, "Team points: " + TeamPoints(ball, 1));
-	
+
 	GFTextMid(10, 210, 400, 53, "War Team " + GetWarTeamName(ball, 2) + ":-");
 	GFTextMid(10, 235, 400, 10, "Number in team: " + MembersInTeam(ball, 2));
 	GFTextMid(10, 260, 400, 10, "Number alive: " + MembersAliveInTeam(ball, 2));
 	GFTextMid(10, 285, 400, 10, "Number killed: " + MembersKilledInTeam(ball, 2));
 	GFTextMid(10, 310, 400, 10, "Number AWOL: " + MembersAWOLInTeam(ball, 2));
 	GFTextMid(10, 335, 400, 10, "Team points: " + TeamPoints(ball, 2));
-	
+
 
 	var highestkills := GetMaxKills(ball);
 	if (highestkills)
@@ -1010,7 +1010,7 @@ function WarSummary(who, ball)
 			endif
 		endforeach
 		GFTextMid(10, 400, 400, 53, "Obtained by: " + pstring);
-	
+
 		var highestbps := GetMaxBPs(ball);
 		pstring:="";
 		GFTextMid(10, 425, 400, 53, "Highest battlepoints: " + highestbps);
@@ -1023,16 +1023,16 @@ function WarSummary(who, ball)
 		endforeach
 		GFTextMid(10, 450, 400, 53, "Obtained by: " + pstring);
 	endif
-	
+
 	if (! IsWar(ball) && GetObjProperty(ball, "startedOnce"))
 		GFTextMid(10, 480, 400, 53, WinnerString(ball));
 	endif
-	
+
 	GFTextLine(90, 570, 5, "Exit");
 	var exitButton := GFButtonID( 60, 575, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
-	
+
 	var choice := GFSendGump(who);
-	
+
 	if(choice[exitButton.keyid])
 		return;
 	endif
@@ -1064,7 +1064,7 @@ function DeleteWarGuilds(ball)
   	endfor
 
 	RemoveAllPlayersFromWar(ball);
-	
+
 	DestroyGuild(guild1);
 	DestroyGuild(guild2);
 endfunction

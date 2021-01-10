@@ -4,11 +4,11 @@ include "include/attributes";
 include "include/cmdlevel_check";
 
 
-program textcmd_showstats( who, action )
+program textcmd_showstats( who, unused action )
 	if (!checkStaff(who, "showstats", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
-	
+
     SendSysMessage( who, "Select a mobile" );
 
     var mobile := Target( who );

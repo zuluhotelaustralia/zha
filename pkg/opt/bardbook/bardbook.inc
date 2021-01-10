@@ -290,7 +290,7 @@ function IsProtectedBard( caster, cast_on, circle )
 endfunction
 
 
-function CheckForAnotherProtItemBard( who, item, prot )
+function CheckForAnotherProtItemBard( who, unused item, prot )
 
 	var prots := { "PoisonImmunity",
 			 "MagicImmunity",

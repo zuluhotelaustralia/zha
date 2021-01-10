@@ -5,7 +5,7 @@ include "include/attributes";
 include "include/spelldata";
 include "include/npcbackpacks";
 
-program use_sunderingsword(who, sword)
+program use_sunderingsword(who, unused sword)
 
 	SendSysMessage(who, "Select Target.");
 	var casttarg := Target(who);

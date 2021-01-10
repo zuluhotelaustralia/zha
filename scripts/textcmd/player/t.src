@@ -1,6 +1,6 @@
 use uo;
 
-program textcmd_bcast( who, text)
+program textcmd_bcast( who, unused text)
 
 SendSysMessage( who, " .t <msg> is NO longer being used. To fix your text, you should" );
 SendSysMessage( who, "DELETE the file speech.mul in your UO3D directory." );
@@ -10,7 +10,7 @@ SendSysMessage( who, "DELETE the file speech.mul in your UO3D directory." );
 	elseif (!who.dead)
 		var color := who.backpack.color;
 		if (!color || color==0) color:=0x3B2; endif
-		PrintTextAbove( who, text, 0x3, color ); 
+		PrintTextAbove( who, text, 0x3, color );
 	endif
 */
 endprogram

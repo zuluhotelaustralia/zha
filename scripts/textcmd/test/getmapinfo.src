@@ -1,6 +1,6 @@
 use uo;
 
-program textcmd_mapinfo( who, text )
+program textcmd_mapinfo( who, unused text )
 	var where := TargetCoordinates( who );
 	if (where)
 	    var mi := GetMapInfo( where.x, where.y );

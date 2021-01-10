@@ -4,7 +4,7 @@ use cfgfile;
 
 include "include/client";
 
-program processcharm( npc, mult )
+program processcharm( npc, unused mult )
 
 var duration := GetObjProperty( npc, "duration" );
 

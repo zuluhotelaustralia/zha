@@ -76,7 +76,7 @@ endfunction
 
 function GetSpellBookTypes()
 	return{
-		SPELLBOOK_TYPE_DRUID, 
+		SPELLBOOK_TYPE_DRUID,
 		SPELLBOOK_TYPE_BARD,
 		SPELLBOOK_TYPE_HOLY,
 		SPELLBOOK_TYPE_UNHOLY,
@@ -92,38 +92,38 @@ function GetClassSpellDiffBonus(booktype, who)
 		return SEMI_SPELLCASTER_BONUS;
 	endif
 	case (booktype)
-		SPELLBOOK_TYPE_DRUID:	
+		SPELLBOOK_TYPE_DRUID:
 			if (GetObjProperty(who, CLASSEID_DRUID))
-				return PURE_SPELLCASTER_BONUS ;		
+				return PURE_SPELLCASTER_BONUS ;
 			endif
 			if (GetObjProperty(who, CLASSEID_RANGER))
-				return SEMI_SPELLCASTER_BONUS ;		
+				return SEMI_SPELLCASTER_BONUS ;
 			endif
 		break;
 		SPELLBOOK_TYPE_BARD:
 			if (GetObjProperty(who, CLASSEID_BARD))
-				return PURE_SPELLCASTER_BONUS ;		
+				return PURE_SPELLCASTER_BONUS ;
 			endif
 		break;
 		SPELLBOOK_TYPE_HOLY:
 			if (GetObjProperty(who, CLASSEID_PRIEST))
-				return PURE_SPELLCASTER_BONUS ;		
+				return PURE_SPELLCASTER_BONUS ;
 			endif
 			if (GetObjProperty(who, CLASSEID_PALADIN))
-				return SEMI_SPELLCASTER_BONUS ;		
+				return SEMI_SPELLCASTER_BONUS ;
 			endif
 		break;
 		SPELLBOOK_TYPE_UNHOLY:
 			if (GetObjProperty(who, CLASSEID_NECROMANCER))
-				return PURE_SPELLCASTER_BONUS ;		
+				return PURE_SPELLCASTER_BONUS ;
 			endif
 			if (GetObjProperty(who, CLASSEID_DEATHKNIGHT))
-				return SEMI_SPELLCASTER_BONUS ;		
+				return SEMI_SPELLCASTER_BONUS ;
 			endif
 		break;
-		SPELLBOOK_TYPE_PSIONICS: 
+		SPELLBOOK_TYPE_PSIONICS:
 			if (GetObjProperty(who, CLASSEID_MONK))
-				return PURE_SPELLCASTER_BONUS ;		
+				return PURE_SPELLCASTER_BONUS ;
 			endif
 	endcase
 endfunction
@@ -175,7 +175,7 @@ function GetBookTypeScrollFeatures(booktype)
 			SPELLBOOK_TYPE_HOLY:	return { SPELLBOOK_HOLY_SPELLSCROLLNAME, SPELLBOOK_HOLY_GRAPHIC, SPELLBOOK_HOLY_COLOUR};
 			SPELLBOOK_TYPE_UNHOLY:	return { SPELLBOOK_UNHOLY_SPELLSCROLLNAME, SPELLBOOK_UNHOLY_GRAPHIC, SPELLBOOK_UNHOLY_COLOUR};
 			SPELLBOOK_TYPE_PSIONICS:	return { SPELLBOOK_PSIONICS_SPELLSCROLLNAME, SPELLBOOK_PSIONICS_GRAPHIC, SPELLBOOK_PSIONICS_COLOUR};
-	
+
 
 		endcase
 endfunction
@@ -212,7 +212,7 @@ function AssignThisSpellID(spellid, spellscroll)
 	spellscroll.color := features[3];
 	spellscroll.script := ":newclassspells:newbookspellscroll_use";
 	return 1;
-endfunction	
+endfunction
 
 function GetBookTypeForSpellID(spellid)
 	foreach bkt in GetSpellBookTypes()
@@ -247,8 +247,8 @@ function IsPlayersClassInClassList(classe_id, classarray)
 	//classarray is a list of classes, who is the person to check whether their class is in that classarray
 	if (len(classarray)==0)
 		return 1;
-	endif 
-	
+	endif
+
 	if (! classe_id)
 		return 0;
 	endif
@@ -272,10 +272,10 @@ function MakeBookContentsArray(contentsString)
 	var wordsArray:= SplitWords(contentsString);//now broken into an array of words
 	//Broadcast("wordsArray: ", wordsArray);
 	var tempContentArray:=array;
-	
+
 	//var i:=1;
 	var tempString:="";
-	
+
 	foreach word in wordsArray
 		//Broadcast("word: " + word + "   size: " + len(word));
 		if (len(tempString)+len(word)<21)
@@ -286,29 +286,29 @@ function MakeBookContentsArray(contentsString)
 			//Broadcast("tempString: " + tempString);
 			tempString:=word;
 			//i:=i+1; //next line of content
-		endif		
+		endif
 	endforeach
-	
+
 	//last word
 	tempContentArray.append(tempString);
-		
+
 	return tempContentArray;
 endfunction
 
-function BookIsEquipped(me, book) 
+function BookIsEquipped(unused me, book)
 
 	if (GetObjProperty(book, "EquippedAlready"))
 		return 1;
 	endif
 	return 0;
 /*
-   var weaponone := GetEquipmentByLayer( me,  LAYER_HAND1 ); 
-   var weapontwo := GetEquipmentByLayer( me,  LAYER_HAND2 ); 
+   var weaponone := GetEquipmentByLayer( me,  LAYER_HAND1 );
+   var weapontwo := GetEquipmentByLayer( me,  LAYER_HAND2 );
 
-   if ( ( weaponone == book ) or (weapontwo == book ) ) 
-      return 1; 
-   else 
-      return 0; 
-   endif 
+   if ( ( weaponone == book ) or (weapontwo == book ) )
+      return 1;
+   else
+      return 0;
+   endif
 */
-endfunction 
+endfunction

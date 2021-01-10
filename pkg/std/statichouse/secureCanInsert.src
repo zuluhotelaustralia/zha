@@ -4,8 +4,8 @@ use os;
 //include "include/objtype";
 include "securechests";
 
-program can_Insert( who, chest , movetype, INSERT_ADD_ITEM, item )
-	
+program can_Insert( unused who, unused chest , unused movetype, unused INSERT_ADD_ITEM, unused item )
+
 	return 1;
 endprogram
 

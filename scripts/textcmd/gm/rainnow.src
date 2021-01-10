@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-program rainnow (character, dur)
+program rainnow (unused character, dur)
 
 var duration := CInt(dur);
 

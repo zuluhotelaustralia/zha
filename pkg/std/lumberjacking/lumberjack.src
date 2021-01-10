@@ -65,7 +65,7 @@ program use_axe( character, axe )
 			result := ChopTree( character, use_on, info, axe );
 
 			if (!axe) //Tool broken
-				SendSysMessage( character, "You stop lumberjacking." );		
+				SendSysMessage( character, "You stop lumberjacking." );
 			        Autoloop_finish();
 				return;
 			endif
@@ -80,12 +80,12 @@ program use_axe( character, axe )
 		if( result > 0)
 			DoSomething( character, axe );
 			if (!axe) //Tool broken
-				SendSysMessage( character, "You stop lumberjacking." );		
+				SendSysMessage( character, "You stop lumberjacking." );
 			        Autoloop_finish();
 				return;
 			endif
 		elseif (result < 0)
-			SendSysMessage( character, "You stop lumberjacking." );		
+			SendSysMessage( character, "You stop lumberjacking." );
 			Autoloop_finish();
 			return;
 		endif
@@ -98,7 +98,7 @@ program use_axe( character, axe )
 endprogram
 
 
-function ChopTree( character, use_on, info, tool )
+function ChopTree( character, use_on, unused info, tool )
 
 	var initial_x	:= character.x;
 	var initial_y	:= character.y;
@@ -159,11 +159,11 @@ function GetStuff( character, logamount, tool )
 		if( crafter )
 			logamount := CInt( logamount * ClasseBonus( character, CLASSEID_CRAFTER ) );
 		endif
-	
+
 		CreateItemInBackpack( character, UOBJ_LOGS, CInt(logamount) );
 		SendSysMessage( character, "You put " + logamount + " logs in your backpack." );
 	endif
-  
+
 endfunction
 
 
@@ -171,7 +171,7 @@ function MakeColoredLog( character, logamount, tool )
 
 	var skill	:= GetEffectiveSkill( character, SKILLID_LUMBERJACKING );
 	var maxamount := CInt( skill / 30 );
-	
+
 	var tool_bon	:= GetObjProperty( tool, "LumberjackingBonus" );
 	if( tool_bon )
 		maxamount	:= maxamount * tool_bon;
@@ -229,7 +229,7 @@ function MakeColoredLog( character, logamount, tool )
 				min_chance := hchance;
 			endif
 		endforeach
-	
+
 		var logs := CreateItemInBackpack( character, CInt(the_log), CInt(logamount) );
 		SendSysMessage( character, "You put " + CInt(logamount) + " " + GetRessourceName( logs ) + " in your backpack." );
 	else
@@ -257,9 +257,9 @@ function DoSomething( character, tool )
 	case( tnum )
 
 		1:
-		2:  
+		2:
 		3:
-		4:	if (!tool_bon)	
+		4:	if (!tool_bon)
 				SendSysMessage( character, "Oh no your tool breaks!" );
 				DestroyTheItem( character, tool );
 				break;
@@ -271,26 +271,26 @@ function DoSomething( character, tool )
 		100:	CreateItemInBackpack( character, 0x0f90, 1 );
 				SendSysMessage( character, "You find some dead wood!" );
 				break;
-		
+
 		101:
 		102:
 		103:
 		104:/*	CreateItemInBackpack( character , 0xBA2A , 1 );
 				Sendsysmessage( character , "You find some young oak wood!" );
 				break;*/
-	
+
 		105:
 		106:
 		107:
 		108:	CreateItemInBackpack( character, 0x0f90, 2 );
 				SendSysMessage( character, "You find some dead wood!" );
 				break;
-	
+
 		109:
 		110:/*	CreateItemInBackpack( character , 0xBA2A , 2 );
 				Sendsysmessage( character , "You find some young oak wood!" );
 				break;*/
-		
+
 		111:
 		112:	CreateItemInBackpack( character, 0x0f90, 3 );
 				SendSysMessage( character, "You find some dead wood!" );
@@ -304,7 +304,7 @@ function DoSomething( character, tool )
 		115:/*	CreateItemInBackpack( character , 0xBA2A , 4 );
 				Sendsysmessage( character , "You find some young oak wood!" );
 				break;*/
-		
+
 		default:
 
 	endcase
@@ -324,7 +324,7 @@ function GetRessourceName( ressource )
 			count := count + 1;
 			amt := CInt( amt / 10 );
 		endwhile
-	
+
 		t_name := t_name[count+1, i - count];
 	endif
 

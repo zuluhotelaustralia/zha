@@ -1,6 +1,6 @@
 /*
 	19/3/01
-	
+
 	Untile.src - ingame command by Jaleem[rMn] ZHI
 
 	This is the "inverse" command of the well known command '.tile'. You can now destroy an area filled with a specific
@@ -9,7 +9,7 @@
 
 	Jaleem
 
-	IMPORTANT NOTE: The code is based on tile.src, ens's product.  
+	IMPORTANT NOTE: The code is based on tile.src, ens's product.
 */
 
 
@@ -19,14 +19,14 @@ include "include/cmdlevel_check";
 
 
 
-program textcmd_untile( who, input )
+program textcmd_untile( who, unused input )
 	if (!checkStaff(who, "untile", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif
-	
 
 
-    /****** Tiles selection & error cheching *************************/   
+
+    /****** Tiles selection & error cheching *************************/
     SendSysMessage( who, "Select tile #1" );
     var item1 := Target( who, TGTOPT_NOCHECK_LOS  );
 
@@ -49,18 +49,18 @@ program textcmd_untile( who, input )
     else
        if (item1 < 0 || item2 < 0)
           SendSysMessage(who, "Invalid selection.");
-          return;       
+          return;
        endif
     endif
 
     if (item1.graphic != item2.graphic)
           SendSysMessage(who, "You must select the same type of tile.");
-          return;       
+          return;
     endif
 
     if (item1.z != item2.z)
           SendSysMessage(who, "You must select tile that lie at the same z.");
-          return;       
+          return;
     endif
 
     /*** Sorting coordinates *******************************************/
@@ -95,7 +95,7 @@ program textcmd_untile( who, input )
     while ( startx <= endx )
         while ( starty <= endy )
            var items := ListItemsAtLocation(startx, starty, startz);
- 
+
              foreach thing in items
                  if (thing.graphic == startg)	//ok
                       DestroyItem(thing);
@@ -110,7 +110,7 @@ program textcmd_untile( who, input )
         startx := startx + 1;
     endwhile
 
-    
+
     SendSysMessage( who, "Command completed. Untiled " + counter + " tiles.");
 
 endprogram

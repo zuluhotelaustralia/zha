@@ -3,7 +3,7 @@ use util;
 
 include "include/cmdlevel_check";
 
-program textcmd_test( who, zdiff )
+program textcmd_test( who, unused zdiff )
 	if (!checkStaff(who, "test", CMDLEVEL_DEVELOPER))
 		return 0;
 	endif
@@ -25,7 +25,7 @@ endprogram
 
 function GetAreaLocation(who)
   var tOne, tTwo;
-  SendSysMessage(who, "Select one corner of the boxed area of Hell.");  
+  SendSysMessage(who, "Select one corner of the boxed area of Hell.");
   tOne := TargetCoordinates(who);
   SendSysMessage(who, "Select the oposite corner of the boxed area of Hell.");
   tTwo := TargetCoordinates(who);
@@ -148,10 +148,10 @@ function sendGump(who)
                   "GumpPic 265 260 2443",
                   "TextEntry 270 260 50 20 39 11 25",
 
-                  
+
                   "checkbox 130 290 210 211 "+destroykeys+" 12", // Destroy keys
                   "text 150 288 0 26",
-                  
+
                   "text 130 310 0 27", // Events
                   "GumpPic 180 320 96", // Divider Lines
 
@@ -173,7 +173,7 @@ function sendGump(who)
                   "TextEntry 258 370 50 20 39 18 37",
                   "GumpPic 315 370 2443",
                   "TextEntry 320 370 50 20 39 19 38",
-                  
+
                   "text 130 390 43 39", // Spawn
                   "text 180 390 5 40", // template
                   "GumpPic 230 390 2443",
@@ -188,7 +188,7 @@ function sendGump(who)
                   "TextEntry 258 410 50 20 39 22 46",
                   "GumpPic 315 410 2443",
                   "TextEntry 320 410 50 20 39 23 47",
-                  
+
                   "text 130 430 43 48", // Script
                   "GumpPic 205 430 2445",
                   "TextEntry 210 430 95 20 39 24 49",

@@ -9,7 +9,7 @@ const NUM_SKILLS_PER_PAGE := 12;
 var skillscfg := ReadConfigFile(":*:skillsdef");
 var maxSkill := CInt( GetGlobalProperty("skilldropmax") );
 
-program skillDropStone(who, item)
+program skillDropStone(who, unused item)
 	print("working");
 	var skillNum := chooseSkill(who);
 	if (skillNum == -1)

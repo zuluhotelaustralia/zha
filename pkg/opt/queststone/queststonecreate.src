@@ -3,14 +3,14 @@ use os;
 
 include "queststone";
 
-program queststonecontrol(queststone, who)
+program queststonecontrol(queststone, unused who)
 	GetStoneStorageArea(queststone);
-	
+
 	//set default values
 	SetObjProperty(queststone, "RegistrationOpen", 0); //registration is closed
 	SetObjProperty(queststone, "QuestDeployed", 0); //not deployed
 	SetObjProperty(queststone, "RewardQuestItems", 0); //no quest items can be 'bought'
-	SetObjProperty(queststone, "RegistrationCondition", 0); //default everyone can register for quest 
+	SetObjProperty(queststone, "RegistrationCondition", 0); //default everyone can register for quest
 	setObjProperty(queststone, "KillerQuestPointPenalty", 100); //default penalty for people killing people on same quest is 100 quest points :)
 endprogram
 

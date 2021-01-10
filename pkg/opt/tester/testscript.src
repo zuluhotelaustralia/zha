@@ -1,8 +1,8 @@
 use uo;
 use os;
 
-program duelstone_deathprocess(parms)
+program duelstone_deathprocess(unused parms)
 	broadcast("Test script running");
 
-  
+
 endprogram

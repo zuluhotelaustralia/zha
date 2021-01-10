@@ -353,7 +353,7 @@ endif
 endfunction
 
 
-function updatebid(item, playername)
+function updatebid(item, unused playername)
 // sendmsg("new bid from : "+playername,300,0x4B);
 sendmsg("bid on : "+item.desc+" "+GetObjProperty(item,"bid"),300,0);
 //sendmsg("time left: "+(getobjproperty(item, "time")-ReadGameClock()),300,0);
@@ -447,7 +447,7 @@ return;
 endfunction
 
 
-function sendmsg(msg,msgcolor,msgsound)
+function sendmsg(msg,msgcolor,unused msgsound)
 
 foreach character in EnumerateOnlineCharacters()
 	if( GetObjProperty( character, "auction" ) == 1 )
@@ -560,7 +560,7 @@ function FillInArrays()
 			if( GetObjProperty( player, "auction" ) )
 			online := online + 1;
       playercount:=playercount +1;
-       
+
       if (playercount>13)
       playercount :=1;
       rowcount :=80;
@@ -596,7 +596,7 @@ function FillInArrays()
       rowcount := rowcount +20;
 endif
 endif
-     
+
     endforeach
 
 data2[1] := online + " Auction Members";

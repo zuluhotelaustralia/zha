@@ -127,7 +127,7 @@ program messageboard( user, board )
 	if (!checkStaff(user, "staffnews", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
-	
+
   var curday := ReadGameClock()/(GetDayLength()*60);
   var message:={};
 
@@ -205,7 +205,7 @@ endprogram
 
 // fill in arrays, this is called when player dclick on the message board
 // it just gets all the topics for each message and displays them.
-function fillinarrays(board,curday)
+function fillinarrays(unused board,curday)
 
   var message:={}, space, i, location:=3, age, oldday,username,temp;
 
@@ -285,7 +285,7 @@ SetGlobalProperty("message"+selected, message );
 endfunction
 
 
-function SetNotes(board,selected)
+function SetNotes(unused board,selected)
 
 var i,message:={},topic;
 

@@ -1,7 +1,7 @@
 
 use uo;
 
-program textcmd_action( who, action )
+program textcmd_action( who, unused action )
     SendSysMessage( who, "Select an NPC" );
 
     var npc := Target( who );

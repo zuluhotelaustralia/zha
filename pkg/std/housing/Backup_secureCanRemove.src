@@ -2,6 +2,6 @@ use uo;
 
 include "utility";
 
-program CanRemoveScript(who, container, item, movetype)
+program CanRemoveScript(unused who, unused container, unused item, unused movetype)
 	return 1;
 endprogram

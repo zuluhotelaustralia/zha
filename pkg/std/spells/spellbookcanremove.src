@@ -1,5 +1,5 @@
 
-program canremovescript(character, container, item, movetype)
+program canremovescript(unused character, unused container, unused item, unused movetype)
 	//cant remove anything from a spellbook
 	return 0;
 endprogram

@@ -74,7 +74,7 @@ var layout := {
 };
 
 
-program code_equal_to_number( who, client )
+program code_equal_to_number( who, unused client )
 	if (!checkStaff(who, "macrokill", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
@@ -139,7 +139,7 @@ endprogram
 function JailPlayer( player )
 
 	var tick_per_day := 86400;
-	var jail_days := 1;   
+	var jail_days := 1;
 	var jailtime := 30 * jail_days;
 	var acc := player.acct;
 	var playername := CStr( player.name );
@@ -158,7 +158,7 @@ function JailPlayer( player )
 		DisconnectClient( player );
 	endif
 endfunction
-		
+
 function numpos(number,player)
 	correctchoicenum := RandomInt(10)+1;
 	for( i := 1; i <= 10; i := i + 1 )
@@ -176,7 +176,7 @@ function numpos(number,player)
 		"You have 5 minutes to press the "+number+" button",  //0
 		"to pass the macrotest.", //1
 		slot[1],  //2
-		"",      
+		"",
 		slot[2],  //4
 		"",
 		slot[3],  //6
@@ -202,7 +202,7 @@ function numpos(number,player)
 		"You have 5 minutes to press the "+number+" button",  //0
 		"to pass the macrotest.", //1
 		slot[1],  //2
-		"",      
+		"",
 		slot[2],  //4
 		"",
 		slot[3],  //6

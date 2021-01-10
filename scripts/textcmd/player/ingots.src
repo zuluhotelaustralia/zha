@@ -128,7 +128,7 @@ function is_a_backpack(what)
 	endif
 endfunction
 //----------------------------------------------------------------------------
-function store_reags(who, reag)
+function store_reags(unused who, reag)
 
 	case (reag.objtype)
 		REAG_BP: gid_reags[1] := gid_reags[1] + reag.amount; break;
@@ -155,7 +155,7 @@ function count_reags(who, container, byref reags_counted)
 endfunction
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-program HowManyReags (who, text)
+program HowManyReags (who, unused text)
 
 	var item, reags_count;
 

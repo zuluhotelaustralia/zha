@@ -15,12 +15,12 @@ program shilcombat()
 endprogram
 
 
-exported function ShilCombatAdvancement( attacker, weapon, defender )
+exported function ShilCombatAdvancement( attacker, weapon, unused defender )
 	var skillid := FindSkillidByIdentifier(weapon.attribute);
 	var points := 20;
 	points:=FameExperiencePointModifier(attacker, skillid, points);
 	points:=DKSMod(attacker, skillid, points);
-	
+
 	if( weapon )
 		AwardSkillPoints( attacker,skillid, points*3);
 	else
@@ -41,6 +41,6 @@ function FindSkillidByIdentifier(skid)
     "Mace":		retval := SKILLID_MACEFIGHTING;
     "Macefighting":	retval := SKILLID_MACEFIGHTING;
     "Archery":		retval := SKILLID_ARCHERY;
-  endcase 
+  endcase
   return retval;
 endfunction

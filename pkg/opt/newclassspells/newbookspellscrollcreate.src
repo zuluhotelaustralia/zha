@@ -3,7 +3,7 @@ use os;
 
 include "newclassbook";
 
-program newclassbookscroll(newclassbookscroll, who)
+program newclassbookscroll(newclassbookscroll, unused who)
 	AssignNewSpellID(newclassbookscroll);
 endprogram
 

@@ -2,13 +2,13 @@ use uo;
 
 include "utility";
 
-program CanRemoveScript(who, container, item, movetype)
+program CanRemoveScript(who, container, unused item, movetype)
 	if ( movetype != MOVETYPE_PLAYER )
 		return 1;
 	endif
 
 	// Treasure chest. ----------------------------------------------------------------------
-		
+
 	if ( GetObjProperty(container, "treasurechest") )
 		if (who.cmdlevel)
 			return 1;
@@ -23,7 +23,7 @@ program CanRemoveScript(who, container, item, movetype)
 	endif
 
 	// House secure. ------------------------------------------------------------------------
-	
+
 	var top := getTopContainer(container);
 	var houseSerial := GetObjProperty(top, "houseserial");
 	if ( houseSerial )
@@ -33,10 +33,10 @@ program CanRemoveScript(who, container, item, movetype)
 				return 1;
 			else
 				return 0;
-			endif	
+			endif
 		endif
 	endif
-	
+
 	return 1;
 endprogram
 
@@ -44,6 +44,6 @@ function getTopContainer(container)
 	while (container.container)
 		container := container.container;
 	endwhile
-	
+
 	return container;
 endfunction

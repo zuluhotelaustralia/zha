@@ -253,7 +253,7 @@ function CreatePickaxe(user)
 
 endfunction
 
-function CreateAnvil(user, lexicon)
+function CreateAnvil(user, unused lexicon)
 
 	var weaps := array;
 	var numitems := 0;
@@ -326,7 +326,7 @@ function CreateAnvil(user, lexicon)
 
 endfunction
 
-function CreateMysticHammer(user, lexicon)
+function CreateMysticHammer(user, unused lexicon)
 
 	var shards:=0;
 	var amt:=150;

@@ -101,7 +101,7 @@ const ERROR_MSG_WRONG_EQUIPMENT		:= "Your hands must be free to cast spells.";
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function ApplyElementalDamage( caster, cast_on, circle, dmg, element, affectsHidden := 0 )
+function ApplyElementalDamage( caster, cast_on, circle, dmg, element, unused affectsHidden := 0 )
 
 	if(caster.dead) return; endif
 	if(cast_on.dead) return; endif
@@ -166,7 +166,7 @@ function ApplyElementalDamageNoResist( on_who, by_who, dmg, element, unused affe
 endfunction
 
 
-function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, affectsHidden := 0 )
+function ApplyPlanarDamage( caster, cast_on, circle, dmg, plane, unused affectsHidden := 0 )
 
 	if(caster.dead) return; endif
 	if(cast_on.dead) return; endif
@@ -484,7 +484,7 @@ function CanTargetThing( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
 endfunction
 
 
-function CheckForAnotherProtItem( who, item, prot )
+function CheckForAnotherProtItem( who, unused item, prot )
 
 	var prots := { "PoisonImmunity",
 			 "MagicImmunity",
@@ -1355,7 +1355,7 @@ function ModifyWithNewClassMagicEfficiency( who, val, casting_skill)
 
 endfunction
 
-function NewClassCanCast( me, circle, returnBool := 1 )
+function NewClassCanCast( me, unused circle, returnBool := 1 )
 	if(returnBool && me.dead)
 		return 0;
 	endif

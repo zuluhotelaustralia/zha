@@ -10,7 +10,7 @@ function GetBookElem( book )
     return df.FindElement( bookid );
 endfunction
 
-exported function IsWritable( book )
+exported function IsWritable( unused book )
     return 0;
 endfunction
 

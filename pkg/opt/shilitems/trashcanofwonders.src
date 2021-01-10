@@ -8,7 +8,7 @@ include "include/random";
 include "include/itemutil";
 include ":karmafame:karmafame";
 
-program trashcanofwonders( who, can, movetype, INSERT_ADD_ITEM, item)
+program trashcanofwonders( who, unused can, unused movetype, unused INSERT_ADD_ITEM, item)
 
 	set_critical(1);
 

@@ -14,7 +14,7 @@ const numWeapons := 3;
 program playerSetup(parms)
 	var who := parms[1];
 	var stone := parms[2];
-	
+
 	EraseObjProperty(who, PVPARENA_CANCELSETUP);
 	if (!who.criminal)
 		SetObjProperty(who, PVPARENA_WASNTCRIMINAL, 1);
@@ -23,20 +23,20 @@ program playerSetup(parms)
 	SetObjProperty(who, PVPARENA_PLAYERBUSY, 1);
 	SetObjProperty(who, PVPARENA_PLAYERNOTSETUP, 1);
 	SetObjProperty(who, "dontAffectKarmaFame", 1);
-	
-	killPlayer(who); 
+
+	killPlayer(who);
 	var teamnum := GetObjProperty(who, PVPARENA_TEAM);
 	var baselocation := Unpack(GetObjProperty(stone, "Base" + CStr(teamnum) + "Start"));
 	MoveObjectToLocation( who, baselocation[1], baselocation[2], baselocation[3], _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION ); //AutoConversion
 	resPlayer(who); // Res them and destroy their items.
 	fixStats(who);
-	
+
 	var steed := CreateNPCFromTemplate("horse", who.x, who.y, who.z);
 	steed.name := who.name + "'s horse";
 	steed.script := "tamed";
 	SetObjProperty(steed, "master", who.serial);
 	RestartScript(steed);
-	
+
 	// Choose the armour.
 	if (!chooseArmour(who, stone))
 		EraseObjProperty(who, PVPARENA_PLAYERBUSY);
@@ -50,9 +50,9 @@ program playerSetup(parms)
 			return;
 		endif
 	endfor
-	
+
 	giveGeneralEquipment(who);
-	
+
 	EraseObjProperty(who, PVPARENA_PLAYERNOTSETUP);
 	EraseObjProperty(who, PVPARENA_PLAYERBUSY);
 endprogram
@@ -64,7 +64,7 @@ function colourItems(who, equipment)
 		2:		colour := 1172; // dark sable colour
 		default:	return;
 	endcase
-	
+
 	foreach item in equipment
 		if (item.hitscript == ":combat:poisonhit")
 			item.color := 1169;
@@ -76,7 +76,7 @@ endfunction
 
 // ARMOUR
 
-function chooseArmour(who, stone)
+function chooseArmour(who, unused stone)
 	var menu;
 
 	menu := CreateMenu( "What armour would you like?" );
@@ -107,7 +107,7 @@ function chooseArmour(who, stone)
 		default:
 		5:	makeClothes(who);
 	endcase
-	
+
 	return 1;
 endfunction
 
@@ -119,7 +119,7 @@ function makePlate(who)
 	equipment.append(ArenaCreateItemInBackpack(who, 0x1414)); //Gloves
 	equipment.append(ArenaCreateItemInBackpack(who, 0x1413)); //Gorget
 	equipment.append(ArenaCreateItemInBackpack(who, 0x1412)); //Helmet
-	
+
 	colourItems(who, equipment);
 	chooseArmourMod(who, equipment);
 endfunction
@@ -129,7 +129,7 @@ function makeChain(who)
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13BF)); //Tunic
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13BE)); //Legs
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13BB)); //Coif
-	
+
 	colourItems(who, equipment);
 	chooseArmourMod(who, equipment);
 endfunction
@@ -140,7 +140,7 @@ function makeRingmail(who)
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13EE)); //Sleeves
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13F0)); //Legs
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13F2)); //Gloves
-	
+
 	colourItems(who, equipment);
 	chooseArmourMod(who, equipment);
 endfunction
@@ -152,7 +152,7 @@ function makeStudded(who)
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13DA)); //Legs
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13D6)); //Gorget
 	equipment.append(ArenaCreateItemInBackpack(who, 0x13D5)); //Gloves
-	
+
 	colourItems(who, equipment);
 	chooseArmourMod(who, equipment);
 endfunction
@@ -162,7 +162,7 @@ function makeClothes(who)
 	equipment.append(ArenaCreateItemInBackpack(who, 0x1F03)); //Robe
 	equipment.append(ArenaCreateItemInBackpack(who, 0x1718)); //Wizard's Hat
 	equipment.append(ArenaCreateItemInBackpack(who, 0x170D)); //Sandals
-	
+
 	colourItems(who, equipment);
 endfunction
 
@@ -171,7 +171,7 @@ function chooseArmourMod(who, equipment)
 	GFInitGump();
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_SILVERTRIM, 450, 300);
-		
+
 	GFTextMid(10, 20, 480, 10, "Armour Modification");
 
 	GFTextLine(90, 50, 5,  "Quality x 1.5");
@@ -181,7 +181,7 @@ function chooseArmourMod(who, equipment)
 	GFTextLine(90, 170, 5, "+3 Water Protection");
 	GFTextLine(90, 200, 5, "+3 Air Protection");
 	GFTextLine(90, 230, 5, "No Magic Penalty");
-	
+
 	// look to text lines above for what they refer to
 	var button1 := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var button2  := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
@@ -215,7 +215,7 @@ endfunction
 
 // WEAPONS
 
-function chooseWeapon(who, stone)
+function chooseWeapon(who, unused stone)
 	var menu, choice;
 
 	var categories := {"Swordsmanship", "Macefighting", "Fencing", "Archery", "Shields", "Spellbooks"};
@@ -228,7 +228,7 @@ function chooseWeapon(who, stone)
 	AddMenuItem( menu, objtypes[4], categories[4] );
 	AddMenuItem( menu, objtypes[5], categories[5] );
 	AddMenuItem( menu, objtypes[6], categories[6] );
-	
+
 	choice := SelectMenuItem2( who, menu ).index;
 	if( !choice )
 		SendSysMessage(who, "Canceled.");
@@ -238,7 +238,7 @@ function chooseWeapon(who, stone)
 	if (setupCanceled(who))
 		return 0;
 	endif
-	
+
 	menu := CreateMenu( "Choose an item." );
 	if (categories[choice] == "Shields")
 		foreach key in GetConfigStringKeys( smith_cfg );
@@ -257,17 +257,17 @@ function chooseWeapon(who, stone)
 			endif
 		endforeach
 	endif
-	
+
 	var theItem := SelectMenuItem2( who, menu );
 	if (!theItem)
 		SendSysMessage(who, "Canceled.");
 		return 1;
 	endif
-	
+
 	if (setupCanceled(who))
 		return 0;
 	endif
-	
+
 	case (theItem.objtype)
 		0xEFA:		CreateSpellbook(who, 1); // Normal spellbook
 				return 1;
@@ -276,14 +276,14 @@ function chooseWeapon(who, stone)
 		0xA100:		CreateSpellbook(who, 3); // Necro spellbook
 				return 1;
 	endcase;
-	
+
 	if (categories[choice] != "Shields") // Don't give shields a weapon mod!
 		theItem := chooseWeaponMod(who, theItem.objtype);
 	else
 		theItem := ArenaCreateItemInBackpack(who, theItem.objtype);
 	endif
 	colourItems(who, {theItem});
-	
+
 	return (!setupCanceled(who));
 endfunction
 
@@ -293,7 +293,7 @@ function chooseWeaponMod(who, obj_type)
 	GFInitGump();
 	GFPage(0);
 	GFResizePic(0, 0, BKGND_SILVERTRIM, 500, 250);
-		
+
 	GFTextMid(10, 20, 480, 10, "Weapon Modification");
 
 	var dmgmod_mod := 0;
@@ -305,7 +305,7 @@ function chooseWeaponMod(who, obj_type)
 	GFTextLine(90, 110, 5, dmgmodName(6+dmgmod_mod)); // Devastation/vanq
 	GFTextLine(90, 140, 5, "Stygian " + dmgmodName(4+dmgmod_mod)); // Stygian Power/Force
 	GFTextLine(90, 170, 5, "Mystical " + dmgmodName(5+dmgmod_mod)); // Mystical Vanquishing/Power
-	
+
 	// look to text lines above for what they refer to
 	var button1 := GFButtonID( 60, 55, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 	var button2  := GFButtonID( 60, 85, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
@@ -320,24 +320,24 @@ function chooseWeaponMod(who, obj_type)
 		theWeapon := ArenaCreateItemInBackpack(who, obj_type);
 		theWeapon.hitscript := ":combat:poisonhit";
 		SetObjProperty(theWeapon, "Poisonlvl", 5);
-		
+
 	elseif (result[button2.keyid])
 		theWeapon := ArenaCreateItemInBackpack(who, elem.Swift);
 		theWeapon.dmg_mod := CInt((5 + dmgmod_mod) * 5);
-		
+
 	elseif (result[button3.keyid])
 		theWeapon := ArenaCreateItemInBackpack(who, obj_type);
 		theWeapon.dmg_mod := CInt((6 + dmgmod_mod) * 5);
-		
+
 	elseif (result[button4.keyid])
 		theWeapon := ArenaCreateItemInBackpack(who, elem.Stygian);
 		theWeapon.dmg_mod := CInt((4 + dmgmod_mod) * 5);
-		
+
 	elseif (result[button5.keyid])
 		theWeapon := ArenaCreateItemInBackpack(who, elem.Mystic);
 		theWeapon.dmg_mod := CInt((5 + dmgmod_mod) * 5);
 	endif
-	
+
 	return theWeapon;
 endfunction
 
@@ -353,7 +353,7 @@ endfunction
 function giveGeneralEquipment(who)
 	var equipment := {};
 	var cloak := ArenaCreateItemInBackpack(who, 0x1515);
-	SetObjProperty(cloak, "Cursed", 1); 
+	SetObjProperty(cloak, "Cursed", 1);
 	EquipItem(who, cloak);
 	equipment.append(cloak);
 
@@ -362,9 +362,9 @@ function giveGeneralEquipment(who)
 	ArenaCreateItemInBackpack(who, 0xDC0F, 1, 0); // Full Refresh
 	ArenaCreateItemInBackpack(who, 0x0F3F, 100, 0); //100 arrows.
 	ArenaCreateItemInBackpack(who, 0x1bfb, 100, 0); //100 bolts.
-			
+
 			var reagsBag := ArenaCreateItemInBackpack(who, 0xe76); //Bag
-			
+
 			// Normal Reagents
 			ArenaCreateItemInContainer(reagsBag, UOBJ_BLACK_PEARL, 50, 0);
 			ArenaCreateItemInContainer(reagsBag, UOBJ_BLOOD_MOSS, 50, 0);
@@ -375,7 +375,7 @@ function giveGeneralEquipment(who)
 			ArenaCreateItemInContainer(reagsBag, UOBJ_SULPHUROUS_ASH, 50, 0);
 			ArenaCreateItemInContainer(reagsBag, UOBJ_SPIDER_SILK, 50, 0);
 			// End of Reagents
-			
+
 			equipment.append(reagsBag);
 
 	ArenaCreateItemInBackpack(who, 0xE21, 100, 0);
@@ -412,7 +412,7 @@ function CreateScrolls(who, type)
 			ArenaCreateItemInContainer(bag, 0xB10C, 10, 0); // Ice Strike
 			ArenaCreateItemInContainer(bag, 0xB10B, 2, 0); // Shapeshift
 			break;
-			
+
 	/*necro*/ 2:	var bag := ArenaCreateItemInBackpack(who, 0xe76);
 			ArenaCreateItemInContainer(bag, 0xA103, 10, 0); // Decaying Ray
 			ArenaCreateItemInContainer(bag, 0xA105, 10, 0); // Abyssal Flame
@@ -431,6 +431,6 @@ function setupCanceled(who)
 		EraseObjProperty(who, PVPARENA_PLAYERNOTSETUP);
 		return 1;
 	endif
-	
+
 	return 0;
 endfunction

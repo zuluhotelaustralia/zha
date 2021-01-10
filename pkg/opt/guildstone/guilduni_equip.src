@@ -1,6 +1,6 @@
 use uo;
 
-program guilduni_equip(who, guilduni, startup)
+program guilduni_equip(who, guilduni, unused startup)
 	if (who.guildid != GetObjProperty(guilduni, "guild_id"))
  		  SendSysMessage(who, "Only a member of the guild can wear its guild uniform");
 	     return 0;

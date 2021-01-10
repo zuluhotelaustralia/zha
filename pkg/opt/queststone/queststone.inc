@@ -746,7 +746,7 @@ function ChangeObjectiveQuestPoints(item, questpoints)
 endfunction
 
 
-function ReturnQuestMonsterObjective(stone_serial, player_serial, monster_serial, spawn_serial, questpoints, dontComplete:=0)
+function ReturnQuestMonsterObjective(stone_serial, player_serial, monster_serial, unused spawn_serial, questpoints, dontComplete:=0)
 //this is called when a monster is killed (death.src) from global scripts in /include/queststone.inc
 	//Broadcast("stone_serial " + stone_serial + " player_serial " + player_serial + " monster_serial " + monster_serial + " questpoints " + questpoints);
 	var stone := SystemFindObjectBySerial(stone_serial);
@@ -1162,7 +1162,7 @@ function addQuestRewardItem(item,stone,questbuyvalue)
 	item.movable:=0;
 endfunction
 
-function removeQuestRewardItem(item,stone,who)
+function removeQuestRewardItem(item,unused stone,who)
 	EraseObjProperty(item, "QuestBuyValue");
 	EraseObjProperty(item, "QuestStoneSerial");
 	EraseObjProperty(item, "QuestNote");
@@ -1790,13 +1790,13 @@ function SetCurrentUser(stone, who)
 	SetObjProperty(stone, "currentuser", who.serial);
 endfunction
 
-function ClearCurrentUser(stone, who)
+function ClearCurrentUser(stone, unused who)
 	//clears props - used when current user stops using stone
 	EraseObjProperty(stone, "#lastclicked");
 	EraseObjProperty(stone, "currentuser");
 endfunction
 
-function CheckCurrentUserTimeElapsed(stone, who)
+function CheckCurrentUserTimeElapsed(stone, unused who)
 	//returns true if time elapsed
 	var clickMaxTime := CInt(GetObjProperty(stone, "#lastclicked"));
 	if (clickMaxTime<ReadGameClock()) //that is current time is greater than reserved time

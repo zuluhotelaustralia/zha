@@ -135,7 +135,7 @@ function BreedOstards(user)
 	endif
 	var femalerating := GetObjProperty(female, "Rating");
 	SetObjProperty(female, "mating", 1);
-	
+
 	if (GetObjProperty(male, "Mother") == female.serial)
 		SendSysMessage(user, "The male ostard refuses to mate with it's own mother!");
 		EraseObjProperty(female, "mating");
@@ -189,7 +189,7 @@ function BreedOstards(user)
 						eggtemp := eggtemp -1;
 					else
 						eggtemp := eggtemp +1;
-					endif	
+					endif
 				endif
 			elseif (!Random(3))
 				if (eggtemp > 5)
@@ -198,14 +198,14 @@ function BreedOstards(user)
 					eggtemp := eggtemp + 1;
 				endif
 			endif
-								
-		endif				
+
+		endif
 		if (eggtemp > 10)
 			eggtemp := 10;
 		elseif (eggtemp < 0)
 			eggtemp := 0;
 		endif
-		
+
 		SetObjProperty(egg, "Temperament", eggtemp);
 		SetObjProperty(egg, "Mother", female.serial);
 		SetObjProperty(egg, "Father", male.serial);
@@ -232,7 +232,7 @@ function BreedOstards(user)
 endfunction
 
 function CheckOstard(user, osty)
-		
+
 	if (!osty.isA(POLCLASS_MOBILE))
 		SendSysMessage(user, "Cancelled");
 		return 0;
@@ -248,10 +248,10 @@ function CheckOstard(user, osty)
 	endif
 	return 1;
 
-endfunction	
+endfunction
 
 function IsReadyToMate(osty)
-	
+
 	if (GetObjProperty(osty, "NextMate") < ReadGameClock() || !GetObjProperty(osty, "NextMate"))
 		return 1;
 	endif
@@ -278,7 +278,7 @@ function CheckBreed(user, osty)
 
 endfunction
 
-function ReadTreatise(user, scroll)
+function ReadTreatise(user, unused scroll)
 
 	GFInitGump();
 	GFPage(0);
@@ -302,7 +302,7 @@ function ReadTreatise(user, scroll)
 	GFTextLine(20, 370, 0, "but it warns against breeding together the more");
 	GFTextLine(20, 390, 0, "violent ostard types. These ostards would be very");
 	GFTextLine(20, 410, 0, "difficult to breed indeed.");
-	
+
 	GFSendGump(user);
-	
+
 endfunction

@@ -1,6 +1,6 @@
 use uo;
 use os;
 
-program textcmd_rpm( who )
+program textcmd_rpm( unused who )
     // SendSysMessage( who, "RPM: " + system_rpm() );
 endprogram

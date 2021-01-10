@@ -12,7 +12,7 @@ program use_guild_stone(who, stone)
      SendSysMessage(who, "You cannot use the guildstone while participating in a war!");
      return;
   endif
-	
+
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
     if(not Accessible(who,stone))
@@ -29,12 +29,12 @@ program use_guild_stone(who, stone)
     return;
   endif
   var guild:=FindGuild(guild_id);
-  
+
   //check to ensure guildstoneserial prop written on guild entry
   if (guild.getprop("stoneserial")!=stone.serial)
   	guild.setprop("stoneserial", stone.serial);
   endif
- 
+
   var count:=guild.members;
   if(guild.errortext)
     DestroyItem(stone);
@@ -1110,7 +1110,7 @@ function SetNotes(guild)
   endfor
 endfunction
 
-function setstonecolor(guild,who,stone)
+function setstonecolor(unused guild,who,stone)
   var i,textline,maxcolor:=52,firstrow:=20,secondrow:=40,newcolor:=0;
   var res:=SendDialogGump(who,dyelayout,dyedata);
   var basecolor:=res[0];
@@ -1394,7 +1394,7 @@ function breakalliance(guild,who)
   	if (guild.removeallyguild( box ))
   		SendSysMessage(who, "You have broken the alliance with " + box.getprop("guildname"), 3, 70);
 	endif
-	
+
 endfunction
 
 function guilduniformmanagement(guild,who,stone)

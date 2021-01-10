@@ -2,7 +2,7 @@ use uo;
 
 include "include/client";
 
-program use_burin(who, burin)
+program use_burin(who, unused burin)
 
 	SendSysMessage(who, "Select item.");
 	var targetobj := Target(who);
@@ -41,7 +41,7 @@ endprogram
 
 function NameValidation(word)
   var i;
-  
+
   for (i := 1; i <= len(word); i := i + 1)
 	if (CAsc( word[i] ) in {9, 10, 11, 12, 13})
 		foreach player in EnumerateOnlineCharacters()
@@ -53,6 +53,6 @@ function NameValidation(word)
 		return 0;
 	endif
   endfor
-	
-  return 1;	
+
+  return 1;
 endfunction

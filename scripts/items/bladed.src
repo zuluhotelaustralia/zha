@@ -22,7 +22,7 @@ const POINTS_MULTIPLIER	:= 8;
 const FAME_BONUS	:= 200;
 
 
-program use_blade( user, blade )
+program use_blade( user, unused blade )
 
 	SendSysMessage( user, "What would you like to use that on?" );
 	var use_on := TargetCoordinates( user );

@@ -71,7 +71,7 @@ var data := {
 	"",
 	"Vesper"
 };
-program walkon_newbierenouncegate(who, me)
+program walkon_newbierenouncegate(who, unused me)
 
 	if(who.acctname)
 		who.frozen := 1;
@@ -82,7 +82,7 @@ program walkon_newbierenouncegate(who, me)
 			EraseObjProperty( who, "frozen");
 			return;
 		endif
-	
+
 		if (SendGateGump(who))
 			RemoveNewbie(who);
 		endif

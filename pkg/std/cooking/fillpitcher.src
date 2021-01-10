@@ -139,7 +139,7 @@ program fill_glassware (character, used_item)
 			0x1f98:		created_glass_objtype := 0x1f7d;
 			0x1f9e:		created_glass_objtype := 0x1f91;
 			0x09ad:		created_glass_objtype := 0x1f89;
-		endcase;		
+		endcase;
 
 		if (created_glass_objtype)
 			PlaySoundEffect(character, SOUND_EFFECT_POUR);
@@ -200,7 +200,7 @@ endprogram
 //  This function checks to see if the item that was selected is a cow
 ///////////////////
 
-function check_for_cows(character, theobj)
+function check_for_cows(unused character, theobj)
 	if (theobj.mobile.objtype == 0xd8 || theobj.mobile.objtype == 0xe7)
 		return 1;
 	endif
@@ -213,7 +213,7 @@ endfunction
 //  This function checks to see if the item that was select was a valid water source
 ///////////////////
 
-function check_for_water(character, theobj)
+function check_for_water(unused character, theobj)
 	//static water tiles
 	if ((theobj.objtype >= 0x1796) && (theobj.objtype <= 0x17b2) )
 		return 1;
@@ -262,7 +262,7 @@ function is_accessible(character, targetted)
 		else
 			return 0;
 		endif
-	
+
 	//we can't use the Accessible function for mobiles because it only works on items.  We'll just check to see if
 	//what was selected is within 2 squares of the character
 	elseif (targetted.mobile.objtype)

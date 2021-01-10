@@ -74,7 +74,7 @@ function DupeItem( item, newitem )
 
 	newitem.graphic := item.graphic;
 	newitem.movable	:= item.decayAt;
-	
+
 	if( item.name )		newitem.name 		:= item.name; 		endif
 	if( item.maxhp_mod ) 	newitem.maxhp_mod 	:= item.maxhp_mod; 	endif
 	if( item.ar_mod ) 	newitem.ar_mod 		:= item.ar_mod; 	endif
@@ -156,30 +156,30 @@ function FitRequirements( who, item )
 						return 0;
 					endif
 					break;
-				
+
 			"stat":		case( condition[2] )
 						"str":	if( GetStrength(who) < CInt( condition[3] ) )
 								return 0;
 							endif
 							break;
-						
+
 						"dex":	if( GetDexterity(who) < CInt( condition[3] ) )
 								return 0;
 							endif
 							break;
-						
+
 						"int":	if( GetIntelligence(who) < CInt( condition[3] ) )
 								return 0;
 							endif
 							break;
 					endcase
 					break;
-				
+
 			"spec":		if( CInt( GetObjProperty( who, condition[2] ) ) < CInt( condition[3] ) )
 						return 0;
 					endif
 					break;
-				
+
 			"owner":	if( !( who.serial in condition[2] ) )
 						return 0;
 					endif
@@ -391,7 +391,7 @@ function GetPossiblePropertyNames()
 			"x",
 			"y",
 			"z"			};
-		
+
 endfunction
 
 
@@ -528,7 +528,7 @@ function IsFish( theobj )
 	else
 		return 0;
 	endif
-	
+
 endfunction
 
 
@@ -587,7 +587,7 @@ function IsLog( item )
 endfunction
 
 
-function IsMinable( theobj, othertype )
+function IsMinable( theobj, unused othertype )
 
 	if( ((theobj >= 0xe2)  && (theobj <= 0xe7))  ||
 	    ((theobj >= 0xf3)  && (theobj <= 0xf7))  ||
@@ -607,7 +607,7 @@ function IsMinable( theobj, othertype )
 	    ((theobj >= 0x749) && (theobj <= 0x750)) ||
 	    ((theobj >= 0x759) && (theobj <= 0x75c)) )
 		return 1;
-	
+
 //	elseif( (othertype >= 0x053b) && (othertype <= 0x0553) && (othertype != 0x0550 ) )
 //		return 1;
 	else
@@ -730,7 +730,7 @@ function IsTree( theobj )
 	else
 		return 0;
 	endif
-	
+
 endfunction
 
 
@@ -760,7 +760,7 @@ function IsWater( theobj )
 	elseif( tile >= 0x3ff0 && tile <= 0x3ff3 )
     		return 1;
     	endif
-    
+
 	return 0;
 
 endfunction
@@ -801,7 +801,7 @@ function ResetAllHitscriptPropsExcep( item, excep := "" )
 				"Powerlevel",
 				"ProtectedType",
 				"SlayType"	};
-			
+
 	foreach cprop in cprops
 		if( cprop != excep )
 			EraseObjProperty( item, cprop );

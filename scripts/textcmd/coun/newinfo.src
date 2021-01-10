@@ -6,7 +6,7 @@ include "include/gumps";
 
 
 
-program text_cmd_info( who, text)
+program text_cmd_info( who, unused text)
 	var player := Target(who);
 	if(!player)
 		return;
@@ -29,13 +29,13 @@ program text_cmd_info( who, text)
 		var skillstr := CStr((skillval/10) + "." + (skillval%10));
 		var modskillval := GetTempModValue(sk, player);
 		var stringname := FormatSkillName(GetAttributeIdBySkillId( sk ));
-		
-						
+
+
 		GFTextLine(x+15, 20+y, 0, stringname);
 		GFTextLine(x+145, 20+y, 0, skillstr );
 		GFTextLine(x+200, 20+y, 0, modskillval);
 		hButton.append(GFButtonID(x, 25+y, G_BLUE_SMALL_CIRCLE_1, G_BLUE_SMALL_CIRCLE_0, 1 ));
-		
+
 		i:=1+1;
 		y:=y+20;
 		if (y>360)
@@ -43,25 +43,25 @@ program text_cmd_info( who, text)
 			x:=x+300;
 		endif
 	endforeach
-	
+
 	GFTextLine(70, 420, 5, "Close");
 
 	var closeButton := GFButtonID( 50, 425, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
 
 	var choice := GFSendGump(who);
-	
+
 	var counter:=0;
 
 	if (choice[closeButton.keyid])
 		return;
 	endif
-		
+
 	foreach b in hButton
 		counter:=counter+1;
    	if (choice[b.keyid])
 		endif
 	endforeach
-		
+
 endprogram
 
 function FormatSkillName(skillname)

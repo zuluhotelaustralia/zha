@@ -147,7 +147,7 @@ function PlaceBeard(me,haircolor)
 	endcase
 
 	CreateAndEquip(me,Beard,haircolor);
-	
+
 endfunction
 
 function MakeHairColor()
@@ -543,7 +543,7 @@ function DressWar(me,gender)
 
 endfunction
 
-function DressMage(me,gender)
+function DressMage(me,unused gender)
 
 	var theitem;
 

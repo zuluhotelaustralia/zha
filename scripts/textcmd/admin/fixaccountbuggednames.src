@@ -9,25 +9,25 @@ program textcmd_fixaccountbuggednames (who,acc)
 	if (!checkStaff(who, "fixaccountbuggednames", CMDLEVEL_ADMINISTRATOR))
 		return 0;
 	endif
-		 	
+
   	if(!acc || acc ==error)
   	  SendSysMessage(who, "Canceled.",3,34);
   	  return;
-  	endif  	
-			
+  	endif
+
 	var accobj := FindAccount(acc);
-		
- 	if (accobj)		
+
+ 	if (accobj)
  		FixAccountCharNames(who, accobj);
  	else
 		SendSysMessage(who,"Error, could not find account: " + acc);
 	endif
-  	
+
 endprogram
 
 
 
-function FixAccountCharNames(who, account) //account object as parameter
+function FixAccountCharNames(unused who, account) //account object as parameter
 	var charNum;
 	var player;
 	for (charNum:=1; charNum <=5; charNum := charNum+1)

@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-program ritualunequip( who, item )
+program ritualunequip( unused who, item )
 
 	if( item.objtype == 0xba29 )
 		item.graphic := 0x1f03;

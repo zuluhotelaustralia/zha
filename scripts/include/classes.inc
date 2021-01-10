@@ -535,7 +535,7 @@ function GetStatPointsMultiplier( who, stat )
 endfunction
 
 
-function HaveInvalidSkillEnchantmentForClasse( item, classeid )
+function HaveInvalidSkillEnchantmentForClasse( unused item, unused classeid )
 
          // Removed Class skill requirement for equipping skill items 12/6/4 Archy
 
@@ -555,7 +555,7 @@ function HaveInvalidSkillEnchantmentForClasse( item, classeid )
 endfunction
 
 
-function HaveRestrictedModEnchantmentForClasse( who, item, classeid )
+function HaveRestrictedModEnchantmentForClasse( unused who, unused item, unused classeid )
 
 	var ret := 0;
 	/* removed for new ES system

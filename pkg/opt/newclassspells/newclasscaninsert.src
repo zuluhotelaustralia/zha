@@ -5,7 +5,7 @@ use os;
 include "newclassbook";
 
 //program can_insert( who, runebook, item )
-program can_Insert( who, book , movetype, INSERT_ADD_ITEM, item )
+program can_Insert( who, book , unused movetype, unused INSERT_ADD_ITEM, item )
 
 	if( !ReserveItem( book ) )
 		return 0;
@@ -18,20 +18,20 @@ program can_Insert( who, book , movetype, INSERT_ADD_ITEM, item )
 
 	var spellid := GetObjProperty(item, "SpellID");
 	var booktype:= GetBookType(book);
-	
+
 	if (!SpellIDInBookTypeSpellIDs(spellid, booktype))
 		SendSysMessage( who, "You can not put this item into this spellbook" );
 		return 0;
 	endif
-	
+
 	//add it to book storage
-	var spellsstored:=GetObjProperty(book, "storedspells"); 
-	
+	var spellsstored:=GetObjProperty(book, "storedspells");
+
 	if (SpellIDAlreadyStored(spellid, spellsstored))
 		SendSysMessage( who, "This spell is already stored in the book" );
 		return 0;
 	endif
-	
+
 	return 1;
 endprogram
 

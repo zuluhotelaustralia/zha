@@ -18,7 +18,7 @@ endif
 endfor
 endfunction
 
-program code_equal_to_number( who, client )
+program code_equal_to_number( who, unused client )
 	if (!checkStaff(who, "killmacro", CMDLEVEL_COUNSELOR))
 		return 0;
 	endif
@@ -52,7 +52,7 @@ program code_equal_to_number( who, client )
 		textcmd_bcast( player, "entered the code correct." );
 		return 0;
 	else
-		textcmd_bcast( player, "failed the code once." );		
+		textcmd_bcast( player, "failed the code once." );
 		SendSysMessage( player, "Wrong code. You have one last chance." );
 		entered := CInt(SendTextEntryGump( player, text, 40 ));
 		if( entered == number )
@@ -66,7 +66,7 @@ program code_equal_to_number( who, client )
 			textcmd_bcast( player, "failed after second try to enter the code correct." );
 			SendSysMessage( player, "Hope you like the jail." );
 			// insert jailcode
-		
+
 			endif
 
 

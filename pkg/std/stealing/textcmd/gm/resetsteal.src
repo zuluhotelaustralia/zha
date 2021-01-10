@@ -8,7 +8,7 @@ use storage;
 
 include "include/cmdlevel_check";
 
-program reset_steal(who, parms)
+program reset_steal(who, unused parms)
 	if (!checkStaff(who, "resetsteal", CMDLEVEL_GAME_MASTER))
 		return 0;
 	endif

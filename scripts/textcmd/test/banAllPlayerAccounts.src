@@ -11,7 +11,7 @@ program textcmd_banAllPlayerAccounts( who )
 	if (!checkStaff(who, "banAllPlayerAccounts", CMDLEVEL_DEVELOPER ))
 		return 0;
 	endif
-	
+
   	SendSysMessage(who, "Banning all accounts without a staff character on them i.e. dont have a character of cmdlevel >=1." , 3,53);
 	var accobj;
 	if (!YesNo(who, "Ban all players?"))
@@ -27,18 +27,18 @@ program textcmd_banAllPlayerAccounts( who )
 			endif
 		endif
 	endforeach
-	
+
 	SendSysMessage(who, "All Accounts with only player characters on them have been banned.",3,53);
 	SendSysMessage(who, "To do a full wipe now do .deleteBannedAccounts and then run the account cleaner.",3,53);
-        
+
 endprogram
 
-function HasCmdLevelCharacters(who, account, accName)
+function HasCmdLevelCharacters(unused who, account,unused accName)
 	var charNum;
 	var player;
 	for (charNum:=1; charNum <=5; charNum := charNum+1)
 		player:=account.GetCharacter(charNum);
-		
+
 		if (player != error && player.cmdlevel)
 			return 1;
 		endif

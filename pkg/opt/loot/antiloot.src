@@ -5,15 +5,15 @@ include "include/areas";
 include "include/constants/propids";
 include "include/queststone";
 
-program antilooting( who, corpse, item )
+program antilooting( who, corpse, unused item )
 
 	//antilooting exemptions (cases where this script doesnt apply)
 	var serial := GetObjProperty( corpse, PROPID_CORPSE_CORPSE_OF );
-	
+
 	if( who.cmdlevel || GetObjProperty(who, "fastlooting"))
 		return 1;
 	elseif( serial == who.serial )
-		return 1;	
+		return 1;
 	endif
 	//generic restrictions
 	if (CInt(GetObjProperty(who, "#looting")) > ReadGameClock()) // is already looting
@@ -30,7 +30,7 @@ program antilooting( who, corpse, item )
 	//cases where this script holds
 
 	//quest stone looting protection
-	
+
 	if (LootingCorpseOfFellowQuester(who, corpse))
 		SendSysMessage( who, "You aren't permitted to loot the corpse of a fellow quester.", 3, 53);
 		return 0;
@@ -62,7 +62,7 @@ program antilooting( who, corpse, item )
 				endif
 			endif
 		endif
-	
+
 		if( IsInAntiLootingArea(who) )
 			SendSysMessage( who, "You can't loot here." );
 			return 0;

@@ -14,7 +14,7 @@ program epicranger( attacker, defender, weapon, armor, basedamage, rawdamage)
 
 	if (TypeOf(attacker) == "Array")
 	//required for archery sys hook handling
-		var temparr := attacker;	
+		var temparr := attacker;
 		attacker := temparr[1];
 		defender := temparr[2];
 		weapon := temparr[3];
@@ -26,9 +26,9 @@ program epicranger( attacker, defender, weapon, armor, basedamage, rawdamage)
 	var victims := ListMobilesNearLocation( CInt(defender.x), CInt(defender.y), CInt(defender.z), 5);
 	var targ := defender;
 	var okay;
-	var weaponType := cfg[attacker.weapon.objtype];	
+	var weaponType := cfg[attacker.weapon.objtype];
 
-	var wbasedamage:= RandomDiceRoll( weaponType.damage ); 
+	var wbasedamage:= RandomDiceRoll( weaponType.damage );
 	if (attacker.weapon.dmg_mod)
 		wbasedamage := (wbasedamage + attacker.weapon.dmg_mod);
 	endif
@@ -36,7 +36,7 @@ program epicranger( attacker, defender, weapon, armor, basedamage, rawdamage)
 	var attackers_archery := GetEffectiveSkill(attacker,SKILLID_ARCHERY);
 	var dambonus := 1 + (attackers_archery/75);
 	wbasedamage := CInt(wbasedamage*dambonus);
-	
+
 	PlaySoundEffect( attacker, 1316);
 
 	foreach mobile in victims
@@ -51,14 +51,14 @@ program epicranger( attacker, defender, weapon, armor, basedamage, rawdamage)
 			DoEpicBowAttack(attacker, mobile, weaponType, SKILLID_ARCHERY, wbasedamage);
 			wbasedamage := CInt(wbasedamage*0.80);
 		else
-			okay:=0;			
+			okay:=0;
 		endif
 		sleepms((200-weaponType.Speed)/10);
 	endforeach
-			
+
 endprogram
 
-function DoEpicBowAttack(attacker, mobile, weaponType, SKILLID_ARCHERY, wbasedamage)
+function DoEpicBowAttack(attacker, mobile, weaponType, unused SKILLID_ARCHERY, wbasedamage)
 
 	PlayMovingEffectXYZ( attacker.x, attacker.y, attacker.z+9, mobile.x, mobile.y, mobile.z+5, weaponType.ProjectileAnim, 2, 0, 0  );
 	PerformAction( attacker, weaponType.Anim);
@@ -77,7 +77,7 @@ function DoEpicBowAttack(attacker, mobile, weaponType, SKILLID_ARCHERY, wbasedam
 		//Broadcast("cant fint it!");
 		return;
 	endif
-	
+
 	//find random piece of armor to hit -- need this for onhit script
 	var wornarmor := array;
 	foreach li in ListEquippedItems(mobile)

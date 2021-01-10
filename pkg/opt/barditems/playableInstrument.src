@@ -11,15 +11,15 @@ include "include/client";
 include "include/spelldata";
 include "include/attributes";
 include "barditems";
-	
+
 
 const SYSEVENT_UPDATEMUSIC:=0x0001234;
 var validnotes := {"P", "A1","A#1","A2","A#2","B1","B2","C1","C#1","C2","C#2","C3","D1","D#1","D2","D#2","E1","E2","F1","F2", "F#1","F#2", "G1","G2", "G#1", "G#2" };
-		
+
 //NOTE: CLIENT RESTRICTION IS SAME SOUND CAN ONLY BE PLAYED ONCE EVERY 1+ seconds... so have at least 5 notes between
 //each same note
-				
-program use_playable_instrument (who, instrument)
+
+program use_playable_instrument (who,unused instrument)
 	//drum
 	/*
 	const SND_DRUM1 :=57;
@@ -32,24 +32,24 @@ program use_playable_instrument (who, instrument)
 	const SND_DRUM8 :=745;
 	const SND_DRUM9 :=746;
 
-	
-	
+
+
 	//initial checks
 	if (! CheckMaxMusicianShip(who))
 		SendSysMessage(who, "You require 130 musicianship to use an arcane instrument.");
 		return 0;
 	endif
-	
+
 	var check := BardLevelCheck(who, instrument);
-	
+
 	if (check==-1)
 		SendSysMessage(who, "Only a classed Bard could use this instrument!");
 		return;
 	elseif(check==0)
 		SendSysMessage(who, "You are not a high enough level Bard to use this instrument!");
-		return;		
+		return;
 	endif
-	
+
 	*/
 
 	var instring:=RequestInput(who, who.backpack, "Enter notes to play (e.g. A#1 is A sharp octave 1, P to pause, enter all with a space between e.g. A#2 F2 G#1)");
@@ -58,7 +58,7 @@ program use_playable_instrument (who, instrument)
 	endif
 	var notes:= SplitWords(instring);
 	//instrument type for music played
-			
+
 	PlayLuteMusic(who, notes);
 	SendSysMessage(who,"You stop playing...");
 
@@ -93,7 +93,7 @@ function PlayLuteMusic(who, notes)
 			PlaySoundEffect(who, GetSFXFromNote(notes[i]));
 		endif
 		sleepms(250);
-		
+
 		i:=i+1;
 	endwhile
 	InformNearbyMuscians(who, notes);
@@ -125,9 +125,9 @@ function GetSFXFromNote(note)
 		"G1": return 1045;
 		"G2": return 1046;
 		"G#1": return 1047;
-		"G#2": return 1048;		
+		"G#2": return 1048;
 	endcase
-	
+
 endfunction
 
 function InformNearbyMuscians(who, notes)
@@ -151,7 +151,7 @@ endfunction
 /*
 function IsValidDrumMusic(notes)
 	var validnotes := {"P", "1","2","3","4","5","6","7","8","9"};
-	
+
 	var counter:=0;
 	foreach n in notes
 		foreach v in validnotes

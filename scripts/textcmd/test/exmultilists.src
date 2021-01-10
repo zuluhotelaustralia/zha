@@ -1,6 +1,6 @@
 use uo;
 
-program exmultilists( who, membername )
+program exmultilists( who, unused membername )
 
     var list := who.multi.membername;
     foreach blah in list

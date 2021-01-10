@@ -13,12 +13,12 @@ program newparry()
 
 endprogram
 
-exported function NewParryAdvancement( attacker, weapon, defender, shield )
+exported function NewParryAdvancement( attacker, unused weapon, defender,unused  shield )
 	var points := 30;
 	var skillid := SKILLID_PARRY;
 	points:=FameExperiencePointModifier(attacker, skillid, points);
 	points:=DKSMod(attacker, skillid, points);
-	
+
 	AwardSkillPoints( defender, SKILLID_PARRY, points*2 );
 
 endfunction

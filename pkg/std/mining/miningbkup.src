@@ -2,19 +2,19 @@
 // mining.src
 //
 // By using a shovel or pickaxe on cave tile this script allows
-// the harvesting of ore. Special reagents or colored ore are 
+// the harvesting of ore. Special reagents or colored ore are
 // possible to find. You get more ore per dig the higher your
-// skill is. 
+// skill is.
 //
 // If a shovel is used on a swamp tile, clay is digged up and
 // can be used to make pots, jars, etc.
 //
-// Authors: DreamWeaver: 
+// Authors: DreamWeaver:
 //			   original
 //		  Racalac:
 //			   5/8/99 colored ore, resource use
 /////////////////
-//			   20010324 Jaleem Added autolooping 
+//			   20010324 Jaleem Added autolooping
 /////////////////
 
 
@@ -74,15 +74,15 @@ program use_picktool( character, tool )
 	if( IsSwamp( info.landtile ) )
 		SendSysMessage( character, "You start mining..." );
 		result := DigForClay( character, use_on, info );
-	
+
 	elseif( IsMinable( info.landtile, use_on.objtype ) )
 		SendSysMessage( character, "You start mining..." );
 		result := MineForOre( character, use_on, info, tool );
-	
+
 	elseif( IsSand( info.landtile ) )
 		SendSysMessage( character, "You start mining..." );
 		result := DigForSand( character, use_on, info );
-	
+
 	else
 		SendSysMessage( character, "You can't mine or dig anything there." );
 		return;
@@ -150,11 +150,11 @@ function GetStuff( character, oreamount, tool )
 		if( crafter )
 			oreamount := CInt( oreamount * CLASSE_BONUS );
 		endif
-	
+
 		CreateItemInBackpack( character, UOBJ_IRON_ORE, oreamount );
 		SendSysMessage( character, "You put " + oreamount + " iron ore in your backpack." );
 	endif
-  
+
 endfunction
 
 
@@ -162,7 +162,7 @@ function MakeColoredOre( character, oreamount, tool )
 
 	var skill	:= GetEffectiveSkill( character, SKILLID_MINING );
 	var maxamount := CInt( skill / 30 );
-	
+
 	var tool_bon	:= GetObjProperty( tool, "MiningBonus" );
 	if( tool_bon )
 		maxamount	:= maxamount * tool_bon;
@@ -191,7 +191,7 @@ function MakeColoredOre( character, oreamount, tool )
 			oreamount	:= CInt( oreamount * CLASSE_BONUS );
 			to_mod		:= CInt( to_mod / CLASSE_BONUS );
 		endif
-	
+
 		if( tool_bon )
 			bonus  := bonus + (6 * tool_bon);
 			to_mod := to_mod - (5 * tool_bon);
@@ -258,14 +258,14 @@ function DigForClay( character, use_on, info )
 		var theamount;
 		if( clay_amount < 2 )
 			theamount := 1;
-		
+
 		else
 			theamount := Random(6)+1;
 		endif
-		
+
 		var theclay := CreateItemInBackpack( character, UOBJ_CLAY, theamount );
 		SendSysMessage( character, "You put " + theamount + " blocks of clay in your backpack." );
-		
+
 	else
 		SendSysMessage( character, "You fail to find any clay." );
 		return 0;
@@ -288,7 +288,7 @@ function DigForSand( character, use_on, info )
 		SendSysMessage(character, "There's no sand left there.");
 		return -1; //was 0, modified by Jaleem
 	endif
-	
+
 	var i;
 	for( i := 1; i <= NUM_PERFORM; i := i + 1 )
 		PerformAction( character, UACTION_PICK );
@@ -304,11 +304,11 @@ function DigForSand( character, use_on, info )
 		var theamount;
 		if( sandamount < 2 )
 			theamount := 1;
-		
+
 		else
 			theamount := Random(6)+1;
 		endif
-	
+
 		var thesand := CreateItemInBackpack( character, UOBJ_SAND, theamount );
 		SendSysMessage( character, "You put " + theamount + " units of sand in your backpack." );
 
@@ -323,7 +323,7 @@ endfunction
 
 
 
-function MineForOre( character, use_on, info, tool )
+function MineForOre( character, use_on, unused info, tool )
 
 	var initial_x	:= character.x;
 	var initial_y	:= character.y;
@@ -380,7 +380,7 @@ function DoSomething( character, tool )
 
 	case( tnum )
 		1:
-		2:  
+		2:
 		3:
 		4:	msg := "Oh no your tool breaks!";
 			DestroyTheItem( character, tool );
@@ -389,23 +389,23 @@ function DoSomething( character, tool )
 		98:	objtype := 0x6003;
 			msg := "You discover a tattered map!";
 			break;
-	
+
 		99:	objtype := 0x0f25;
 			msg := "You find a chunk of fossilized sap!";
 			break;
-		
+
 		100:	objtype := 0xc503;
 			msg := "You find a piece of elusive NEW ZULU ORE!";
 			break;
-		
+
 		105:	objtype := 0x0f30;
 			msg := "You find a diamond!";
 			break;
-	
+
 		106:	objtype := 0xc503;
 			msg := "You find a piece of elusive NEW ZULU ORE!";
 			break;
-		
+
 		107:	if( Random(15) < 1 )
 				case(RandomInt(3))
 					0:	objtype := 0xc538;
@@ -438,7 +438,7 @@ function DoSomething( character, tool )
 				msg := "You find a glowing bright white gem!";
 			endif
 			break;
-	
+
 	endcase
 
 	if( objtype )

@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-program removeold(who)
+program removeold(unused who)
 
 EraseGlobalProperty( "orelist");
 EraseGlobalProperty( "deathpool");

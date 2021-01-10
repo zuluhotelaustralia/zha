@@ -1,7 +1,7 @@
 use uo;
 
 
-program no_insert( who, container, item )
+program no_insert( who, unused container, unused item )
 
 	if( who.cmdlevel )
 		return 1;

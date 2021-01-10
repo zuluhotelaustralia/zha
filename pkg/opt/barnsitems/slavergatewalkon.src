@@ -3,17 +3,17 @@ use os;
 
 include "include/spelldata";
 
-program slavergatewalkon( who, gate )
+program slavergatewalkon( who, unused gate )
 
 	if (who.dead || !who.acct)
 		return;
 	endif
 	if (HasSlaveTimeElapsed(who))
 		MoveObjectToLocation(who, 1475, 1645, 20, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion //brit start
-		EraseObjProperty(who, "#cantLeaveSlaversBefore");	
+		EraseObjProperty(who, "#cantLeaveSlaversBefore");
 	endif
 	SendSysMessage(who, "You must still wait " + CInt(CInt(GetObjProperty(who, "#cantLeaveSlaversBefore")-ReadGameClock())/60) + " minutes before you can pass through this gate to freedom.");
-	
+
 endprogram
 
 function HasSlaveTimeElapsed(who)

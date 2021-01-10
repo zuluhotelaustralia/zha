@@ -3,13 +3,13 @@ use os;
 
 include "war";
 
-program warballoncreate(ball, who)
+program warballoncreate(ball, unused who)
 	//set default values
 	CloseWarRegistration(ball);
 	SetObjProperty(ball, "WarHappening", 0);
 	SetObjProperty(ball, "PlayerData",{});
 	SetAWOLTime(48, ball); //default AWOL time is 2 days
-	
+
 	//create guilds for both teams and set them to war
 	var guild1 := CreateGuild();
 	var guild2 := CreateGuild();

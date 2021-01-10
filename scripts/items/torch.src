@@ -1,5 +1,5 @@
 
-program torch( character, item )
+program torch( unused character, item )
 
     if( item.graphic == 0x0f64 )
 	item.graphic := 0xa12;

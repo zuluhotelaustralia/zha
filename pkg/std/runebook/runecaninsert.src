@@ -4,7 +4,7 @@ use os;
 include "include/objtype";
 
 //program can_insert( who, runebook, item )
-program can_Insert( who, runebook , movetype, INSERT_ADD_ITEM, item )
+program can_Insert( who, runebook , unused movetype, unused INSERT_ADD_ITEM, item )
 
 	if( !ReserveItem( runebook ) )
 		return 0;
@@ -37,21 +37,21 @@ program can_Insert( who, runebook , movetype, INSERT_ADD_ITEM, item )
 				return 0;
 			endif
 		endif
-	
+
 	elseif( item.objtype == UOBJ_RECALL_SCROLL )
 		var charges	 := CInt( GetObjProperty( runebook, "charges" ) );
 		var maxcharges := CInt( GetObjProperty( runebook, "maxcharges" ) );
 		if( !maxcharges )
 			maxcharges := 5;
 		endif
-	
+
 		if( charges >= maxcharges )
 			SendSysMessage( who, "This runebook is already fully charged." );
 			return 0;
 		else
 			return 1;
 		endif
-	
+
 	else
 		SendSysMessage( who, "You can only put marked recall runes or recall scrolls in runebooks." );
 		return 0;

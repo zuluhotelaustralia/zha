@@ -19,7 +19,7 @@ program use_flax( me, flax)
 
   if(!ReserveItem(flax)) // Duping bug fixed by seravy. Used to use auctioner to reserve item.
     PunishForBugAbusing(me, flax);
-    return; 
+    return;
   endif
 
 	var flaxtype := flax.objtype;
@@ -89,7 +89,7 @@ function DestroyFive(me, byref allmyflax);
 
 endfunction
 
-function CountFlax(me, byref allmyflax)
+function CountFlax(unused me, byref allmyflax)
 
 	var numflax := 0;
 	foreach item in (allmyflax)
@@ -132,19 +132,19 @@ function PunishForBugAbusing(who, item)
     var prop := array;
     prop .+ pname;
     prop .+ pvalue;
-	
+
     prop.pname := "charname";
     prop.pvalue := who.name;
     props[1] := prop;
-	
+
     prop.pname := "serial";
     prop.pvalue := who.serial;
     props[2] := prop;
-	
+
     prop.pname := "coords";
     prop.pvalue := CStr(who.x) + " " + CStr(who.y);
     props[3] := prop;
-	
+
     prop.pname := "datetime";
     prop.pvalue := NowString();
     props[4] := prop;
@@ -152,7 +152,7 @@ function PunishForBugAbusing(who, item)
     prop.pname := "item";
     prop.pvalue := "Thread: " + CStr(item.name) + " - "+ CStr(item.desc) + " - "+ CStr(item.serial);
     props[4] := prop;
-	
+
     AppendConfigFileElem( "::log-itemdupe", "haxor", elemkey, props );
     UnloadConfigFile("::log-itemdupe");
 

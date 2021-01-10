@@ -6,8 +6,8 @@ include "include/objtype";
 include "newclassbook";
 
 //program on_insert( who, runebook, item )
-program on_insert( who, book, movetype, INSERT_ADD_ITEM, item )
-	
+program on_insert( who, book, unused movetype, unused INSERT_ADD_ITEM, item )
+
 
 	if( !ReserveItem( book ) )
 		return 0;
@@ -26,7 +26,7 @@ program on_insert( who, book, movetype, INSERT_ADD_ITEM, item )
 				SendSysMessage(who, GetSpellName(spellid) + " has been added to the spellbook");
 				DestroyItem(item);
 			break;
-				
+
 		default:		MoveItemToContainer( item, who.backpack );
 	endcase
 

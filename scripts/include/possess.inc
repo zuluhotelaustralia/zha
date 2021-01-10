@@ -208,7 +208,7 @@ function SwapClothes(me, npc)
 
 endfunction
 
-function unpossesscorpse( me, corpse )
+function unpossesscorpse( me, unused corpse )
 
 	var npc;
 	if ( GetObjProperty(me,"possess") )

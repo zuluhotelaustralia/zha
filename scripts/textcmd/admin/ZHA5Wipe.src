@@ -83,7 +83,7 @@ var tamed	 := FindStorageArea( "Tamed Storage" );
 
 var Trees := ReadConfigFile(":botanik:tree");
 
-program ZH5Wipe( who, text)
+program ZH5Wipe( who, unused text)
 	if (!checkStaff(who, "ZH5Wipe", CMDLEVEL_ADMINISTRATOR))
 		return 0;
 	endif

@@ -47,20 +47,20 @@ endfunction
 //						else
 //							ev[6] := "";
 //						endif
-//					
+//
 //		EVID_AUCTION_ADD_PLAYER:	ev[3] := uobject;
-//	
+//
 //		EVID_AUCTION_BID_ON_ITEM:	ev[3] := uobject;
 //						ev[4] := mobile;
 //						ev[5] := bid;
-//					
+//
 //		EVID_AUCTION_REMOVE_PLAYER:	ev[3] := uobject;
 //		EVID_AUCTION_SELL_ITEM:		ev[3] := uobject;
 //	endcase
 //
 //
 //	manager.SendEvent(ev);
-//	
+//
 //	ev := wait_for_event(120);
 //	if( ev[1] == EVID_MANAGER_ANSWER )
 //		return ev[2];
@@ -95,13 +95,13 @@ function SendBookCaseEvent( event_type, bookcase := 0 )
 	case( event_type )
 		EVID_BOOKCASE_CREATED:
 			ev[3] := bookcase;
-		
+
 		EVID_BOOKCASE_DESTROYED:
 			ev[3] := bookcase;
 	endcase
 
 	manager.SendEvent(ev);
-	
+
 	ev := wait_for_event(120);
 	if( ev[1] == EVID_MANAGER_ANSWER )
 		return ev[2];
@@ -136,13 +136,13 @@ function SendChestEvent( event_type, chest := 0 )
 	case( event_type )
 		EVID_CHEST_CREATED:
 			ev[3] := chest;
-		
+
 		EVID_CHEST_DESTROYED:
 			ev[3] := chest;
 	endcase
 
 	manager.SendEvent(ev);
-	
+
 	ev := wait_for_event(120);
 	if( ev[1] == EVID_MANAGER_ANSWER )
 		return ev[2];
@@ -185,7 +185,7 @@ function SendListsManagerEvent( event_type, mobile := 0 )
 	endcase
 
 	manager.SendEvent(ev);
-	
+
 	ev := wait_for_event(120);
 	if( ev[1] == EVID_MANAGER_ANSWER )
 		return ev[2];
@@ -198,7 +198,7 @@ function SendListsManagerEvent( event_type, mobile := 0 )
 endfunction
 
 
-function SendSpawnPointEvent( event_type, point := 0, serial := 0, corpseserial :=0 )
+function SendSpawnPointEvent( event_type, point := 0, serial := 0, unused corpseserial :=0 )
 
 	var pid := GetGlobalProperty(PROPID_GLOBAL_SPAWNPOINTS_MANAGER);
 	if( !pid )
@@ -220,25 +220,25 @@ function SendSpawnPointEvent( event_type, point := 0, serial := 0, corpseserial 
 	case( event_type )
 		EVID_SPAWNPOINT_CHECK_POINT:
 			ev[3] := point;
-		
+
 		EVID_SPAWNPOINT_CREATED:
 			ev[3] := point;
-		
+
 		EVID_SPAWNPOINT_DEATH:
 			ev[3] := SystemFindObjectBySerial(CInt(point));
 			ev[4] := serial;
 			manager.SendEvent(ev);
 			return 1;
-		
+
 		EVID_SPAWNPOINT_DESTROYED:
 			ev[3] := point;
-		
+
 		EVID_SPAWNPOINT_RESETED:
 			ev[3] := point;
 	endcase
 
 	manager.SendEvent(ev);
-	
+
 	ev := wait_for_event(240);
 	if( ev[1] == EVID_MANAGER_ANSWER )
 		return ev[2];

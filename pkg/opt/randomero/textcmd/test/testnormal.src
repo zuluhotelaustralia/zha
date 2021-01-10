@@ -3,11 +3,11 @@ use os;
 include "include/random";
 include "include/cmdlevel_check";
 
-program textcmd_testNormal(who, params)
+program textcmd_testNormal(who, unused params)
 	if (!checkStaff(who, "testnormal", CMDLEVEL_DEVELOPER))
 		return 0;
 	endif
-	
+
 	SendSysMessage(who, "Start");
 	for i:=1 to 100
 		print(RandomStandardNormal());
