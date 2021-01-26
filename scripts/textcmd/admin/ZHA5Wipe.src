@@ -282,7 +282,12 @@ function ShouldDelete(item)
 		return 1;
 	endif
 
-	if(item.getprop("FromDeed") || item.getprop("DeedOwnerSerial") || item.getprop("ItemsCreatedSerials") || item.getprop("lockeddown") )
+	if(item.getprop("FromDeed") || item.getprop("DeedOwnerSerial") || item.getprop("ItemsCreatedSerials") || item.getprop("lockeddown") || item.getprop("houseserial") || item.getprop("house_serial"))
+		return 1;
+	endif
+
+	// If it is an ocean tile from a SOS bottle (fishing package)
+	if (item.objtype == 41829 && item.getprop("msgserial"))
 		return 1;
 	endif
 
