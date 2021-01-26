@@ -7,6 +7,7 @@ use cfgfile;
 include "include/all";
 include "include/starteqp";
 include "include/time";
+include "include/constants/realms";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // CONSTS
@@ -165,11 +166,10 @@ function RegisterSpawnPoints()
 	spawnpoints := {};
 	var start := ReadGameClock();
 	syslog( "Starting spawnpoints registration..." );
-	foreach object in ListObjectsInBox( 0, 0, -128, 6142, 4094, 128 )
-		if( object.objtype == UOBJ_SPAWNPOINT )
-			spawnpoints.append(object);
-		endif
-		sleepms(100);
+	
+	var allSpawns := ListItemsInBoxOfObjType(UOBJ_SPAWNPOINT, REALM_BRITANNIA_START_X, REALM_BRITANNIA_START_Y, REALM_BRITANNIA_START_Z, REALM_BRITANNIA_END_X, REALM_BRITANNIA_END_Y, REALM_BRITANNIA_END_Z, _DEFAULT_REALM);
+	foreach object in allSpawns
+		spawnpoints.append(object);
 	endforeach
 
 	syslog( "Spawnpoints registration completed, took " + (ReadGameClock()-start) +
