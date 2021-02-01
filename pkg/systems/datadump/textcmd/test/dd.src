@@ -1,0 +1,186 @@
+use uo;
+use file;
+use cfgfile;
+include "include/random";
+
+const DD_PARAMETERS := ".dd [nlootgroup|npcdesc|itemdesc]";
+
+program textcmd_datadump(who, parameters)
+	var params := SplitWords(parameters);
+
+	if (TypeOf(params) != "Array" || len(params) < 1)
+		SendSysMessage(who, "No parameter specified");
+		SendSysMessage(who, DD_PARAMETERS);
+	elseif (params[1] == "nlootgroup") 
+		DumpNLootGroup(who);
+	elseif (params[1] == "npcdesc") 
+		DumpNpcdesc(who);
+	elseif (params[1] == "itemdesc") 
+		DumpItemdesc(who);
+	else
+		SendSysMessage(who, "Unknown paramter: " + params[1]);
+		SendSysMessage(who, DD_PARAMETERS);
+	endif
+endprogram
+
+//*********** itemdesc.cfg functions ***********\\
+function DumpItemdesc(who)
+  	var cfgFile := ReadConfigFile("::itemdesc");
+
+	var npcs := struct{};
+    foreach str in GetConfigStringKeys(cfgFile)
+		var element := FindConfigElem(cfgFile, str);
+		var props := struct{ }; 
+		foreach prop in ListConfigElemProps(element)
+			if (Lower(prop) == "cprop")
+				props[Lower(prop)] := CProp(GetConfigStringDictionary(element, prop));
+			else
+				// If only some props are arrays but others are not, this can cause an issue.
+				// Should probably report it as a invalid template.
+				if (Len(GetConfigStringArray(element, prop)) > 1)
+					SendSysMessage(who, "Template: {1} has duplicate key {2}. This will cause issues.".format(str, prop));
+					// props[Lower(prop)] := GetConfigStringArray(element, prop);
+					props[Lower(prop)] := GetConfigString(element, prop);
+				else 
+					props[Lower(prop)] := GetConfigString(element, prop);
+				endif
+			endif
+		endforeach
+		
+		npcs[str] := props;
+    endforeach
+
+	var file := npcs;
+	SaveFileWithFailure("itemdesc.json", array { PackJSON(file) });
+	SendSysMessage(who, "itemdesc.json Complete");
+endfunction
+//*********** npcdesc.cfg functions ***********\\
+function DumpNpcdesc(who)
+  	var cfgFile := ReadConfigFile("::npcdesc");
+
+	var npcs := struct{};
+    foreach str in GetConfigStringKeys(cfgFile)
+		var element := FindConfigElem(cfgFile, str);
+		var props := struct{ }; 
+		foreach prop in ListConfigElemProps(element)
+			if (Lower(prop) == "cprop")
+				props[Lower(prop)] := CProp(GetConfigStringDictionary(element, prop));
+			elseif (Lower(prop) == "spell")
+				props[Lower(prop)] := GetConfigStringArray(element, prop);
+			else
+				// If only some props are arrays but others are not, this can cause an issue.
+				// Should probably report it as a invalid template.
+				if (Len(GetConfigStringArray(element, prop)) > 1)
+					SendSysMessage(who, "Template: {1} has duplicate key {2}. This will cause issues.".format(str, prop));
+					// props[Lower(prop)] := GetConfigStringArray(element, prop);
+					props[Lower(prop)] := GetConfigString(element, prop);
+				else 
+					props[Lower(prop)] := GetConfigString(element, prop);
+				endif
+			endif
+		endforeach
+		
+		npcs[str] := props;
+    endforeach
+
+	var file := npcs;
+	SaveFileWithFailure("npcdesc.json", array { PackJSON(file) });
+	SendSysMessage(who, "npcdesc.json Complete");
+endfunction
+
+//*********** nlootgroup.cfg functions ***********\\
+function DumpNLootGroup(who)
+  	var cfgFile := ReadConfigFile("::nlootgroup");
+
+	var lootgroups := struct{};
+	var groups := struct{};
+    foreach str in GetConfigStringKeys(cfgFile)
+		var element := FindConfigElem(cfgFile, str);
+		var itemProps := struct{ }; 
+		foreach prop in ListConfigElemProps(element)
+			if (prop == "Stack")
+				itemProps[Lower(prop)] := NLGChanceRow(GetConfigStringArray(element, prop));
+			elseif (prop == "Item")
+				itemProps[Lower(prop)] := NLGChanceRow(GetConfigStringArray(element, prop));
+			elseif (prop == "Random")
+				itemProps[Lower(prop)] := NLGChanceRow(GetConfigStringArray(element, prop));
+			else
+				itemProps[Lower(prop)] := GetConfigStringArray(element, prop);
+			endif
+		endforeach
+		
+		var intv := CInt(str);
+		if (intv)
+			lootgroups[str] := itemProps;
+		else
+			groups[str] := itemProps;
+		endif
+    endforeach
+
+	var file := struct{};
+	file["groups"] := groups;
+	file["lootgroups"] := lootgroups;
+
+	SaveFileWithFailure("nlootgroup.json", array { PackJSON(file) });
+	SendSysMessage(who, "Complete");
+endfunction
+
+function NLGChanceRow(items)
+	var results := array{};
+	foreach row in items
+		var props := struct{ }; 
+		var params := SplitWords(row);
+		if ( IsDiceRoll(params[1]))
+			if (params[1] != error)
+				props["count"] := params[1];
+			endif
+			if (params[2] != error)
+				props["name"] := params[2];
+			endif
+			if (params[3] != error)
+				props["chance"] := params[3];
+			endif
+			if (params[4] != error)
+				props["color"] := params[4];
+			endif
+		else
+			if (params[1] != error)
+				props["name"] := params[1];
+			endif
+			if (params[2] != error)
+				props["chance"] := params[2];
+			endif
+			if (params[3] != error)
+				props["color"] := params[3];
+			endif
+		endif
+		results.append(props);
+	endforeach
+
+	return results;
+endfunction
+
+//*********** utility functions ***********\\
+function IsDiceRoll(thing)
+	if ( RandomDiceStr( thing ) )
+		return 1;
+	else
+		return 0;
+	endif
+endfunction
+
+function CProp(items)
+	var results := struct{};
+	foreach key in (items.keys())
+		results[key] := Unpack(items[key]);
+	endforeach
+
+	return results;
+endfunction
+
+function SaveFileWithFailure(filename, data)
+	var tJson := WriteFile(":datadump:data/" + filename, data);
+	if (tJson != 1)
+		Broadcast("Saving failed :datadump:data/" + filename + " >" + tJson);
+	endif
+endfunction
