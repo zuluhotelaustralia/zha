@@ -84,7 +84,7 @@ function sendclassgump(who, class);
 	GFTextLine(35, pageline, 38+(25*excludelist[6]), "Warrior");
 	if (excludelist[6] != 0) warriorButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );endif
 	pageline := pageline+30;
-	
+	/*  NEW CLASSES REMOVED FROM HERE
 	GFTextLine(35, pageline, 38+(25*excludelist[7]), "Druid");
 	if (excludelist[7] != 0) druidButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );endif
 	pageline := pageline+30;
@@ -111,7 +111,7 @@ function sendclassgump(who, class);
 	
 	GFTextLine(35, pageline, 38+(25*excludelist[13]), "Necromancer");
 	if (excludelist[13] != 0) necromancerButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );endif
-	pageline := pageline+30;
+	pageline := pageline+30;*/
 	
 	GFTextLine(35, pageline, 63, "Power Player");
 	ppButton := GFButtonID( 20, pageline+3, G_BLUE_SMALL_CIRCLE_0, G_BLUE_SMALL_CIRCLE_1, 1 );
