@@ -212,6 +212,7 @@ function ToplevelWipe( )
 	var Objects := ListObjectsInBox(0, 0, -128, 6142, 4094, 128);
 	var ContainerItems;
 	foreach obj in Objects
+		sleepms(500);
 		if ( obj.isa(POLCLASS_ITEM) && ShouldDelete(obj) )
 			DestroyItem(obj);
 			ItemCount := ItemCount +1;
@@ -257,6 +258,7 @@ function MultiWipe();
 	var Multis := ListMultisInBox(0, 0, -128, 6142, 4094, 128);
 
 	foreach multi in Multis
+		sleepms(500);
 		if( multi.isa( POLCLASS_BOAT) ) //Ship
 			deleteboat(Multi);
 			wipedBoats := wipedBoats + 1;
@@ -273,6 +275,7 @@ endfunction
 
 function ShouldDelete(item)
 	foreach Type in DeletableTypes
+		sleepms(500);
 		if(item.objtype == Type)
 			return 1;
 		endif
