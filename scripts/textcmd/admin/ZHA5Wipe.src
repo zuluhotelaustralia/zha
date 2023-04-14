@@ -84,6 +84,7 @@ var tamed	 := FindStorageArea( "Tamed Storage" );
 var Trees := ReadConfigFile(":botanik:tree");
 
 program ZH5Wipe( who, unused text)
+	set_critical(1);
 	if (!checkStaff(who, "ZH5Wipe", CMDLEVEL_ADMINISTRATOR))
 		return 0;
 	endif
@@ -102,6 +103,8 @@ program ZH5Wipe( who, unused text)
 	WipePlayerItems();
 	Print( "Wiping Multis" );
 	MultiWipe();
+	Print( "WIPE COMPLETE!" );
+	set_critical(0);
 
 endprogram
 
@@ -196,10 +199,6 @@ function WipePlayerItems( )
 	print("Accounts: " + len(AccountList));
 	print("ItemCount: " + ItemCount);
 	print("CharacterCount: " + CharacterCount);
-
-
-
-
 endfunction
 
 function ToplevelWipe( )
@@ -212,7 +211,6 @@ function ToplevelWipe( )
 	var Objects := ListObjectsInBox(0, 0, -128, 6142, 4094, 128);
 	var ContainerItems;
 	foreach obj in Objects
-		sleepms(500);
 		if ( obj.isa(POLCLASS_ITEM) && ShouldDelete(obj) )
 			DestroyItem(obj);
 			ItemCount := ItemCount +1;
@@ -229,6 +227,11 @@ function ToplevelWipe( )
 		endif
 
 		if(obj.isa(POLCLASS_NPC))
+
+			if(obj.getprop("freetime"))
+				obj.kill();
+				NpcCount += 1;
+			endif
 
 			DestroyRootItemInStorageArea( merchant, obj.serial + " FS");
 			DestroyRootItemInStorageArea( merchant, obj.serial + " PB");
@@ -258,7 +261,6 @@ function MultiWipe();
 	var Multis := ListMultisInBox(0, 0, -128, 6142, 4094, 128);
 
 	foreach multi in Multis
-		sleepms(500);
 		if( multi.isa( POLCLASS_BOAT) ) //Ship
 			deleteboat(Multi);
 			wipedBoats := wipedBoats + 1;
@@ -275,7 +277,6 @@ endfunction
 
 function ShouldDelete(item)
 	foreach Type in DeletableTypes
-		sleepms(500);
 		if(item.objtype == Type)
 			return 1;
 		endif
@@ -285,7 +286,7 @@ function ShouldDelete(item)
 		return 1;
 	endif
 
-	if(item.getprop("FromDeed") || item.getprop("DeedOwnerSerial") || item.getprop("ItemsCreatedSerials") || item.getprop("lockeddown") || item.getprop("houseserial") || item.getprop("house_serial"))
+	if(item.getprop("guild_id") ||item.getprop("FromDeed") || item.getprop("DeedOwnerSerial") || item.getprop("ItemsCreatedSerials") || item.getprop("lockeddown") || item.getprop("houseserial") || item.getprop("house_serial"))
 		return 1;
 	endif
 
