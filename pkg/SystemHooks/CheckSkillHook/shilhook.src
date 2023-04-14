@@ -8,7 +8,7 @@ include "include/attributes";
 include "include/classes";
 include "include/skillpoints";
 include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
-include ":hooks:dksmod";
+include ":CheckSkillHook:dksmod";
 
 program shilhook()
 
@@ -44,7 +44,7 @@ function DifficultySkillCheck( who, skillid, difficulty, points )
 	endif
 
 	var chance := Cint( skill - difficulty + 20 );
-	
+
 	if( chance < 0 )
 		AwardSkillPoints(who, skillid, 0); // In case they have the skill arrow down.
 		return 0;

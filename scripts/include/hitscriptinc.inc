@@ -10,7 +10,7 @@ include "include/damages";
 include "include/bitwise";
 include "include/random";
 include "include/myutil";
-include "../pkg/foundations/hooks/zhaArchery";
+include ":CombatHook:zhaArchery";
 
 var cfgfile := ReadConfigFile(":*:itemdesc");
 var weaponElem;

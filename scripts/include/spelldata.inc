@@ -24,7 +24,7 @@ include "include/areas";
 include "include/skillpoints";
 include "include/guardcall";
 include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
-include ":hooks:dksmod";
+include ":CheckSkillHook:dksmod";
 
 
 

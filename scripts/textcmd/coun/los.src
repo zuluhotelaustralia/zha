@@ -25,7 +25,7 @@ program loscheck( chr, ground )
             else
                 SendSysMessage( chr, "You do not have line-of-sight to that." );
             endif
-            if (CheckLineOfSight( chr, what, 1 ))
+            if (CheckLineOfSight( chr, what))
                 SendSysMessage( chr, "POL95: You have line-of-sight to that." );
             else
                 SendSysMessage( chr, "POL95: You do not have line-of-sight to that." );

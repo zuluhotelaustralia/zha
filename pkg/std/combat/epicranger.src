@@ -5,7 +5,7 @@ use cfgfile;
 include "include/damages";
 include "include/random";
 include "include/hitscriptinc";
-include "../pkg/foundations/hooks/zhaArchery";
+include ":CombatHook:zhaArchery";
 include "include/classes";
 
 var cfg := ReadConfigFile(":combat:itemdesc");

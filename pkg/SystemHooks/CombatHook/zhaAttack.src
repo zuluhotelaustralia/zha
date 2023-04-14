@@ -3,12 +3,11 @@ use uo;
 use os;
 use party;
 
-include ":hooks:zhaSpecialMonsterAttacks";
-//include ":hooks:zhaArchery";
+include ":CombatHook:include/zhaSpecialMonsterAttacks";
+//include ":CombatHook:zhaArchery";
 include "include/hitscriptinc";
 include "include/guardcall";
 include "include/classes";
-include "include/pol95";
 
 
 var cfg := ReadConfigFile(":combat:itemdesc");
@@ -23,7 +22,7 @@ exported function ZHAAttackfunc( attacker, defender )
 		return 1;
 	endif
 
-	if (!CheckLineOfSight95(attacker, defender))
+	if (!CheckLineOfSight(attacker, defender))
 		return 1;
 	endif
 
