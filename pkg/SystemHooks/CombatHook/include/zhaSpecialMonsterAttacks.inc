@@ -52,7 +52,7 @@ function DoSpecialMonsterAttack(attacker, defender, weaponType, specialAttackEff
 		PlaySoundEffect( defender, weaponType.hitSound );
 		var hitscript := attacker.weapon.hitscript;
 
-		var wbasedamage:= RandomDiceRoll( weaponType.damage ); 
+		var wbasedamage:= RandomDiceRoll( weaponType.damage );
 		if (attacker.weapon.dmg_mod)
 			wbasedamage := wbasedamage + attacker.weapon.dmg_mod;
 		endif
@@ -60,9 +60,9 @@ function DoSpecialMonsterAttack(attacker, defender, weaponType, specialAttackEff
 		var attackers_wepskillval := GetEffectiveSkill(attacker,attackskill );
 		var attackers_tacticsval := GetEffectiveSkill(attacker,SKILLID_TACTICS );
 
-		var dambonus := 1 + (attackers_wepskillval /65) + (attackers_tacticsval /65); 
+		var dambonus := 1 + (attackers_wepskillval /65) + (attackers_tacticsval /65);
 		wbasedamage := CInt(wbasedamage * dambonus);
-		
+
 		//find random piece of armor to hit -- need this for onhit script
 		var wornarmor := array;
 		foreach li in ListEquippedItems(defender)
@@ -74,25 +74,25 @@ function DoSpecialMonsterAttack(attacker, defender, weaponType, specialAttackEff
 		if (len(wornarmor)>0)
 			def_armor:=wornarmor[RandomInt(len(wornarmor))+1];
 		endif
-		start_script (":combat:"+hitscript, {attacker, defender, attacker.weapon, def_armor, wbasedamage, 0});
+		start_script (hitscript, {attacker, defender, attacker.weapon, def_armor, wbasedamage, 0});
 		else
 			PlaySoundEffect( attacker, weaponType.missSound );
 		endif
-endfunction 
+endfunction
 
 
 
 
 function CheckHit(attacker, defender, combat_skill_id)
-	
+
 	var defenders_ar := CInt(1.2 * defender.ar); //based on the idea that monsters dont tend to have more than 100 AR
-		
+
 	var difficulty := defenders_ar ;
 	var points:= difficulty * 10;
 	if (points > 1300)
 		points := 1300;
 	endif
-	
+
 	//random component
 	var randdiff := RandomDiceRoll("5d12");
 	if (randdiff <=30)
@@ -100,10 +100,10 @@ function CheckHit(attacker, defender, combat_skill_id)
 	else
 		difficulty := difficulty + randdiff;
 	endif
-	
+
 	//difficulty reduction for dex
 	//difficulty := difficulty - CInt(attacker.dexterity/4);
-	
+
 	if (difficulty<0)
 		difficulty:=0;
 	elseif(difficulty>150)
@@ -112,7 +112,7 @@ function CheckHit(attacker, defender, combat_skill_id)
 
 	//Broadcast("difficulty : " + difficulty + "    points : " + points + "   rangeToDef: " + rangeToDef);
 	return CheckSkill( attacker, combat_skill_id, difficulty, points);
-	
+
 endfunction
 
 function GetWeaponSkillID(weaponTypeAttribute)
@@ -122,10 +122,10 @@ function GetWeaponSkillID(weaponTypeAttribute)
 		return 40;
 	elseif	(weaponTypeAttribute=="Fencing")
 		return 42;
-	
+
 	/*elseif	(weaponTypeAttribute=="Wrestling")
 		return 43;
 	*/
 	endif
-	return 43; 
+	return 43;
 endfunction

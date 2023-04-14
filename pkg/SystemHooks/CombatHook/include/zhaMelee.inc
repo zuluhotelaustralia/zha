@@ -10,12 +10,12 @@ include "include/attributes";
 include ":karmafame:karmafame";
 
 
-function MeleeAttack( attacker, defender ) 
-	
+function MeleeAttack( attacker, defender )
+
 	//if (!coordDistance (attacker.x, attacker.y, attackx, attacky))
 	//endif
 	DoAttack(attacker, defender);
-endfunction 
+endfunction
 
 function DoAttack(attacker, defender)
 	var attackerweaponType := cfg[attacker.weapon.objtype];
@@ -25,11 +25,11 @@ function DoAttack(attacker, defender)
 	PerformAction( attacker, weaponType.Anim);
 	sleep((100-weaponType.Speed)/10);
 	var combat_skill_id := GetWeaponSkillID(weaponType.Attribute);
-	
+
 	if (combat_skill_id == -1)
 		return;
 	endif
-					
+
 	if (CheckHit(attacker, defender, combat_skill_id))
 		PlaySoundEffect( defender, weaponType.hitSound );
 	else
@@ -45,16 +45,16 @@ function DoAttack(attacker, defender)
 		//Broadcast("cant fint it!");
 		return;
 	endif
-	var wbasedamage:= RandomDiceRoll( weaponType.damage ); 
+	var wbasedamage:= RandomDiceRoll( weaponType.damage );
 	if (attacker.weapon.dmg_mod)
 		wbasedamage := wbasedamage + attacker.weapon.dmg_mod;
 	endif
 	//further bonus damage based on archery skill - temporarily removed pending testing
-	
+
 	var attackers_skill := GetEffectiveSkill(attacker,combat_skill_id);
-	var dambonus := 1 + (attackers_skill/130); //i.e. at 130 theyd do 2x times base... 
+	var dambonus := 1 + (attackers_skill/130); //i.e. at 130 theyd do 2x times base...
 	wbasedamage := CInt(wbasedamage * dambonus);
-	
+
 	//find random piece of armor to hit -- need this for onhit script
 	var wornarmor := array;
 	foreach li in ListEquippedItems(defender)
@@ -66,19 +66,19 @@ function DoAttack(attacker, defender)
 	if (len(wornarmor)>0)
 		def_armor:=wornarmor[RandomInt(len(wornarmor))+1];
 	endif
-	start_script (":combat:"+hitscript, {attacker, defender, attacker.weapon, def_armor, wbasedamage, 0});
+	start_script (hitscript, {attacker, defender, attacker.weapon, def_armor, wbasedamage, 0});
 endfunction
 
 function CheckHit(attacker, defender, combat_skill_id)
-	
+
 	var defenders_ar := CInt(1.2 * defender.ar); //based on the idea that monsters dont tend to have more than 100 AR
-		
+
 	var difficulty := defenders_ar ;
 	var points:= difficulty * 10;
 	if (points > 1300)
 		points := 1300;
 	endif
-	
+
 	points:=FameExperiencePointModifier(attacker, combat_skill_id, points);
 	points:=DKSMod(attacker, combat_skill_id, points);
 	//random component
@@ -88,10 +88,10 @@ function CheckHit(attacker, defender, combat_skill_id)
 	else
 		difficulty := difficulty + randdiff;
 	endif
-	
+
 	//difficulty reduction for dex
 	//difficulty := difficulty - CInt(attacker.dexterity/4);
-	
+
 		if (difficulty<1)
 			difficulty:=1;
 	elseif(difficulty>150)
@@ -100,7 +100,7 @@ function CheckHit(attacker, defender, combat_skill_id)
 
 	//Broadcast("difficulty : " + difficulty + "    points : " + points + "   rangeToDef: " + rangeToDef);
 	return CheckSkill( attacker, combat_skill_id, difficulty, points);
-	
+
 endfunction
 
 function GetWeaponSkillID(weaponTypeAttribute)
@@ -110,15 +110,15 @@ function GetWeaponSkillID(weaponTypeAttribute)
 		return 40;
 	elseif	(weaponTypeAttribute=="Fencing")
 		return 42;
-	
+
 	/*elseif	(weaponTypeAttribute=="Wrestling")
 		return 43;
 	*/
 	endif
-	return 43; 
+	return 43;
 endfunction
 function DKSMod(attacker, combat_skill_id, points)
-	if( attacker.IsA(POLCLASS_NPC) )	
+	if( attacker.IsA(POLCLASS_NPC) )
 		return points;
 	endif
 	//dont do anything if skill set to decrease or locked
