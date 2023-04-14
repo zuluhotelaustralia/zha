@@ -1,6 +1,6 @@
 FROM docker.pkg.github.com/zuluhotelaustralia/polcore/polcore:latest AS polserver
 
-FROM ubuntu:eoan
+FROM ubuntu:focal
 
 WORKDIR /app/
 COPY . .
