@@ -6,7 +6,7 @@ if(!ReserveItem(item))
 elseif(!Accessible(user,item))
 	SendSysMessage(user,"You can't reach "+item.name);
 	return 0;
-elseif(!CheckLineOfSight95(user,item ))
+elseif(!CheckLineOfSight(user,item ))
 	SendSysMessage(user,"You can't see that.");
 	return 0;
 elseif(item.container.serial != user.backpack.serial)
@@ -20,7 +20,7 @@ function fix_equip( byref user, byref item)
 if(!Accessible(user,item))
 	SendSysMessage(user,"You can't reach "+item.name);
 	return 0;
-elseif(!CheckLineOfSight95(user,item ))
+elseif(!CheckLineOfSight(user,item ))
 	SendSysMessage(user,"You can't see that.");
 	return 0;
 endif
@@ -36,7 +36,7 @@ elseif(!Accessible(user,item))
 	SendSysMessage(user,"You can't reach "+item.name);
 	return 0;
 endif
-if(!CheckLineOfSight95(user,item ))
+if(!CheckLineOfSight(user,item ))
 	SendSysMessage(user,"You can't see that.");
 	return 0;
 endif

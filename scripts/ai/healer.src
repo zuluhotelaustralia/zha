@@ -47,13 +47,13 @@ if( me.name["<random>"] )
 endif
 
 program HealerAI()
-	
+
 	var spawnpoint := 0;
 	var spawnpointserial := GetObjProperty(me, "SpawnPoint");
 	if (spawnpointserial)
 		spawnpoint := SystemFindObjectBySerial(spawnpointserial);
 	endif
-	
+
 	GrantPrivilege( me, "seeghosts" );
 	me.enable( "seeghosts" );
 	GrantPrivilege( me, "hearghosts" );
@@ -97,7 +97,7 @@ program HealerAI()
 			Fight( ev.source );
                     endif
 
-		
+
 
                 SYSEVENT_ENTEREDAREA:
                     if ( !ev.source.isA(POLCLASS_NPC) )
@@ -121,7 +121,7 @@ program HealerAI()
 				if(Distance(me, spawnpoint) >= 50 || me.multi)
 					RecallToSpawnPoint(spawnpoint);
 				endif
-				
+
 				next_recall := ReadGameClock() + 60;
 			endif
 		endif
@@ -148,7 +148,7 @@ outer:
                 SYSEVENT_DISENGAGED:
                 SYSEVENT_ENGAGED:
                 SYSEVENT_DAMAGED:
-			if ( GetHp(me) < (GetMaxHp(me)/2) )		
+			if ( GetHp(me) < (GetMaxHp(me)/2) )
                     		CastSpell( me, me, "gheal");
 			endif
                 SYSEVENT_OPPONENT_MOVED:
@@ -182,10 +182,10 @@ function CloseDistance( opponent )
   if (sleepdelay < 0) sleepdelay := 0; endif
 
     case (Distance( me, opponent )) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
             return 1;
-       
+
         2:
             WalkToward( opponent );
             sleepms(sleepdelay);
@@ -211,7 +211,7 @@ function HealerStuff(mobile)
       say("I cannot help thee until I escape this danger!");
     else
 	if( mobile.dead )
-		if( CheckLineOfSight95(me,mobile))
+		if( CheckLineOfSight(me,mobile))
 	   		//Bring up Res choice gump
 	   		TurnToward(mobile);
 	   		say( "Live again by the Virtues!" );
@@ -221,13 +221,13 @@ function HealerStuff(mobile)
 		endif
 
 
-	elseif( (mobile.poisoned) && (CheckLineOfSight95(me,mobile)) && (!len(ListHostiles(mobile))))
+	elseif( (mobile.poisoned) && (CheckLineOfSight(me,mobile)) && (!len(ListHostiles(mobile))))
 
 		TurnToward(mobile);
 		say("Sacrifice Purifies the Body and Soul!");
 		CastSpell( me, mobile, "archcure" );
 
-	elseif( (GetHp(mobile) < GetMaxHp(mobile)) && CheckLineOfSight95(me,mobile) && (!len(ListHostiles(mobile))) )
+	elseif( (GetHp(mobile) < GetMaxHp(mobile)) && CheckLineOfSight(me,mobile) && (!len(ListHostiles(mobile))) )
 
 		TurnToward(mobile);
 		say("Compassion heals all!");

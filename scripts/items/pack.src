@@ -1,11 +1,11 @@
 use uo;
 
-include "include/pol95";
+
 
 program use_backpack(who, backpack)
 
 SendSysMessage(who, "On what animal would you like to place this pack?");
-var what := Target95(who, TGTOPT_CHECK_LOS);
+var what := Target(who, TGTOPT_CHECK_LOS);
 
 if (!what)
 	SendSysMessage(who, "Targetting canceled");

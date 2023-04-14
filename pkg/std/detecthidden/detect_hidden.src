@@ -21,7 +21,7 @@ program detect_hidden( who )
 		return;
 	endif
 
-		
+
 	var range  := CInt( GetEffectiveSkill( who, SKILLID_DETECTINGHIDDEN ) / 15 );
 	if( thief )
 		range := CInt( range * ClasseBonus( who, CLASSEID_THIEF ) );
@@ -60,9 +60,9 @@ program detect_hidden( who )
 			if (thief)
 				distanceallowed:=distanceallowed+1+thief; //ie. unclassed can see these at 1 distance, level 1 at 3, level4 at 6.
 			endif
-			
+
 			if (item.objtype == 0x12||item.objtype == 0x13||item.objtype == 0x14) //hidentraptile and trapped pick doors
-				if ((Distance(who, item)<=distanceallowed) && CheckLineOfSight95( who, item ))
+				if ((Distance(who, item)<=distanceallowed) && CheckLineOfSight( who, item ))
 					var dparams:= {who, item};
 					start_script(":barnsitems:revealtraptile", dparams);//handles temporarily revealing the tile
 				endif
@@ -71,7 +71,7 @@ program detect_hidden( who )
 					PrintTextAbovePrivate( item, "Trap", who );
 					SetObjProperty( item, "trapped", 1 );
 				endif
-				
+
 		 	elseif( prop )
 				if( CheckSkill( who, SKILLID_DETECTINGHIDDEN, -1, 0 ))
 					PrintTextAbovePrivate( item, "Trapped", who );

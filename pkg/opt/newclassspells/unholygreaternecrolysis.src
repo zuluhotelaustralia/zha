@@ -23,7 +23,7 @@ program cast_greaternecrolysis(parms)
     Send_Attack( cast_on, caster, SPELL_ID);
   else
     caster := parms;
-    cast_on := Target95( caster, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
+    cast_on := Target( caster, TGTOPT_NEUTRAL + TGTOPT_CHECK_LOS );
 
     if (!cast_on)
       EraseObjProperty( caster, "#Casting");
@@ -44,9 +44,9 @@ program cast_greaternecrolysis(parms)
 	var basedamage:=dmg;
 	var extra:=0;
 	var mult:=GetResistanceMultiplier(cast_on, NECRO);
-	if (mult < 0)	
+	if (mult < 0)
 		extra := (basedamage * (1 + mult)) - basedamage;
-	endif	
+	endif
 	dmg:=dmg+extra;
 
 	mult:=GetResistanceMultiplier(caster, NECRO);
@@ -54,7 +54,7 @@ program cast_greaternecrolysis(parms)
 		extra := (basedamage / (1 + abs(mult))) - basedamage;
 	else
 		extra := (basedamage * (1 + mult)) - basedamage;
-	endif	
+	endif
 	dmg:=CInt(dmg+extra);
 	HealDamage( cast_on, dmg);
   else

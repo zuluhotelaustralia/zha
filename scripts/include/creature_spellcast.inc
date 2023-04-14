@@ -6,10 +6,10 @@
 //
 // Description: one spell per function. Most functions are functionname(caster, target), w
 // here target can be either an object or a location (depends on the spell).
-// where applicable, and where I implemented it, spell reflection is used. There are still 
+// where applicable, and where I implemented it, spell reflection is used. There are still
 // some that don't have reflection implemented.
-// 
-// Note: we still need to set up a script for summoned creatures to use, so they'll fight 
+//
+// Note: we still need to set up a script for summoned creatures to use, so they'll fight
 // for their masters
 //
 // TODO: add spell reflect code, add die roll damage, add other spells
@@ -88,8 +88,8 @@ endfunction
 /////////////
 function cast_AGILITY( caster, cast_on )
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-       
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (! ConsumeMana( me, 9 ))
@@ -106,11 +106,11 @@ function cast_AGILITY( caster, cast_on )
     PlayObjectCenteredEffect( cast_on, EFFECT_SPARKLE, 7,7);
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
-      
+
     var mod_amount := GetModAmount( magery );
     var duration := GetModDuration( magery, mod_amount );
-  
-     
+
+
     SetDexterityMod(cast_on, GetDexterityMod(cast_on) + mod_amount);
     do_temp_mod(cast_on, "dex", mod_amount,  duration);
 
@@ -122,8 +122,8 @@ endfunction
 //////////////
 function cast_strength( caster, cast_on )
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-       
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (! ConsumeMana( me, 16 ))
@@ -140,7 +140,7 @@ function cast_strength( caster, cast_on )
     PlayObjectCenteredEffect( cast_on, EFFECT_SPARKLE, 7,7);
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
-      
+
     var mod_amount := GetModAmount( magery );
     var duration := GetModDuration( magery, mod_amount );
 
@@ -158,7 +158,7 @@ endfunction
 /////////////
 function cast_CUNNING( caster, cast_on )
 
-    if (!CheckLineOfSight95( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ))
         return;
     endif
         if (! ConsumeMana( me, 10 ))
@@ -175,12 +175,12 @@ function cast_CUNNING( caster, cast_on )
     PlayObjectCenteredEffect( cast_on, EFFECT_SPARKLE, 7,7);
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
-   
+
     var mod_amount := GetModAmount( magery );
     var duration :=   GetModDuration( magery, mod_amount );
 
     Detach();
-   
+
     SetIntelligenceMod(cast_on, GetIntelligenceMod(cast_on) + mod_amount);
     sleep(duration);
     SetIntelligenceMod(cast_on, GetIntelligenceMod(cast_on) - mod_amount);
@@ -192,8 +192,8 @@ endfunction
 ////////////
 function cast_clumsy( caster, cast_on )
 
-   if (!CheckLineOfSight95( caster, cast_on ))
-       
+   if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (! ConsumeMana( me, 1 ))
@@ -219,7 +219,7 @@ function cast_clumsy( caster, cast_on )
 
     SetDexterityMod(cast_on, GetDexterityMod(cast_on) - mod_amount);
     do_temp_mod(cast_on, "dex", 0-mod_amount, duration);
-   
+
 endfunction
 
 ////////////
@@ -227,8 +227,8 @@ endfunction
 ////////////
 function cast_WEAKEN( caster, cast_on)
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-       
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
 
@@ -246,13 +246,13 @@ function cast_WEAKEN( caster, cast_on)
     PlayObjectCenteredEffect( cast_on, EFFECT_RED_SPARKLE, 7,7);
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
-      
+
     var mod_amount := GetModAmount( magery );
     var duration := GetModDuration( magery, mod_amount );
 
     SetStrengthMod(cast_on, GetStrengthMod(cast_on) - mod_amount);
     do_temp_mod(cast_on, "str", 0-mod_amount, duration);
-   
+
 endfunction
 
 ////////////////
@@ -261,8 +261,8 @@ endfunction
 
 function cast_FEEBLEMIND( caster, cast_on )
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-       
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (! ConsumeMana( me, 3 ))
@@ -282,10 +282,10 @@ function cast_FEEBLEMIND( caster, cast_on )
     var mod_amount := GetModAmount( magery );
     var duration := GetModDuration( magery, mod_amount );
 
-   
+
     SetIntelligenceMod(cast_on, GetIntelligenceMod(cast_on) - mod_amount);
     do_temp_mod(cast_on, "int", 0-mod_amount, duration);
-   
+
 endfunction
 
 ///////////
@@ -293,7 +293,7 @@ endfunction
 ///////////
 function cast_bless( caster, cast_on )
 
-    if (!CheckLineOfSight95( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ))
 
         return;
     endif
@@ -312,7 +312,7 @@ function cast_bless( caster, cast_on )
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
     var die_string := CStr( magery/15 ) + "d3+2";
-   
+
     var str_mod := RandomDiceStr( die_string );
     var dex_mod := RandomDiceStr( die_string );
     var int_mod := RandomDiceStr( die_string );
@@ -320,7 +320,7 @@ function cast_bless( caster, cast_on )
 
 
     Detach();
-   
+
     SetStrengthMod(cast_on, GetStrengthMod(cast_on) + str_mod);
     SetDexterityMod(cast_on, GetDexterityMod(cast_on) + dex_mod);
     SetIntelligenceMod(cast_on, GetIntelligenceMod(cast_on) + int_mod);
@@ -338,8 +338,8 @@ endfunction
 ///////////
 function cast_curse( caster, cast_on )
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-       
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (! ConsumeMana( me, 27 ))
@@ -351,13 +351,13 @@ function cast_curse( caster, cast_on )
     if (saywords)
         SpeakPowerWords( me, 27);
     endif
-   
+
     PlaySoundEffect(cast_on, sound_effect_curse);
     PlayObjectCenteredEffect( caster, EFFECT_RED_SPARKLE, 10,10);
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
     var die_string := CStr( magery /15 ) + "d3+2";
-   
+
     var str_mod := RandomDiceStr( die_string );
     var dex_mod := RandomDiceStr( die_string );
     var int_mod := RandomDiceStr( die_string );
@@ -381,7 +381,7 @@ function cast_teleport( caster, where )
     if (CheckLosAt( caster, where.x, where.y, where.z ))
         MoveObjectToLocation( caster, where.x, where.y, where.z , _DEFAULT_REALM); //AutoConversion
     else
-       
+
     endif
 
 endfunction
@@ -391,7 +391,7 @@ endfunction
 ///////////////
 
 function cast_resurrect( caster, cast_on)
-   if (!CheckLineOfSight95( caster, cast_on )) return; endif
+   if (!CheckLineOfSight( caster, cast_on )) return; endif
    if (!yesno(cast_on,"Live Again?")) return; endif
 
     PlaySoundEffect(caster, SOUND_EFFECT_CURE);
@@ -432,7 +432,7 @@ function poison(creature)
         endif
 	var poison_level:= CInt(GetObjProperty(creature, "poison_level"));
         if (poison_level == 0)
-            start_script( "spells/poisondamage", creature );   
+            start_script( "spells/poisondamage", creature );
         endif
         poison_level := poison_level + 2;
 //        print( "setting poison level to " + poison_level );
@@ -441,7 +441,7 @@ function poison(creature)
     // the script we just started won't start until here
 
         // Moved to poisondamage: ApplyRawDamage(creature, 3 * poison_level);
-       
+
     PlayObjectCenteredEffect( creature, EFFECT_SPARKLE, 10,10);
     PlaySoundEffect(creature, SOUND_EFFECT_POISON);
 endfunction
@@ -455,7 +455,7 @@ function cast_poison( caster, cast_on )
 var parms := array;
 var parms2 := array;
 
-if (!CheckLineOfSight95(caster, cast_on))
+if (!CheckLineOfSight(caster, cast_on))
     //return 0;
 endif
     if (! ConsumeMana( me, 20 ))
@@ -471,17 +471,17 @@ endif
  parms[2]  := cast_on;
  parms[3]  := 0;
  parms[4]  := EFFECT_RED_SPARKLE;
- parms[5]  := 10;          
- parms[6]  := 10;   
- parms[7]  := 0;          
- parms[8]  := 0;	     
- parms[9]  := 0;        
+ parms[5]  := 10;
+ parms[6]  := 10;
+ parms[7]  := 0;
+ parms[8]  := 0;
+ parms[9]  := 0;
  parms[10] := ":spells:effect_poisoning";
 
 
  parms2[1] := cast_on;
  parms2[2] := caster;
- parms2[3] := CInt(GetEffectiveSkill( caster, SKILLID_MAGERY ) /15); //poison_level 
+ parms2[3] := CInt(GetEffectiveSkill( caster, SKILLID_MAGERY ) /15); //poison_level
 
  parms[11] := parms2;
 
@@ -497,8 +497,8 @@ endfunction
 function cast_mind_blast( caster, victim )
 
     var parms := array;
-  
-    if (!CheckLineOfSight95( caster, victim ))
+
+    if (!CheckLineOfSight( caster, victim ))
        	//return 0;
     endif
     if (! ConsumeMana( me, 37 ))
@@ -528,7 +528,7 @@ function cast_mind_blast( caster, victim )
         parms[11] := "";
         start_script( ":spells:reflect_spell",parms);
 	PlaySoundEffect(victim, SOUND_EFFECT_MINDBLAST);
-   
+
     elseif(his_int > my_int)
 	var diff := (his_int - my_int);
         parms[1] := victim;
@@ -544,7 +544,7 @@ function cast_mind_blast( caster, victim )
         parms[11] := "";
         start_script( ":spells:reflect_spell",parms);
 	PlaySoundEffect(caster, SOUND_EFFECT_MINDBLAST);
-    
+
     else
 
     endif
@@ -556,13 +556,13 @@ endfunction
 function cast_meteor( caster, cast_loc )
 
     var parms := array;
-  
+
     var targets := ListMobilesNearLocation(cast_loc.x,cast_loc.y,cast_loc.z,4);
     if (saywords)
     SpeakPowerWords( me, 55);
     endif
     foreach mobile in targets
-	    if( (mobile.serial != caster.serial)  && (CheckLineOfSight95( caster, mobile )) )
+	    if( (mobile.serial != caster.serial)  && (CheckLineOfSight( caster, mobile )) )
 	    var dmg := GetEffectiveSkill( caster, SKILLID_MAGERY ) / (Random(3) + 5);
 	    dmg := dmg /2;
 	    parms[1] := caster;
@@ -590,8 +590,8 @@ function cast_magicarrow( caster, cast_on )
 
     var parms := array;
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-       
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (! ConsumeMana( me, 5 ))
@@ -609,7 +609,7 @@ function cast_magicarrow( caster, cast_on )
     var dmg := RandomDiceStr( die_string );
 
     dmg := dmg + CInt( GetEffectiveSkill(caster, SKILLID_MAGERY)/20);
-   
+
 //    print( "damage will be: " + dmg );
     parms[1] := caster;
     parms[2] := cast_on;
@@ -622,8 +622,8 @@ function cast_magicarrow( caster, cast_on )
     parms[9] := 0;
     parms[10] := "";
     parms[11] := "";
-   
-    start_script( ":spells:reflect_spell",parms); 
+
+    start_script( ":spells:reflect_spell",parms);
 
 endfunction
 
@@ -632,7 +632,7 @@ endfunction
 ///////////////
 function cast_lightning( caster, cast_on)
 
-    if (!CheckLineOfSight95( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ))
        	return;
     endif
         if (! ConsumeMana( me, 30 ))
@@ -651,7 +651,7 @@ function cast_lightning( caster, cast_on)
     var dmg := RandomDiceStr( die_string );
     dmg := dmg + (GetEffectiveSkill( caster, SKILLID_MAGERY ) / 15);
 
-   
+
     	var parms := array;
     	parms[1] := cast_on;
     	parms[2] := caster;
@@ -667,8 +667,8 @@ function cast_harm( caster, cast_on)
 
 	var parms := array;
 
-	if (!CheckLineOfSight95( caster, cast_on ))
-        
+	if (!CheckLineOfSight( caster, cast_on ))
+
         	return;
     	endif
     if (! ConsumeMana( me, 12 ))
@@ -697,7 +697,7 @@ function cast_harm( caster, cast_on)
     	parms[9] := 0;
     	parms[10] := "";
     	parms[11] := "";
-   
+
 	start_script( ":spells:reflect_spell",parms);
 endfunction
 
@@ -733,7 +733,7 @@ function cast_flamestrike( caster, cast_on )
     parms[9] := 0;
     parms[10] := "";
     parms[11] := "";
-   
+
     start_script( ":spells:reflect_spell",parms);
 
 endfunction
@@ -742,10 +742,10 @@ endfunction
 // Ebolt //
 ///////////
 function cast_ebolt( caster, cast_on)
-   
+
     var parms := array;
 
-    if (!CheckLineOfSight95( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ))
         //return 0;
     endif
     if (! ConsumeMana( me, 42 ))
@@ -772,11 +772,11 @@ function cast_ebolt( caster, cast_on)
     parms[9] := 0;
     parms[10] := "";
     parms[11] := "";
-   
+
     start_script( ":spells:reflect_spell",parms);
-   
+
     PlaySoundEffect( cast_on, SOUND_EFFECT_EBOLT );
-   
+
 endfunction
 
 //////////////////
@@ -791,12 +791,12 @@ therange := CInt(GetEffectiveSkill( caster, SKILLID_MAGERY )/10 );
 
     items := ListItemsNearLocation(cast_area.x, cast_area.y, cast_area.z, therange);
     PlaySoundEffect( caster, SOUND_EFFECT_DISPEL );
-   
+
     foreach item in items
         if (GetObjProperty(item, "f") == "1")
                 PlayObjectCenteredEffect( item, EFFECT_SPARKLE, 10,10);
                 DestroyItem(item);
-        endif   
+        endif
    endforeach
 endfunction
 
@@ -805,8 +805,8 @@ endfunction
 //////////
 function cast_cure( caster, cast_on)
 
-	if (!CheckLineOfSight95( caster, cast_on ))
-        
+	if (!CheckLineOfSight( caster, cast_on ))
+
         	return;
     	endif
 
@@ -817,12 +817,12 @@ function cast_cure( caster, cast_on)
         if (poison_level >= 1)
                 poison_level := poison_level - 1;
                 if (poison_level >= 1)
-            
+
                 else
                  SendSysMessage(caster, "Target cured.");
                 endif
                 SetObjProperty(cast_on, "poison_level", CInt(poison_level));
-        endif       
+        endif
 
 endfunction
 
@@ -836,12 +836,12 @@ function cast_chainlightning( caster, cast_loc)
     var targets := ListMobilesNearLocation(cast_loc.x,cast_loc.y,cast_loc.z,4);
 
     foreach mobile in targets
-	    if( (mobile.serial != caster.serial) && (mobile.dead == 0) && (CheckLineOfSight95( caster, mobile )) )
-	   
+	    if( (mobile.serial != caster.serial) && (mobile.dead == 0) && (CheckLineOfSight( caster, mobile )) )
+
 		    PlayLightningBoltEffect( mobile );
 
 		    PlaySoundEffect( caster, SOUND_EFFECT_LIGHTNING );
-		   
+
 		    var damagestr := CStr(GetEffectiveSkill( caster, SKILLID_MAGERY ) / 9) + "d4";
 		    var dmg := RandomDiceStr(damagestr);
 		    ApplyRawDamage( mobile, dmg );
@@ -854,7 +854,7 @@ endfunction
 //////////////
 function cast_archcure( caster, cast_on )
 
-	if (!CheckLineOfSight95( caster, cast_on ))
+	if (!CheckLineOfSight( caster, cast_on ))
         	return  0;
     	endif
 
@@ -873,7 +873,7 @@ function cast_archcure( caster, cast_on )
                     SendSysMessage(cast_on, "You were cured.");
                 endif
                 SetObjProperty(cast_on, "poison_level", CInt(poison_level));
-        endif       
+        endif
 
 endfunction
 
@@ -1003,14 +1003,14 @@ function cast_fireball( caster, cast_on )
 
 
     var parms := {};
-   
+
     if (!cast_on)
         return;
     endif
 
 
-    if (!CheckLineOfSight95( caster, cast_on ))
-      
+    if (!CheckLineOfSight( caster, cast_on ))
+
         return;
     endif
     if (saywords)
@@ -1035,15 +1035,15 @@ function cast_fireball( caster, cast_on )
     parms[9] := 0;
     parms[10] := "";
     parms[11] := "";
-   
-   
-    start_script( ":spells:reflect_spell",parms); 
+
+
+    start_script( ":spells:reflect_spell",parms);
 
 endfunction
 
 function  cast_paralyze( caster, cast_on)
 
-    if (!CheckLineOfSight95( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ))
         return;
     endif
     if (saywords)
@@ -1054,7 +1054,7 @@ function  cast_paralyze( caster, cast_on)
         PlaySoundEffect( cast_on, SFX_SPELL_PARALYZE );
         cast_on.paralyzed := 1;
         do_temp_mod(cast_on, "p", 1, 15);
-       
+
     endif
 endfunction
 
@@ -1065,12 +1065,12 @@ function cast_masscurse( caster, cast_on )
   endif
 
     PlaySoundEffect(caster, SFX_SPELL_MASS_CURSE);
-       
+
     var targets := ListMobilesNearLocation( cast_on.x, cast_on.y, cast_on.z, 4 );
 
     var magery := GetEffectiveSkill(caster, SKILLID_MAGERY);
     var die_string := CStr( magery /15 ) + "d3+2";
-   
+
     var str_mod := RandomDiceStr( die_string );
     var dex_mod := RandomDiceStr( die_string );
     var int_mod := RandomDiceStr( die_string );
@@ -1080,7 +1080,7 @@ function cast_masscurse( caster, cast_on )
 
     foreach cast_on in targets
 
-        if ( (cast_on.serial != caster.serial) && (CheckLineOfSight95( caster, cast_on )) )
+        if ( (cast_on.serial != caster.serial) && (CheckLineOfSight( caster, cast_on )) )
             PlaySoundEffect(cast_on, SFX_SPELL_MASS_CURSE);
             PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 10,10);
 

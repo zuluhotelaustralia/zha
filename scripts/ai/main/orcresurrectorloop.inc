@@ -25,7 +25,7 @@ function main_AI_loop()
 		//recursively look for orcs to res
 		while (lookForOrcToRes())
 		endwhile
-		
+
 		var hiders := ListMobilesNearLocationEx( me.x, me.y, me.z, HALT_THRESHOLD, LISTEX_FLAG_HIDDEN );
 		if( len(hiders) )
 			foreach mobile in hiders
@@ -95,13 +95,13 @@ endfunction
 
 function lookForOrcToRes()
 		foreach corpse in ListItemsNearLocationOfType( me.x, me.y, me.z, HALT_THRESHOLD, 0x2006 )
-		if (CheckLineOfSight95( me, corpse ))
+		if (CheckLineOfSight( me, corpse ))
 			if (! GetObjProperty(corpse, "triedToResButFailed"))
 				SetObjProperty(corpse, "triedToResButFailed",1);
 
 				if (GetObjProperty(corpse, "Type") == "Orc")
 					var gettocorpsesteps :=0;
-					
+
 					while (Distance( me, corpse )&&gettocorpsesteps<40)
 						RunTowardLocation(corpse.x, corpse.y);
 						gettocorpsesteps:=gettocorpsesteps+1;
@@ -122,7 +122,7 @@ function lookForOrcToRes()
 						EraseObjProperty(newmonster, "triedToResButFailed");
 						return 1;
 					endif
-				endif			
+				endif
 			endif
 		endif
 	endforeach
@@ -131,7 +131,7 @@ endfunction
 
 function look_around()
 	lookForOrcToRes();
-	
+
 	foreach critter in ListMobilesInLineOfSight( me, HALT_THRESHOLD )
 		if (!critter.npctemplate || critter.script == "tamed")
 			Fight( critter );

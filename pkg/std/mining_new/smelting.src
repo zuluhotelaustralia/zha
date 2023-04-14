@@ -59,7 +59,7 @@ function SmeltOre(who, ore, ingot, difficulty)
   endif
   var forge := Target(who);
   if((forge.objtype == 0xfb1) || ((forge.objtype >= 0x197a) && (forge.objtype <= 0x19a9)))
-    if(!CheckLineOfSight95(who, forge))
+    if(!CheckLineOfSight(who, forge))
       SendSysMessage(who,"you cant see that");
       return;
     endif

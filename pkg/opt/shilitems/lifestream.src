@@ -45,7 +45,7 @@ program item_lifestream( who, item )
 	Detach();
 
 	foreach ghost in ListGhostsNearLocation( who.x, who.y, who.z, 10 );
-		if( !(!CheckLineOfSight95( who, ghost ) && ghost.multi) )
+		if( !(!CheckLineOfSight( who, ghost ) && ghost.multi) )
 			ResurrectMobile( ghost, who );
 			PlaySoundEffect( who, SFX_SPELL_RESURRECTION );
 			PlaySoundEffect( ghost, SFX_SPELL_RESURRECTION );
@@ -56,7 +56,7 @@ program item_lifestream( who, item )
 	endforeach
 
 	foreach mobile in ListMobilesNearLocation( who.x, who.y, who.z, 10 );
-		if ( !(!CheckLineOfSight95(who, mobile) && mobile.multi) )
+		if ( !(!CheckLineOfSight(who, mobile) && mobile.multi) )
 			if( GetObjProperty( mobile, "Type" ) == "Undead" )
 				ApplyTheDamage( mobile, who, (GetHp(mobile)+3), DMGID_MAGIC );
 			else

@@ -15,7 +15,7 @@
 
 use uo;
 use os;
-include "include/pol95";
+
 
 // move to a master include file ? example include/client ?
 // or split to object, animation, sound, ... file
@@ -38,7 +38,7 @@ var cfg := ReadConfigFile(":combat:itemdesc");
 
 program training_archery( who, butte )
 
-	if (!CheckLineOfSight95( who, butte ))
+	if (!CheckLineOfSight( who, butte ))
 	        SendSysMessage( who, "You don't have line of sight to that." );
         	return;
 	endif
@@ -49,7 +49,7 @@ program training_archery( who, butte )
            SetObjProperty( butte, "arrows", 0 );
         endif
 
-   
+
         used_bolts := GetObjProperty( butte, "bolts" );
         if(!used_bolts)
            used_bolts := 0;
@@ -72,7 +72,7 @@ program training_archery( who, butte )
 		if ( itemtype == 0x13b2 ) // bow
 			ammunitiontype := UOBJECT_ARROW;
 			panim := ANIM_ATTACK_BOW;
-                        effect := GFX_ARROW_FLIGHT;	
+                        effect := GFX_ARROW_FLIGHT;
 		endif
 
 		if (( itemtype == 0xf4f ) || ( itemtype == 0x13fd )) //xbow

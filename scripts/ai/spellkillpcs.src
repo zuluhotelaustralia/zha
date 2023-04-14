@@ -44,7 +44,7 @@ program KillPlayers()
 	endif
 
 	SetWarMode( 0 );
-      
+
 	main_AI_loop();
 
 endprogram
@@ -71,12 +71,12 @@ function CloseDistance( opponent )
 //	return 1 if we DON'T need to move
 //	return 0 if we DO need to move
 //  return 4 if they went onto a multi
-	
+
   var cfg := ReadConfigFile(":combat:itemdesc");
   var weaponType := cfg[me.weapon.objtype];
 
   var weprange;
-  if (!weaponType.maxrange)	
+  if (!weaponType.maxrange)
 	weprange:=1;
   else
    	weprange:=weaponType.maxrange;
@@ -101,7 +101,7 @@ function CloseDistance( opponent )
 	endif
 
     case (d) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
 		if ( runaway < 15 )
 			if (GetMana(me) > (GetMaxMana(me)/3))
@@ -121,7 +121,7 @@ function CloseDistance( opponent )
 			WalkToward( opponent );
 			sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight95( me, opponent) )
+		elseif (!CheckLineOfSight( me, opponent) )
 			if (runrandom(opponent))
 			sleepms(sleepdelay);
 				return 2;

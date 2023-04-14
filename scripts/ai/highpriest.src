@@ -86,7 +86,7 @@ while (1)
 				say( "No, I won't listen to thy request.");
 				sleep( 1 );
 				say( "Thine past behavior made thee unworthy in the eyes of the Virtues" );
-			
+
 			elseif( event.text["Greeting"] || event.text["Hail"] || event.text["greeting"] || event.text["Hi"] || event.text["hi"] || event.text["Hello"] || event.text["hello"])
 				TurnToward( event.source );
 				say( "Greetings, I hope thee is having a good day." );
@@ -94,7 +94,7 @@ while (1)
 			elseif( event.text["Help"] || event.text["help"] || event.text["HELP"] )
 				TurnToward( event.source );
 				say( "How can I help thee?" );
-			
+
 			elseif( event.text["Farewell"] || event.text["farewell"] )
 				TurnToward( event.source );
 				say( "I wish thee good luck in thine travels, and may the Virtues looks upon thee." );
@@ -112,7 +112,7 @@ while (1)
 						SetObjProperty( player, "PriestPrice", price );
 						SetObjProperty( player, "TargetedItem", item.serial );
 						say( "I will remove the curse from that item for at least " + price + " gold pieces." );
-				
+
 					elseif( GetDexterity(item) )
 						say( "The Virues of Compassion teach us to always respect the people around us." );
 						sleep( 5 );
@@ -131,7 +131,7 @@ while (1)
 				if (item)
 					if ( GetDexterity(item) )
 						say( "I really don't think it's cursed, nor that it will ever be." );
-				
+
 					elseif ( GetObjProperty( item, "Cursed" ) == 2 || GetObjProperty( item, "Cursed" ) == 3 )
 						say( "That item isn't only cursed, but the curse is also already revealed." );
 
@@ -197,7 +197,7 @@ while (1)
             	SYSEVENT_ENTEREDAREA:
 			if ( !event.source.isA(POLCLASS_NPC) )
 				var player := event.source;
-                 		if( player.dead && CheckLineOfSight95(me,player) && !GetObjProperty( player, "PriestUpset" ) )
+                 		if( player.dead && CheckLineOfSight(me,player) && !GetObjProperty( player, "PriestUpset" ) )
 					TurnToward( event.source );
 					if( GetObjProperty( event.source, "PriestUpset" ) )
 						say( "Hahah I see that thee was finally killed, that is what thee deserved,");
@@ -205,7 +205,7 @@ while (1)
 						say( "after what he did in the past against the holy Virtues." );
 						return;
 					endif
-				
+
 					say( "By the power of the Virtues, may this soul be brough back to life!" );
 					PerformAction( me, ANIM_CAST_DIR );
 					PlaySoundEffect( me, SFX_SPELL_RESURRECTION);

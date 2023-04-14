@@ -44,7 +44,7 @@ program KillPlayers()
 	if (GetObjProperty(me, "frozen"))
 		me.frozen := 1;
 	endif
-      
+
 	main_AI_loop(ReadGameClock() + 10);
 
 endprogram
@@ -53,7 +53,7 @@ function CloseDistance( opponent )
 
   var sleepdelay := 300 - (CInt(GetDexterity(me)) * 1.5);
   if (sleepdelay < 0) sleepdelay := 0; endif
- 
+
 //	return 1 if we DON'T need to move
 //	return 0 if we DO need to move
 
@@ -66,7 +66,7 @@ function CloseDistance( opponent )
 
     case (d) //Conversion
 
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
 		if ( runaway < 15 )
 			if (GetMana(me) > (GetMaxMana(me)/3))
@@ -86,7 +86,7 @@ function CloseDistance( opponent )
 			WalkToward( opponent );
 			sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight95( me, opponent) )
+		elseif (!CheckLineOfSight( me, opponent) )
 			if (runrandom(opponent))
 			sleepms(sleepdelay);
 				return 2;

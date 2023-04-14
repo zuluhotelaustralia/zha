@@ -46,7 +46,7 @@ program KillPlayers()
 	endif
 
 	SetWarMode( 0 );
-      
+
 	main_AI_loop();
 
 endprogram
@@ -84,7 +84,7 @@ function CloseDistance( opponent )
 	endif
 
     case (d) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
 		if ( runaway < 15 )
 			if (GetMana(me) > (GetMaxMana(me)/3))
@@ -104,7 +104,7 @@ function CloseDistance( opponent )
 			WalkToward( opponent );
 			sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight95( me, opponent) )
+		elseif (!CheckLineOfSight( me, opponent) )
 			if (runrandom(opponent))
 			sleepms(sleepdelay);
 				return 2;

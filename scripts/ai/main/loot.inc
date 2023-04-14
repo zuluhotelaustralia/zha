@@ -1,4 +1,4 @@
-include "include/pol95";
+
 const STARTHAIR := 0x2030;
 const ENDHAIR := 0x2060;
 
@@ -44,7 +44,7 @@ function grabloot()
 		endif
 
 
-		if( CheckLineOfSight95( me, myitem ) )
+		if( CheckLineOfSight( me, myitem ) )
 			var sh := GetStandingHeight( CInt(myitem.x), CInt(myitem.y), CInt(myitem.z) );
 			if (sh.multi || sh.multi.serial)
 				continue;

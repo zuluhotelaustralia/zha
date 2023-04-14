@@ -22,7 +22,7 @@ const ANIM_DELAY_MS    := 1500;
 var conf := ReadConfigFile( "ninjaalchemy" );
 
 program use_mortar( user, mortar )
-	
+
 	if(!ReserveItem(mortar))
 		return;
 	endif
@@ -32,11 +32,11 @@ program use_mortar( user, mortar )
 		return;
 	endif
 
-	
+
 	SendSysMessage( user, "What would you like to use that on?" );
 
-	var use_on := Target95( user, TGTOPT_CHECK_LOS );
-	
+	var use_on := Target( user, TGTOPT_CHECK_LOS );
+
 	if( !use_on )
 		return;
 	endif
@@ -53,7 +53,7 @@ program use_mortar( user, mortar )
 	//if( use_on.isa(POLCLASS_WEAPON) )
 	//	makethrowable( user, use_on );
 	//	return;
-	//endif 
+	//endif
 
 	var elem := conf[use_on.objtype];
 	if( !elem )

@@ -39,7 +39,7 @@ program cast_curse( parms )
 
 	foreach cast_on in ListMobilesNearLocation( CInt(thetarget.x), CInt(thetarget.y), CInt(thetarget.z), ModifyWithMagicEfficiency( caster, 4 ));
 
-		if ( CheckLineOfSight95( caster, cast_on ) )
+		if ( CheckLineOfSight( caster, cast_on ) )
 			var immunity := IsProtected( caster, cast_on, circle );
 			if( immunity != IMMUNED )
 				//if(!cast_on.criminal)
@@ -57,7 +57,7 @@ program cast_curse( parms )
 					SendSysMessage( cast_on, "Your equipment increase the effect of the spell!" );
 				mod_amount := mod_amount * 2;
 				endif
-		
+
 				if (CanMod(cast_on, "all"))
 					DoTempMod(cast_on, "all", (0-mod_amount), duration);
 				endif

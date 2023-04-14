@@ -1,5 +1,5 @@
 /* Psionics Spell - Fists of Fury    **
-** Reduces Hitting rate by half      ** 
+** Reduces Hitting rate by half      **
 ** Seravy - seravy@gmail.com         */
 
 use uo;
@@ -39,7 +39,7 @@ program cast_fistsoffury(parms)
 
   foreach mobile in victims
 
-    if(CheckLineOfSight95( mobile, caster))
+    if(CheckLineOfSight( mobile, caster))
       var immunity := IsProtected( caster, mobile, circle );
       var circ := circle;
       if( immunity != IMMUNED && mobile != caster )
@@ -59,7 +59,7 @@ program cast_fistsoffury(parms)
         ApplyElementalDamage(caster, mobile, circ, dmg, 0);
       endif
     endif
-  
+
   sleepms(150);
   endforeach
 endprogram

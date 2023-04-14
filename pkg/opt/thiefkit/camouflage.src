@@ -5,7 +5,7 @@ use storage;
 include "include/client";
 include "include/attributes";
 include "include/camouflage";
-include "include/pol95";
+
 
 const DIFFICULTY:=100;
 const POINTS:=300;
@@ -38,7 +38,7 @@ SetObjProperty(thief, "#cmftime", ReadGameClock() + 30);
 
 	SendSysMessage(thief, "Who would u like to camouflage as?");
 
-	var what := Target95(thief, TGTOPT_CHECK_LOS);
+	var what := Target(thief, TGTOPT_CHECK_LOS);
 
 	if(!what)
 	        return;
@@ -69,7 +69,7 @@ SetObjProperty(thief, "#cmftime", ReadGameClock() + 30);
 	PrintTextAbovePrivate(thief,"You start to camouflage...", thief);
 	thief.hidden := 1;
 	sleep( 20 - CInt(GetEffectiveSkill( thief, SKILLID_HIDING )/10 ) );
-       
+
 	foreach npc in ListMobilesNearLocation( thief.x, thief.y, thief.z, 15 )
 		if( npc.serial != thief.serial )
 
@@ -100,7 +100,7 @@ SetObjProperty(thief, "#cmftime", ReadGameClock() + 30);
 	endif
 
 	var storage := findsa(thief);
-       
+
 	SetObjProperty(thief, "cmfc", thief.color);
 	SetObjProperty(thief, "cmfg", thief.graphic);
 	SetObjProperty(thief, "cmfn", thief.name);
@@ -139,5 +139,5 @@ SetObjProperty(thief, "#cmftime", ReadGameClock() + 30);
 	PrintTextAbovePrivate(thief,"Your disguise has worn out...", thief);
 	sleep(2);
 	PrintTextAbovePrivate(thief,"You are now " + thief.name + ", again.", thief);
-       
+
 endprogram

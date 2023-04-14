@@ -172,7 +172,7 @@ program tame( character )
 		SendSysMessage( character, CStr(the_creature.name + " belongs to someone else!") );
 		return;
 	endif
-	
+
 	if( !tame_timer || tame_timer < ReadGameClock() )
 
 		EraseObjProperty( the_creature, "tametimer" );
@@ -268,12 +268,12 @@ function WaitAndCheckTheTamer( the_tamer, the_creature )
 		SendSysMessage( the_tamer, "You can't tame a creature that don't see you." );
 		return 0;
 	endif
-	
+
 	if (the_tamer.dead)
 		return 0;
 	endif
 
-	if( !CheckLineOfSight95( the_tamer, the_creature ) )
+	if( !CheckLineOfSight( the_tamer, the_creature ) )
 		SendSysMessage( the_tamer, "The creature isn't in your line of sight." );
 		return 0;
 	endif

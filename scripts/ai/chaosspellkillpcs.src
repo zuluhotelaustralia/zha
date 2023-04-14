@@ -43,7 +43,7 @@ program KillPlayers()
 	endif
 
 	SetWarMode( 0 );
-       
+
 	main_AI_loop();
 
 endprogram
@@ -67,11 +67,11 @@ endprogram
 /////////////////////////////////////////////////////////////////////////////
 function CloseDistance( opponent )
 //  return 4 if they went onto a multi
-	
+
 	if  (opponent.multi.serial != me.multi.serial)
 		return 4;
 	endif
-	
+
 
 //	return 1 if we DON'T need to move
 //	return 0 if we DO need to move
@@ -82,12 +82,12 @@ var runaround := 0;
 foreach item in Near
 if (item.objtype == 0x5f or item.objtype == 0x57 or item.objtype == 0x3946 or item.objtype == 0x3955)
 if (kwall == 0)
-	if (!CheckLineOfSight95( me, opponent))
+	if (!CheckLineOfSight( me, opponent))
 		if (Random(2) == 1 )
 			me.mana := me.mana + 50;
 			CastSpell(me,me,"dispel_field");
 			kwall := 1;
-		else	
+		else
 			while (runaround < 15)
 				runaround := runaround + 1;
 				RunToward(opponent);
@@ -109,7 +109,7 @@ endforeach
 	endif
 
     case (d) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
 		if ( runaway < 15 )
 			if (me.mana > (me.maxmana/3))
@@ -129,7 +129,7 @@ endforeach
 			RunToward( opponent );
 			Sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight95( me, opponent) )
+		elseif (!CheckLineOfSight( me, opponent) )
 			if (GetObjProperty(me,"lastnolos") != opponent.name)
 				if (runrandom(opponent))
 					Sleepms(sleepdelay);
@@ -137,9 +137,9 @@ endforeach
 			endif
 			SetObjProperty(me,"lastnolos",opponent.name);
 			foreach mobile in ListMobilesNearLocation( me.x, me.y, me.z, 9 )
-				if (CheckLineOfSight95( me, mobile ) and !mobile.npctemplate )
+				if (CheckLineOfSight( me, mobile ) and !mobile.npctemplate )
 					opponent := mobile;
-		
+
 				endif
 			endforeach
 			var choice := Random (4) + 1;
@@ -171,4 +171,3 @@ endforeach
 
 endfunction
 
-		

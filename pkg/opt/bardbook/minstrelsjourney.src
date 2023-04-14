@@ -3,13 +3,13 @@ use cfgfile;
 
 include "bardbook";
 include "include/client";
-include "include/pol95";
+
 include "include/speedhackRecallCheck";
 
 var water := { 0xa8, 0xa9, 0x64, 0xaa, 0xab };
 
 program minstrelsjourney( caster, parms )
-	
+
 	if(!TryToCastBard( caster, 1 ))
 		EraseObjProperty( caster, "#Casting" );
 		return;
@@ -41,19 +41,19 @@ program minstrelsjourney( caster, parms )
 	bx:=caster.x;
 	by:=caster.y;
 	bz:=caster.z;
-	
+
 	if (caster.z > where.z+10 || caster.z < where.z-10)
 		SendSysMessage( caster, "You can't see that." );
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
-	
+
 	if (! CheckLosAt( caster, where.x, where.y, where.z ))
 		SendSysMessage( caster, "You can't see that." );
 		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
-	
+
 	//make a place marker at location and check that it can see the player :)
 	var firefield := CreateItemAtLocation(where.x, where.y, where.z, "firefield" ); //chose firefield cos if shard fails as script run it wont be made at reboot
 	if (!firefield)
@@ -62,8 +62,8 @@ program minstrelsjourney( caster, parms )
 		return;
 	endif
 	firefield.invisible:=1;
-	
-	if (! CheckLineOfSight95(firefield, caster) ||  ! CheckLineOfSight95(caster, firefield) || Distance(caster,firefield)>22)
+
+	if (! CheckLineOfSight(firefield, caster) ||  ! CheckLineOfSight(caster, firefield) || Distance(caster,firefield)>22)
 		SendSysMessage( caster, "You can't see that." );
 		DestroyItem(firefield);
 		EraseObjProperty( caster, "#Casting" );

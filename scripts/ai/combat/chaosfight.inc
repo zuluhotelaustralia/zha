@@ -1,7 +1,7 @@
 
 include "include/random";
 include "ai/main/npcinfo";
-include "include/pol95";
+
 
 function Fight( opponent )
 
@@ -97,7 +97,7 @@ function Fight( opponent )
 
 		steps := 0;
 		randomruns := 0;
-		if ( CheckLineOfSight95(me,opponent) )
+		if ( CheckLineOfSight(me,opponent) )
 			loops := 0;
 			waittime := 1;
 			EraseObjProperty(me,"#flees");

@@ -29,9 +29,9 @@ program exploder(parms)
 	endif
 
 	var lookout := CreateItemAtLocation( CInt(where.x), CInt(where.y), CInt(where.z), 0x0f0d, 1 );
-	
+
 	lookout.movable := 0;
-	if(!CheckLineOfSight95(thrower, lookout))
+	if(!CheckLineOfSight(thrower, lookout))
 		PrintTextAbove(thrower, thrower.name + " fumbles the potion!");
 		where.x := thrower.x;
 		where.y := thrower.y;
@@ -97,11 +97,10 @@ program exploder(parms)
 			parms2[1] := thrower;
 			parms2[2] := item;
 			parms2[3] := loc;
-		
+
 			start_script( ":alchemy:exploder", parms2 );
 		endif
 	endforeach*/
 
 endprogram
 
-    

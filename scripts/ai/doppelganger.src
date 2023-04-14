@@ -62,14 +62,14 @@ endprogram
 
 function CloseDistance( opponent )
 //  return 4 if they went onto a multi
-	
+
 	if  (opponent.multi.serial != me.multi.serial)
 		return 4;
 	endif
 
   var sleepdelay := 300 - (CInt(GetDexterity(me)) * 1.5);
   if (sleepdelay < 0) sleepdelay := 0; endif
- 
+
 	var archerymovement := HasBow();
 
 	var d := Distance(me, opponent);
@@ -95,7 +95,7 @@ function CloseDistance( opponent )
 			sleepms(sleepdelay);
 			return 0;
 		else
-			if (!CheckLineOfSight95(me,opponent))
+			if (!CheckLineOfSight(me,opponent))
 				RunRandom(opponent,2);
 				sleepms(sleepdelay);
 				return 0;

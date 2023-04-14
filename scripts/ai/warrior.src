@@ -393,7 +393,7 @@ function Fight(opponent)
 			endif
 		1:
 			if (wasmoving) TurnToward(opponent); endif
-			if (!CheckLineOfSight95(me,opponent))
+			if (!CheckLineOfSight(me,opponent))
 				SetOpponent(0);
 				SetWarMode(0);
 				following := wasfollowing;

@@ -2,7 +2,7 @@ use uo;
 use os;
 
 include "include/namingbyenchant";
-include "include/pol95";
+
 
 const DELAY_BETWEEN_USE	:= 2;
 
@@ -11,7 +11,7 @@ program wand_of_id( who, item )
 	if( !ReserveItem( item ) )
 		return;
 	endif
-	
+
 	var last_use := CInt(GetObjProperty( item, "#last_use" ));
 	if( last_use && last_use > CInt(ReadGameClock() - DELAY_BETWEEN_USE) )
 		SendSysMessage( who, "You must wait before using it again." );
@@ -32,16 +32,16 @@ program wand_of_id( who, item )
 	endif
 
 	SendSysMessage( who, "Select an object to identify." );
-	var the_item := Target95(who, TGTOPT_CHECK_LOS);
+	var the_item := Target(who, TGTOPT_CHECK_LOS);
 	if( !the_item )
 		return;
 	endif
-	
+
 	if( !Accessible( who, the_item ) )
 		SendSysMessage( who, "You can't reach that." );
 		return;
 	endif
-	
+
 	if(the_item.isA(POLCLASS_MOBILE) )
 		SendSysMessage( who, "That's not an item!" );
 		return;
@@ -54,27 +54,27 @@ program wand_of_id( who, item )
 
 		var staticname := GetObjProperty( the_item, "StaticName" );
 			var true_name := GetObjProperty( the_item, "tname" );
-			
+
 			if( staticname )
-			SetName( the_item, staticname );	
+			SetName( the_item, staticname );
 			elseif( true_name )
 			SetName( the_item, true_name );
 		endif
-	
+
 		SendSysMessage( who, "It appears to be a " + the_item.desc + "," );
 		SendSysMessage( who, "and there's " + ncharges + " charges left in that item." );
-	
+
 	elseif( manastored )
 
 		var staticname := GetObjProperty( the_item, "StaticName" );
 			var true_name := GetObjProperty( the_item, "tname" );
-			
+
 			if( staticname )
-			SetName( the_item, staticname );	
+			SetName( the_item, staticname );
 			elseif( true_name )
 			SetName( the_item, true_name );
 		endif
-	
+
 		SendSysMessage( who, "It appears to be a " + the_item.desc + "," );
 		SendSysMessage( who, "and there's " + manastored + " mana stored in it." );
 
@@ -84,12 +84,12 @@ program wand_of_id( who, item )
 		GetObjProperty( the_item, "IsGMItem" ) ||
 		GetObjProperty( the_item, "EnchantColor" ) ||
 		GetObjProperty( the_item, "StaticName" ) )
-		
+
 		if( !ided )
 			SetNameByEnchant( the_item );
 		endif
 		SendSysMessage( who, "It appears to be a " + the_item.desc );
-			
+
 	else
 		SendSysMessage( who, "This is a normal item." );
 	endif
@@ -100,5 +100,5 @@ program wand_of_id( who, item )
 
 	sleep( DELAY_BETWEEN_USE );
 	EraseObjProperty( item, "#last_use" );
-		
+
 endprogram

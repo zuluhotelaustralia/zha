@@ -67,17 +67,17 @@ endprogram
 /////////////////////////////////////////////////////////////////////////////
 function CloseDistance( opponent )
 //  return 4 if they went onto a multi
-	
+
 	if  (opponent.multi.serial != me.multi.serial)
 		return 4;
 	endif
-	
+
 
 //	return 1 if we DON'T need to move
 //	return 0 if we DO need to move
 
   var sleepdelay := 300 - (CInt(GetDexterity(me)) * 1.5);
-  if (sleepdelay < 0) 
+  if (sleepdelay < 0)
 	sleepdelay := 0;
   endif
 	var d:=Distance(me,opponent);
@@ -88,7 +88,7 @@ function CloseDistance( opponent )
 	endif
 
     case (d) //Conversion
-        1:              // the most likely, so first 
+        1:              // the most likely, so first
         0:
 		if ( runaway < 15 )
 			if (GetMana(me) > (GetMaxMana(me)/3))
@@ -109,7 +109,7 @@ function CloseDistance( opponent )
 			WalkToward( opponent );
 			sleepms(sleepdelay);
 			return 0;
-		elseif (!CheckLineOfSight95( me, opponent) )
+		elseif (!CheckLineOfSight( me, opponent) )
 			if (runrandom(opponent))
 			sleepms(sleepdelay);
 				return 2;

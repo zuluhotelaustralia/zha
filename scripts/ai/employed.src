@@ -215,7 +215,7 @@ function Fight(opponent)
                            endif
                            if(ev.source)
 			                 if(ev.source != opponent)
-				               if((!CheckLineOfSight95(me, opponent)) || (Random(8)==1))
+				               if((!CheckLineOfSight(me, opponent)) || (Random(8)==1))
 					             opponent := ev.source;
 					             SetOpponent(opponent);
 				               endif
@@ -279,7 +279,7 @@ function Fetch()
     return;
   endif
   var times := 0;
-  while((Distance(me, tobj) > 1) && (times <= 5) && CheckLineOfSight95(me,tobj))
+  while((Distance(me, tobj) > 1) && (times <= 5) && CheckLineOfSight(me,tobj))
     if(!RunToward(tobj))
       sleepms(100);
       times := times + 1;
@@ -287,7 +287,7 @@ function Fetch()
       times := 0;
     endif
   endwhile
-  if((Accessible(me,tobj)) && (CheckLineOfSight95(me,tobj)))
+  if((Accessible(me,tobj)) && (CheckLineOfSight(me,tobj)))
 	MoveItemToContainer(tobj, mypack);
   else
     say("but I cannot reach that.");

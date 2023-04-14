@@ -87,10 +87,10 @@ if (!mobile.npctemplate || mobile.npctemplate["guard"] || mobile.script == "tame
         return;
 endif
 
-	if( (mobile.poisoned) && (CheckLineOfSight95(me,mobile)) )
+	if( (mobile.poisoned) && (CheckLineOfSight(me,mobile)) )
 		TurnToward(mobile);
 		CastSpell(me,mobile,"cure");
-	elseif( (GetHp(mobile) < (GetMaxHp(mobile)/2)) && (CheckLineOfSight95(me,mobile))  )
+	elseif( (GetHp(mobile) < (GetMaxHp(mobile)/2)) && (CheckLineOfSight(me,mobile))  )
 		TurnToward(mobile);
 		CastSpell(me,mobile,"gheal");
 	endif

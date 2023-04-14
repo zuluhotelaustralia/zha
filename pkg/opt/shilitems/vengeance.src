@@ -17,7 +17,7 @@ program item_vengeance( who, item )
 		SendSysMessage( who, "You must wait before using it again." );
 		return;
 	endif
-	
+
 	SetObjProperty( who, "#last_vengeance_use", CInt(ReadGameClock()) );
 
 	if (!can_cast(who, 0)) // (who, circle 0)
@@ -36,11 +36,11 @@ program item_vengeance( who, item )
 		endif
 	endif
 
-	var victim := Target95( who, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
+	var victim := Target( who, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS );
 	if( !victim )
 		return;
 	endif
-	
+
 	var dmg := CInt( (GetMaxHp(who) - GetHp(who) ) / 2);
 	if (dmg > 100)
 		dmg := 100;
@@ -50,7 +50,7 @@ program item_vengeance( who, item )
 	elseif ((GetHP(victim)-dmg) < GetHP(who))
 		dmg := GetHP(victim) - GetHP(who);
 	endif
-	
+
 	ApplyRawDamage( victim, dmg );
 
 	Detach();

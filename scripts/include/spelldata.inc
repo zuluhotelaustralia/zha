@@ -25,7 +25,7 @@ include "include/skillpoints";
 include "include/guardcall";
 include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
 include ":hooks:dksmod";
-include "include/pol95";
+
 
 
 ////////////////////////////////
@@ -423,7 +423,7 @@ function CanTargetSpell( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
 	var cy := caster.y;
 	var shp := GetHp(caster);
 
-	var cast_on := Target95( caster, targopt );
+	var cast_on := Target( caster, targopt );
 	if(!cast_on  || !GetStrength(cast_on) || cast_on.hidden)
 		return 0;
 	endif

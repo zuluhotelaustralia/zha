@@ -24,7 +24,7 @@ include "include/objtype";
 include "include/anchors";
 include "ai/setup/modsetup";
 include "include/random";
-include "include/pol95";
+
 
 const stone := 0x1365;
 const HALT_THRESHOLD := 5; // how close before he attacks?
@@ -73,19 +73,19 @@ var next_wander := ReadGameClock() + 10;
             case (ev.type)
                 //Removed by Rac for optimizations
                 //SYSEVENT_SPEECH:
-                //    if (speech > "") 
+                //    if (speech > "")
                                 //        say(process_text(ev.text, "default",speech));
                 //    endif
 
                 SYSEVENT_ENGAGED:
                     Fight( ev.source );
-   
+
             EVID_PEACEMADE:
                         break;
                 SYSEVENT_DAMAGED:
                     if (ev.source)
                         Fight( ev.source );
-     
+
                     endif
 
                 SYSEVENT_ENTEREDAREA:
@@ -126,7 +126,7 @@ endif
     var loops := 0;
   outer:
     while (opponent && not (opponent.dead || opponent.hidden || opponent.concealed))
-       
+
 
         var ev := wait_for_event( waittime );
         if (1) //check for ammo
@@ -146,19 +146,19 @@ endif
                 //    if (speech > "")
                 //        say(process_text(ev.text, "default",speech));
                 //    endif
-           
+
                 SYSEVENT_DISENGAGED:
                     // too bad, we don't break off.
                     break;
 
                 SYSEVENT_ENGAGED:
-                    if( !CheckLineOfSight95( me, opponent ) )
+                    if( !CheckLineOfSight( me, opponent ) )
                          Fight(ev.source);
                          break;
                     endif
 
 
-                    if( !CheckLineOfSight95( me, opponent ) )
+                    if( !CheckLineOfSight( me, opponent ) )
                          Fight(ev.source);
                          break;
                     endif
@@ -177,7 +177,7 @@ endif
                 SYSEVENT_LEFTAREA:
                     // ignore both of these
             endcase
-            if( (loops > 20) && !CheckLineOfSight95(me,opponent))
+            if( (loops > 20) && !CheckLineOfSight(me,opponent))
                     break outer;
             endif
         until (! (ev := wait_for_event(0)) );
@@ -237,7 +237,7 @@ sleepms(250);
 endif
 endfunction
 
-// Look around me for humans to fight.  
+// Look around me for humans to fight.
 function throw_stone(thetarg)
 
 if (Distance(me,thetarg) > 20) return; endif

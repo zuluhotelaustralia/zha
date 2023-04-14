@@ -145,7 +145,7 @@ function Fetch()
 
 /*
 	var times := 0;
-	while ( (Distance(me, tobj) > 1) && times < 10 && CheckLineOfSight95(me,tobj) )
+	while ( (Distance(me, tobj) > 1) && times < 10 && CheckLineOfSight(me,tobj) )
 		if( !RunToward(tobj))
 			sleepms(500);
 			times := times + 1;
@@ -221,7 +221,7 @@ function Guard()
 
 	if (ReadGameClock() > nextwatch)
 		if (!master.dead)
-			if (CheckLineOfSight95(me,master))
+			if (CheckLineOfSight(me,master))
 				if (caster && GetHp(master) < (GetMaxHp(master)/2) )
                     			CastSpell( me, master, "gheal");
 					sleep(3)	;
@@ -472,7 +472,7 @@ function Fight( opponent )
 				if (ev.source)
 					if ( (ev.source.serial != opponent.serial) && (ev.source.serial != master.serial) &&
 					     (ev.source.serial != me.serial) )
-						if( (!CheckLineOfSight95( me, opponent )) || (Random(8)==1) )
+						if( (!CheckLineOfSight( me, opponent )) || (Random(8)==1) )
 							opponent := ev.source;
 							SetOpponent( opponent );
 						endif
@@ -484,7 +484,7 @@ function Fight( opponent )
 				if (ev.source)
 					if ( (ev.source.serial != opponent.serial) && (ev.source.serial != master.serial) &&
 					     (ev.source.serial != me.serial) )
-						if( (!CheckLineOfSight95( me, opponent )) || (Random(8)==1) )
+						if( (!CheckLineOfSight( me, opponent )) || (Random(8)==1) )
 							opponent := ev.source;
 							SetOpponent( opponent );
 						endif
@@ -657,7 +657,7 @@ function GrabLoot()
 	var near_items := ListItemsNearLocation(me.x, me.y, me.z, 6);
 
 	foreach item in near_items
-		if( CheckLineOfSight95( me, item ) )
+		if( CheckLineOfSight( me, item ) )
 			if (!canloot(item))
 				continue;
 			endif

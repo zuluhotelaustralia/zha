@@ -50,13 +50,13 @@ program use_bandages( character, kusuribin )
 	endif
 
 	SendSysMessage( character, "Who would you like to heal?" );
-	var patient := Target95( character, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
+	var patient := Target( character, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS );
 
 	//Targeting was canceled
 	if( !patient )
 		return;
 	endif
-	
+
 	//The patient is too far
 	if( Distance( character, patient ) > 1 )
 		SendSysMessage( character, "The patient is too far." );
@@ -85,7 +85,7 @@ program use_bandages( character, kusuribin )
 				SendSysMessage( character,"This patient don't even have a bruise!" );
 				return;
 			endif
-		
+
 		elseif( type in withvet )
 			return;
 
@@ -95,7 +95,7 @@ program use_bandages( character, kusuribin )
 		endif
 
 	else
-	
+
 		if( patient.poisoned )
 			if (GetGlobalProperty("traitors"))
 				CheckTraitor(character, patient);
@@ -166,7 +166,7 @@ endfunction
 
 
 function TryToHeal( character, patient, kusuribin )
-	
+
 
 	var delay 	:= DELAY_TO_HEAL;
 	var healing	:= CInt( GetEffectiveSkill( character, SKILLID_ALCHEMY ) / 10 );

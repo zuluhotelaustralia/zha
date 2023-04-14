@@ -1,6 +1,6 @@
 use uo;
 use os;
-include "include/pol95";
+
 
 var REAGS 	:= {0xf7a, 0xf7b, 0xf84, 0xf85, 0xf86, 0xf88, 0xf8c, 0xf8d};
 var PAGANS 	:= {0xf78, 0xf79, 0xf7c, 0xf7d, 0xf7e, 0xf7f, 0xf80, 0xf81, 0xf82, 0xf83, 0xf87, 0xf89, 0xf8a, 0xf8b, 0xf8e, 0xf8f, 0xf90, 0xf91};
@@ -32,7 +32,7 @@ program get_items_from_corpse(who, types)
 	endforeach
 
 	SendSysMessage(who, "Select an NPC corpse or treasure chest to loot");
-	var corpse := Target95(who, TGTOPT_CHECK_LOS);
+	var corpse := Target(who, TGTOPT_CHECK_LOS);
 	if (!corpse)
 		SendSysMessage(who, "Cancelled");
 		return;
@@ -71,7 +71,7 @@ program get_items_from_corpse(who, types)
 	endfor
 
 	SetObjProperty(who, "DefaultBag", newbagarray);
-	
+
 	foreach type in typearray
 		case (type) //Conversion
 			"gold":			GrabItems(who, corpse, GOLD, "gold");
@@ -98,12 +98,12 @@ case (typename) //Conversion
 			"gold":			bag := bagarray[6];
 			"maps":			bag := bagarray[7];
 	endcase
-	
+
 	if (!bag)
 		SendSysMessage(who, "You need to set a bag for "+typename+" using .setget");
 		return;
 	endif
-	
+
 	SetObjProperty(who, "fastlooting", 1);
 	foreach item in EnumerateItemsInContainer(corpse)
 		if (!ReserveItem(Item))
@@ -123,7 +123,7 @@ case (typename) //Conversion
 	EraseObjProperty(who, "fastlooting");
 
 endfunction
-	
+
 function GrabScrolls(who, corpse)
 	var bagarray := 	GetObjProperty(who, "DefaultBag");
 	var bag:= 	bagarray[5];
@@ -131,7 +131,7 @@ function GrabScrolls(who, corpse)
 	SetObjProperty(who, "fastlooting", 1);
 	foreach item in EnumerateItemsInContainer(corpse)
 		obj:=item.objtype;
-		if ((obj >= 0x1f2d && obj <= 0x1f6c) || 
+		if ((obj >= 0x1f2d && obj <= 0x1f6c) ||
 		(obj >= 0xa100 && obj <=0xa110) ||
 		(obj >= 0xb100 && obj <= 0xb110))
 		if (!ReserveItem(Item))
@@ -148,5 +148,5 @@ function GrabScrolls(who, corpse)
 		endif
 	endforeach
 	EraseObjProperty(who, "fastlooting");
-	
+
 endfunction

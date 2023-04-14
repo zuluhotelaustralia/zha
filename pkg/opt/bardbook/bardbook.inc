@@ -10,7 +10,7 @@ include "include/attributes";
 include "include/objtype";
 include "include/client";
 include "include/itemutil";
-include "include/pol95";
+
 
 function GetScriptBard( songid )
 
@@ -192,7 +192,7 @@ function CanTargetSpellBard( caster )
 	var cy := caster.y;
 	var shp := GetHp(caster);
 
-	var cast_on := Target95( caster, TGTOPT_CHECK_LOS );
+	var cast_on := Target( caster, TGTOPT_CHECK_LOS );
 	if(!cast_on  || !GetStrength(cast_on) || cast_on.hidden)
 		return 0;
 	endif

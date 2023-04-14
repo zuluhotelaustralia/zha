@@ -8,7 +8,7 @@ use uo;
 use os;
 
 include "include/client";
-include "include/pol95";
+
 
 const UOBJECT_DUMMYSWING_EW := 0x1ec1;
 const UOBJECT_DUMMYFREEZE_EW := 0x1ec0;
@@ -23,14 +23,14 @@ program pickpocket_dummy( who, dummy )
         	return;
 	endif
 
-	if( !CheckLineOfSight95( who, dummy ))
+	if( !CheckLineOfSight( who, dummy ))
 	        SendSysMessage( who, "You don't have line of sight to that." );
         	return;
 	endif
 
 	if( CheckSkill( who, SKILLID_STEALING, 10, 200 ))
 
-		PlaySoundEffect( who, SFX_58 );	
+		PlaySoundEffect( who, SFX_58 );
 		SendSysMessage( who, "You unnoticedly grip into the bag." );
 		sleepms(3600);
 
@@ -44,7 +44,7 @@ program pickpocket_dummy( who, dummy )
 			dummy.graphic := UOBJECT_DUMMYSWING_NS; // dummy swing
 			sleepms(3600); // show animation for (x) ms
 			dummy.graphic := UOBJECT_DUMMYFREEZE_NS; // dummy freeze
-		
+
 		elseif ( dummy.objtype == UOBJECT_DUMMYFREEZE_EW )
 			dummy.graphic := UOBJECT_DUMMYSWING_EW; // dummy swing
 			sleepms(3600); // show animation for (x) ms

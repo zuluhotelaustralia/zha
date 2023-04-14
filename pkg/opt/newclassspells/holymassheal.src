@@ -33,10 +33,10 @@ program cast_massheal(parms)
   var level:=GetClasseLevel(caster);
 
   foreach person in people
-    if (CheckLineOfSight95(person, caster))
+    if (CheckLineOfSight(person, caster))
       PlayObjectCenteredEffect(caster, FX_SPELL_MASSHEAL, SPEED_SPELL_MASSHEAL, LOOP_SPELL_MASSHEAL);
       PlaySoundEffect(caster, SFX_SPELL_MASSHEAL);
-      
+
       var die_string := "3d6";
       var healed := RandomDiceStr(die_string)*2;
       healed := ModifyWithMagicEfficiency( caster, healed + CInt( GetEffectiveSkill(caster, SKILLID_PIETY)/3) );
@@ -49,7 +49,7 @@ program cast_massheal(parms)
           CLASSEID_MAGE:     healed:=CInt(healed * (1+ level*BONUS_PER_LEVEL));
           CLASSEID_PRIEST:   healed:=CInt(healed * (1+ level*LARGE_BONUS_PER_LEVEL));
         endcase
-	
+
       if( GetObjProperty(person, "Type" ) == "Undead" )
         ApplyTheDamage(person, caster, healed, DMGID_MAGIC );
       else

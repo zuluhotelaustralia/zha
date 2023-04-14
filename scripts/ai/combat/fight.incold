@@ -92,7 +92,7 @@ function Fight( opponent )
 
 		steps := 0;
 		randomruns := 0;
-		if ( CheckLineOfSight95(me,opponent) )
+		if ( CheckLineOfSight(me,opponent) )
 			loops := 0;
 			waittime := 1;
 			EraseObjProperty(me,"#flees");
@@ -100,7 +100,7 @@ function Fight( opponent )
 			loops := loops +1;
 			waittime := 1;
 			RunTowardLocation(me.x+(Random(3)-1), me.y+(Random(3)-1));
-		endif		
+		endif
 	2:
 		//closedistance returned 2, which means the mob was peacemade:
 		PeaceMade();
@@ -138,7 +138,7 @@ function Fight( opponent )
     endwhile
 
     post_combat();
-     
+
 endfunction
 
 function EnableCombatEvents()
