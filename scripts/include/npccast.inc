@@ -386,12 +386,6 @@ function PrepareToCast(caster, cast_on, spellid)
 		return 0;
 	endif
 
-	if (saywords)
-		SpeakPowerWords( me, spellid);
-		PerformAction(caster,ANIM_CAST_DIR);
-		sleep(1);
-	endif
-
 	if (GetEffectiveSkill(caster, SKILLID_MAGERY))
 		if (!CheckSkill(caster, SKILLID_MAGERY, GetSpellDifficulty( spellid ), 100))
 			PlaySoundEffect(caster,0x005d);

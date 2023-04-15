@@ -7,6 +7,8 @@ use polsys;
 
 include ":serverlist:settings";
 
+var settings := SL_GetSettingsCfgElem("Settings");
+
 program doServerList()
 	Print("INSTALLING: ServerList PH...");
 
@@ -23,7 +25,7 @@ const SERVERLIST_COMPACTSTATUS := 0xFE;
 
 exported function handleRecvStatusRequest(connection, byref request_packet)
     print("[0xF1 status info] Request received from {}".format(connection.ip));
-    var settings := SL_GetSettingsCfgElem("Settings");
+
     
     if (!settings.Enabled)
         return 0;
@@ -70,7 +72,7 @@ function SendCompactReply(byref connection)
     offset += 4;
     packet_status.setint32flipped(offset,0); // memory low[4]
     packet_status.setsize(packet_status.getsize());
-    print("size: "+packet_status.getsize()+" packet: "+packet_status);
+    if(settings.Debug) print("size: "+packet_status.getsize()+" packet: "+packet_status); endif
     return packet_status.SendPacket(connection);
 
 endfunction
@@ -87,7 +89,6 @@ endfunction
 
 // ConnectUO expects: Name Age Clients Items Chars Mem
 function GetConnectUOStatus()
-	var settings := SL_GetSettingsCfgElem("Settings");
 	var memory := CInt(GetConfigInt(settings, "PhysicalMemory") / 1024);
 	
     var status_string := "POL, Name={}, Age={}, Clients={}, Items={}, Chars={}, Mem={}K";
@@ -106,7 +107,6 @@ endfunction
 
 // UOGateway expects: Name Age Ver TZ EMail URL Clients
 function GetUOGatewayStatus()
-	var settings := SL_GetSettingsCfgElem("Settings");
     var status_string := "POL, Name={}, Age={}, Ver={}, TZ={}, EMail={}, URL={}, Clients={}";
     
     return status_string.format(settings.ServerName, CInt(ReadGameClock()/86400), PolCore().verstr, 1, settings.ServerEmail, settings.ServerURL, online_count());

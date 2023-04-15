@@ -187,7 +187,16 @@ program chrdeath(corpse,ghost)
 		if (newbie && !inDuelGate) //teleports newbie to wind healer
 			SetSpeedCheckNote(ghost);
 			var newbie_res_pos := GetGlobalProperty("newbie_res_pos");
-			newbie_res_pos :=SplitWords(newbie_res_pos);
+
+			//error checking
+			if((newbie_res_pos[1] == 0 && newbie_res_pos[2] == 0 &&newbie_res_pos[2] == 0) || newbie_res_pos == error)
+				SysLog("ERROR: Global Property newbie_res_pos cannot be found and needs to be set.");
+				newbie_res_pos := array{1475,1645,20};
+
+			else
+				newbie_res_pos :=SplitWords(newbie_res_pos);
+			endif
+
 			if (newbie_res_pos)
 				MoveObjectToLocation( ghost, CInt(newbie_res_pos[1]), CInt(newbie_res_pos[2]), CInt(newbie_res_pos[3]), _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION); //AutoConversion
 			endif
