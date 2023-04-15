@@ -1,0 +1,94 @@
+use uo;
+include ":github-issues:outbound";
+include ":gridGumps:gump";
+include ":gumps:gumps";
+
+program textcmd_report( mobile )
+
+	var grid := grid_Init( 3, 10, ColumnWidth := 150 );
+	var tile; // For current working tile.
+	var GumpRefStruct := struct{}; // For processing buttons and responses.
+
+	////Title Bar
+	tile := grid_AddTile( grid, 1, 1, 3 );
+	GFTextMid(Grid.gump, tile.x, tile.y, tile.endx, 53, "Issue and Bug Reporter v1.0");
+
+	////Main Section
+	// Title.
+	tile := grid_AddTile( Grid, 1, 2 );
+	GFTextLine(Grid.gump, tile.x+10, tile.y, 63, "Title:");
+	tile := grid_AddTile( Grid, 2, 2, 2 );
+	GumpRefStruct.+title := GFTextEntry(Grid.Gump, tile.x, tile.y, tile.width, tile.height, 63, ini_text:="Title of your bug report.");
+	// Body.
+	tile := grid_AddTile( Grid, 1, 3 );
+	GFTextLine(Grid.gump, tile.x+10, tile.y, 63, "Body:");
+	tile := grid_AddTile( Grid, 2, 3, 2, 3 );
+	GumpRefStruct.+body := GFTextEntry(Grid.Gump, tile.x, tile.y, tile.width-Grid.settings.TileXPadding, tile.height, 63, ini_text:="");
+	// Tags.
+	tile := grid_AddTile( Grid, 1, 6 );
+	GFTextLine(Grid.gump, tile.x+10, tile.y, 63, "Tags:");
+	tile := grid_AddTile( Grid, 2, 6 );
+	GumpRefStruct.+BugButton := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 0);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "Bug");
+	tile := grid_AddTile( Grid, 3, 6 );
+	GumpRefStruct.+EnhancementButton := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 0);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "Enhancement");
+	tile := grid_AddTile( Grid, 2, 7 );
+	GumpRefStruct.+QuestionButton := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 0);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "Question");
+	tile := grid_AddTile( Grid, 3, 7 );
+	GumpRefStruct.+InGameButton := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 0);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "In Game");
+	tile := grid_AddTile( Grid, 2, 8 );
+	GumpRefStruct.+WorldProblemButton := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 0);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "World Problem");
+	tile := grid_AddTile( Grid, 3, 8 );
+	GumpRefStruct.+SpawnProblemButton := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 0);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "Spawn Problem");
+	// Use Location.
+	tile := grid_AddTile( Grid, 1, 9 );
+	GFTextLine(Grid.gump, tile.x+10, tile.y, 63, "Location:");
+	tile := grid_AddTile( Grid, 2, 9, 2 );
+	GumpRefStruct.+Location := GFCheckBox(Grid.Gump, tile.x, tile.y, 0x2342, 0x2343, 1);
+	GFTextLine(Grid.gump, tile.x+20, tile.y, 63, "Include location in report?");
+	////Footer Bar
+	tile := grid_AddTile( Grid, 1, 10, 3 );
+	GumpRefStruct.+SubmitButton := GFAddButton( Grid.gump, tile.x, tile.y, GFGetCfgConst("Buttons","GOLD_APPLY_OFF"), GFGetCfgConst("Buttons","GOLD_APPLY_ON"), GF_CLOSE_BTN );
+	GumpRefStruct.+exitButton := GFAddButton( Grid.gump, tile.endx-60, tile.y, GFGetCfgConst("Buttons","GOLD_CANCEL_OFF"), GFGetCfgConst("Buttons","GOLD_CANCEL_ON"), GF_CLOSE_BTN );
+
+	var res := GFSendGump(mobile, Grid.gump);
+
+	if( !res[GumpRefStruct["SubmitButton"]] )
+		SendSysMessage(mobile, "Cancelled.");
+		return;
+	endif
+	var labelsArray := array{};
+	var body := res[GumpRefStruct["body"]];
+	var title := res[GumpRefStruct["title"]] + "["+mobile.name+"]";
+	if( res[GumpRefStruct["BugButton"]] )
+		labelsArray.append("bug");
+	endif
+	if( res[GumpRefStruct["EnhancementButton"]] )
+		labelsArray.append("enhancement");
+	endif
+	if( res[GumpRefStruct["QuestionButton"]] )
+		labelsArray.append("question");
+	endif
+	if( res[GumpRefStruct["InGameButton"]] )
+		labelsArray.append("in game");
+	endif
+	if( res[GumpRefStruct["WorldProblemButton"]] )
+		labelsArray.append("world problem");
+	endif
+	if( res[GumpRefStruct["SpawnProblemButton"]] )
+		labelsArray.append("spawn problem");
+	endif
+	if( res[GumpRefStruct["Location"]] )
+		body += "\n Player Loc: "+mobile.x+", "+mobile.y+", "+mobile.z+", "+mobile.realm;
+	endif
+
+	SendSysMessage(mobile, "Sending Report");
+
+	GHIC_CreateIssue(title , body , labels := labelsArray);
+
+endprogram
