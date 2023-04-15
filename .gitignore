@@ -24,6 +24,8 @@ scripts/Compile-All.bat
 setup/uo-client
 setup/ecompile
 realm
+scripts/modules/
+*.em
 
 # Misc pol generated files
 leftovers.txt
@@ -75,4 +77,7 @@ obj/
 setup/config.rar
 setup/textcmd.rar
 scripts/ai/fight.inc
+
+# Security based
+config/secrets.cfg
 
