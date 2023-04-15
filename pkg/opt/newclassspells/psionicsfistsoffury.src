@@ -39,7 +39,7 @@ program cast_fistsoffury(parms)
 
   foreach mobile in victims
 
-    if(CheckLineOfSight( mobile, caster))
+    if(CheckLineOfSight( mobile, caster) && !mobile.hidden && !mobile.concealed)
       var immunity := IsProtected( caster, mobile, circle );
       var circ := circle;
       if( immunity != IMMUNED && mobile != caster )

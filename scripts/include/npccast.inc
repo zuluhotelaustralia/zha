@@ -382,7 +382,7 @@ endfunction
 
 function PrepareToCast(caster, cast_on, spellid)
 
-	if (!CheckLineOfSight( caster, cast_on ))
+	if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
 		return 0;
 	endif
 
@@ -442,7 +442,7 @@ endfunction
 
 function SpitWeb(caster, cast_on)
 
-	if (CheckLineOfSight(caster, cast_on))
+	if (CheckLineOfSight(caster, cast_on) && !cast_on.hidden)
 		var x := cast_on.x;
 		var y := cast_on.y;
 		var z := cast_on.z;

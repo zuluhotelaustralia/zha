@@ -39,7 +39,7 @@ program cast_curse( parms )
 
 	foreach cast_on in ListMobilesNearLocation( CInt(thetarget.x), CInt(thetarget.y), CInt(thetarget.z), ModifyWithMagicEfficiency( caster, 4 ));
 
-		if ( CheckLineOfSight( caster, cast_on ) )
+		if ( CheckLineOfSight( caster, cast_on ) && !cast_on.hidden && !cast_on.concealed )
 			var immunity := IsProtected( caster, cast_on, circle );
 			if( immunity != IMMUNED )
 				//if(!cast_on.criminal)

@@ -22,7 +22,7 @@ exported function ZHAAttackfunc( attacker, defender )
 		return 1;
 	endif
 
-	if (!CheckLineOfSight(attacker, defender))
+	if (!CheckLineOfSight(attacker, defender) || defender.hidden || defender.concealed)
 		return 1;
 	endif
 

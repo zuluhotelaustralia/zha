@@ -83,7 +83,7 @@ endfunction
 // Agility //
 /////////////
 function cast_AGILITY( caster, cast_on )
-  if(!CheckLineOfSight( caster, cast_on ))
+  if(!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
     return;
   endif
   if(!ConsumeMana(me, 9))
@@ -109,7 +109,7 @@ endfunction
 // Strength //
 //////////////
 function cast_strength( caster, cast_on )
-  if(!CheckLineOfSight( caster, cast_on ))
+  if(!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
     return;
   endif
   if(!ConsumeMana(me, 16))
@@ -137,7 +137,7 @@ endfunction
 // Cunning //
 /////////////
 function cast_CUNNING( caster, cast_on )
-  if(!CheckLineOfSight( caster, cast_on ))
+  if(!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
      return;
   endif
   if(!ConsumeMana(me, 10))
@@ -218,7 +218,7 @@ endfunction
 ////////////////
 
 function cast_FEEBLEMIND( caster, cast_on )
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
         return;
     endif
     if (! ConsumeMana( me, 3 ))
@@ -243,7 +243,7 @@ endfunction
 // Bless //
 ///////////
 function cast_bless( caster, cast_on )
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
         return;
     endif
     if (! ConsumeMana( me, 17 ))
@@ -278,7 +278,7 @@ endfunction
 // Curse //
 ///////////
 function cast_curse( caster, cast_on )
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
         return;
     endif
     if (! ConsumeMana( me, 27 ))
@@ -467,7 +467,7 @@ function cast_meteor( caster, cast_loc )
     SpeakPowerWords( me, 55);
   endif
   foreach mobile in targets
-	if((mobile.serial != caster.serial)  && (CheckLineOfSight(caster, mobile)))
+	if((mobile.serial != caster.serial)  && (CheckLineOfSight(caster, mobile) && !moile.hidden && !mobile.concealed))
 	  var dmg := GetEffectiveSkill( caster, SKILLID_MAGERY ) / (RandomInt(3) + 5);
 	  dmg := dmg /2;
 	  parms[1] := caster;
@@ -527,7 +527,7 @@ endfunction
 // Lightning //
 ///////////////
 function cast_lightning( caster, cast_on)
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
        	return;
     endif
         if (! ConsumeMana( me, 30 ))
@@ -562,7 +562,7 @@ function cast_harm( caster, cast_on)
 
 	var parms := array;
 
-	if (!CheckLineOfSight( caster, cast_on ))
+	if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
 
         	return;
     	endif
@@ -640,7 +640,7 @@ function cast_ebolt( caster, cast_on)
 
     var parms := array;
 
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
         //return 0;
     endif
     if (! ConsumeMana( me, 42 ))
@@ -700,7 +700,7 @@ endfunction
 //////////
 function cast_cure( caster, cast_on)
 
-	if (!CheckLineOfSight( caster, cast_on ))
+	if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
 
         	return;
     	endif
@@ -732,7 +732,7 @@ function cast_chainlightning( caster, cast_loc)
     var targets := ListMobilesNearLocation(cast_loc.x,cast_loc.y,cast_loc.z,4);
 
     foreach mobile in targets
-	    if( (mobile.serial != caster.serial) && (mobile.dead == 0) && (CheckLineOfSight( caster, mobile )) )
+	    if( (mobile.serial != caster.serial) && (mobile.dead == 0) && (CheckLineOfSight( caster, mobile ) && !mobile.hidden && !mobile.concealed) )
 
 		    PlayLightningBoltEffect( mobile );
 
@@ -750,7 +750,7 @@ endfunction
 //////////////
 function cast_archcure( caster, cast_on )
 
-	if (!CheckLineOfSight( caster, cast_on ))
+	if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
         	return  0;
     	endif
 
@@ -900,7 +900,7 @@ function cast_fireball( caster, cast_on )
     endif
 
 
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
 
         return;
     endif
@@ -934,7 +934,7 @@ endfunction
 
 function  cast_paralyze( caster, cast_on)
 
-    if (!CheckLineOfSight( caster, cast_on ))
+    if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
         return;
     endif
     if (saywords)
@@ -971,7 +971,7 @@ function cast_masscurse( caster, cast_on )
 
     foreach cast_on in targets
 
-        if ( (cast_on.serial != caster.serial) && (CheckLineOfSight( caster, cast_on )) )
+        if ( (cast_on.serial != caster.serial) && (CheckLineOfSight( caster, cast_on ) && !cast_on.hidden && !cast_on.concealed) )
             PlaySoundEffect(cast_on, SFX_SPELL_MASS_CURSE);
             PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 10,10);
 
