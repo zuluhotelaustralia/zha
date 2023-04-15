@@ -6,8 +6,10 @@ include "include/constants/cmdlevels";
 include "include/time";
 
 //change these to change password
-const ADD_ACCOUNT_PASSWORD := "mjb Rcllcqqcc";
-const ADD_ACCOUNT_PASSWORD_HINT := "Id like to go back to old Tennessee";
+var secrets_cfg := FindConfigElem(ReadConfigFile( "secrets" ), "settings");
+var ADD_ACCOUNT_PASSWORD := GetConfigString(secrets_cfg, "add_password");
+
+var ADD_ACCOUNT_PASSWORD_HINT := GetConfigString(secrets_cfg, "add_hint");
 
 //Notes: councies to GM can be assigned in game...
 //devs and admins are hardcoded and require recompile
@@ -162,6 +164,7 @@ endfunction
 
 function FindHighestCmdLevelForAccount(accountname)
      	var accobj := FindAccount(accountname);
+     	print("accountobj: "+accobj + "for account: "+accountname);
 	if (!accobj)
 		return -1;
 	endif
