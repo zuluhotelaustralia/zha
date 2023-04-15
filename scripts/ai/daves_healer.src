@@ -181,6 +181,10 @@ endfunction
 
 function HealerStuff(mobile)
 
+    if( mobile.concealed || mobile.hidden )
+        return;
+    endif
+
 	if ( (!mobile.warmode) && (mobile.dead) )
 		say("You must manifest so that I can see you, ghost.");
 		return;
