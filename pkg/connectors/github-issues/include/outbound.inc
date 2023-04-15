@@ -4,13 +4,14 @@ function GHIC_CreateIssue(title, body, labels := array{})
 
 	var method := "POST";
 	var url := "https://api.github.com/repos/zuluhotelaustralia/zha/issues";
-	var oAuth := "5ef6a23e77cbc7d1316a65cd6e0fbfee61f3b95d";
+	var oAuth := GetConfigString(FindConfigElem(ReadConfigFile( "::secrets" ), "github"), "github_auth");
 	var header := struct{
-		"Accept" := "application/vnd.github.VERSION.text+json",
-		"Authorization" := "token "+oAuth,
+		"Accept" := "application/vnd.github+json",
+		"Authorization" := "Bearer "+oAuth,
+		"X-GitHub-Api-Version":="2022-11-28",
 		"User-Agent" := "Chrome"
 	};
-	var LabelsOutput, i;
+	var LabelsOutput := "", i;
 	for( i := 1; i <= labels.size(); i++)
 		LabelsOutput += "\"";
 		LabelsOutput += CStr(labels[i]);
@@ -20,14 +21,12 @@ function GHIC_CreateIssue(title, body, labels := array{})
 			LabelsOutput += "\"";
 		endif
 	endfor
+
 	var data :=
 	  	"{\"title\":\""+title+"\",
   		\"body\": \""+body+"\",
-  		\"labels\":[
-  			\"bug\"
-  		]
+  		\"labels\":["+LabelsOutput+"]
 	}";
-
 
 	var req := HTTPRequest(url, method, options := struct{
 	            "headers" := header,

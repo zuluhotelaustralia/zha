@@ -6,7 +6,7 @@ include "include/constants/cmdlevels";
 include "include/time";
 
 //change these to change password
-var secrets_cfg := FindConfigElem(ReadConfigFile( "secrets" ), "settings");
+var secrets_cfg := FindConfigElem(ReadConfigFile( "::secrets" ), "cmdlevel");
 var ADD_ACCOUNT_PASSWORD := GetConfigString(secrets_cfg, "add_password");
 
 var ADD_ACCOUNT_PASSWORD_HINT := GetConfigString(secrets_cfg, "add_hint");

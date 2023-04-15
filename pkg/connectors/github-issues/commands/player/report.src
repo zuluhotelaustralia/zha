@@ -63,8 +63,9 @@ program textcmd_report( mobile )
 		return;
 	endif
 	var labelsArray := array{};
-	var body := res[GumpRefStruct["body"]];
-	var title := res[GumpRefStruct["title"]] + "["+mobile.name+"]";
+
+	var body := GFExtractData(res,GumpRefStruct["body"]);
+	var title := GFExtractData(res,GumpRefStruct["title"]) + "["+mobile.name+"]";
 	if( res[GumpRefStruct["BugButton"]] )
 		labelsArray.append("bug");
 	endif
@@ -84,11 +85,10 @@ program textcmd_report( mobile )
 		labelsArray.append("spawn problem");
 	endif
 	if( res[GumpRefStruct["Location"]] )
-		body += "\n Player Loc: "+mobile.x+", "+mobile.y+", "+mobile.z+", "+mobile.realm;
+		body += "\\nPlayer Loc: "+mobile.x+", "+mobile.y+", "+mobile.z+", "+mobile.realm;
 	endif
 
 	SendSysMessage(mobile, "Sending Report");
 
 	GHIC_CreateIssue(title , body , labels := labelsArray);
-
 endprogram
