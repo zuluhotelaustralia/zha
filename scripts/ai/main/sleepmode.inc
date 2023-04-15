@@ -56,7 +56,7 @@ function sleepmode()
 					EnableMainEvents();
 					return ev;
 				SYSEVENT_ENTEREDAREA:
-					if ( (!ev.source.dead) )
+					if ( (!ev.source.dead) && !ev.source.concealed && !ev.source.hidden )
 						if ( (GetHp(me) > (GetMaxHp(me)/2)) || (!me.hidden) )
 							if ( (!ev.source.npctemplate) || (ev.source.script == "tamed") )
 								if (me.hidden)

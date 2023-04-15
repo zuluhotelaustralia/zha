@@ -30,7 +30,7 @@ function sleepmode()
 		repeat
 
 		case (ev.type)
-                	SYSEVENT_ENGAGED:
+            SYSEVENT_ENGAGED:
 			SYSEVENT_DAMAGED:
 			EVID_ALL_ATTACK_CMD:
 				if (me.hidden)
@@ -40,7 +40,7 @@ function sleepmode()
 				EnableMainEvents();
 				return ev;
 			SYSEVENT_LEFTAREA:
-				if ( (!ev.source.dead) && (GetHp(me) > 10) )
+				if ( (!ev.source.dead) && (GetHp(me) > 10) && !ev.source.concealed && !ev.source.hidden  )
 				    if ( (!ev.source.npctemplate) || (ev.source.script == "tamed") )
 					if (me.hidden)
 						me.hidden := 0;
