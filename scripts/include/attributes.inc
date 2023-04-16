@@ -46,7 +46,7 @@ include "include/client";
 
 // This is the path to the custom skills.cfg
 // This file work exactly like a normal skills.cfg except that skillids can go above 48.
-const CFGFILESPEC_SKILLSDEF		:= ":hooks:skillsdef";
+const CFGFILESPEC_SKILLSDEF		:= ":CheckSkillHook:skillsdef";
 
 // The core minimum and maximum value for an attribute in base value
 const CORE_SETTINGS_MIN_ATTRIBUTE	:= 0;
