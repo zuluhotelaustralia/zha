@@ -50,8 +50,6 @@ program use_scroll( who, scroll )
 		return;
 	endif
 
-	SpeakPowerWords( who, spellid );
-
 	var loop := CInt((spellid + 7) / 8 * 500);
 	PerformAction(who,ANIM_CAST_DIR);
 
