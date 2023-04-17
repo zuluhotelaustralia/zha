@@ -103,7 +103,7 @@ endfunction
 function scriptis(spellid)
 
 	var cfg := ReadConfigFile(":spells:spells");
-	var script := cfg[spellid].script;
+	var script := cfg[spellid].SpellScript;
 	return script;
 
 endfunction
