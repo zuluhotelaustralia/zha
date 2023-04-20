@@ -683,7 +683,7 @@ function OpenMyPack();
     endcase
 
 	if (mounttype)
-		if (!(master.graphic == 400 ||master.graphic == 401) && !master.cmdlevel)
+		if (!(master.graphic in {400,401,605,606,744,745,750,751,666,667} ) && !master.cmdlevel)
 			SendSysMessage(master, "You cannot use this mount in this form");
 			return;
 		endif

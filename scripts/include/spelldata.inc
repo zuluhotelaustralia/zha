@@ -719,7 +719,7 @@ endfunction
 function GetScript( spellid )
 
 	var spellcfg := ReadConfigFile( ":*:spells" );
-	var script := spellcfg[spellid].script;
+	var script := spellcfg[spellid].SpellScript;
 	if( spellid <= MAX_NORMAL_SPELL )
 		script := ":spells:" + script;
 	elseif( spellid <= MAX_NECRO_SPELL )

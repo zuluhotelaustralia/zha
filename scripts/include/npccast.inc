@@ -385,6 +385,11 @@ function PrepareToCast(caster, cast_on, spellid)
 	if (!CheckLineOfSight( caster, cast_on ) || cast_on.hidden)
 		return 0;
 	endif
+	if (saywords)
+		SpeakPowerWords( me, spellid);
+		PerformAction(caster,ANIM_CAST_DIR);
+		sleep(1);
+	endif
 
 	if (GetEffectiveSkill(caster, SKILLID_MAGERY))
 		if (!CheckSkill(caster, SKILLID_MAGERY, GetSpellDifficulty( spellid ), 100))
