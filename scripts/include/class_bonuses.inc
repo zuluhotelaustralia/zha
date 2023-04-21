@@ -66,11 +66,11 @@ TryToVetRes
 
 
 const CLASSE_BONUS        := 1.5;
-const SMALL_BONUS_PER_LEVEL := 0.05;
-const BONUS_PER_LEVEL     := 0.1;  				//used in the function ClasseBonus( who, classeid ) 
-const LARGE_BONUS_PER_LEVEL  := 0.15;  
-const PENALTY_PER_LEVEL := -0.1;
-const LARGE_PENALTY_PER_LEVEL := -0.15;
+const SMALL_BONUS_PER_LEVEL := 0.1;
+const BONUS_PER_LEVEL     := 0.2;  				//used in the function ClasseBonus( who, classeid )
+const LARGE_BONUS_PER_LEVEL  := 0.5;
+const PENALTY_PER_LEVEL := -0.2;
+const LARGE_PENALTY_PER_LEVEL := -0.5;
 
 const RANGER_LEVEL_ARCHERY_RANGE_BONUS := 1; 			//1 range per level further range before 1/4 base damage done
 

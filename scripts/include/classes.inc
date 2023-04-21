@@ -44,14 +44,14 @@ const PERCENT7 := 90;
 const PERCENT8 := 95;*/
 
 
-const LEVEL1 := 600;
-const LEVEL2 := 720;
-const LEVEL3 := 840;
-const LEVEL4 := 960;
-const LEVEL5 := 1080;
-const LEVEL6 := 1200;
-const LEVEL7 := 1201;
-const LEVEL8 := 1202;
+const LEVEL1 := 600;	//75 * 8
+const LEVEL2 := 720; 	//90 * 8
+const LEVEL3 := 840;	//105 * 8
+const LEVEL4 := 960;	//120 * 8
+const LEVEL5 := 1080;	//135 * 8
+const LEVEL6 := 1200;	//150 * 8
+const LEVEL7 := 1201;	//
+const LEVEL8 := 1202;	//
 
 
 const PERCENT1 := 60;
