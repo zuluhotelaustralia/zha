@@ -13,17 +13,27 @@ program use_scroll(who, scroll)
 	if (scroll.amount)
 		var spellid := GetObjProperty(scroll, "SpellID");
 		spellid := CInt(spellid);
-		SubtractAmount(scroll, 1);
+		if(!SubtractAmount(scroll, 1))
+			SendSysMessage(who, "Something appears to be wrong with that scroll.");
+			return 0;
+		endif
 		SetObjProperty(who, "CastingOpts", "NOREGS");
-	
+
 		var spell := GetScript( spellid );
 		SetObjProperty( who, "#Casting", 1 );
 
-		start_script( spell, who );
-	
+		if(!start_script( spell, who ))
+			SendSysMessage(who, "Something appears to be wrong with that scroll.");
+			SysLog("["+scroll.name+"]Scroll Error: script appears to not be able to start: "+spell);
+			EraseObjProperty( who, "#Casting" );
+			return 0;
+		endif
+
+
+
 		while( GetObjProperty( who, "#Casting" ) )
 			sleepms( 250 );
 		endwhile
 	endif
-	
+
 endprogram

@@ -720,11 +720,11 @@ function GetScript( spellid )
 
 	var spellcfg := ReadConfigFile( ":*:spells" );
 	var script := spellcfg[spellid].SpellScript;
-	if( spellid <= MAX_NORMAL_SPELL )
+	if( spellid <= MAX_NORMAL_SPELL ) //64
 		script := ":spells:" + script;
-	elseif( spellid <= MAX_NECRO_SPELL )
+	elseif( spellid <= MAX_NECRO_SPELL ) //80
 		script := ":necro:" + script;
-	elseif( spellid <= MAX_EARTH_SPELL )
+	elseif( spellid <= MAX_EARTH_SPELL ) //96
 		script := ":earth:" + script;
 	elseif( spellid <= MAX_RITUAL_SPELL )
 		script := ":artificier:" + script;
