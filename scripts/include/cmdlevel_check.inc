@@ -255,6 +255,8 @@ function logFake(who, commandname)
 	AppendConfigFileElem( "staffcommands", "haxor", elemkey, props );
 	UnloadConfigFile("staffcommands");
 endfunction
+
+//TODO: This really needs to be rewritten to support a struct input that isn't written out explicitly/incorrectly.
 function logcommand(who, data)
 	var commandname := data[1];
 	var tgt := data[2];
@@ -299,6 +301,14 @@ function logcommand(who, data)
 	prop.pname := "option";
 	prop.pvalue := option;
 	props[10] := prop;
+	if (data.size() > 7)
+		var i;
+		for (i:=8;i<=data.size();i:=i+1)
+			prop.pname := "additional";
+			prop.pvalue := data[i];
+			props.append(prop);
+		endfor
+	endif
 	AppendConfigFileElem( "::staffcommands - "+who.acctname, "staff-log", elemkey, props );
 	UnloadConfigFile("staffcommands - "+who.acctname);
 endfunction

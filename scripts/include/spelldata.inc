@@ -87,7 +87,7 @@ const ERROR_MSG_INTERRUPTED		:= "You were interrupted during the casting";
 const ERROR_MSG_LOST_CONCENTRATION	:= "You've lost your concentration!";
 const ERROR_MSG_NOT_ENOUGH_REAGENTS	:= "Insufficient Reagents.";
 const ERROR_MSG_NOT_ENOUGH_MANA		:= "Insufficient Mana.";
-const ERROR_MSG_NOT_ENOUGH_SKILL	:= "This spell is above yours magical capacities.";
+const ERROR_MSG_NOT_ENOUGH_SKILL	:= "This spell is above your magical capacities.";
 const ERROR_MSG_NOT_IN_SIGHT		:= "You can't see that.";
 const ERROR_MSG_WRONG_EQUIPMENT		:= "Your hands must be free to cast spells.";
 
