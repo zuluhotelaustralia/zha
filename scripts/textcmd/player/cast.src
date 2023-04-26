@@ -67,7 +67,7 @@ program pagan_cast (who, text)
 		"flame spirit": 	spellid := 94; break;
 		"storm spirit": 	spellid := 95; break;
 		"water spirit": 	spellid := 96; break;
-		
+		default:			spellid := CInt(spellname); break;
 	endcase
 	
 	if(spellid == -1)
@@ -78,18 +78,23 @@ program pagan_cast (who, text)
 	var BookType;
 	var Offset;
 	
-	
-	if( spellid > MAX_NORMAL_SPELL && spellid <= MAX_NECRO_SPELL )
+	if(spellid <= MAX_NORMAL_SPELL)
+		Offset := 0;
+		BookType := 0x0EFA;
+	elseif( spellid > MAX_NORMAL_SPELL && spellid <= MAX_NECRO_SPELL )
 		Offset := MAX_NORMAL_SPELL;
 		BookType := 0xA100; //Necro book
 	elseif( spellid > MAX_NECRO_SPELL && spellid <= MAX_EARTH_SPELL)
 		Offset := MAX_NECRO_SPELL;
 		BookType := 0xB100; //Earth book
+	else
+		SendSysMessage(who, "This may not be a valid spell name or ID.");
+		return 0;
 	endif
 	
 	var Book := FindObjtypeInContainer(who.backpack, BookType);
 
-	if(Book.serial)
+	if(Book.serial && Offset != 0)
 		var greaterflag := CInt(GetObjProperty( Book, "Greater" ));
 		var lesserflag := CInt(GetObjProperty( Book, "Lesser" ));
 		var OffsetID := spellid - Offset;
@@ -110,12 +115,25 @@ program pagan_cast (who, text)
 		return 0;
 	endif
 	
-	//SendSysMessage(who, "Casting spellid: " + spellid + " from book: " + Book.desc);
 	
 	
+	var spell := GetScript( spellid );
+
+	//SendSysMessage(who, "Casting spellid: " + spellid + " from book: " + Book.desc+" which uses script: "+spell);
 	
+	if( GetObjProperty( book, "CastingOpts" ) )
+		SetObjProperty( who, "CastingOpts", GetObjProperty( book, "CastingOpts" ) );
+	endif
+
 	SetObjProperty( who, "#Casting", 1 );
-	
-	StartSpellEffect(who, spellid);
+	if( Offset > MAX_NORMAL_SPELL)
+		if( !start_script( spell, who ) )
+			SendSysMessage(who, "You struggle to cast the spell correctly.");
+			EraseObjProperty( who, "#Casting");
+		endif
+	else
+		StartSpellEffect(who, spellid);
+	endif
+
 	
 endprogram

@@ -61,7 +61,7 @@ function castspell( caster, cast_on, spellname )
 			parms[1] := "#MOB";
 			parms[2] := caster;
 			parms[3] := cast_on;
-			parms[4] := spellid;
+			parms[4] := GetCircle( spellid );
 			Detach();
 			start_script( GetScript( spellid ), parms );
 		endif

@@ -30,14 +30,6 @@ program castSpell(who, spell_id)
 		print(who.name + " was unable to start [" + spellElement.SpellScript + "] -> " + script.errortext);
 	endif
 
+	EraseObjProperty(who, "#Casting" );
 	return 1;
-	/*
-	// Distro way of starting spell scripts. We dont need to use it yet.
-	var script := Start_Script("spellStarter", {who, spell_id});
-	if ( script.errortext )
-		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);
-		return 0;
-	endif
-	return 1;
-	*/
 endprogram
