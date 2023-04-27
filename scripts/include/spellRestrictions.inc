@@ -7,7 +7,7 @@ include "include/fields";
 include "include/attributes";
 include "include/client";
 include "include/objtype";
-include "include/statMod";
+include "include/dotempmods";
 include "include/firewall";
 include "include/spellAttack";
 include "include/dist";

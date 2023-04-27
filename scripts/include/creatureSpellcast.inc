@@ -25,7 +25,7 @@ use cfgfile;
 
 include "include/client";
 include "include/attributes";
-include "include/statMod";
+include "include/dotempmods";
 include "include/tempMod";
 include "include/res";
 include "include/resPenalty";
