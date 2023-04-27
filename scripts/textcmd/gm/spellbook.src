@@ -1,6 +1,6 @@
 use uo;
 include "include/cmdlevel_check";
-include ":newclassspells:newclassbook";
+//include ":newclassspells:newclassbook";
 
 
 program textcmd_spellbook( who )
@@ -30,7 +30,7 @@ program textcmd_spellbook( who )
 	SetObjProperty( druid, "Lesser", 255 );
 	SetObjProperty( druid, "Greater", 255 );
     
-	var bard := CreateItemInBackpack(who, 0xa5a, 1);
+	/*var bard := CreateItemInBackpack(who, 0xa5a, 1);
 	SetObjProperty(bard, "LFucker", who.serial + " - " + who.name);
 	SetObjProperty(bard, "storedspells", { 129 });
 	
@@ -48,5 +48,5 @@ program textcmd_spellbook( who )
     
 	var psi:=CreateItemInBackpack(who, 0xa5f, 1);
 	SetObjProperty(psi, "LFucker", who.serial + " - " + who.name);
-	SetObjProperty(psi, "storedspells", { 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 });
+	SetObjProperty(psi, "storedspells", { 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 });*/
 endprogram
