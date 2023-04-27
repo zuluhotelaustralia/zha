@@ -86,6 +86,7 @@ program cast_spellid (who, text)
 
 	if (!(spellid in GetBookSpellIDs(book)))
 		SendSysMessage(who, "You don't have that spell!");
+		EraseObjProperty( caster, "#Casting" );
 		return;
 	endif
 	

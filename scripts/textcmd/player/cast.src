@@ -126,7 +126,7 @@ program pagan_cast (who, text)
 	endif
 
 	SetObjProperty( who, "#Casting", 1 );
-	if( Offset > MAX_NORMAL_SPELL)
+	if( Offset >= MAX_NORMAL_SPELL)
 		if( !start_script( spell, who ) )
 			SendSysMessage(who, "You struggle to cast the spell correctly.");
 			EraseObjProperty( who, "#Casting");
