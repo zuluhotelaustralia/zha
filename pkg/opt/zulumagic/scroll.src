@@ -90,11 +90,18 @@ program use_scroll( who, scroll )
 */
 	if (CanReadScroll(who))
 	if (CheckSkill( who, SKILLID_MAGERY, GetSpellDifficulty(spellid)-20, value ) )
-	        if ( ConsumeMana( who, spellid ) )
-	        	Detach();
-			SubtractAmount( scroll, 1 );
-                	StartSpellEffect( who, spellid );
-			return;
+        if ( ConsumeMana( who, spellid ) )
+        	Detach();
+			if( SubtractAmount( scroll, 1 ) )
+            	var spell := GetScript(spellid);
+            	if( !start_script(spell, who) )
+					SendSysMessage(who, "You struggle to cast the spell correctly.");
+					return;
+				endif
+			else
+				SendSysMessage(who, "You don't seem to be able to read the scroll.");
+				return;
+			endif
 		endif
 	endif
 	endif
