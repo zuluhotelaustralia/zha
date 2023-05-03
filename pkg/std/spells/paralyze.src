@@ -81,7 +81,9 @@ program cast_paralyze( parms )
 
 	var amt := 2 + CInt(magery / 25);
 	amt := ModifyWithMagicEfficiency( caster, Resisted( caster, cast_on, circle, amt) );
-	DoTempMod(cast_on, "p", 1, amt);
+	if( !GetObjProperty( cast_on, "FreeAction" ) )
+		DoTempMod(cast_on, "p", 1, amt);
+	endif
    
 endprogram
 
