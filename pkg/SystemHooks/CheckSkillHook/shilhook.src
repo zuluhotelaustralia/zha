@@ -19,8 +19,9 @@ endprogram
 
 exported function ShilCheckSkill( who, skillid, difficulty, points )
 
-	if(GetObjProperty(who, CLASSEID_POWERPLAYER))
-		points+=cdbl(points)*0.05;
+	var ppLvL := GetObjProperty(who, CLASSEID_POWERPLAYER);
+	if(ppLvL > 0)
+		points+=cdbl(points)*(0.05*ppLvL);
 	endif
 
 	if( who.IsA(POLCLASS_NPC) && skillid != SKILLID_DETECTINGHIDDEN )
