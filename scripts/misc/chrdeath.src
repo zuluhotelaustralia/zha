@@ -22,6 +22,7 @@ include "include/queststone";
 include "include/war";
 include "include/speedhackRecallCheck";
 include "../../pkg/opt/barnsitems/monsterDuelGate";
+include "include/PartyMessage";
 
 
 program chrdeath(corpse,ghost)
@@ -38,9 +39,9 @@ program chrdeath(corpse,ghost)
 	endif
 
 	if (GetObjProperty( ghost, "KilledBy" ))
-		SendPartyMsg(party, ghost, "I was just killed by " + GetObjProperty( ghost, "KilledBy" ));
+		party_SendPartyMsg(party, ghost, "I was just killed by " + GetObjProperty( ghost, "KilledBy" ));
 	else
-		SendPartyMsg(party, ghost, "I just died");
+		party_SendPartyMsg(party, ghost, "I just died");
 	endif
 
 	EraseObjProperty( ghost, "KilledBy" );

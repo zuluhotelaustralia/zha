@@ -255,7 +255,7 @@ function MakeTotem( me, what )
 	if (!thecritter)
 		thecritter := CreateNpcFromTemplate("humuc", me.x, CInt(me.y - 1), me.z, parms);
 		if (!thecritter)
-			SendSysMessage(me, "There was an error creating your totem, please report this.")
+			SendSysMessage(me, "There was an error creating your totem, please report this.");
 			return;
 		endif
 	endif

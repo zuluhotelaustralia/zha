@@ -8,6 +8,7 @@ include ":CombatHook:include/zhaSpecialMonsterAttacks";
 include "include/hitscriptinc";
 include "include/guardcall";
 include "include/classes";
+include "include/PartyMessage";
 
 
 var cfg := ReadConfigFile(":combat:itemdesc");
@@ -27,8 +28,8 @@ exported function ZHAAttackfunc( attacker, defender )
 	endif
 
 	//party notification here
-	if (attacker.party != defender.party)
-		SendPartyMsg(defender.party, defender, "" + attacker.name + " cast a spell on me!");
+	if (attacker.party != defender.party && !defender.npctemplate)
+		party_SendPartyMsg(defender.party, defender, "" + attacker.name + " is attacking me!");
 	endif
 
 	if (attacker.acct && defender.acct)

@@ -10,6 +10,7 @@ include "include/attributes";
 include "include/objtype";
 include "include/client";
 include "include/itemutil";
+include "include/PartyMessage";
 
 
 function GetScriptBard( songid )
@@ -212,7 +213,7 @@ function CanTargetSpellBard( caster )
    if (caster.acct && cast_on.acct)//both players
 	//party notification here
 	 if (caster.party != cast_on.party)
-	 	SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
+	 	party_SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
 	 endif
   endif
 
