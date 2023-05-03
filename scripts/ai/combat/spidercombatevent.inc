@@ -57,10 +57,10 @@ function send_web(opponent)
 
 	PrintTextAbove(me, "The spider spits a web!");
 
-
 	var x := opponent.x;
 	var y := opponent.y;
 	var z := opponent.z;
+	PlayMovingEffectXYZ( me.x, me.y, me.z, x, y, z, 0x0F8D, 1 );
 
 	sleep(1);
 

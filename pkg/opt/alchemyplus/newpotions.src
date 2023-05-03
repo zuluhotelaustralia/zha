@@ -248,13 +248,14 @@ function MakeTotem( me, what )
 
 	set_critical(1);
 	Detach();
-	var parms := {};
+	var parms := struct{};
 	parms .+ script := "humuc";
 
 	var thecritter := CreateNpcFromTemplate("humuc", CInt(me.x - 1), me.y, me.z, parms);
 	if (!thecritter)
 		thecritter := CreateNpcFromTemplate("humuc", me.x, CInt(me.y - 1), me.z, parms);
 		if (!thecritter)
+			SendSysMessage(me, "There was an error creating your totem, please report this.")
 			return;
 		endif
 	endif
