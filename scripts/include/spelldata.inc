@@ -25,6 +25,7 @@ include "include/skillpoints";
 include "include/guardcall";
 include ":karmafame:karmafame"; //for fame exp system see FameExperiencePointModifier function
 include ":CheckSkillHook:dksmod";
+include "include/PartyMessage";
 
 
 
@@ -443,7 +444,7 @@ function CanTargetSpell( caster, circle := 1, targopt := TGTOPT_CHECK_LOS )
    if (caster.acct && cast_on.acct)//both players
 	//party notification here
 	 if (caster.party != cast_on.party)
-	 	SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
+		party_SendPartyMsg(cast_on.party, cast_on, "" + caster.name + " cast a spell on me!");
 	 endif
   endif
 
@@ -793,7 +794,6 @@ endfunction
 
 function ModifyWithMagicEfficiency( who, val )
 
-	/*
 	if( GetObjProperty( who, CLASSEID_MAGE ) )
 		val := CInt(val * ClasseBonus( who, CLASSEID_MAGE ));
 	elseif( GetObjProperty( who, CLASSEID_WARRIOR ) )
@@ -801,7 +801,6 @@ function ModifyWithMagicEfficiency( who, val )
 	elseif( GetObjProperty(who, "UsingBardInstrument")==1)
 		val := CInt(val * ClasseBonus( who, CLASSEID_BARD ));
 	endif
-	*/
 	var penalty:=0;
 	penalty := CInt( GetMagicEfficiencyPenalty( who ) );
 
