@@ -5,6 +5,7 @@ use cfgfile;
 include "include/yesno";
 include "include/itemutil";
 include "alchemy";
+include "include/attributes";
 
 const SOUND_EFFECT_POUR		:= 0x0241;
 const MAX_KEG_VOLUME		:= 100;
@@ -251,8 +252,11 @@ program potionkeg (character, keg)
 				return;
 			endif
 		endif
-
-		sleep(1);
+		if (GetEffectiveSkill(character,SKILLID_ALCHEMY) > 130)
+			sleepms(500);
+		else
+			sleep(1);
+		endif
 
 		//reload info about the keg, just to be safe
 		keg_potion_type := GetObjProperty(keg, "type");

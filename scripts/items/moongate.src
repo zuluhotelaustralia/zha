@@ -51,6 +51,7 @@ program walk_on_moongate( mobile, gate )
 	endif
 
 	if( !GetObjProperty(gate, "perma") && IsForbiddenAreaToRecallTo( mobile, x, y ) )
+		SendSysMessage(mobile, "Something twisted stops you from being able to travel through that gate.");
 		return;
 	endif
 	
@@ -161,6 +162,8 @@ program walk_on_moongate( mobile, gate )
 	if( MoveObjectToLocation( mobile, x, y, z ) )
 		SetObjProperty( mobile, "JustGated", 1 );
 		SetSpeedCheckNote(mobile);
+	else
+		SendSysMessage(mobile, "As you travel through the magic of the gate, you feel something reach out and grab you back to where you were before.");
 	endif
 endprogram
 

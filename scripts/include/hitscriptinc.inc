@@ -291,6 +291,7 @@ function MaceHit( attacker, defender, weapon, armor, unused absorbed )
 
 		if( armor.hp )
 			if( Random(100) < 5 )
+				SendSysMessage(defender, "The blow damages your armor.");
 				armor.hp := armor.hp - 1;
 			endif
 		endif
@@ -298,6 +299,7 @@ function MaceHit( attacker, defender, weapon, armor, unused absorbed )
 	elseif( Random(100) < archance )
 
 		if( armor.hp )
+			SendSysMessage(defender, "The blow damages your armor.");
 			armor.hp := armor.hp - 1;
 		endif
 
@@ -305,18 +307,21 @@ function MaceHit( attacker, defender, weapon, armor, unused absorbed )
 
 	if( Random(100) < weapchance )
 		if( weapon.hp )
+			SendSysMessage(attacker, "Using your weapon with such power damages it slightly.");
 			weapon.hp := weapon.hp - 1;
 		endif
 	endif
 
 	if( armor.quality )
 		if( (armor.hp > armor.maxhp) || (armor.hp < 1) )
+			SendSysMessage(attacker, "The raw power of your opponents attack sends your "+armor.desc+" to its demise.");
 			DestroyEquipment( defender, armor );
 		endif
 	endif
 
 	if( weapon.quality )
 		if( (weapon.hp > weapon.maxhp) || (weapon.hp < 1) )
+			SendSysMessage(attacker, "The raw power of your attacks sends your weapon to its demise.");
 			DestroyEquipment( attacker, weapon );
 		endif
 	endif
@@ -475,7 +480,7 @@ function DestroyEquipment( who, item )
 
 	if( who.isA(POLCLASS_NPC) )
 		if( item.skillid )
-			PrintTextAbove( who, who.name + " seem exhausted and can barely hit anyones anymore!" );
+			PrintTextAbove( who, who.name + " seem exhausted and can barely hit anyone anymore!" );
 		else
 			PrintTextAbove( who, who.name + "'s defences has been penetrated making it easy to hit vital parts!" );
 		endif
