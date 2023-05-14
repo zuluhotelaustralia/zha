@@ -1,209 +1,388 @@
-use cfgfile;
-use uo;
-use basic;
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// Original: Unknown.                                                           //
+// Revisited: MontuZ (MontuZ@aol.com) Jan 30, 2004.                             //
+// Version: 2.0                                                                 //
+// Core: 093                                                                    //
+// Bugs: None. Atleast none that I know of..                                    //
+// ToDo: Add in for items with an OnHitScript.                                  //
+//                                                                              //
+//                Now tells the cast rate of castable weapons.                  //
+//               And the poison level of perma poisoned weapons.                //
+//                  Also the actual dmg/ar/hp of an item.                       //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
 
-include "include/string";
-include "include/attributes";
-include "include/client";
-include "include/classes";
-include "include/skillpoints";
+Use cfgfile;
+Use uo;
+Use basic;
 
-const POINTS := 200;
+Include "include/string";
+Include "include/client";
+Include "include/classes";
+Include "include/skillpoints";
 
-program do_armslore( character )
+Const POINTS := 250;
 
-	SendSysMessage( character, "Select an object to evaluate." );
-	var item := Target( character );
-	if( !Accessible( character, item ) )
-		SendSysMessage( character, "You can't reach that." );
-		return;
-	endif
+Program do_armslore( character )
 
-	if( Distance( character, item ) > 2 )
-		SendSysMessage( character, "That is too far." );
-		return;
-	endif
+    SendSysMessage( character , "Select an object to evaluate." );
 
-	if( item.isa( POLCLASS_ARMOR ) )
-		EvaluateArmor( character, item );
-	elseif( item.isa( POLCLASS_WEAPON ) )
-		EvaluateWeapon( character, item );
-	else
-		SendSysMessage( character, "You can only use this skill on weapons or armor!" );
-	endif
+    Var item := Target( character );
 
-endprogram
+    If( !Accessible( character , item ) )
+    SendSysMessage( character , "You can not reach that.");
+    Return;
+    Endif
 
+    If( Distance( character , item ) > 2 )
+    SendSysMessage( character , "That is too far away." );
+    Return;
+    Endif
 
-function EvaluateArmor( who, item )
+    If( ( item.onhitscript == ":combat:spellonhit" ) OR ( item.onhitscript == "spellonhit" ) )
+    EvaluateCastOnHit( character , item );
+    Elseif( ( item.hitscript == ":combat:spellstrikescript" ) OR ( item.hitscript == "spellstrikescript" ) )
+    EvaluateCastWeapon( character , item );
+    Elseif( ( item.hitscript == ":combat:trielementalscript" ) OR ( item.hitscript == "trielementalscript" ) )
+    EvaluateFuryCastWeapon( character , item );
+    Elseif( ( item.hitscript == ":combat:poisonhit" ) OR ( item.hitscript == "poisonhit" ) )
+    EvaluatePoisonWeapon( character , item );
+    Elseif( item.isa( POLCLASS_WEAPON ) )
+    EvaluateWeapon( character , item );
+    Elseif( item.isa( POLCLASS_ARMOR ) )
+    EvaluateArmor( character , item );
+    Else
+    SendSysMessage( character , "You can not evaluate that." );
+    Endif
 
-	var crafter := GetObjProperty( who, CLASSEID_CRAFTER );
-
-	if( !CheckSkill( who, SKILLID_ARMSLORE, -1, POINTS ) )
-		SendSysMessage( who, "I can't quite tell . . ." );
-		return;
-	endif
-
-
-	var ar := item.ar;
-	var a_desc;
-	if( ar > 60 )
-		a_desc := "is superbly crafted to provide maximum protection";
-	elseif( ar > 50 )
-		a_desc := "offers excellent protection";
-	elseif( ar > 40 )
-		a_desc := "is a superior defense against attack";
-	elseif( ar > 30 )
-		a_desc := "serves as a sturdy protection";
-	elseif( ar > 20 )
-		a_desc := "offers some protection against blows";
-	elseif( ar > 10 )
-		a_desc := "provides very little protection";
-	elseif( ar > 0 )
-		a_desc := "provides almost no protection";
-	else
-		a_desc := "offers no defense against attackers";
-	endif
+EndProgram
 
 
-	var max_hp := CInt(item.maxhp);
-	var hp := CInt(item.hp);
-	if( !max_hp )
-		max_hp := 1;
-		if( !hp )
-			hp := 1;
-		endif
-	endif
+Function EvaluateArmor( who , item )
 
-	var condition	:= CInt( CDbl(hp) / CDbl(max_hp) * 100 );
-	var c_desc;
-	if( condition >= 100  )
-		c_desc := "is brand new.";
-	elseif( condition >= 90 )
-		c_desc := "is almost new.";
-	elseif( condition >= 80 )
-		c_desc := "is barely used, with a few nicks and scrapes.";
-	elseif( condition >= 70 )
-		c_desc := "is in fairly good condition.";
-	elseif( condition >= 60 )
-		c_desc := "suffered some wear and tear.";
-	elseif( condition >= 50 )
-		c_desc := "is well used.";
-	elseif( condition >= 40 )
-		c_desc := "is rather battered.";
-	elseif( condition >= 30 )
-		c_desc := "is somewhat badly damaged.";
-	elseif( condition >= 20 )
-		c_desc := "is flimsy and trustworthy.";
-	else
-		c_desc := "is falling apart.";
-	endif
+    Var crafter := GetObjProperty( who , CLASSEID_CRAFTER );
 
-	SendSysMessage( who, "This " + TruncateArticle(item.desc) + " " + a_desc + " and " + c_desc );
-	if( GetObjProperty( item, "FortifiedBy" ) && GetObjProperty( item, "BaseName" ) )
-		SendSysMessage(who, "The item also seems to have been fortified with a " + TruncateArticle( GetObjProperty( item, "BaseName" ) ) );
-	endif
+    If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+        If( crafter )
+            If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+            SendSysMessage( who , "I can't quite tell . . ." );
+            Return;
+            Endif
+        Else
+        SendSysMessage( who , "I can't quite tell . . ." );
+        Return;
+        Endif
+    Endif
 
-endfunction
+    Var ar := item.ar;
+    Var Armour;
 
+    Armour := " [Armour Rating: " + item.ar + "] ";
 
-function EvaluateWeapon( who, item )
+    Var max_hp := Cint(item.maxhp);
+    Var hp     := Cint(item.hp);
 
-	var crafter := GetObjProperty( who, CLASSEID_CRAFTER );
+    If( !max_hp )
+    max_hp := 1;
+        If( !hp )
+        hp := 1;
+        Endif
+    Endif
+	
+    Var condition  := Cint( Cdbl(hp) / CDbl(max_hp) * 100 );
+    Var ItemHP;
 
-	if( !CheckSkill( who, SKILLID_ARMSLORE, -1, POINTS ) )
-		if( crafter )
-			if( !CheckSkill( who, SKILLID_ARMSLORE, -1, POINTS ) )
-				SendSysMessage( who, "I can't quite tell . . ." );
-				return;
-			endif
-		else
-			SendSysMessage( who, "I can't quite tell . . ." );
-			return;
-		endif
-	endif
+    ItemHP := "[Item HP: " + condition + "%]";
 
-	var max_hp := CInt(item.maxhp);
-	var hp := CInt(item.hp);
-	if( !max_hp )
-		max_hp := 1;
-		if( !hp )
-			hp := 1;
-		endif
-	endif
+    SendSysMessage( who , TruncateArticle(item.desc) + Armour + ItemHP );
 
-	var condition	:= CInt( CDbl(hp) / CDbl(max_hp) * 100 );
-	var cfg	:= ReadConfigFile( ":*:itemdesc" );
-	var base_dmg	:= cfg[item.objtype].Damage;
-	var dmg_mod	:= CInt(item.dmg_mod);
-	var quality	:= item.quality;
-	var space	:= find( base_dmg, "d", 1 );
-	var space2a	:= find( base_dmg, "+", space+1 );
-	var space2b	:= find( base_dmg, "-", space+1 );
-	var dice_a	:= CInt( base_dmg[1,space-1] );
-	var bonus	:= 0;
-	var dice_t;
-
-	if( (!space2a) && space2b )
-		space2a := space2b;
-	endif
-
-	if( !space2a )
-		dice_t	:= CInt( base_dmg[space+1,(len(base_dmg)-space)] );
-	else
-		dice_t	:= CInt( base_dmg[space+1, (space2a-space-1)] );
-		bonus	:= CInt( base_dmg[space2a+1, len(base_dmg)-space2a] );
-	endif
-
-	if( space2b )
-		bonus := 0 - bonus;
-	endif
-
-	var average	:= CInt( (dice_a * (CDbl(dice_t+1)/2)) + bonus );
-	average		:= CInt( average * condition / 100 * quality );
-	average		:= CInt( average + dmg_mod );
-
-	var dmg_desc;
-	if( average > 55 )
-		dmg_desc := "would be extraordinarily deadly";
-	elseif( average > 45 )
-		dmg_desc := "would be a superior weapon";
-	elseif( average > 35 )
-		dmg_desc := "would inflict quite a lot of damage and pain";
-	elseif( average > 25 )
-		dmg_desc := "would probably hurt your opponent a fair amount";
-	elseif( average > 15 )
-		dmg_desc := "would do some damage";
-	elseif( average > 5 )
-		dmg_desc := "would do minimal damage";
-	else
-		dmg_desc := "might scratch your opponent slightly";
-	endif
+EndFunction
 
 
-	var c_desc;
-	if( condition >= 100  )
-		c_desc := "is brand new.";
-	elseif( condition >= 90 )
-		c_desc := "is almost new.";
-	elseif( condition >= 80 )
-		c_desc := "is barely used, with a few nicks and scrapes.";
-	elseif( condition >= 70 )
-		c_desc := "is in fairly good condition.";
-	elseif( condition >= 60 )
-		c_desc := "suffered some wear and tear.";
-	elseif( condition >= 50 )
-		c_desc := "is well used.";
-	elseif( condition >= 40 )
-		c_desc := "is rather battered.";
-	elseif( condition >= 30 )
-		c_desc := "is somewhat badly damaged.";
-	elseif( condition >= 20 )
-		c_desc := "is flimsy and trustworthy.";
-	else
-		c_desc := "is falling apart.";
-	endif
+Function EvaluateWeapon( who , item )
 
-	SendSysMessage( who, "This " + TruncateArticle(item.desc) + " " + dmg_desc + " and " + c_desc );
+    Var crafter := GetObjProperty( who , CLASSEID_CRAFTER );
 
-endfunction
+    If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+        If( crafter )
+            If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+            SendSysMessage( who , "I can't quite tell . . ." );
+            Return;
+            Endif
+        Else
+        SendSysMessage( who , "I can't quite tell . . ." );
+        Return;
+        Endif
+    Endif
+
+    Var max_hp := Cint(item.maxhp);
+    Var hp     := Cint(item.hp);
+
+    If( !max_hp )
+    max_hp := 1;
+        If( !hp )
+        hp := 1;
+        Endif
+    Endif
+
+    Var condition := Cint( Cdbl(hp) / CDbl(max_hp) * 100 );
+    Var cfg	  := ReadConfigFile( ":*:itemdesc" );
+    Var base_dmg  := cfg[item.objtype].Damage;
+    Var dmg_mod	  := Cint(item.dmg_mod);
+    Var quality	  := item.quality;
+    Var space	  := Find( base_dmg , "d" , 1 );
+    Var space2a	  := Find( base_dmg , "+" , space+1 );
+    Var space2b	  := Find( base_dmg , "-" , space+1 );
+    Var dice_a	  := Cint( base_dmg[1,space-1] );
+    Var bonus	  := 0;
+    Var dice_t;
+
+    If( (!space2a) and space2b )
+    space2a := space2b;
+    Endif
+
+    If( !space2a )
+    dice_t	:= Cint( base_dmg[space+1,(len(base_dmg)-space)] );
+    Else
+    dice_t	:= Cint( base_dmg[space+1, (space2a-space-1)] );
+    bonus	:= Cint( base_dmg[space2a+1, len(base_dmg)-space2a] );
+    Endif
+
+    If( space2b )
+    bonus := 0 - bonus;
+    Endif
+
+    Var average	:= Cint( (dice_a * (CDbl(dice_t+1)/2)) + bonus );
+
+    average    := Cint( average * condition / 100 * quality );
+    average    := Cint( average + dmg_mod );
+
+    Var DamageRating;
+
+    DamageRating := " [Damage Rating: " + average + "] ";
+
+    Var ItemHP;
+
+    ItemHP := "[Item HP: " + condition + "%]";
+
+    SendSysMessage( who , TruncateArticle(item.desc) + DamageRating + ItemHP );
+
+EndFunction
+
+Function EvaluateCastWeapon( who , item )
+
+    Var crafter := GetObjProperty( who , CLASSEID_CRAFTER );
+
+    If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+        If( crafter )
+            If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+            SendSysMessage( who , "I can't quite tell . . ." );
+            Return;
+            Endif
+        Else
+        SendSysMessage( who , "I can't quite tell . . ." );
+        Return;
+        Endif
+    Endif
+
+    Var spellcfg := ReadConfigFile( "::spells" );
+    Var Casts := spellcfg[GetObjProperty( item , "HitWithSpell" )].Name;
+    Var Spell;
+
+    Spell := " [Casts: " + Casts + "]";
+
+    Var Cast := GetObjProperty( item , "ChanceOfEffect" );
+    Var CastRate;
+
+    CastRate := " [Chance: " + Cast + "%]";
+    
+    Var CircleNum := GetObjProperty( item , "EffectCircle" );
+    Var Circle;
+
+    Circle := " [Circle: " + CircleNum + "] ";
+
+    Var max_hp := Cint(item.maxhp);
+    Var hp     := Cint(item.hp);
+
+    If( !max_hp )
+    max_hp := 1;
+        If( !hp )
+        hp := 1;
+        Endif
+    Endif
+
+    Var condition  := Cint( Cdbl(hp) / CDbl(max_hp) * 100 );
+    Var ItemHP;
+
+    ItemHP := "[Item HP: " + condition + "%]";
+
+    SendSysMessage( who , TruncateArticle(item.desc) + Spell + CastRate + Circle + ItemHP );
+
+EndFunction
+
+Function EvaluateCastOnHit( who , item )
+
+    Var crafter := GetObjProperty( who , CLASSEID_CRAFTER );
+
+    If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+        If( crafter )
+            If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+            SendSysMessage( who , "I can't quite tell . . ." );
+            Return;
+            Endif
+        Else
+        SendSysMessage( who , "I can't quite tell . . ." );
+        Return;
+        Endif
+    Endif
+
+    Var spellcfg := ReadConfigFile( "::spells" );
+    Var Casts := spellcfg[GetObjProperty( item , "HitWithSpell" )].Name;
+    Var Spell;
+
+    Spell := " [Casts: " + Casts + "]";
+
+    Var Cast := GetObjProperty( item , "ChanceOfEffect" );
+    Var CastRate;
+
+    CastRate := " [Chance: " + Cast + "%]";
+
+    Var CircleNum := GetObjProperty( item , "EffectCircle" );
+    Var Circle;
+
+    Circle := " [Circle: " + CircleNum + "] ";
+
+    Var max_hp := Cint(item.maxhp);
+    Var hp     := Cint(item.hp);
+
+    If( !max_hp )
+    max_hp := 1;
+        If( !hp )
+        hp := 1;
+        Endif
+    Endif
+
+    Var condition  := Cint( Cdbl(hp) / CDbl(max_hp) * 100 );
+    Var ItemHP;
+
+    ItemHP := "[Item HP: " + condition + "%]";
+
+    SendSysMessage( who , TruncateArticle(item.desc) + Spell + CastRate + Circle + ItemHP );
+
+EndFunction
+
+Function EvaluateFuryCastWeapon( who , item )
+
+    Var crafter := GetObjProperty( who , CLASSEID_CRAFTER );
+
+    If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+        If( crafter )
+            If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+            SendSysMessage( who , "I can't quite tell . . ." );
+            Return;
+            Endif
+        Else
+        SendSysMessage( who , "I can't quite tell . . ." );
+        Return;
+        Endif
+    Endif
+
+    Var Cast := GetObjProperty( item , "ChanceOfEffect" );
+    Var CastRate;
+
+    CastRate := "[Chance: " + Cast + "%] ";
+
+    Var max_hp := Cint(item.maxhp);
+    Var hp     := Cint(item.hp);
+
+    If( !max_hp )
+    max_hp := 1;
+        If( !hp )
+        hp := 1;
+        Endif
+    Endif
+
+    Var condition  := Cint( Cdbl(hp) / CDbl(max_hp) * 100 );
+    Var ItemHP;
+
+    ItemHP := "[Item HP: " + condition + "%]";
+
+    SendSysMessage( who , TruncateArticle(item.desc) + " [Casts: Elemental Fury] " + CastRate + ItemHP );
+
+EndFunction
+
+Function EvaluatePoisonWeapon( who , item )
+
+    Var crafter := GetObjProperty( who , CLASSEID_CRAFTER );
+
+    If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+        If( crafter )
+            If( !CheckSkill( who , SKILLID_ARMSLORE , -1 , POINTS ) )
+            SendSysMessage( who , "I can't quite tell . . ." );
+            Return;
+            Endif
+        Else
+        SendSysMessage( who , "I can't quite tell . . ." );
+        Return;
+        Endif
+    Endif
+
+    Var max_hp := Cint(item.maxhp);
+    Var hp     := Cint(item.hp);
+
+    If( !max_hp )
+    max_hp := 1;
+        If( !hp )
+        hp := 1;
+        Endif
+    Endif
+
+    Var condition := Cint( Cdbl(hp) / CDbl(max_hp) * 100 );
+    Var cfg	  := ReadConfigFile( ":*:itemdesc" );
+    Var base_dmg  := cfg[item.objtype].Damage;
+    Var dmg_mod	  := Cint(item.dmg_mod);
+    Var quality	  := item.quality;
+    Var space	  := Find( base_dmg , "d" , 1 );
+    Var space2a   := Find( base_dmg , "+" , space+1 );
+    Var space2b	  := Find( base_dmg , "-" , space+1 );
+    Var dice_a	  := Cint( base_dmg[1,space-1] );
+    Var bonus	  := 0;
+    Var dice_t;
+
+    If( (!space2a) and space2b )
+    space2a := space2b;
+    Endif
+
+    If( !space2a )
+    dice_t      := Cint( base_dmg[space+1,(len(base_dmg)-space)] );
+    Else
+    dice_t	:= Cint( base_dmg[space+1, (space2a-space-1)] );
+    bonus	:= Cint( base_dmg[space2a+1, len(base_dmg)-space2a] );
+    Endif
+
+    If( space2b )
+    bonus := 0 - bonus;
+    Endif
+
+    Var average	:= Cint( (dice_a * (CDbl(dice_t+1)/2)) + bonus );
+
+    average  := Cint( average * condition / 100 * quality );
+    average  := Cint( average + dmg_mod );
+
+    Var DamageRating;
+
+    DamageRating := " [Damage Rating: " + average + "] ";
+
+    Var ItemHP;
+
+    ItemHP := "[Item HP: " + condition + "%]";
+
+    Var Poison := GetObjProperty( item , "Poisonlvl" );
+    Var PoisonLvl;
+
+    PoisonLvl := " [PoisonLvl: " + Poison + "]";
+
+    SendSysMessage( who , TruncateArticle(item.desc) + PoisonLvl + DamageRating + ItemHP );
+
+EndFunction
