@@ -1,6 +1,7 @@
 use os;
 use uo;
 use cfgfile;
+use polsys;
 
 include "include/yesno";
 include "include/itemutil";
@@ -139,30 +140,59 @@ program potionkeg (character, keg)
 			PlaySoundEffect(character, SOUND_EFFECT_POUR);
 
 			//destroy the bottle, create the potion and rename it
-			SubtractAmount(targetted, 1);
+			if(!SubtractAmount(targetted, 1))
+				SendSysMessage(character, "Select a different stack of empty bottles.");
+				return;
+			endif
 
-			if (empty_bottle_container)
-				created_potion := CreateItemInContainer(empty_bottle_container, keg_potion_type, 1);
-				if (keg_mage_bonus)
-					SetObjProperty(created_potion, "ByTrueMage", keg_mage_bonus);
-				endif
-			else
-				created_potion := CreateItemInBackpack(character, keg_potion_type, 1);
-				if (keg_mage_bonus)
-					SetObjProperty(created_potion, "ByTrueMage", keg_mage_bonus);
-				endif
+			var newitem := GetItemDescriptor(keg_potion_type);
+			if(newitem.errortext || !newitem)
+				SendSysMessage(character, "The potion seems to have gone off in the keg. See if a staff member can salvage it.");
+				broadcast("Error with keg system: "+created_potion.errortext, required_cmdlevel:= 1);
+				CreateItemInContainer(empty_bottle_container, 0x0f0e, 1);
+				return;
+			endif
+
+
+			if (keg_mage_bonus)
+				newitem.CProps.insert("ByTrueMage",keg_mage_bonus);
 			endif
 
 			//if it has a subtype, load the cfg file and find out information that needs
 			//to be set from there
 			if (keg_potion_subtype)
+
 				var current_potion := alchemy_cfg_file[ keg_potion_subtype ];
-				SetObjProperty(created_potion,"itemtype", current_potion.itemtype);
-				created_potion.graphic := current_potion.graphic;
-				created_potion.color := current_potion.color;
-				created_potion.name := current_potion.name;
+				if(!current_potion)
+					SendSysMessage(character, "That looks like no potion you've ever seen.");
+					broadcast("Error with keg system: "+current_potion.errortext, required_cmdlevel:= 1);
+					CreateItemInContainer(empty_bottle_container, 0x0f0e, 1);
+					return;
+				endif
+
+				newitem.CProps.insert("itemtype",current_potion.itemtype);
+				if(current_potion.graphic)
+					newitem.graphic := current_potion.graphic;
+				endif
+				if(current_potion.color)
+					newitem.color := current_potion.color;
+				endif
+				newitem.desc := current_potion.name;
+				newitem.name := current_potion.name;
 			else
-				created_potion.name := get_potion_name(created_potion.objtype, keg_potion_subtype);
+				newitem.desc := get_potion_name(created_potion.objtype, keg_potion_subtype);
+			endif
+
+			if (!empty_bottle_container)
+				empty_bottle_container := character.backpack;
+			endif
+			created_potion := CreateItemInContainer(empty_bottle_container, newitem, 1);
+			print(created_potion.errortext);
+			if(!created_potion)
+				SendSysMessage(character, "There seems to be a blockage in your kegs tap.");
+				broadcast("Error with keg system: "+created_potion.errortext, required_cmdlevel:= 1);
+				CreateItemInContainer(empty_bottle_container, 0x0f0e, 1);
+				return;
 			endif
 
 			//reduce the keg fullness
@@ -197,7 +227,6 @@ program potionkeg (character, keg)
 
 		//see if the potion that was targetted is the same as the potion already in the keg
 		elseif (targetted.objtype == keg_potion_type)
-
 			//if the keg is already full, return
 			if (keg_fullness >= MAX_KEG_VOLUME)
 				SendSysMessage(character, "The keg is full.");
@@ -208,7 +237,7 @@ program potionkeg (character, keg)
 					return 0;
 				else
 					keg_fullness := keg_fullness + 1;
-					temp_string := get_keg_name(targetted.objtype, keg_potion_subtype);
+					temp_string := get_keg_name(keg_potion_type, keg_potion_subtype);
 					if (!temp_string)
 						return;
 					else

@@ -1,0 +1,8 @@
+use uo;
+use polsys;
+
+program textcmd_Hide(mobile, text )
+
+	SendSysMessage(mobile, "Redrawing.");
+	MoveObjectToLocation(mobile, mobile.x, mobile.y, mobile.z, mobile.realm, flags := MOVEOBJECT_FORCELOCATION);
+endprogram

@@ -1,0 +1,12 @@
+use uo;
+use polsys;
+
+program textcmd_Hide(mobile, text )
+
+	SendSysMessage(mobile, "Please select the object you'd like to hide.");
+	var targ := Target(mobile);
+	var packet_status := CreatePacket(0x1D, 5);
+    var offset := 1;
+    packet_status.setint32(offset,targ.serial);
+    packet_status.SendPacket(mobile);
+endprogram
