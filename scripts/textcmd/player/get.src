@@ -8,9 +8,18 @@ var AMMO 		:= {0xf3f, 0x6051, 0xb200, 0x1bfb, 0x824e};
 var GEMS 		:= {0xf0f, 0xf10, 0xf11, 0xf13, 0xf15, 0xf16, 0xf18, 0xf25, 0xf30, 0xc539, 0xc53a, 0xc538};
 var GOLD 		:= {0xEED, 0xeee, 0xeef};
 var MAPS 		:= {0x6000, 0x6003, 0x6004, 0x6005, 0x6006, 0x6007};
+var SCROLLS := array{};
+for i:=0x1f2d to 0x1f6c
+	SCROLLS.append(i);
+endfor
+for i:=0xa100 to 0xa110
+	SCROLLS.append(i);
+endfor
+for i:=0xb100 to 0xb110
+	SCROLLS.append(i);
+endfor
 
 program get_items_from_corpse(who, types)
-
 	if (!types)
 			SendSysMessage(who, "Usage: .setget to set catch bags");
 			SendSysMessage(who, "Usage: .get <reags> <pagans> <ammo> <gems> <scrolls> <gold> <maps>");
@@ -80,7 +89,7 @@ program get_items_from_corpse(who, types)
 			"ammo":			GrabItems(who, corpse, AMMO, "ammo");
 			"gems":			GrabItems(who, corpse, GEMS, "gems");
 			"maps":			GrabItems(who, corpse, MAPS, "maps");
-			"scrolls":	GrabScrolls(who, corpse);
+			"scrolls":			GrabItems(who, corpse, SCROLLS, "scrolls");
 		endcase
 	endforeach
 
@@ -88,13 +97,20 @@ endprogram
 
 function GrabItems(who, corpse, type, typename)
 
-var bagarray := 	GetObjProperty(who, "DefaultBag");
-var bag;
-case (typename) //Conversion
+	var bagarray := 	GetObjProperty(who, "DefaultBag");
+	var bag;
+
+	if(corpse.serial in bagarray)
+		SendSysMessage(who, "You cannot use .get on one of your collection bags.");
+		return;
+	endif
+
+	case (typename) //Conversion
 			"reags":		bag := bagarray[1];
-			"pagans": 	bag := bagarray[2];
+			"pagans":		bag := bagarray[2];
 			"ammo":			bag := bagarray[3];
 			"gems":			bag := bagarray[4];
+			"scrolls":		bag := bagarray[5];
 			"gold":			bag := bagarray[6];
 			"maps":			bag := bagarray[7];
 	endcase
@@ -106,45 +122,15 @@ case (typename) //Conversion
 
 	SetObjProperty(who, "fastlooting", 1);
 	foreach item in EnumerateItemsInContainer(corpse)
-		if (!ReserveItem(Item))
-			SendSysMessage(who, "That item is in use.");
-			return;
-		endif
 		if (item.objtype in type)
-			if (CreateItemInContainer(bag, item.objtype, item.amount))
-				SendSysMessage(who, "Grabbed "+item.desc);
+				SendSysMessage(who, "Attempting to grab "+item.desc);
+			if (MoveItemToContainer(item,SystemFindObjectBySerial(bag),add_to_existing_stack:=2))
 				ReleaseItem(Item);
-				DestroyItem(item);
 			else
 				SendSysMessage(who, "Failed to move "+item.desc);
 			endif
-		endif
-	endforeach
-	EraseObjProperty(who, "fastlooting");
-
-endfunction
-
-function GrabScrolls(who, corpse)
-	var bagarray := 	GetObjProperty(who, "DefaultBag");
-	var bag:= 	bagarray[5];
-	var obj;
-	SetObjProperty(who, "fastlooting", 1);
-	foreach item in EnumerateItemsInContainer(corpse)
-		obj:=item.objtype;
-		if ((obj >= 0x1f2d && obj <= 0x1f6c) ||
-		(obj >= 0xa100 && obj <=0xa110) ||
-		(obj >= 0xb100 && obj <= 0xb110))
-		if (!ReserveItem(Item))
-			SendSysMessage(who, "That item is in use.");
-			return;
-		endif
-			if (CreateItemInContainer(bag, obj, item.amount))
-				SendSysMessage(who, "Grabbed "+item.desc);
-				ReleaseItem(Item);
-				DestroyItem(item);
-			else
-				SendSysMessage(who, "Failed to move "+item.desc);
-			endif
+		else
+			ReleaseItem(Item);
 		endif
 	endforeach
 	EraseObjProperty(who, "fastlooting");

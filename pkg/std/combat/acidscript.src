@@ -37,13 +37,15 @@ program acidscript(attacker, defender, weapon, armor, basedamage, rawdamage)
 			var thing := things[ CInt(Random(len(things))+1) ];
 	
 			if ( CanEat(thing) )
-		  		PrintTextAbovePrivate(defender, "Acid damages " + defender.name + "'s " + thing.desc, defender);
-		  		if (dmg > thing.hp)
-					dmg := thing.hp;
+		  		if ((dmg > thing.hp)&& thing.hp != 1)
+					dmg := thing.hp-1;
+			  		PrintTextAbovePrivate(defender, "Acid damages " + defender.name + "'s " + thing.desc+" rendering it virtually unusable.", defender);
+			  		PrintTextAbovePrivate(defender, "You quickly take it off preventing the acid burning your skin.", defender);
+			  		MoveItemToContainer(thing, defender.backpack);
 		  		endif
 		  		thing.hp := thing.hp - dmg;
 		  		if ( (thing.hp <= 0) || (thing.hp > thing.maxhp) )
-					PrintTextAbovePrivate(defender, thing.desc + " is destroyed!", defender);
+					PrintTextAbovePrivate(defender, thing.desc + " is destroyed by the acid!", defender);
 					DestroyTheItem( defender, thing );
 		  		endif
 		  	endif
