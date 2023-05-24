@@ -38,43 +38,64 @@ program enchanted_pickaxe (user, pickaxe)
 	SendSysMessage(user, "You start to mine the mystic crystal...", 3, 55);
 
 	Repeat
-	var num_chops := Random(3) + 3;
+		var num_chops := Random(3) + 3;
     	for i := 1 to num_chops
     		PerformAction(user, UACTION_PICK);
-		PlaySoundEffect(user, 0x41);
-		sleepms(Random(500)+1000);
-		if (user.x != sx || user.y != sy || user.dead || user.hidden || GetObjProperty(user, "IsCrafter") < 5)
-			SendSysMessage(user, "You stop mining.");
-  			return;
-		endif
+			PlaySoundEffect(user, 0x41);
+			sleepms(Random(500)+1000);
+			if (user.x != sx || user.y != sy || user.dead || user.hidden || GetObjProperty(user, "IsCrafter") < 5)
+				if(user.x != sx || user.y != sy)
+					SendSysMessage(user, "You move away from mystic crystal.");
+				endif
+				if(user.dead)
+					SendSysMessage(user, "Dead people cannot mine.");
+				endif
+				if(GetObjProperty(user, "IsCrafter") < 5)
+					SendSysMessage(user, "Suddenly you seem dumbfounded about how to even use this tool.");
+					MoveItemToContainer(pickaxe, user.backpack);
+				endif
+				SendSysMessage(user, "You stop mining.");
+  				return;
+			endif
     	endfor
-	var k;
+		var k;
 
-	// 1 in 8 chance of summoning or breaking tool
-	if (Random(12) > 10 && !GetObjProperty(crystal, "summoning"))
-		k:=(Random(100)+1);
-		if (k<90)
-			start_script("summonguardians", crystal);
-		else
-			if(!CheckSkill(user, SKILLID_MINING, BREAKDIFF, 0))
-				SendSysMessage(user, "Your tool breaks!");
-				DestroyItem(pickaxe);
-				return;
+		// 1 in 8 chance of summoning or breaking tool
+		if (Random(12) > 10 && !GetObjProperty(crystal, "summoning"))
+			k:=(Random(100)+1);
+			if (k<90)
+				start_script("summonguardians", crystal);
+			else
+				if(!CheckSkill(user, SKILLID_MINING, BREAKDIFF, 0))
+					SendSysMessage(user, "Your tool breaks!");
+					DestroyItem(pickaxe);
+					return;
+				endif
 			endif
 		endif
-	endif
 
-	if(CheckSkill(user, SKILLID_MINING, MININGDIFF, 0))
-		SendSysMessage(user, "You put a mystic crystal shard in your pack");
-		shards := CreateItemInBackpack(user, MYSTICSHARD, 1);
+		if(CheckSkill(user, SKILLID_MINING, MININGDIFF, 0))
+			SendSysMessage(user, "You put a mystic crystal shard in your pack");
+			shards := CreateItemInBackpack(user, MYSTICSHARD, 1);
     		if(!shards)
       			shards := CreateItemAtLocation(user.x, user.y, user.z, MYSTICSHARD, 1);
     		endif
-	else
-		SendSysMessage(user, "You fail to harvest any mystic crystal");
-	endif
+		else
+			SendSysMessage(user, "You fail to harvest any mystic crystal");
+		endif
+		if(user.x != sx || user.y != sy)
+			SendSysMessage(user, "You move away from mystic crystal.");
+		endif
+		if(user.dead)
+			SendSysMessage(user, "Dead people cannot mine.");
+		endif
+		if(GetObjProperty(user, "IsCrafter") < 5)
+			SendSysMessage(user, "Suddenly you seem dumbfounded about how to even use this tool.");
+			MoveItemToContainer(pickaxe, user.backpack);
+		endif
+
 	until (user.x != sx || user.y != sy || user.dead || user.hidden || GetObjProperty(user, "IsCrafter") < 5);
-	SendSysMessage(user, "You stop mining");
+	SendSysMessage(user, "You stop mining.");
 	
 		
 endprogram
