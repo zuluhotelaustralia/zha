@@ -43,6 +43,9 @@ function RandomName( me )
 	    OBJ_RATMAN_AXE:	newname := AssignName( me, RATMAN_IDX );
 	    0x3ca:		newname := AssignName( me, MALE_IDX ); //nightwalker graphic
 	    0x22a:
+	    0x106: //Minotaur
+			0x107: //Minotaur
+	    0x118: //Minotaur
 	    0x119: //Minotaur
 	    0x1b3:		if( RandomInt(2) )
 	    				newname := AssignName( me, MALE_IDX );
