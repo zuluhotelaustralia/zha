@@ -1,0 +1,14 @@
+use uo;
+
+program textcmd_Serial(mobile)
+	SendSysMessage(mobile, "Target the equipment you wish the serial for.");
+	var item := Target(mobile);
+	var layer := item.layer;
+	if( !layer || !GetEquipmentByLayer(mobile, layer) )
+	    SendSysMessage(mobile, "You can only get serials for items you have equipped.");
+	    return;
+	else
+		SendSysMessage(mobile, item.desc+": "+item.serial);
+	endif
+
+endprogram

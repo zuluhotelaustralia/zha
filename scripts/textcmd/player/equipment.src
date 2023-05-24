@@ -27,9 +27,9 @@ program Equipment_gump (who)
         var x:=40;
         GFInitGump();
         GFPage(0);
-        GFResizePic(0, 0, BKGND_GOLDTRIM, 550, 170+(len(equiplist)*20));
+        GFResizePic(0, 0, BKGND_GOLDTRIM, 700, 170+(len(equiplist)*20));
         GFTextLine(x, y-30, 1000, "EQUIPMENT:");
-        for i:=1 to 4
+        for i:=1 to 6
                 GFGumpPic(x, y-8, 0x60);
                 x:=x+90;
         endfor
@@ -46,7 +46,15 @@ program Equipment_gump (who)
                 y:=y+20;
         endfor
 
-        for i:=1 to 4
+        y:=70;
+        GFTextLine(550, y-30, 1000, "SERIAL");
+
+        for i:=1 to len (equiplist)
+                GFTextLine(550, y, 1000, equiplist[i].ref.serial);
+                y:=y+20;
+        endfor
+
+        for i:=1 to 6
                 GFGumpPic(x, y+3, 0x60);
                 x:=x+90;
         endfor
