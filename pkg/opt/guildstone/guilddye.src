@@ -1,0 +1,37 @@
+use uo;
+use os;
+
+include "guilddata";
+include "include/objtype";
+include "include/client";
+include "include/gumps";
+include "include/zhacolors";
+include "guilduniform";
+include "include/yesno";
+
+program purifyingc( player, guilddye )
+
+SendSysMessage( player, "What item do you wish to bear your guild colour?" );
+var item := Target(player);
+
+if(item)
+    DestroyItem( guilddye );
+
+else
+    return;
+endif
+
+ChangeHouseColours(item, player.guild);
+
+endprogram
+
+function ChangeHouseColours(item, guild)
+    var gcolor := CInt(guild.getprop("guildunicolour"));
+    if (!gcolor || gcolor ==error)
+        return;
+
+        else
+            item.color:=gcolor;
+        endif
+
+endfunction
